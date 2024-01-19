@@ -10,7 +10,6 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-      issues: write
     env:
       TRIVY_REPORT: trivy_report.txt
       TRIVY_COMMENT_PREFIX: "<!-- TRIVY REPORT -->"
