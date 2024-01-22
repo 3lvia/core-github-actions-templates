@@ -8,6 +8,10 @@ on:
         required: false
         default: '.'
         type: string
+      skip-dirs:
+        description: 'Comma-separated list of directories to skip.'
+        required: false
+        type: string
       severity:
         description: 'Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.'
         required: false
@@ -49,6 +53,7 @@ jobs:
           ignore-unfixed: true
           severity: ${{ inputs.severity }}
           scan-ref: ${{ inputs.path }}
+          skip-dirs: ${{ inputs.skip-dirs }}
 
       - name: Upload Trivy report to step summary
         if: failure() && steps.trivy_check.outcome == 'failure'
