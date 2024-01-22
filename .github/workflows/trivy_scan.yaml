@@ -2,7 +2,7 @@ name: Scan Terraform code with Trivy
 
 on:
   workflow_call:
-    intpus:
+    inputs:
       severity:
         description: 'Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.'
         required: false
