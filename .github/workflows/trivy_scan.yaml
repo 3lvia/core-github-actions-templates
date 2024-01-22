@@ -2,6 +2,22 @@ name: Scan Terraform code with Trivy
 
 on:
   workflow_call:
+    intpus:
+      severity:
+        description: 'Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.'
+        required: false
+        default: 'CRITICAL,HIGH'
+        type: string
+      upload_report:
+        description: 'Upload Trivy report to step summary.'
+        required: false
+        default: true
+        type: boolean
+      comment_report:
+        description: 'Comment on pull request with Trivy report.'
+        required: false
+        default: true
+        type: boolean
 
 jobs:
   trivy_scan:
@@ -26,7 +42,7 @@ jobs:
           output: ${{ env.TRIVY_REPORT }}
           exit-code: '2'
           ignore-unfixed: true
-          severity: 'CRITICAL,HIGH'
+          severity: ${{ inputs.severity }}
 
       - name: Upload Trivy report to step summary
         if: failure() && steps.trivy_check.outcome == 'failure'
