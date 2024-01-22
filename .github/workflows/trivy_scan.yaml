@@ -26,14 +26,14 @@ on:
 
 jobs:
   trivy_scan:
-    name: "Scan Terraform code with Trivy"
+    name: 'Scan Terraform code with Trivy'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
     env:
       TRIVY_REPORT: trivy_report.txt
-      TRIVY_COMMENT_PREFIX: "<!-- TRIVY REPORT -->"
+      TRIVY_COMMENT_PREFIX: '<!-- TRIVY REPORT -->'
     steps:
       - name: Clone repository
         uses: actions/checkout@v4

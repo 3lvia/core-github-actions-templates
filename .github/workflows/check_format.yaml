@@ -1,0 +1,24 @@
+name: Check format of workflows
+
+on:
+  pull_request:
+    branches: [trunk]
+
+jobs:
+  prettier_check:
+    name: 'Prettier check'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 20
+
+      - name: Install Prettier
+        run: yarn global add prettier@3.2.4
+
+      - name: Check format
+        run: prettier --check --single-quote .github/workflows/*
