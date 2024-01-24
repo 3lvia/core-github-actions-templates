@@ -1,0 +1,24 @@
+name: Check Terraform formatting
+
+on:
+  workflow_call:
+    inputs:
+      path:
+        description: 'Path to process.'
+        required: false
+        default: '.'
+        type: string
+
+jobs:
+  terraform_format:
+    name: 'Check Terraform formatting'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Check formatting
+        run: terraform fmt -check -recursive ${{ inputs.path }}
