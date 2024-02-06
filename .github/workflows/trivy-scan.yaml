@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       path:
-        description: 'Path to Terraform code to scan.'
+        description: 'Path to IaC to scan.'
         required: false
         default: '.'
         type: string
@@ -67,7 +67,7 @@ jobs:
       - name: Run second Trivy vulnerability scanner in IaC mode for GitHub summary
         id: trivy_check_summary
         if: failure() && steps.trivy_check.outcome == 'failure' && inputs.upload-report
-        uses: aquasecurity/trivy-action@0.17.0
+        uses: aquasecurity/trivy-action@0.16.1
         with:
           scan-type: 'config'
           format: 'table'
