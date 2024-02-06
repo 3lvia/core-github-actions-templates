@@ -1,0 +1,23 @@
+name: Auto-generate action documentation in README
+
+on:
+  push:
+    branches: [trunk]
+  pull_request:
+    branches: [trunk]
+
+jobs:
+  auto_gen_action_docs:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        workflow-file: ['.github/workflows/trivy-scan.yaml', '.github/workflows/terraform-format.yaml']
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Auto-generate action documentation
+        uses: npalm/action-docs-action@v1.4.0
+        with:
+          actionFile: ${{ matrix.workflow-file }}
+
