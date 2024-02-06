@@ -41,8 +41,8 @@ jobs:
       contents: read
       pull-requests: write
     env:
-      TRIVY_REPORT: output.json
-      TRIVY_REPORT_SUMMARY: summary.txt
+      TRIVY_REPORT: trivy_output.json
+      TRIVY_REPORT_SUMMARY: trivy_summary.txt
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -51,7 +51,7 @@ jobs:
 
       - name: Run Trivy vulnerability scanner in IaC mode
         id: trivy_check
-        uses: aquasecurity/trivy-action@0.17.0
+        uses: aquasecurity/trivy-action@0.16.1
         with:
           scan-type: 'config'
           format: 'json'
