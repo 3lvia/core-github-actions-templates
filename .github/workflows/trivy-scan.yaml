@@ -51,7 +51,7 @@ jobs:
 
       - name: Run Trivy vulnerability scanner in IaC mode
         id: trivy_check
-        uses: aquasecurity/trivy-action@0.16.1
+        uses: aquasecurity/trivy-action@0.17.0
         with:
           scan-type: 'config'
           format: 'json'
@@ -67,7 +67,7 @@ jobs:
       - name: Run second Trivy vulnerability scanner in IaC mode for GitHub summary
         id: trivy_check_summary
         if: failure() && steps.trivy_check.outcome == 'failure' && inputs.upload-report
-        uses: aquasecurity/trivy-action@0.16.1
+        uses: aquasecurity/trivy-action@0.17.0
         with:
           scan-type: 'config'
           format: 'table'
