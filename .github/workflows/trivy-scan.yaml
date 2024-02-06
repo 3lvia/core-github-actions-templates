@@ -41,8 +41,8 @@ jobs:
       contents: read
       pull-requests: write
     env:
-      TRIVY_REPORT: trivy_report.json
-      TRIVY_REPORT_SUMMARY: trivy_report_summary.txt
+      TRIVY_REPORT: output.json
+      TRIVY_REPORT_SUMMARY: summary.txt
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
