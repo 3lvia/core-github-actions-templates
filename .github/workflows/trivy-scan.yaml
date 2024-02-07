@@ -47,7 +47,7 @@ jobs:
       # This can be refactored when trivy-action supports multiple outputs via convert:
       # https://github.com/aquasecurity/trivy-action/issues/259
       - name: Run Trivy vulnerability scanner in IaC mode
-        uses: aquasecurity/trivy-action@0.16.1
+        uses: aquasecurity/trivy-action@0.17.0
         with:
           scan-type: 'config'
           format: 'sarif'
