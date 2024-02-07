@@ -37,7 +37,6 @@ jobs:
       contents: read
       security-events: write
     env:
-      TRIVY_JSON: trivy.json
       TRIVY_SARIF: trivy.sarif
     steps:
       - name: Clone repository
@@ -45,24 +44,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run Trivy vulnerability scanner in IaC mode
-        id: trivy_check
-        uses: aquasecurity/trivy-action@0.16.1
-        with:
-          scan-type: 'config'
-          format: 'json'
-          output: ${{ env.TRIVY_JSON }}
-          exit-code: '1'
-          ignore-unfixed: ${{ inputs.ignore-unfixed }}
-          severity: ${{ inputs.severity }}
-          scan-ref: ${{ inputs.path }}
-          skip-dirs: ${{ inputs.skip-dirs }}
-
       # This can be refactored when trivy-action supports multiple outputs via convert:
       # https://github.com/aquasecurity/trivy-action/issues/259
-      - name: Run second Trivy vulnerability scanner in IaC mode for GitHub Security tab
-        id: trivy_check_summary
-        if: failure() && steps.trivy_check.outcome == 'failure' && inputs.upload-report
+      - name: Run Trivy vulnerability scanner in IaC mode
         uses: aquasecurity/trivy-action@0.16.1
         with:
           scan-type: 'config'
@@ -77,11 +61,10 @@ jobs:
       # GitHub Security tab does not support SARIF files with `git::` or `https:/` URL's:
       # https://github.com/aquasecurity/trivy/issues/5003#issuecomment-1780415058
       - name: Workaround for Trivy SARIF output
-        if: failure() && steps.trivy_check.outcome == 'failure' && inputs.upload-report && steps.trivy_check_summary.outcome == 'success'
         run: sed -i 's#git::https:/##g' "${{ env.TRIVY_SARIF }}"
 
       - name: Upload Trivy report to GitHub Security tab
-        if: failure() && steps.trivy_check.outcome == 'failure' && inputs.upload-report && steps.trivy_check_summary.outcome == 'success'
+        if: inputs.upload-report
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ env.TRIVY_SARIF }}
