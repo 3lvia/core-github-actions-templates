@@ -18,12 +18,7 @@ on:
         default: 'CRITICAL,HIGH,MEDIUM'
         type: string
       upload-report:
-        description: 'Upload Trivy report to step summary.'
-        required: false
-        default: true
-        type: boolean
-      comment-report:
-        description: 'Comment on pull request with Trivy report.'
+        description: 'Upload Trivy report to GitHub Security tab. GitHub Advanced Security must be enabled for the repository to use this feature.'
         required: false
         default: true
         type: boolean
@@ -38,11 +33,12 @@ jobs:
     name: 'Scan Terraform code with Trivy'
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: read
-      pull-requests: write
+      security-events: write
     env:
-      TRIVY_REPORT: trivy_output.json
-      TRIVY_REPORT_SUMMARY: trivy_summary.txt
+      TRIVY_JSON: trivy.json
+      TRIVY_SARIF: trivy.sarif
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -55,7 +51,7 @@ jobs:
         with:
           scan-type: 'config'
           format: 'json'
-          output: ${{ env.TRIVY_REPORT }}
+          output: ${{ env.TRIVY_JSON }}
           exit-code: '1'
           ignore-unfixed: ${{ inputs.ignore-unfixed }}
           severity: ${{ inputs.severity }}
@@ -64,124 +60,29 @@ jobs:
 
       # This can be refactored when trivy-action supports multiple outputs via convert:
       # https://github.com/aquasecurity/trivy-action/issues/259
-      - name: Run second Trivy vulnerability scanner in IaC mode for GitHub summary
+      - name: Run second Trivy vulnerability scanner in IaC mode for GitHub Security tab
         id: trivy_check_summary
         if: failure() && steps.trivy_check.outcome == 'failure' && inputs.upload-report
         uses: aquasecurity/trivy-action@0.16.1
         with:
           scan-type: 'config'
-          format: 'table'
-          output: ${{ env.TRIVY_REPORT_SUMMARY }}
+          format: 'sarif'
+          output: ${{ env.TRIVY_SARIF }}
           exit-code: '0'
           ignore-unfixed: ${{ inputs.ignore-unfixed }}
           severity: ${{ inputs.severity }}
           scan-ref: ${{ inputs.path }}
           skip-dirs: ${{ inputs.skip-dirs }}
 
-      - name: Upload Trivy report to step summary
+      # GitHub Security tab does not support SARIF files with `git::` or `https:/` URL's:
+      # https://github.com/aquasecurity/trivy/issues/5003#issuecomment-1780415058
+      - name: Workaround for Trivy SARIF output
         if: failure() && steps.trivy_check.outcome == 'failure' && inputs.upload-report && steps.trivy_check_summary.outcome == 'success'
-        run: cat "${{ env.TRIVY_REPORT_SUMMARY }}" >> $GITHUB_STEP_SUMMARY
+        run: sed -i 's#git::https:/##g' "${{ env.TRIVY_SARIF }}"
 
-      - name: Get changed Terraform files
-        id: changed-tf-files
-        if: failure() && steps.trivy_check.outcome == 'failure' && inputs.comment-report
-        uses: tj-actions/changed-files@v42
+      - name: Upload Trivy report to GitHub Security tab
+        if: failure() && steps.trivy_check.outcome == 'failure' && inputs.upload-report && steps.trivy_check_summary.outcome == 'success'
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          files: '*.tf'
-          json: 'true'
-          since_last_remote_commit: 'true'
-
-      - name: Print changed files for debugging # this step can be commented out
-        if: failure() && steps.trivy_check.outcome == 'failure' && inputs.comment-report
-        run: echo "${{ steps.changed-tf-files.outputs.all_changed_files }}"
-
-      - name: Comment on pull request with Trivy report
-        uses: actions/github-script@v7.0.1
-        if: failure() && steps.trivy_check.outcome == 'failure' && inputs.comment-report && steps.changed-tf-files.outputs.any_changed == 'true'
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const trivyReport = JSON.parse(
-              fs.readFileSync('${{ env.TRIVY_REPORT }}', 'utf8'),
-            );
-
-            const pull_number = '${{ github.event.number }}';
-            const { owner, repo } = context.repo;
-
-            const results = trivyReport.Results.filter(
-              (res) => res.Misconfigurations && res.Misconfigurations.length > 0,
-            );
-
-            const { data: existingReviewComments } =
-              await github.rest.pulls.listReviewComments({
-                owner,
-                repo,
-                pull_number,
-              });
-
-            console.log(`Found ${existingReviewComments.length} existing review comments.`);
-
-            results.forEach((res) => {
-              const path = res.Target;
-              console.log(
-                `Found ${res.Misconfigurations.length} misconfigurations in ${path}.`,
-              );
-
-              const files = JSON.parse(
-                '${{ steps.changed-tf-files.outputs.all_changed_files }}',
-              );
-              if (!files.includes(path)) {
-                console.log(
-                  `Skipping review comment for ${path} as it was not changed in this pull request.`,
-                );
-                return;
-              }
-
-              const emojiPrefix = {
-                CRITICAL: '🚨',
-                HIGH: '⚠️',
-                MEDIUM: '🔍',
-                LOW: '🔍',
-                UNKNOWN: '🔍',
-              };
-
-              res.Misconfigurations.forEach(async (misConf) => {
-                const severity = misConf.Severity;
-                const body = `## ${emojiPrefix[severity] ?? ''} ${severity} – ${
-                  misConf.Title
-                }\n\n### ${misConf.Description}\n\n${misConf.Message}\n\n${
-                  misConf.PrimaryURL
-                }`;
-                const { StartLine: start_line, EndLine: line } = misConf.CauseMetadata;
-
-                const existingComment = existingReviewComments.find(
-                  (comment) =>
-                    comment.body === body && comment.path === path && comment.line === line,
-                );
-
-                if (!existingComment) {
-                  console.log(`Creating review comment for ${path} on line ${line}.`);
-
-                  await github.rest.pulls.createReviewComment({
-                    owner,
-                    repo,
-                    pull_number,
-                    commit_id: '${{ github.event.pull_request.head.sha }}',
-                    body,
-                    path,
-                    start_line: line === start_line ? undefined : start_line,
-                    line,
-                  });
-                }
-
-                console.log(
-                  `Skipping review comment for ${path} on line ${line} as it already exists.`,
-                );
-              });
-            });
-
-            if (results.length === 0) {
-              // TODO: resolve existing comments if misconfigurations have been fixed.
-              console.log('No misconfigurations found.');
-            }
+          sarif_file: ${{ env.TRIVY_SARIF }}
+          category: 'Trivy'
