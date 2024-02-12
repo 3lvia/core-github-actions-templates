@@ -15,7 +15,7 @@ on:
       severity:
         description: 'Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.'
         required: false
-        default: 'CRITICAL,HIGH,MEDIUM'
+        default: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
         type: string
       upload-report:
         description: 'Upload Trivy report to GitHub Security tab. GitHub Advanced Security must be enabled for the repository to use this feature.'
@@ -44,8 +44,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      # This can be refactored when trivy-action supports multiple outputs via convert:
-      # https://github.com/aquasecurity/trivy-action/issues/259
       - name: Run Trivy vulnerability scanner in IaC mode
         uses: aquasecurity/trivy-action@0.16.1
         with:
