@@ -8,13 +8,13 @@ in the Security tab on GitHub.
 
 ### Inputs
 
-| Name             | Type    | Default                | Description                                                                                                                   |
-| ---------------- | ------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `path`           | String  | `.`                    | Path to IaC to scan.                                                                                                          |
-| `skip-dirs`      | String  |                        | Comma-separated list of directories to skip                                                                                   |
-| `severity`       | String  | `CRITICAL,HIGH,MEDIUM` | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information. |
-| `upload-report`  | Boolean | `true`                 | Upload Trivy report to GitHub Security tab.                                                                                   |
-| `ignore-unfixed` | Boolean | `false`                | Ignore unpatched/unfixed vulnerabilities.                                                                                     |
+| Name             | Type    | Default                            | Description                                                                                                                   |
+| ---------------- | ------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `path`           | String  | `.`                                | Path to IaC to scan.                                                                                                          |
+| `skip-dirs`      | String  |                                    | Comma-separated list of directories to skip                                                                                   |
+| `severity`       | String  | `CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN` | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information. |
+| `upload-report`  | Boolean | `true`                             | Upload Trivy report to GitHub Security tab.                                                                                   |
+| `ignore-unfixed` | Boolean | `false`                            | Ignore unpatched/unfixed vulnerabilities.                                                                                     |
 
 ### Example
 
