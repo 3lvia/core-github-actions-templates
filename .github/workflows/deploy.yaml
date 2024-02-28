@@ -1,0 +1,92 @@
+name: Deploy to kubernetes
+
+on:
+  workflow_call:
+    inputs:
+      name:
+        description: 'Name of application. Do not include namespace.'
+        required: true
+        type: string
+      namespace:
+        description: 'Namespace or system of the application.'
+        required: true
+        type: string
+      environment:
+        description: 'Environment to deploy to. Must be from dev, test or prod'
+        required: true
+        type: string
+      AZURE_CLIENT_ID:
+        description: 'ClientId of a service principal that can deploy to AKS.'
+        required: false
+        default:  ${{ vars.AZURE_CLIENT_ID }}
+        type: string
+      AZURE_TENANT_ID:
+        description: 'TenantId of a service principal that can deploy to AKS.'
+        required: false
+        default:  ${{ vars.AZURE_TENANT_ID }}
+        type: string
+      AKS_SUBSCRIPTION_ID:
+        description: 'Subscription ID of AKS to deploy to.'
+        required: false
+        default:  ${{ vars.AKS_SUBSCRIPTION_ID }}
+        type: string
+      AKS_CLUSTER_NAME:
+        description: 'Subscription ID of AKS to deploy to.'
+        required: false
+        default:  ${{ vars.AKS_CLUSTER_NAME }}
+        type: string
+      AKS_RESOURCE_GROUP:
+        description: 'Subscription ID of AKS to deploy to.'
+        required: false
+        default:  ${{ vars.AKS_RESOURCE_GROUP }}
+        type: string
+
+env: 
+  image_tag: ${{ github.sha }}-${{ github.run_number }}
+
+jobs:
+  deploy_kubernetes:
+    name: Deploy to ${{ inputs.environment}}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment}}
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: authenticate with Azure
+        uses: azure/login@v1
+        with:
+          client-id: ${{ inputs.AZURE_CLIENT_ID}}
+          tenant-id: ${{ inputs.AZURE_TENANT_ID}}
+          subscription-id: ${{ inputs.AKS_SUBSCRIPTION_ID}}
+
+      - name: setup kubelogin
+        uses: azure/use-kubelogin@v1
+        with:
+          kubelogin-version: 'v0.0.24'
+
+      - name: set AKS context
+        uses: azure/aks-set-context@v3
+        with:
+          cluster-name: ${{ inputs.AKS_CLUSTER_NAME }}
+          resource-group: ${{ inputs.AKS_RESOURCE_GROUP }}
+          admin: 'false'
+          use-kubelogin: 'true'
+          subscription: ${{ inputs.AKS_SUBSCRIPTION_ID }}
+
+      - name: helm deploy
+        run: |
+          helm repo add elvia-charts https://raw.githubusercontent.com/3lvia/kubernetes-charts/master
+          helm repo update
+          helm upgrade --debug --install -n ${{ inputs.namespace}} -f CI/values.yaml ${{ inputs.name}} elvia-charts/elvia-deployment \
+            --set environment=dev --set image.tag=${{ env.image_tag }} --set labels.repositoryName=${{ github.repository }} --set labels.commitHash=${{ github.sha }}
+
+      - name: rollout status
+        run: |
+          kubectl -n ${{ inputs.namespace}} rollout status deploy ${{ inputs.name}}
+
+      - name: get events
+        continue-on-error: true
+        run: |
+          kubectl -n ${{ inputs.namespace}} get events --sort-by='.lastTimestamp' |grep ${{ inputs.name}} || true
+        if: always()
