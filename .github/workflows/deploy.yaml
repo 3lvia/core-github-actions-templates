@@ -90,3 +90,13 @@ jobs:
         run: |
           kubectl -n ${{ inputs.namespace}} get events --sort-by='.lastTimestamp' |grep ${{ inputs.name}} || true
         if: always()
+
+      - name: set grafana annotations
+        uses: 3lvia/core-github-actions-templates/post-grafana-annotations.yaml
+        with:
+          title: 'Event - Deploy ${{job.status}}'
+          description: 'description'
+          app: '${{input.name}}'
+          system: '${{input.namespace}}'
+          env: 'dev'
+          event: 'deploy'
