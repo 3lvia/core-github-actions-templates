@@ -46,10 +46,6 @@ on:
         required: false
         default:  containerregistryelvia
         type: string
-      environment:
-        description: 'Github Environment.'
-        required: true
-        type: string
 
 env: 
   image_tag: ${{ github.sha }}-${{ github.run_number }}
@@ -91,7 +87,7 @@ jobs:
   build:
     name: Build and Scan
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
+    environment: dev
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
