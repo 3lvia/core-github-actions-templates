@@ -25,7 +25,7 @@ Template that build docker image, analyze it using CodeQL, scans for vulnerabili
 ### Example
 
 ```yaml
-name: Check Terraform code formatting
+name: Build
 
 on:
   push:
