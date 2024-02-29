@@ -66,6 +66,11 @@ jobs:
         # CodeQL supports [ 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift' ]
 
     steps:
+    - name: echo
+      run: |
+        echo "vars.AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}"
+        echo "input.AZURE_CLIENT_ID: ${{ input.AZURE_CLIENT_ID }}"
+        
     - name: Checkout repository
       uses: actions/checkout@v4
 
@@ -87,64 +92,64 @@ jobs:
     runs-on: ubuntu-latest
     environment: dev
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Build image
-        run: |
-          if [ -z "${{ inputs.dockerBuildContext}}" ]
-          then
-                dir=`dirname ${{ inputs.dockerfile}}` # default to the directory of the Dockerfile
-          else
-                dir=${{ inputs.dockerBuildContext}}
-          fi
-          docker build --tag ${{ env.image_full_name}} -f ${{ inputs.dockerfile}} $dir
+    - name: Build image
+      run: |
+        if [ -z "${{ inputs.dockerBuildContext}}" ]
+        then
+              dir=`dirname ${{ inputs.dockerfile}}` # default to the directory of the Dockerfile
+        else
+              dir=${{ inputs.dockerBuildContext}}
+        fi
+        docker build --tag ${{ env.image_full_name}} -f ${{ inputs.dockerfile}} $dir
 
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ${{ env.image_full_name}}
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          severity: ${{ inputs.severity }}
-          github-pat: ${{ secrets.GITHUB_TOKEN }} 
-        if: github.event_name == 'pull_request'
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ env.image_full_name}}
+        format: 'table'
+        exit-code: '1'
+        ignore-unfixed: true
+        severity: ${{ inputs.severity }}
+        github-pat: ${{ secrets.GITHUB_TOKEN }} 
+      if: github.event_name == 'pull_request'
 
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ${{ env.image_full_name}}
-          format: 'sarif'
-          template: '@/contrib/sarif.tpl'
-          output: trivy.sarif
-          severity: ${{ inputs.severity }}
-          github-pat: ${{ secrets.GITHUB_TOKEN }} 
-          ignore-unfixed: true
-        if: github.event_name == 'push'
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ env.image_full_name}}
+        format: 'sarif'
+        template: '@/contrib/sarif.tpl'
+        output: trivy.sarif
+        severity: ${{ inputs.severity }}
+        github-pat: ${{ secrets.GITHUB_TOKEN }} 
+        ignore-unfixed: true
+      if: github.event_name == 'push'
 
-      # GitHub Security tab does not support SARIF files with `git::` or `https:/` URL's:
-      # https://github.com/aquasecurity/trivy/issues/5003#issuecomment-1780415058
-      - name: Fix Trivy output
-        run: sed -i 's#git::https:/##g' "trivy.sarif"
-        if: github.event_name == 'push'
+    # GitHub Security tab does not support SARIF files with `git::` or `https:/` URL's:
+    # https://github.com/aquasecurity/trivy/issues/5003#issuecomment-1780415058
+    - name: Fix Trivy output
+      run: sed -i 's#git::https:/##g' "trivy.sarif"
+      if: github.event_name == 'push'
 
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: trivy.sarif
-          category: 'Trivy'
-        if: github.event_name == 'push'
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: trivy.sarif
+        category: 'Trivy'
+      if: github.event_name == 'push'
 
-      - name: Authenticate with Azure
-        uses: azure/login@v1
-        with:
-          client-id: ${{ inputs.AZURE_CLIENT_ID}}
-          tenant-id: ${{ inputs.AZURE_TENANT_ID}}
-          subscription-id: ${{ inputs.ACR_SUBSCRIPTION_ID}}
+    - name: Authenticate with Azure
+      uses: azure/login@v1
+      with:
+        client-id: ${{ inputs.AZURE_CLIENT_ID}}
+        tenant-id: ${{ inputs.AZURE_TENANT_ID}}
+        subscription-id: ${{ inputs.ACR_SUBSCRIPTION_ID}}
 
-      - name: Login ACR
-        run: az acr login --name ${{ inputs.ACR_NAME }}
+    - name: Login ACR
+      run: az acr login --name ${{ inputs.ACR_NAME }}
 
-      - name: Push image
-        run: docker push ${{ env.image_full_name}}
+    - name: Push image
+      run: docker push ${{ env.image_full_name}}
