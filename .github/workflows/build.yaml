@@ -32,17 +32,14 @@ on:
       AZURE_CLIENT_ID:
         description: 'ClientId of a service principal that can push to Container Registry.'
         required: false
-        default:  ${{ vars.AZURE_CLIENT_ID }}
         type: string
       AZURE_TENANT_ID:
         description: 'TenantId of a service principal that can push to Azure Container Registry.'
         required: false
-        default:  ${{ vars.AZURE_TENANT_ID }}
         type: string
       ACR_SUBSCRIPTION_ID:
         description: 'Subscription ID of the Azure Container Registry to push to.'
         required: false
-        default:  ${{ vars.ACR_SUBSCRIPTION_ID }}
         type: string
       ACR_NAME:
         description: 'Name of the Azure Container Registry to push to.'
