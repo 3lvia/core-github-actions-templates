@@ -45,7 +45,7 @@ jobs:
           fetch-depth: 0
 
       - name: Run Trivy vulnerability scanner in IaC mode
-        uses: aquasecurity/trivy-action@0.16.1
+        uses: aquasecurity/trivy-action@0.18.0
         with:
           scan-type: 'config'
           format: 'sarif'
