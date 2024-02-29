@@ -6,8 +6,8 @@ name: Add annotation to Grafana Cloud
 on:
   workflow_call:
     inputs:
-      headline:
-        description: 'The headline of the annotation.'
+      title:
+        description: 'The title of the annotation.'
         required: true
         type: string
       description:

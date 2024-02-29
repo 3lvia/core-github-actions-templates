@@ -11,6 +11,14 @@ on:
         description: 'Namespace or system of the application.'
         required: true
         type: string
+      dockerfile:
+        description: 'Path to Dockerfile.'
+        required: true
+        type: string
+      dockerBuildContext:
+        description: 'Docker build context. It is the working directory needed to build the dockerfile. Defaults to the directory with the Dockerfile.'
+        required: false
+        type: string
       languages:
         description: 'List of languages to run CodeQL on. Defaults to [csharp]. The supported languages are c-cpp, csharp, go, java-kotlin, javascript-typescript, python, ruby, swift.'
         required: false
@@ -20,14 +28,6 @@ on:
         description: 'Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.'
         required: false
         default: 'CRITICAL,HIGH'
-        type: string
-      dockerfile:
-        description: 'Location of Dockerfile.'
-        required: true
-        type: string
-      dockerBuildContext:
-        description: 'Docker build context. It is the working directory needed to build the dockerfile. Defaults to the directory with the Dockerfile.'
-        required: false
         type: string
       AZURE_CLIENT_ID:
         description: 'ClientId of a service principal that can push to Container Registry.'
