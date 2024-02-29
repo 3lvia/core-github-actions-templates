@@ -20,9 +20,9 @@ on:
         required: false
         type: string
       languages:
-        description: 'List of languages to run CodeQL on. Defaults to [csharp]. The supported languages are c-cpp, csharp, go, java-kotlin, javascript-typescript, python, ruby, swift.'
+        description: 'List of languages to run CodeQL on, As JSON array. Defaults to ["csharp"]. The supported languages are c-cpp, csharp, go, java-kotlin, javascript-typescript, python, ruby, swift.'
         required: false
-        default: '[csharp]'
+        default: '["csharp"]'
         type: string
       severity:
         description: 'Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.'
@@ -62,7 +62,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: ${{ inputs.languages }}
+        language: ${{ fromJSON(inputs.languages) }} 
         # CodeQL supports [ 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift' ]
 
     steps:
