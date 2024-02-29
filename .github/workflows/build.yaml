@@ -69,7 +69,7 @@ jobs:
     - name: echo
       run: |
         echo "vars.AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}"
-        echo "input.AZURE_CLIENT_ID: ${{ input.AZURE_CLIENT_ID }}"
+        echo "input.AZURE_CLIENT_ID: ${{ inputs.AZURE_CLIENT_ID }}"
         
     - name: Checkout repository
       uses: actions/checkout@v4
