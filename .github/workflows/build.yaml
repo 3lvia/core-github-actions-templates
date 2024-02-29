@@ -31,20 +31,24 @@ on:
         type: string
       AZURE_CLIENT_ID:
         description: 'ClientId of a service principal that can push to Container Registry.'
-        required: false
+        required: true
         type: string
       AZURE_TENANT_ID:
         description: 'TenantId of a service principal that can push to Azure Container Registry.'
-        required: false
+        required: true
         type: string
       ACR_SUBSCRIPTION_ID:
         description: 'Subscription ID of the Azure Container Registry to push to.'
-        required: false
+        required: true
         type: string
       ACR_NAME:
         description: 'Name of the Azure Container Registry to push to.'
         required: false
         default:  containerregistryelvia
+        type: string
+      environment:
+        description: 'Github Environment.'
+        required: true
         type: string
 
 env: 
@@ -66,7 +70,7 @@ jobs:
     - name: echo
       run: |
         echo "vars.AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}"
-        echo "input.AZURE_CLIENT_ID: ${{ inputs.AZURE_CLIENT_ID }}"
+        echo "inputs.AZURE_CLIENT_ID: ${{ inputs.AZURE_CLIENT_ID }}"
         
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -87,7 +91,7 @@ jobs:
   build:
     name: Build and Scan
     runs-on: ubuntu-latest
-    environment: dev
+    environment: ${{ inputs.environment }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
