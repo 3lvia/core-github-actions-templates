@@ -50,6 +50,10 @@ on:
         default:  containerregistryelvia
         type: string
 
+env: 
+  image_tag: ${{ github.sha }}-${{ github.run_number }}
+  image_full_name: containerregistryelvia.azurecr.io/${{ inputs.namespace }}-${{ inputs.name }}:${{ github.sha }}-${{ github.run_number }}
+
 jobs:
   analyze:
     name: CodeQL Analyze
@@ -82,9 +86,6 @@ jobs:
     name: Build and Scan
     runs-on: ubuntu-latest
     environment: dev
-    env: 
-      image_tag: ${{ github.sha }}-${{ github.run_number }}
-      image_full_name: containerregistryelvia.azurecr.io/${{ inputs.namespace }}-${{ inputs.name }}:${{ env.image_tag }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
