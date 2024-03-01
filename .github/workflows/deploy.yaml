@@ -110,7 +110,7 @@ jobs:
       run: |
         helm repo add elvia-charts https://raw.githubusercontent.com/3lvia/kubernetes-charts/master
         helm repo update
-        repo="${${{ github.repository }}##*/}"
+        repo="${$GITHUB_REPOSITORY##*/}"
         echo "$repo"
         helm upgrade --debug --install -n ${{ inputs.namespace}} -f CI/values.yaml ${{ inputs.name}} elvia-charts/elvia-deployment \
           --set environment=dev --set image.tag=${{ env.image_tag }} --set labels.repositoryName=$repo --set labels.commitHash=${{ github.sha }}
@@ -134,8 +134,8 @@ jobs:
         method: jwt
         path: jwt-github
         secrets: |
-            monitoring/kv/shared grafana_api_url        | grafana_api_url
-            monitoring/kv/shared grafana_editor_api_key | grafana_editor_api_key
+            monitoring/kv/data/shared grafana_api_url        | grafana_api_url
+            monitoring/kv/data/shared grafana_editor_api_key | grafana_editor_api_key
     - name: Output
       if: always()
       run: |
