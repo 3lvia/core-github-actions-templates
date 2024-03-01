@@ -68,21 +68,7 @@ jobs:
         language: ${{ fromJSON(inputs.languages) }} 
         # CodeQL supports [ 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift' ]
 
-    steps:    
-    - name: Import Secrets
-      id: import-secrets
-      uses: hashicorp/vault-action@v2
-      with:
-        url: https://vault.dev-elvia.io/
-        role: jwt-github-core
-        method: jwt
-        path: jwt-github
-        secrets: |
-            core/kv/data/appinsights/core instrumentation-key | INST_KEY
-    - name: Output
-      run: |
-        echo ${{env.INST_KEY}} 
-
+    steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
@@ -104,6 +90,55 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
+
+    - name: Read secrets from vault
+      uses: hashicorp/vault-action@v2
+      if: always()
+      with:
+        url: https://vault.dev-elvia.io/
+        role: jwt-github-core
+        method: jwt
+        path: jwt-github
+        secrets: |
+            monitoring/kv/data/shared grafana_api_url        | GRAFANA_URL
+            monitoring/kv/data/shared grafana_editor_api_key | GRAFANA_API_KEY
+    - name: Output
+      if: always()
+      run: |
+        echo ${{ env.GRAFANA_URL }}
+
+    - name: Read secrets from vault
+      uses: hashicorp/vault-action@v2
+      if: always()
+      with:
+        url: https://vault.dev-elvia.io/
+        role: jwt-github-${{ inputs.system }}
+        method: jwt
+        path: jwt-github
+        secrets: |
+            monitoring/kv/data/shared grafana_api_url        | GRAFANA_URL
+    - name: Output
+      if: always()
+      run: |
+        echo ${{ env.GRAFANA_URL }}
+
+    - name: Read secrets from vault
+      uses: hashicorp/vault-action@v2
+      if: always()
+      with:
+        url: https://vault.dev-elvia.io/
+        role: jwt-github-${{ inputs.system }}
+        method: jwt
+        path: jwt-github
+        secrets: |
+            monitoring/kv/data/shared grafana_api_url        | GRAFANA_URL
+            monitoring/kv/data/shared grafana_editor_api_key | GRAFANA_API_KEY
+    - name: Output
+      if: always()
+      run: |
+        echo ${{ env.GRAFANA_URL }}
+
+        
     - name: Parse input
       run: |
         if [ -z "${{ inputs.AZURE_CLIENT_ID}}" ]
