@@ -9,18 +9,19 @@ Template that build docker image, analyze it using CodeQL, scans for vulnerabili
 
 ### Inputs
 
-| Name                  | Type   | Default                  | Description                   |
-| --------------------- | ------ | ------------------------ | ----------------------------- |
-| `name`                | String |                          | Name of application.          |
-| `namespace`           | String |                          | Namespace of application.     |
-| `dockerfile`          | String |                          | Path to Dockerfile.           |
-| `dockerBuildContext`  | String | directory of dockerfile  | Path to Docker build context. |
-| `languages`           | String | `[csharp]`               | List of language to run CodeQL on. The supported languages are c-cpp, csharp, go, java-kotlin, javascript-typescript, python, ruby, swift. |
-| `severity`            | String | `CRITICAL,HIGH`          | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information. |
-| `AZURE_CLIENT_ID`     | String | `$AZURE_CLIENT_ID`       | ClientId of a service principal that can push to Container Registry. |
-| `AZURE_TENANT_ID`     | String | `$AZURE_TENANT_ID`       | TenantId of a service principal that can push to Azure Container Registry. |
-| `ACR_SUBSCRIPTION_ID` | String | `$ACR_SUBSCRIPTION_ID`   | Subscription ID of the Azure Container Registry to push to. |
-| `ACR_NAME`            | String | `containerregistryelvia` | Name of the Azure Container Registry to push to. |
+| Name                  | Type   | Default                  | Description 
+| --------------------- | ------ | ------------------------ | ------------
+| `name`                | String |                          | Name of application.
+| `namespace`           | String |                          | Namespace of application.
+| `environment´         | String |                          | Github environment. This environment should contain the variable AZURE_CLIENT_ID, AZURE_TENANT_ID and ACR_SUBSCRIPTION_ID.
+| `dockerfile`          | String |                          | Path to Dockerfile.
+| `dockerBuildContext`  | String | directory of dockerfile  | Path to Docker build context.
+| `languages`           | String | `[csharp]`               | List of language to run CodeQL on. The supported languages are c-cpp, csharp, go, java-kotlin, javascript-typescript, python, ruby, swift.
+| `severity`            | String | `CRITICAL,HIGH`          | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.
+| `AZURE_CLIENT_ID`     | String | `$AZURE_CLIENT_ID`       | ClientId of a service principal that can push to Container Registry.
+| `AZURE_TENANT_ID`     | String | `$AZURE_TENANT_ID`       | TenantId of a service principal that can push to Azure Container Registry.
+| `ACR_SUBSCRIPTION_ID` | String | `$ACR_SUBSCRIPTION_ID`   | Subscription ID of the Azure Container Registry to push to.
+| `acrName `            | String | `containerregistryelvia` | Name of the Azure Container Registry to push to.
 
 ### Example
 
@@ -44,6 +45,7 @@ jobs:
     with:
       name: 'my-cool-app'
       namespace: 'my-system'
+      environment: 'dev'
       dockerfile: 'src/Dockerfile'
 ```
 

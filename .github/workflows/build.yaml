@@ -11,6 +11,10 @@ on:
         description: 'Namespace or system of the application.'
         required: true
         type: string
+      environment:
+        description: 'Github Environment.'
+        required: true
+        type: string
       dockerfile:
         description: 'Path to Dockerfile.'
         required: true
@@ -31,15 +35,18 @@ on:
         type: string
       AZURE_CLIENT_ID:
         description: 'ClientId of a service principal that can push to Container Registry.'
-        required: true
+        required: false
+        default:  'Default to using the one defined in the github environment.'
         type: string
       AZURE_TENANT_ID:
         description: 'TenantId of a service principal that can push to Azure Container Registry.'
-        required: true
+        required: false
+        default:  ''
         type: string
       ACR_SUBSCRIPTION_ID:
         description: 'Subscription ID of the Azure Container Registry to push to.'
-        required: true
+        required: false
+        default:  ''
         type: string
       ACR_NAME:
         description: 'Name of the Azure Container Registry to push to.'
@@ -55,7 +62,6 @@ jobs:
   analyze:
     name: CodeQL Analyze
     runs-on: 'ubuntu-latest'
-    environment: dev
     timeout-minutes: 15
     strategy:
       fail-fast: false
@@ -64,11 +70,6 @@ jobs:
         # CodeQL supports [ 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift' ]
 
     steps:
-    - name: echo
-      run: |
-        echo "vars.AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}"
-        echo "inputs.AZURE_CLIENT_ID: ${{ inputs.AZURE_CLIENT_ID }}"
-        
     - name: Checkout repository
       uses: actions/checkout@v4
 
@@ -88,8 +89,35 @@ jobs:
   build:
     name: Build and Scan
     runs-on: ubuntu-latest
-    environment: dev
+    environment: ${{ inputs.environment }}
     steps:
+    - name: Validate input
+      run: |
+        if [ -z "${{ inputs.AZURE_CLIENT_ID}}" ]
+        then
+          echo "AZURE_CLIENT_ID=${{ inputs.AZURE_CLIENT_ID}}" >> "$GITHUB_ENV"
+        else
+          echo "AZURE_CLIENT_ID=${{ vars.AZURE_CLIENT_ID}}" >> "$GITHUB_ENV"
+        fi
+        if [ -z "${{ inputs.AZURE_TENANT_ID}}" ]
+        then
+          echo "AZURE_TENANT_ID=${{ inputs.AZURE_TENANT_ID}}" >> "$GITHUB_ENV"
+        else
+          echo "AZURE_TENANT_ID=${{ vars.AZURE_TENANT_ID}}" >> "$GITHUB_ENV"
+        fi
+        if [ -z "${{ inputs.ACR_SUBSCRIPTION_ID}}" ]
+        then
+          echo "ACR_SUBSCRIPTION_ID=${{ inputs.ACR_SUBSCRIPTION_ID}}" >> "$GITHUB_ENV"
+        else
+          echo "ACR_SUBSCRIPTION_ID=${{ vars.ACR_SUBSCRIPTION_ID}}" >> "$GITHUB_ENV"
+        fi
+
+    - name: Echo
+      run: |
+        echo "AZURE_CLIENT_ID: $AZURE_CLIENT_ID"
+        echo "AZURE_TENANT_ID: $AZURE_TENANT_ID"
+        echo "ACR_SUBSCRIPTION_ID: $ACR_SUBSCRIPTION_ID"
+
     - name: Checkout repository
       uses: actions/checkout@v4
 
@@ -142,9 +170,9 @@ jobs:
     - name: Authenticate with Azure
       uses: azure/login@v1
       with:
-        client-id: ${{ inputs.AZURE_CLIENT_ID}}
-        tenant-id: ${{ inputs.AZURE_TENANT_ID}}
-        subscription-id: ${{ inputs.ACR_SUBSCRIPTION_ID}}
+        client-id: $AZURE_CLIENT_ID
+        tenant-id: $AZURE_TENANT_ID
+        subscription-id: $ACR_SUBSCRIPTION_ID
 
     - name: Login ACR
       run: az acr login --name ${{ inputs.ACR_NAME }}
