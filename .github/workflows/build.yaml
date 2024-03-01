@@ -36,7 +36,7 @@ on:
       AZURE_CLIENT_ID:
         description: 'ClientId of a service principal that can push to Container Registry.'
         required: false
-        default:  'Default to using the one defined in the github environment.'
+        default:  ''
         type: string
       AZURE_TENANT_ID:
         description: 'TenantId of a service principal that can push to Azure Container Registry.'
@@ -95,21 +95,21 @@ jobs:
       run: |
         if [ -z "${{ inputs.AZURE_CLIENT_ID}}" ]
         then
-          echo "AZURE_CLIENT_ID=${{ inputs.AZURE_CLIENT_ID}}" >> "$GITHUB_ENV"
-        else
           echo "AZURE_CLIENT_ID=${{ vars.AZURE_CLIENT_ID}}" >> "$GITHUB_ENV"
+        else
+          echo "AZURE_CLIENT_ID=${{ inputs.AZURE_CLIENT_ID}}" >> "$GITHUB_ENV"
         fi
         if [ -z "${{ inputs.AZURE_TENANT_ID}}" ]
         then
-          echo "AZURE_TENANT_ID=${{ inputs.AZURE_TENANT_ID}}" >> "$GITHUB_ENV"
-        else
           echo "AZURE_TENANT_ID=${{ vars.AZURE_TENANT_ID}}" >> "$GITHUB_ENV"
+        else
+          echo "AZURE_TENANT_ID=${{ inputs.AZURE_TENANT_ID}}" >> "$GITHUB_ENV"
         fi
         if [ -z "${{ inputs.ACR_SUBSCRIPTION_ID}}" ]
         then
-          echo "ACR_SUBSCRIPTION_ID=${{ inputs.ACR_SUBSCRIPTION_ID}}" >> "$GITHUB_ENV"
-        else
           echo "ACR_SUBSCRIPTION_ID=${{ vars.ACR_SUBSCRIPTION_ID}}" >> "$GITHUB_ENV"
+        else
+          echo "ACR_SUBSCRIPTION_ID=${{ inputs.ACR_SUBSCRIPTION_ID}}" >> "$GITHUB_ENV"
         fi
 
     - name: Echo
