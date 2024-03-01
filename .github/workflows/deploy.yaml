@@ -124,11 +124,11 @@ jobs:
       if: always()
 
     - name: set grafana annotations
-      uses: 3lvia/core-github-actions-templates/post-grafana-annotations.yaml
+      uses: 3lvia/core-github-actions-templates/post-grafana-annotations.yaml@feature/build-deploy
       with:
         title: 'Event - Deploy ${{job.status}}'
         description: 'description'
-        app: '${{input.name}}'
-        system: '${{input.namespace}}'
-        env: 'dev'
+        app: '${{ inputs.name }}'
+        system: '${{ inputs.namespace }}'
+        env: '${{ inputs.environment }}'
         event: 'deploy'
