@@ -91,7 +91,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
-    - name: Validate input
+    - name: Parse input
       run: |
         if [ -z "${{ inputs.AZURE_CLIENT_ID}}" ]
         then
@@ -111,15 +111,6 @@ jobs:
         else
           echo "ACR_SUBSCRIPTION_ID=${{ inputs.ACR_SUBSCRIPTION_ID}}" >> "$GITHUB_ENV"
         fi
-
-    - name: Echo
-      run: |
-        echo "vars.AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID}}"
-        echo "vars.AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID}}"
-        echo "vars.ACR_SUBSCRIPTION_ID: ${{ vars.ACR_SUBSCRIPTION_ID}}"
-        echo "AZURE_CLIENT_ID: $AZURE_CLIENT_ID"
-        echo "AZURE_TENANT_ID: $AZURE_TENANT_ID"
-        echo "ACR_SUBSCRIPTION_ID: $ACR_SUBSCRIPTION_ID"
 
     - name: Checkout repository
       uses: actions/checkout@v4

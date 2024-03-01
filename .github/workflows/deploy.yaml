@@ -18,27 +18,27 @@ on:
       AZURE_CLIENT_ID:
         description: 'ClientId of a service principal that can deploy to AKS.'
         required: false
-        default:  ${{ vars.AZURE_CLIENT_ID }}
+        default:  ''
         type: string
       AZURE_TENANT_ID:
         description: 'TenantId of a service principal that can deploy to AKS.'
         required: false
-        default:  ${{ vars.AZURE_TENANT_ID }}
+        default:  ''
         type: string
       AKS_SUBSCRIPTION_ID:
         description: 'Subscription ID of AKS to deploy to.'
         required: false
-        default:  ${{ vars.AKS_SUBSCRIPTION_ID }}
+        default:  ''
         type: string
       AKS_CLUSTER_NAME:
         description: 'Subscription ID of AKS to deploy to.'
         required: false
-        default:  ${{ vars.AKS_CLUSTER_NAME }}
+        default:  ''
         type: string
       AKS_RESOURCE_GROUP:
         description: 'Subscription ID of AKS to deploy to.'
         required: false
-        default:  ${{ vars.AKS_RESOURCE_GROUP }}
+        default:  ''
         type: string
 
 env: 
@@ -50,15 +50,47 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment}}
     steps:
+    - name: Parse input
+      run: |
+        if [ -z "${{ inputs.AZURE_CLIENT_ID}}" ]
+        then
+          echo "AZURE_CLIENT_ID=${{ vars.AZURE_CLIENT_ID}}" >> "$GITHUB_ENV"
+        else
+          echo "AZURE_CLIENT_ID=${{ inputs.AZURE_CLIENT_ID}}" >> "$GITHUB_ENV"
+        fi
+        if [ -z "${{ inputs.AZURE_TENANT_ID}}" ]
+        then
+          echo "AZURE_TENANT_ID=${{ vars.AZURE_TENANT_ID}}" >> "$GITHUB_ENV"
+        else
+          echo "AZURE_TENANT_ID=${{ inputs.AZURE_TENANT_ID}}" >> "$GITHUB_ENV"
+        fi
+        if [ -z "${{ inputs.AKS_SUBSCRIPTION_ID}}" ]
+        then
+          echo "AKS_SUBSCRIPTION_ID=${{ vars.AKS_SUBSCRIPTION_ID}}" >> "$GITHUB_ENV"
+        else
+          echo "AKS_SUBSCRIPTION_ID=${{ inputs.AKS_SUBSCRIPTION_ID}}" >> "$GITHUB_ENV"
+        fi
+        if [ -z "${{ inputs.AKS_CLUSTER_NAME}}" ]
+        then
+          echo "AKS_CLUSTER_NAME=${{ vars.AKS_CLUSTER_NAME}}" >> "$GITHUB_ENV"
+        else
+          echo "AKS_CLUSTER_NAME=${{ inputs.AKS_CLUSTER_NAME}}" >> "$GITHUB_ENV"
+        fi
+        if [ -z "${{ inputs.AKS_RESOURCE_GROUP}}" ]
+        then
+          echo "AKS_RESOURCE_GROUP=${{ vars.AKS_RESOURCE_GROUP}}" >> "$GITHUB_ENV"
+        else
+          echo "AKS_RESOURCE_GROUP=${{ inputs.AKS_RESOURCE_GROUP}}" >> "$GITHUB_ENV"
+        fi
     - name: checkout repository
       uses: actions/checkout@v4
 
     - name: authenticate with Azure
       uses: azure/login@v1
       with:
-        client-id: ${{ inputs.AZURE_CLIENT_ID}}
-        tenant-id: ${{ inputs.AZURE_TENANT_ID}}
-        subscription-id: ${{ inputs.AKS_SUBSCRIPTION_ID}}
+        client-id: ${{ env.AZURE_CLIENT_ID}}
+        tenant-id: ${{ env.AZURE_TENANT_ID}}
+        subscription-id: ${{ env.AKS_SUBSCRIPTION_ID}}
 
     - name: setup kubelogin
       uses: azure/use-kubelogin@v1
@@ -68,11 +100,11 @@ jobs:
     - name: set AKS context
       uses: azure/aks-set-context@v3
       with:
-        cluster-name: ${{ inputs.AKS_CLUSTER_NAME }}
-        resource-group: ${{ inputs.AKS_RESOURCE_GROUP }}
+        cluster-name: ${{ env.AKS_CLUSTER_NAME }}
+        resource-group: ${{ env.AKS_RESOURCE_GROUP }}
         admin: 'false'
         use-kubelogin: 'true'
-        subscription: ${{ inputs.AKS_SUBSCRIPTION_ID }}
+        subscription: ${{ env.AKS_SUBSCRIPTION_ID }}
 
     - name: helm deploy
       run: |
