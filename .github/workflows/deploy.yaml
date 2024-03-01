@@ -110,7 +110,7 @@ jobs:
       run: |
         helm repo add elvia-charts https://raw.githubusercontent.com/3lvia/kubernetes-charts/master
         helm repo update
-        repo="${$GITHUB_REPOSITORY##*/}"
+        repo="${GITHUB_REPOSITORY##*/}"
         echo "$repo"
         helm upgrade --debug --install -n ${{ inputs.namespace}} -f CI/values.yaml ${{ inputs.name}} elvia-charts/elvia-deployment \
           --set environment=dev --set image.tag=${{ env.image_tag }} --set labels.repositoryName=$repo --set labels.commitHash=${{ github.sha }}
