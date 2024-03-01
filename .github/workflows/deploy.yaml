@@ -123,12 +123,16 @@ jobs:
         kubectl -n ${{ inputs.namespace}} get events --sort-by='.lastTimestamp' |grep ${{ inputs.name}} || true
       if: always()
 
-    - name: set grafana annotations
-      uses: 3lvia/core-github-actions-templates/.github/workflows/post-grafana-annotations.yaml@feature/build-deploy
+    - name: Read secrets from vault
+      uses: hashicorp/vault-action@v2
       with:
-        title: 'Event - Deploy ${{job.status}}'
-        description: 'description'
-        app: '${{ inputs.name }}'
-        system: '${{ inputs.namespace }}'
-        env: '${{ inputs.environment }}'
-        event: 'deploy'
+        url: https://vault.dev-elvia.io/
+        role: jwt-github-${{input.system}}
+        method: jwt
+        path: jwt-github
+        secrets: |
+            monitoring/kv/shared grafana_api_url        | grafana_api_url
+            monitoring/kv/shared grafana_editor_api_key | grafana_editor_api_key
+    - name: Output
+      run: |
+        echo ${{ env.grafana_api_url }}
