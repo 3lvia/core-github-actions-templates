@@ -127,7 +127,7 @@ jobs:
       uses: hashicorp/vault-action@v2
       with:
         url: https://vault.dev-elvia.io/
-        role: jwt-github-${{input.system}}
+        role: jwt-github-${{ inputs.system }}
         method: jwt
         path: jwt-github
         secrets: |
