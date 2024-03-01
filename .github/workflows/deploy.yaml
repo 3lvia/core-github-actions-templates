@@ -110,21 +110,24 @@ jobs:
       run: |
         helm repo add elvia-charts https://raw.githubusercontent.com/3lvia/kubernetes-charts/master
         helm repo update
+        repo="${${{ github.repository }}##*/}"
+        echo "$repo"
         helm upgrade --debug --install -n ${{ inputs.namespace}} -f CI/values.yaml ${{ inputs.name}} elvia-charts/elvia-deployment \
-          --set environment=dev --set image.tag=${{ env.image_tag }} --set labels.repositoryName=${{ github.repository }} --set labels.commitHash=${{ github.sha }}
+          --set environment=dev --set image.tag=${{ env.image_tag }} --set labels.repositoryName=$repo --set labels.commitHash=${{ github.sha }}
 
     - name: rollout status
       run: |
         kubectl -n ${{ inputs.namespace}} rollout status deploy ${{ inputs.name}}
 
     - name: get events
+      if: always()
       continue-on-error: true
       run: |
         kubectl -n ${{ inputs.namespace}} get events --sort-by='.lastTimestamp' |grep ${{ inputs.name}} || true
-      if: always()
 
     - name: Read secrets from vault
       uses: hashicorp/vault-action@v2
+      if: always()
       with:
         url: https://vault.dev-elvia.io/
         role: jwt-github-${{ inputs.system }}
@@ -134,5 +137,6 @@ jobs:
             monitoring/kv/shared grafana_api_url        | grafana_api_url
             monitoring/kv/shared grafana_editor_api_key | grafana_editor_api_key
     - name: Output
+      if: always()
       run: |
         echo ${{ env.grafana_api_url }}
