@@ -113,22 +113,22 @@ jobs:
         helm upgrade --debug --install -n ${{ inputs.namespace}} -f CI/values.yaml ${{ inputs.name}} elvia-charts/elvia-deployment \
           --set environment=dev --set image.tag=${{ env.image_tag }} --set labels.repositoryName=${{ github.repository }} --set labels.commitHash=${{ github.sha }}
 
-    # - name: rollout status
-    #   run: |
-    #     kubectl -n ${{ inputs.namespace}} rollout status deploy ${{ inputs.name}}
+    - name: rollout status
+      run: |
+        kubectl -n ${{ inputs.namespace}} rollout status deploy ${{ inputs.name}}
 
-    # - name: get events
-    #   continue-on-error: true
-    #   run: |
-    #     kubectl -n ${{ inputs.namespace}} get events --sort-by='.lastTimestamp' |grep ${{ inputs.name}} || true
-    #   if: always()
+    - name: get events
+      continue-on-error: true
+      run: |
+        kubectl -n ${{ inputs.namespace}} get events --sort-by='.lastTimestamp' |grep ${{ inputs.name}} || true
+      if: always()
 
-    # - name: set grafana annotations
-    #   uses: 3lvia/core-github-actions-templates/post-grafana-annotations.yaml
-    #   with:
-    #     title: 'Event - Deploy ${{job.status}}'
-    #     description: 'description'
-    #     app: '${{input.name}}'
-    #     system: '${{input.namespace}}'
-    #     env: 'dev'
-    #     event: 'deploy'
+    - name: set grafana annotations
+      uses: 3lvia/core-github-actions-templates/post-grafana-annotations.yaml
+      with:
+        title: 'Event - Deploy ${{job.status}}'
+        description: 'description'
+        app: '${{input.name}}'
+        system: '${{input.namespace}}'
+        env: 'dev'
+        event: 'deploy'
