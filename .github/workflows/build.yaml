@@ -55,7 +55,6 @@ on:
         type: string
 
 env: 
-  image_tag: ${{ github.sha }}-${{ github.run_number }}
   image_full_name: containerregistryelvia.azurecr.io/${{ inputs.namespace }}-${{ inputs.name }}:${{ github.sha }}-${{ github.run_number }}
 
 jobs:
