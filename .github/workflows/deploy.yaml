@@ -124,7 +124,7 @@ jobs:
       if: always()
 
     - name: set grafana annotations
-      uses: 3lvia/core-github-actions-templates/post-grafana-annotations.yaml@feature/build-deploy
+      uses: 3lvia/core-github-actions-templates/.github/workflows/post-grafana-annotations.yaml@feature/build-deploy
       with:
         title: 'Event - Deploy ${{job.status}}'
         description: 'description'
