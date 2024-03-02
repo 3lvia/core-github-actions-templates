@@ -100,7 +100,7 @@ jobs:
         method: jwt
         path: jwt-github
         secrets: |
-          core/kv/data/appinsights/core instrumentation-key | INST_KEY
+                core/kv/data/appinsights/core instrumentation-key | INST_KEY
     - name: Output
       run: |
         echo ${{env.INST_KEY}} 
@@ -125,7 +125,7 @@ jobs:
       if: always()
       with:
         url: https://vault.dev-elvia.io/
-        role: jwt-github-${{ inputs.system }}
+        role: jwt-github-core
         method: jwt
         path: jwt-github
         secrets: |
@@ -141,7 +141,7 @@ jobs:
       if: always()
       with:
         url: https://vault.dev-elvia.io/
-        role: jwt-github-${{ inputs.system }}
+        role: jwt-github-core
         method: jwt
         path: jwt-github
         secrets: |
