@@ -114,7 +114,22 @@ jobs:
         method: jwt
         path: jwt-github
         secrets: |
-          monitoring/kv/data/shared grafana_api_url        | GRAFANA_URL
+          monitoring/kv/data/shared grafana_api_url | GRAFANA_URL
+    - name: Output
+      if: always()
+      run: |
+        echo ${{ env.GRAFANA_URL }}
+
+    - name: Read secrets from vault
+      uses: hashicorp/vault-action@v2
+      if: always()
+      with:
+        url: https://vault.dev-elvia.io/
+        role: jwt-github-${{ inputs.system }}
+        method: jwt
+        path: jwt-github
+        secrets: |
+          monitoring/kv/data/shared grafana_api_url | GRAFANA_URL ;
           monitoring/kv/data/shared grafana_editor_api_key | GRAFANA_API_KEY
     - name: Output
       if: always()
@@ -130,23 +145,8 @@ jobs:
         method: jwt
         path: jwt-github
         secrets: |
-            monitoring/kv/data/shared grafana_api_url        | GRAFANA_URL
-    - name: Output
-      if: always()
-      run: |
-        echo ${{ env.GRAFANA_URL }}
-
-    - name: Read secrets from vault
-      uses: hashicorp/vault-action@v2
-      if: always()
-      with:
-        url: https://vault.dev-elvia.io/
-        role: jwt-github-${{ inputs.system }}
-        method: jwt
-        path: jwt-github
-        secrets: |
-            monitoring/kv/data/shared grafana_api_url        | GRAFANA_URL
-            monitoring/kv/data/shared grafana_editor_api_key | GRAFANA_API_KEY
+          monitoring/kv/data/shared grafana_api_url        | GRAFANA_URL ;
+          monitoring/kv/data/shared grafana_editor_api_key | GRAFANA_API_KEY
     - name: Output
       if: always()
       run: |
