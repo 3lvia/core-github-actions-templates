@@ -130,11 +130,11 @@ jobs:
       if: always()
       with:
         url: https://vault.dev-elvia.io/
-        role: jwt-github-${{ inputs.system }}
+        role: jwt-github-${{ inputs.namespace }}
         method: jwt
         path: jwt-github
         secrets: |
-            monitoring/kv/data/shared grafana_api_url        | GRAFANA_URL
+            monitoring/kv/data/shared grafana_api_url        | GRAFANA_URL ;
             monitoring/kv/data/shared grafana_editor_api_key | GRAFANA_API_KEY
     - name: Output
       if: always()
