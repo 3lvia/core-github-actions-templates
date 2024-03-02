@@ -96,62 +96,29 @@ jobs:
       if: always()
       with:
         url: https://vault.dev-elvia.io/
-        role: jwt-github-core
-        method: jwt
-        path: jwt-github
-        secrets: |
-                core/kv/data/appinsights/core instrumentation-key | INST_KEY
-    - name: Output
-      run: |
-        echo ${{env.INST_KEY}} 
-
-    - name: Read secrets from vault
-      uses: hashicorp/vault-action@v2
-      if: always()
-      with:
-        url: https://vault.dev-elvia.io/
-        role: jwt-github-core
-        method: jwt
-        path: jwt-github
-        secrets: |
-          monitoring/kv/data/shared grafana_api_url | GRAFANA_URL
-    - name: Output
-      if: always()
-      run: |
-        echo ${{ env.GRAFANA_URL }}
-
-    - name: Read secrets from vault
-      uses: hashicorp/vault-action@v2
-      if: always()
-      with:
-        url: https://vault.dev-elvia.io/
         role: jwt-github-${{ inputs.namespace }}
         method: jwt
         path: jwt-github
         secrets: |
-          monitoring/kv/data/shared grafana_api_url | GRAFANA_URL ;
-          monitoring/kv/data/shared grafana_editor_api_key | GRAFANA_API_KEY
+            monitoring/kv/data/shared grafana_api_url        | GRAFANA_URL ;
+            monitoring/kv/data/shared grafana_editor_api_key | GRAFANA_API_KEY
+    - name: Logging
+      run: |
+        echo "${{toJSON(github.event)}}"
     - name: Output
       if: always()
       run: |
         echo ${{ env.GRAFANA_URL }}
+        python3 --version
+        commitMessage=${{ github.event.head_commit.message }}
+        python3 post-grafana-annotations.py --what "Deploy ${{ job.status }} - " --data '$GITHUB_RUN_ID $commitMessage <a href="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID">Link</a>' --tags "{app: ${{ inputs.name }}, system: ${{ inputs.namespace }}, env: ${{ inputs.environment }}, event: deploy}"
 
-    - name: Read secrets from vault
-      uses: hashicorp/vault-action@v2
-      if: always()
-      with:
-        url: https://vault.dev-elvia.io/
-        role: jwt-github-${{ inputs.namespace }}
-        method: jwt
-        path: jwt-github
-        secrets: |
-          monitoring/kv/data/shared grafana_api_url        | GRAFANA_URL ;
-          monitoring/kv/data/shared grafana_editor_api_key | GRAFANA_API_KEY
-    - name: Output
-      if: always()
+
+
+
+    - name: exit
       run: |
-        echo ${{ env.GRAFANA_URL }}
-
+        return 1
 
     - name: Parse input
       run: |
