@@ -100,6 +100,20 @@ jobs:
         method: jwt
         path: jwt-github
         secrets: |
+              core/kv/data/appinsights/core instrumentation-key | INST_KEY
+    - name: Output
+      run: |
+        echo ${{env.INST_KEY}} 
+
+    - name: Read secrets from vault
+      uses: hashicorp/vault-action@v2
+      if: always()
+      with:
+        url: https://vault.dev-elvia.io/
+        role: jwt-github-core
+        method: jwt
+        path: jwt-github
+        secrets: |
             monitoring/kv/data/shared grafana_api_url        | GRAFANA_URL
             monitoring/kv/data/shared grafana_editor_api_key | GRAFANA_API_KEY
     - name: Output
@@ -138,7 +152,7 @@ jobs:
       run: |
         echo ${{ env.GRAFANA_URL }}
 
-        
+
     - name: Parse input
       run: |
         if [ -z "${{ inputs.AZURE_CLIENT_ID}}" ]
