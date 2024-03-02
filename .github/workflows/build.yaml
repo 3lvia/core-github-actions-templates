@@ -100,7 +100,7 @@ jobs:
         method: jwt
         path: jwt-github
         secrets: |
-              core/kv/data/appinsights/core instrumentation-key | INST_KEY
+          core/kv/data/appinsights/core instrumentation-key | INST_KEY
     - name: Output
       run: |
         echo ${{env.INST_KEY}} 
@@ -114,8 +114,8 @@ jobs:
         method: jwt
         path: jwt-github
         secrets: |
-            monitoring/kv/data/shared grafana_api_url        | GRAFANA_URL
-            monitoring/kv/data/shared grafana_editor_api_key | GRAFANA_API_KEY
+          monitoring/kv/data/shared grafana_api_url        | GRAFANA_URL
+          monitoring/kv/data/shared grafana_editor_api_key | GRAFANA_API_KEY
     - name: Output
       if: always()
       run: |
