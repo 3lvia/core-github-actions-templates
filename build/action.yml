@@ -22,13 +22,15 @@ inputs:
     description: "ClientId of a service principal that can push to Container Registry."
     required: true
   AZURE_TENANT_ID:
-    description: "TenantId of a service principal that can push to Azure Container Registry."
-    required: true
+    description: "TenantId of a service principal that can push to Azure Container Registry. Default to Elvia's Tenant ID"
+    required: false
+    default: "2186a6ec-c227-4291-9806-d95340bf439d"
   ACR_SUBSCRIPTION_ID:
-    description: "Subscription ID of the Azure Container Registry to push to."
-    required: true
+    description: "Subscription ID of the Azure Container Registry to push to. Defaults to Elvia's standard ACR."
+    required: false
+    default: "9edbf217-b7c1-4f6a-ae76-d046cf932ff0"
   ACR_NAME:
-    description: "Name of the Azure Container Registry to push to."
+    description: "Name of the Azure Container Registry to push to. Defaults to Elvia's standard ACR."
     required: false
     default: containerregistryelvia
 
@@ -138,9 +140,9 @@ runs:
     - name: Authenticate with Azure
       uses: azure/login@v1
       with:
-        client-id: ${{ env.AZURE_CLIENT_ID }}
-        tenant-id: ${{ env.AZURE_TENANT_ID }}
-        subscription-id: ${{ env.ACR_SUBSCRIPTION_ID }}
+        client-id: ${{ inputs.AZURE_CLIENT_ID }}
+        tenant-id: ${{ inputs.AZURE_TENANT_ID }}
+        subscription-id: ${{ inputs.ACR_SUBSCRIPTION_ID }}
 
     - name: Login ACR
       shell: bash
