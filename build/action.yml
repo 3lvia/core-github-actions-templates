@@ -45,10 +45,15 @@ runs:
     #   run: |
     #     echo '${{ toJSON(github) }}' 
 
-    - name: Output job
+    - name: Output env
       shell: bash
       run: |
-        echo '${{ toJSON(job) }}' 
+        echo '${{ toJSON(env) }}' 
+
+    - name: Output vars
+      shell: bash
+      run: |
+        echo '${{ toJSON(vars) }}' 
 
     - name: Parse input
       shell: bash
