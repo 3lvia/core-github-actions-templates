@@ -96,7 +96,7 @@ runs:
         template: "@/contrib/sarif.tpl"
         output: trivy.sarif
         severity: ${{ inputs.severity }}
-        github-pat: ${{ secrets.GITHUB_TOKEN }}
+        # github-pat: ${{ secrets.GITHUB_TOKEN }}
         ignore-unfixed: true
       if: github.event_name == 'push'
 
