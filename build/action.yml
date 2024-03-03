@@ -20,16 +20,13 @@ inputs:
     default: "CRITICAL,HIGH"
   AZURE_CLIENT_ID:
     description: "ClientId of a service principal that can push to Container Registry."
-    required: false
-    default: ""
+    required: true
   AZURE_TENANT_ID:
     description: "TenantId of a service principal that can push to Azure Container Registry."
-    required: false
-    default: ""
+    required: true
   ACR_SUBSCRIPTION_ID:
     description: "Subscription ID of the Azure Container Registry to push to."
-    required: false
-    default: ""
+    required: true
   ACR_NAME:
     description: "Name of the Azure Container Registry to push to."
     required: false
@@ -74,7 +71,12 @@ runs:
         # pip3 install -Iv requests pyyaml
         echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
         echo "GITHUB_RUN_ID=$GITHUB_RUN_ID"
-        python3 ${{ github.action_path }}/post-grafana-annotations.py --what "Deploy ${{ job.status }} - " --data '$GITHUB_RUN_ID $gitMessage <a href="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID">Link</a>' --tags "{app: ${{ inputs.name }}, system: ${{ inputs.namespace }}, env: dev, event: deploy}" --grafana_url $GRAFANA_URL --grafana_api_key $GRAFANA_API_KEY
+        python3 ${{ github.action_path }}/post-grafana-annotations.py \
+          --what "Deploy ${{ job.status }} - " \
+          --data "$GITHUB_RUN_ID $gitMessage <a href="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID">Link</a>" \
+          --tags "{app: ${{ inputs.name }}, system: ${{ inputs.namespace }}, env: dev, event: deploy}" \
+          --grafana_url $GRAFANA_URL \
+          --grafana_api_key $GRAFANA_API_KEY
 
     - name: Echo input
       if: always()
