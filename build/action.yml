@@ -40,10 +40,19 @@ runs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    # - name: Output github
+    #   shell: bash
+    #   run: |
+    #     echo '${{ toJSON(github) }}' 
+
+    - name: Output job
+      shell: bash
+      run: |
+        echo '${{ toJSON(job) }}' 
+
     - name: Parse input
       shell: bash
       run: |
-        echo '${{ toJSON(github) }}' 
         echo "IMAGE_LONG_NAME=containerregistryelvia.azurecr.io/${{ inputs.namespace }}-${{ inputs.name }}:${{ github.sha }}-${{ github.run_number }}" >> "$GITHUB_ENV"
 
     - name: Build image
