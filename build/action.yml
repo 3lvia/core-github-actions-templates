@@ -38,6 +38,9 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
     - name: Read secrets from vault
       uses: hashicorp/vault-action@v2
       if: always()
