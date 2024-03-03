@@ -12,23 +12,22 @@ inputs:
     description: "Environment to deploy to. Must be from dev, test or prod"
     required: true
   AZURE_CLIENT_ID:
-    description: "ClientId of a service principal that can deploy to AKS."
-    required: false
-    default: ""
+    description: "ClientId of a service principal that can push to Container Registry."
+    required: true
   AZURE_TENANT_ID:
-    description: "TenantId of a service principal that can deploy to AKS."
+    description: "TenantId of a service principal that can push to Azure Container Registry. Default to Elvia's Tenant ID"
     required: false
-    default: ""
+    default: "2186a6ec-c227-4291-9806-d95340bf439d"
   AKS_SUBSCRIPTION_ID:
-    description: "Subscription ID of AKS to deploy to."
+    description: "Subscription ID of AKS to deploy to. Defaults to Elvias normal clusters. "
     required: false
     default: ""
   AKS_CLUSTER_NAME:
-    description: "Subscription ID of AKS to deploy to."
+    description: "Subscription ID of AKS to deploy to. Defaults to Elvias normal clusters. "
     required: false
     default: ""
   AKS_RESOURCE_GROUP:
-    description: "Subscription ID of AKS to deploy to."
+    description: "Subscription ID of AKS to deploy to. Defaults to Elvias normal clusters. "
     required: false
     default: ""
 
@@ -38,43 +37,59 @@ runs:
     - name: Parse input
       shell: bash
       run: |
-        echo "IMAGE_TAG=${{ github.sha }}-${{ github.run_number }}" >> "$GITHUB_ENV"
-        if [ -z "${{ inputs.AZURE_CLIENT_ID}}" ]
+        if [ "${{ inputs.environment}}" == "dev" ]
         then
-          echo "AZURE_CLIENT_ID=${{ vars.AZURE_CLIENT_ID}}" >> "$GITHUB_ENV"
-        else
-          echo "AZURE_CLIENT_ID=${{ inputs.AZURE_CLIENT_ID}}" >> "$GITHUB_ENV"
-        fi
-        if [ -z "${{ inputs.AZURE_TENANT_ID}}" ]
+          sub_id="ceb9518c-528f-4c91-9b5a-c051d383e7a8"
+          rg="RUNTIMESERVICE-RGdev"
+          cluster_name="aksclusterdev"
+        elif [ "${{ inputs.environment}}" == "test" ]
         then
-          echo "AZURE_TENANT_ID=${{ vars.AZURE_TENANT_ID}}" >> "$GITHUB_ENV"
+          sub_id="ceb9518c-528f-4c91-9b5a-c051d383e7a8"
+          rg="RUNTIMESERVICE-RGtest"
+          cluster_name="aksclustertest"
+        elif [ "${{ inputs.environment}}" == "prod" ]
+        then
+          sub_id="9edbf217-b7c1-4f6a-ae76-d046cf932ff0"
+          rg="RUNTIMESERVICE-RGprod"
+          cluster_name="aksclusterprod"
         else
-          echo "AZURE_TENANT_ID=${{ inputs.AZURE_TENANT_ID}}" >> "$GITHUB_ENV"
+          echo "unsupported environment: ${{ inputs.environment}}"
+          exit 1
         fi
+
         if [ -z "${{ inputs.AKS_SUBSCRIPTION_ID}}" ]
         then
-          echo "AKS_SUBSCRIPTION_ID=${{ vars.AKS_SUBSCRIPTION_ID}}" >> "$GITHUB_ENV"
+          echo "AKS_SUBSCRIPTION_ID=$sub_id" >> "$GITHUB_ENV"
         else
           echo "AKS_SUBSCRIPTION_ID=${{ inputs.AKS_SUBSCRIPTION_ID}}" >> "$GITHUB_ENV"
         fi
         if [ -z "${{ inputs.AKS_CLUSTER_NAME}}" ]
         then
-          echo "AKS_CLUSTER_NAME=${{ vars.AKS_CLUSTER_NAME}}" >> "$GITHUB_ENV"
+          echo "AKS_CLUSTER_NAME=$cluster_name" >> "$GITHUB_ENV"
         else
           echo "AKS_CLUSTER_NAME=${{ inputs.AKS_CLUSTER_NAME}}" >> "$GITHUB_ENV"
         fi
         if [ -z "${{ inputs.AKS_RESOURCE_GROUP}}" ]
         then
-          echo "AKS_RESOURCE_GROUP=${{ vars.AKS_RESOURCE_GROUP}}" >> "$GITHUB_ENV"
+          echo "AKS_RESOURCE_GROUP=$rg" >> "$GITHUB_ENV"
         else
           echo "AKS_RESOURCE_GROUP=${{ inputs.AKS_RESOURCE_GROUP}}" >> "$GITHUB_ENV"
         fi
 
+    - name: echo
+      shell: bash
+      run: |
+        echo "AKS_SUBSCRIPTION_ID=$AKS_SUBSCRIPTION_ID"
+        echo "AKS_CLUSTER_NAME=$AKS_CLUSTER_NAME"
+        echo "AKS_RESOURCE_GROUP=$AKS_RESOURCE_GROUP"
+        echo "AZURE_CLIENT_ID= ${{ inputs.AZURE_CLIENT_ID}}"
+        echo "AZURE_TENANT_ID=${{ inputs.AZURE_TENANT_ID}}"
+
     - name: authenticate with Azure
       uses: azure/login@v1
       with:
-        client-id: ${{ env.AZURE_CLIENT_ID}}
-        tenant-id: ${{ env.AZURE_TENANT_ID}}
+        client-id: ${{ inputs.AZURE_CLIENT_ID}}
+        tenant-id: ${{ inputs.AZURE_TENANT_ID}}
         subscription-id: ${{ env.AKS_SUBSCRIPTION_ID}}
 
     - name: setup kubelogin
@@ -98,8 +113,9 @@ runs:
         helm repo update
         repo="${GITHUB_REPOSITORY##*/}"
         echo "$repo"
+        image_tag="${{ github.sha }}-${{ github.run_number }}"
         helm upgrade --debug --install -n ${{ inputs.namespace}} -f CI/values.yaml ${{ inputs.name}} elvia-charts/elvia-deployment \
-          --set environment=dev --set image.tag=${{ env.IMAGE_TAG }} --set labels.repositoryName=$repo --set labels.commitHash=${{ github.sha }}
+          --set environment=dev --set image.tag=$image_tag --set labels.repositoryName=$repo --set labels.commitHash=${{ github.sha }}
 
     - name: rollout status
       shell: bash
