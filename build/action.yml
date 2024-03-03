@@ -38,6 +38,15 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Parse input
+      shell: bash
+      run: |
+        echo "IMAGE_LONG_NAME=containerregistryelvia.azurecr.io/${{ inputs.namespace }}-${{ inputs.name }}:${{ github.sha }}-${{ github.run_number }}" >> "$GITHUB_ENV"
+    - name: Parse input
+      shell: bash
+      run: |
+        echo "IMAGE_LONG_NAME=$IMAGE_LONG_NAME"
+
     - name: Checkout repository
       uses: actions/checkout@v4
 
@@ -77,7 +86,7 @@ runs:
         if [ -z "${{ inputs.dockerBuildContext}}" ]
         then
             dir=`dirname ${{ inputs.dockerfile}}` # default to the directory of the Dockerfile
-            echo "dockerBuildContextempty - dir: $dir"
+            echo "dockerBuildContext empty - dir: $dir"
         else
             dir=${{ inputs.dockerBuildContext}}
             echo "dockerBuildContext set - dir: $dir"
