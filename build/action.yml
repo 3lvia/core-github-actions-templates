@@ -50,11 +50,6 @@ runs:
       run: |
         echo '${{ toJSON(env) }}' 
 
-    - name: Output vars
-      shell: bash
-      run: |
-        echo '${{ toJSON(vars) }}' 
-
     - name: Parse input
       shell: bash
       run: |
