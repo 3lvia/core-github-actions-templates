@@ -4,23 +4,23 @@ on:
   workflow_call:
     inputs:
       name:
-        description: 'Name of application. Do not include namespace.'
+        description: "Name of application. Do not include namespace."
         required: true
         type: string
       namespace:
-        description: 'Namespace or system of the application.'
+        description: "Namespace or system of the application."
         required: true
         type: string
       environment:
-        description: 'Github Environment.'
+        description: "Github Environment."
         required: true
         type: string
       dockerfile:
-        description: 'Path to Dockerfile.'
+        description: "Path to Dockerfile."
         required: true
         type: string
       dockerBuildContext:
-        description: 'Docker build context. It is the working directory needed to build the dockerfile. Defaults to the directory with the Dockerfile.'
+        description: "Docker build context. It is the working directory needed to build the dockerfile. Defaults to the directory with the Dockerfile."
         required: false
         type: string
       languages:
@@ -29,48 +29,48 @@ on:
         default: '["csharp"]'
         type: string
       severity:
-        description: 'Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.'
+        description: "Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information."
         required: false
-        default: 'CRITICAL,HIGH'
+        default: "CRITICAL,HIGH"
         type: string
       AZURE_CLIENT_ID:
-        description: 'ClientId of a service principal that can push to Container Registry.'
+        description: "ClientId of a service principal that can push to Container Registry."
         required: false
-        default:  ''
+        default: ""
         type: string
       AZURE_TENANT_ID:
-        description: 'TenantId of a service principal that can push to Azure Container Registry.'
+        description: "TenantId of a service principal that can push to Azure Container Registry."
         required: false
-        default:  ''
+        default: ""
         type: string
       ACR_SUBSCRIPTION_ID:
-        description: 'Subscription ID of the Azure Container Registry to push to.'
+        description: "Subscription ID of the Azure Container Registry to push to."
         required: false
-        default:  ''
+        default: ""
         type: string
       ACR_NAME:
-        description: 'Name of the Azure Container Registry to push to.'
+        description: "Name of the Azure Container Registry to push to."
         required: false
-        default:  containerregistryelvia
+        default: containerregistryelvia
         type: string
 
-env: 
+env:
   image_full_name: containerregistryelvia.azurecr.io/${{ inputs.namespace }}-${{ inputs.name }}:${{ github.sha }}-${{ github.run_number }}
 
 jobs:
   analyze:
     name: CodeQL Analyze
-    runs-on: 'ubuntu-latest'
+    runs-on: "ubuntu-latest"
     timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        language: ${{ fromJSON(inputs.languages) }} 
+        language: ${{ fromJSON(inputs.languages) }}
         # CodeQL supports [ 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift' ]
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
     # - name: Initialize CodeQL
     #   uses: github/codeql-action/init@v3
@@ -90,115 +90,119 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
-
-    - name: Read secrets from vault
-      uses: hashicorp/vault-action@v2
-      if: always()
-      with:
-        url: https://vault.dev-elvia.io/
-        role: jwt-github-${{ inputs.namespace }}
-        method: jwt
-        path: jwt-github
-        secrets: |
+      - name: Read secrets from vault
+        uses: hashicorp/vault-action@v2
+        if: always()
+        with:
+          url: https://vault.dev-elvia.io/
+          role: jwt-github-${{ inputs.namespace }}
+          method: jwt
+          path: jwt-github
+          secrets: |
             monitoring/kv/data/shared grafana_api_url        | GRAFANA_URL ;
             monitoring/kv/data/shared grafana_editor_api_key | GRAFANA_API_KEY
-    - name: Logging
-      run: |
-        echo "${{toJSON(github.event)}}"
-    - name: Output
-      if: always()
-      run: |
-        echo ${{ env.GRAFANA_URL }}
-        python3 --version
-        commitMessage=${{ github.event.head_commit.message }}
-        python3 post-grafana-annotations.py --what "Deploy ${{ job.status }} - " --data '$GITHUB_RUN_ID $commitMessage <a href="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID">Link</a>' --tags "{app: ${{ inputs.name }}, system: ${{ inputs.namespace }}, env: ${{ inputs.environment }}, event: deploy}"
+      - name: gitMessage
+        run: |
+          gitMessage=$(git log -1 --no-merges --pretty=%B)
+          echo $gitMessage
+      - name: Checkout core-github-actions-templates
+        uses: actions/checkout@v4
+        with:
+          repository: 3lvia/core-github-actions-templates
+          path: core-github-actions-templates
 
+      - name: Output
+        if: always()
+        run: |
+          echo ${{ env.GRAFANA_URL }}
+          python3 --version
+          commitMessage=${{ github.event.head_commit.message }}
+          ls core-github-actions-templates
+          python3 post-grafana-annotations.py --what "Deploy ${{ job.status }} - " --data '$GITHUB_RUN_ID $commitMessage <a href="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID">Link</a>' --tags "{app: ${{ inputs.name }}, system: ${{ inputs.namespace }}, env: ${{ inputs.environment }}, event: deploy}"
 
+      - name: exit
+        run: |
+          return 1
 
+      - name: Parse input
+        run: |
+          if [ -z "${{ inputs.AZURE_CLIENT_ID}}" ]
+          then
+            echo "AZURE_CLIENT_ID=${{ vars.AZURE_CLIENT_ID}}" >> "$GITHUB_ENV"
+          else
+            echo "AZURE_CLIENT_ID=${{ inputs.AZURE_CLIENT_ID}}" >> "$GITHUB_ENV"
+          fi
+          if [ -z "${{ inputs.AZURE_TENANT_ID}}" ]
+          then
+            echo "AZURE_TENANT_ID=${{ vars.AZURE_TENANT_ID}}" >> "$GITHUB_ENV"
+          else
+            echo "AZURE_TENANT_ID=${{ inputs.AZURE_TENANT_ID}}" >> "$GITHUB_ENV"
+          fi
+          if [ -z "${{ inputs.ACR_SUBSCRIPTION_ID}}" ]
+          then
+            echo "ACR_SUBSCRIPTION_ID=${{ vars.ACR_SUBSCRIPTION_ID}}" >> "$GITHUB_ENV"
+          else
+            echo "ACR_SUBSCRIPTION_ID=${{ inputs.ACR_SUBSCRIPTION_ID}}" >> "$GITHUB_ENV"
+          fi
 
-    - name: exit
-      run: |
-        return 1
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Parse input
-      run: |
-        if [ -z "${{ inputs.AZURE_CLIENT_ID}}" ]
-        then
-          echo "AZURE_CLIENT_ID=${{ vars.AZURE_CLIENT_ID}}" >> "$GITHUB_ENV"
-        else
-          echo "AZURE_CLIENT_ID=${{ inputs.AZURE_CLIENT_ID}}" >> "$GITHUB_ENV"
-        fi
-        if [ -z "${{ inputs.AZURE_TENANT_ID}}" ]
-        then
-          echo "AZURE_TENANT_ID=${{ vars.AZURE_TENANT_ID}}" >> "$GITHUB_ENV"
-        else
-          echo "AZURE_TENANT_ID=${{ inputs.AZURE_TENANT_ID}}" >> "$GITHUB_ENV"
-        fi
-        if [ -z "${{ inputs.ACR_SUBSCRIPTION_ID}}" ]
-        then
-          echo "ACR_SUBSCRIPTION_ID=${{ vars.ACR_SUBSCRIPTION_ID}}" >> "$GITHUB_ENV"
-        else
-          echo "ACR_SUBSCRIPTION_ID=${{ inputs.ACR_SUBSCRIPTION_ID}}" >> "$GITHUB_ENV"
-        fi
+      - name: Build image
+        run: |
+          if [ -z "${{ inputs.dockerBuildContext}}" ]
+          then
+                dir=`dirname ${{ inputs.dockerfile}}` # default to the directory of the Dockerfile
+          else
+                dir=${{ inputs.dockerBuildContext}}
+          fi
+          docker build --tag ${{ env.image_full_name}} -f ${{ inputs.dockerfile}} $dir
 
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.image_full_name}}
+          format: "table"
+          exit-code: "1"
+          ignore-unfixed: true
+          severity: ${{ inputs.severity }}
+          github-pat: ${{ secrets.GITHUB_TOKEN }}
+        if: github.event_name == 'pull_request'
 
-    - name: Build image
-      run: |
-        if [ -z "${{ inputs.dockerBuildContext}}" ]
-        then
-              dir=`dirname ${{ inputs.dockerfile}}` # default to the directory of the Dockerfile
-        else
-              dir=${{ inputs.dockerBuildContext}}
-        fi
-        docker build --tag ${{ env.image_full_name}} -f ${{ inputs.dockerfile}} $dir
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.image_full_name}}
+          format: "sarif"
+          template: "@/contrib/sarif.tpl"
+          output: trivy.sarif
+          severity: ${{ inputs.severity }}
+          github-pat: ${{ secrets.GITHUB_TOKEN }}
+          ignore-unfixed: true
+        if: github.event_name == 'push'
 
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
-      with:
-        image-ref: ${{ env.image_full_name}}
-        format: 'table'
-        exit-code: '1'
-        ignore-unfixed: true
-        severity: ${{ inputs.severity }}
-        github-pat: ${{ secrets.GITHUB_TOKEN }} 
-      if: github.event_name == 'pull_request'
+      # GitHub Security tab does not support SARIF files with `git::` or `https:/` URL's:
+      # https://github.com/aquasecurity/trivy/issues/5003#issuecomment-1780415058
+      - name: Fix Trivy output
+        run: sed -i 's#git::https:/##g' "trivy.sarif"
+        if: github.event_name == 'push'
 
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
-      with:
-        image-ref: ${{ env.image_full_name}}
-        format: 'sarif'
-        template: '@/contrib/sarif.tpl'
-        output: trivy.sarif
-        severity: ${{ inputs.severity }}
-        github-pat: ${{ secrets.GITHUB_TOKEN }} 
-        ignore-unfixed: true
-      if: github.event_name == 'push'
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: trivy.sarif
+          category: "Trivy"
+        if: github.event_name == 'push'
 
-    # GitHub Security tab does not support SARIF files with `git::` or `https:/` URL's:
-    # https://github.com/aquasecurity/trivy/issues/5003#issuecomment-1780415058
-    - name: Fix Trivy output
-      run: sed -i 's#git::https:/##g' "trivy.sarif"
-      if: github.event_name == 'push'
+      - name: Authenticate with Azure
+        uses: azure/login@v1
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.ACR_SUBSCRIPTION_ID }}
 
-    - name: Upload Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v2
-      with:
-        sarif_file: trivy.sarif
-        category: 'Trivy'
-      if: github.event_name == 'push'
+      - name: Login ACR
+        run: az acr login --name ${{ inputs.ACR_NAME }}
 
-    - name: Authenticate with Azure
-      uses: azure/login@v1
-      with:
-        client-id: ${{ env.AZURE_CLIENT_ID }}
-        tenant-id: ${{ env.AZURE_TENANT_ID }}
-        subscription-id: ${{ env.ACR_SUBSCRIPTION_ID }}
-
-    - name: Login ACR
-      run: az acr login --name ${{ inputs.ACR_NAME }}
-
-    - name: Push image
-      run: docker push ${{ env.image_full_name}}
+      - name: Push image
+        run: docker push ${{ env.image_full_name}}

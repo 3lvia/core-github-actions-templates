@@ -1,0 +1,24 @@
+name: Analyze
+description: Run CodeQL
+
+inputs:
+  languages:
+    description: 'List of languages to run CodeQL on, As JSON array. Defaults to ["csharp"]. The supported languages are c-cpp, csharp, go, java-kotlin, javascript-typescript, python, ruby, swift.'
+    required: false
+    default: '["csharp"]'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ input.languages }}
+
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v3
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{input.languages}}"
