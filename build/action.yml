@@ -37,48 +37,13 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
     - name: Parse input
       shell: bash
       run: |
         echo "IMAGE_LONG_NAME=containerregistryelvia.azurecr.io/${{ inputs.namespace }}-${{ inputs.name }}:${{ github.sha }}-${{ github.run_number }}" >> "$GITHUB_ENV"
-    - name: Parse input
-      shell: bash
-      run: |
-        echo "IMAGE_LONG_NAME=$IMAGE_LONG_NAME"
-
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Read secrets from vault
-      uses: hashicorp/vault-action@v2
-      if: always()
-      with:
-        url: https://vault.dev-elvia.io/
-        role: jwt-github-${{ inputs.namespace }}
-        method: jwt
-        path: jwt-github
-        secrets: |
-          monitoring/kv/data/shared grafana_api_url        | GRAFANA_URL ;
-          monitoring/kv/data/shared grafana_editor_api_key | GRAFANA_API_KEY
-
-    - name: Output
-      shell: bash
-      if: always()
-      run: |
-        set -x
-        echo ${{ env.GRAFANA_URL }}
-        python3 --version
-        gitMessage=$(git log -1 --no-merges --pretty=%B)
-        echo $gitMessage
-        # pip3 install -Iv requests pyyaml
-        echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
-        echo "GITHUB_RUN_ID=$GITHUB_RUN_ID"
-        python3 ${{ github.action_path }}/post-grafana-annotations.py \
-          --what "Deploy ${{ job.status }} - " \
-          --data "$GITHUB_RUN_ID $gitMessage <a href="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID">Link</a>" \
-          --tags "{app: ${{ inputs.name }}, system: ${{ inputs.namespace }}, env: dev, event: deploy}" \
-          --grafana_url $GRAFANA_URL \
-          --grafana_api_key $GRAFANA_API_KEY
 
     - name: Build image
       shell: bash
@@ -130,13 +95,6 @@ runs:
         sarif_file: trivy.sarif
         category: "Trivy"
       if: github.event_name == 'push'
-    
-    - name: echo
-      shell: bash
-      run: |
-        echo "AZURE_CLIENT_ID: ${{ inputs.AZURE_CLIENT_ID }}"
-        echo "AZURE_TENANT_ID: ${{ inputs.AZURE_TENANT_ID }}"
-        echo "ACR_SUBSCRIPTION_ID: ${{ inputs.ACR_SUBSCRIPTION_ID }}"
 
     - name: Authenticate with Azure
       uses: azure/login@v1
