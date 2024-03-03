@@ -62,7 +62,7 @@ runs:
         python3 --version
         gitMessage=$(git log -1 --no-merges --pretty=%B)
         echo $gitMessage
-        ls -lR
+        ls -lR ${{ github.action_path }}
         python3 ${{ github.action_path }}/deploy/post-grafana-annotations.py --what "Deploy ${{ job.status }} - " --data '$GITHUB_RUN_ID $gitMessage <a href="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID">Link</a>' --tags "{app: ${{ inputs.name }}, system: ${{ inputs.namespace }}, env: dev, event: deploy}"
 
     - name: Echo input
