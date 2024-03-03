@@ -85,7 +85,7 @@ runs:
         exit-code: "1"
         ignore-unfixed: true
         severity: ${{ inputs.severity }}
-        github-pat: ${{ secrets.GITHUB_TOKEN }}
+        # github-pat: ${{ secrets.GITHUB_TOKEN }}
       if: github.event_name == 'pull_request'
 
     - name: Run Trivy vulnerability scanner
