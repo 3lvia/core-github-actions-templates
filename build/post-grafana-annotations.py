@@ -10,12 +10,7 @@ import json
 import urllib
 import requests
 
-from elvia_vault import VaultClient
-
-def post_annotations(event):
-    vault = VaultClient()
-    base_url = vault.get_value("monitoring/kv/shared/grafana_api_url")
-    grafana_secret = vault.get_value("monitoring/kv/shared/grafana_editor_api_key")
+def post_annotations(event, base_url, grafana_secret):
     headers = {"Accept": "application/json", "Content-Type": "application/json; charset=utf-8", "Authorization": "Bearer " + grafana_secret}
     path = "annotations/graphite"
     json_data = json.dumps(event)
@@ -47,7 +42,7 @@ def main(args):
         "tags": tags
     }
 
-    post_annotations(event)
+    post_annotations(event, args.grafana_url, args.grafana_api_key)
 
 
 def get_args_parser():
@@ -55,6 +50,8 @@ def get_args_parser():
     parser.add_argument("--tags", help="Json formatted key-value object: { myVar1: system/kv/path1, myVar2: system/kv/path2 }")
     parser.add_argument("--what", help="Text describing the annotation header.")
     parser.add_argument("--data", help="Text describing the annotation value.")
+    parser.add_argument("--grafana_url", help="Text describing the annotation value.")
+    parser.add_argument("--grafana_api_key", help="Text describing the annotation value.")
     return parser
 
 if __name__ == "__main__":
