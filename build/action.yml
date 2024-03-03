@@ -66,6 +66,7 @@ runs:
         python3 ${{ github.action_path }}/deploy/post-grafana-annotations.py --what "Deploy ${{ job.status }} - " --data '$GITHUB_RUN_ID $gitMessage <a href="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID">Link</a>' --tags "{app: ${{ inputs.name }}, system: ${{ inputs.namespace }}, env: dev, event: deploy}"
 
     - name: Echo input
+      if: always()
       shell: bash
       run: |
         echo "AZURE_CLIENT_ID: $AZURE_CLIENT_ID"
