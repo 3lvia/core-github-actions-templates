@@ -8,9 +8,6 @@ inputs:
   namespace:
     description: "Namespace or system of the application."
     required: true
-  environment:
-    description: "Environment to deploy to. Must be from dev, test or prod"
-    required: true
   AZURE_CLIENT_ID:
     description: "ClientId of a service principal that can push to Container Registry."
     required: true
@@ -40,23 +37,27 @@ runs:
     - name: Parse input
       shell: bash
       run: |
-        if [ "${{ inputs.environment}}" == "dev" ]
+        if [ -z "${{ github.event.deployment.environment }}" ]
+        then
+          echo "This action can only be used with an environment"
+        fi
+        if [ "${{ github.event.deployment.environment }}" == "dev" ]
         then
           sub_id="ceb9518c-528f-4c91-9b5a-c051d383e7a8"
           rg="RUNTIMESERVICE-RGdev"
           cluster_name="aksclusterdev"
-        elif [ "${{ inputs.environment}}" == "test" ]
+        elif [ "${{  github.event.deployment.environment }}" == "test" ]
         then
           sub_id="ceb9518c-528f-4c91-9b5a-c051d383e7a8"
           rg="RUNTIMESERVICE-RGtest"
           cluster_name="aksclustertest"
-        elif [ "${{ inputs.environment}}" == "prod" ]
+        elif [ "${{ github.event.deployment.environment }}" == "prod" ]
         then
           sub_id="9edbf217-b7c1-4f6a-ae76-d046cf932ff0"
           rg="RUNTIMESERVICE-RGprod"
           cluster_name="aksclusterprod"
         else
-          echo "unsupported environment: ${{ inputs.environment}}"
+          echo "unsupported environment: ${{  github.event.deployment.environment }}"
           exit 1
         fi
 
