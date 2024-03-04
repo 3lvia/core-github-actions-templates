@@ -49,7 +49,7 @@ runs:
           sub_id="ceb9518c-528f-4c91-9b5a-c051d383e7a8"
           rg="RUNTIMESERVICE-RGdev"
           cluster_name="aksclusterdev"
-        elif [ "${{  github.event.deployment.environment }}" == "test" ]
+        elif [ "${{ inputs.environment }}" == "test" ]
         then
           sub_id="ceb9518c-528f-4c91-9b5a-c051d383e7a8"
           rg="RUNTIMESERVICE-RGtest"
@@ -60,7 +60,7 @@ runs:
           rg="RUNTIMESERVICE-RGprod"
           cluster_name="aksclusterprod"
         else
-          echo "unsupported environment: ${{  github.event.deployment.environment }}"
+          echo "unsupported environment: ${{ inputs.environment }}"
           exit 1
         fi
 
