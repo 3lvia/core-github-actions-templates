@@ -8,6 +8,9 @@ inputs:
   namespace:
     description: "Namespace or system of the application."
     required: true
+  environment:
+    description: "Environment to deploy to."
+    required: true
   AZURE_CLIENT_ID:
     description: "ClientId of a service principal that can push to Container Registry."
     required: true
