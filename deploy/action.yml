@@ -40,11 +40,11 @@ runs:
     - name: Parse input
       shell: bash
       run: |
-        if [ -z "${{ github.event.deployment.environment }}" ]
+        if [ -z "${{ inputs.environment }}" ]
         then
           echo "This action can only be used with an environment"
         fi
-        if [ "${{ github.event.deployment.environment }}" == "dev" ]
+        if [ "${{ inputs.environment }}" == "dev" ]
         then
           sub_id="ceb9518c-528f-4c91-9b5a-c051d383e7a8"
           rg="RUNTIMESERVICE-RGdev"
@@ -54,7 +54,7 @@ runs:
           sub_id="ceb9518c-528f-4c91-9b5a-c051d383e7a8"
           rg="RUNTIMESERVICE-RGtest"
           cluster_name="aksclustertest"
-        elif [ "${{ github.event.deployment.environment }}" == "prod" ]
+        elif [ "${{ inputs.environment }}" == "prod" ]
         then
           sub_id="9edbf217-b7c1-4f6a-ae76-d046cf932ff0"
           rg="RUNTIMESERVICE-RGprod"
