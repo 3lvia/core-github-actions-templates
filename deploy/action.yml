@@ -40,6 +40,7 @@ runs:
     - name: Parse input
       shell: bash
       run: |
+        # Parse input
         if [ -z "${{ inputs.environment }}" ]
         then
           echo "This action can only be used with an environment"
@@ -83,15 +84,6 @@ runs:
           echo "AKS_RESOURCE_GROUP=${{ inputs.AKS_RESOURCE_GROUP}}" >> "$GITHUB_ENV"
         fi
 
-    - name: echo
-      shell: bash
-      run: |
-        echo "AKS_SUBSCRIPTION_ID=$AKS_SUBSCRIPTION_ID"
-        echo "AKS_CLUSTER_NAME=$AKS_CLUSTER_NAME"
-        echo "AKS_RESOURCE_GROUP=$AKS_RESOURCE_GROUP"
-        echo "AZURE_CLIENT_ID= ${{ inputs.AZURE_CLIENT_ID}}"
-        echo "AZURE_TENANT_ID=${{ inputs.AZURE_TENANT_ID}}"
-
     - name: authenticate with Azure
       uses: azure/login@v1
       with:
@@ -116,30 +108,27 @@ runs:
     - name: helm deploy
       shell: bash
       run: |
-        echo "::group::Helm deploy"
+        # Helm deploy
         helm repo add elvia-charts https://raw.githubusercontent.com/3lvia/kubernetes-charts/master
         helm repo update
         repo="${GITHUB_REPOSITORY##*/}"
         image_tag="${{ github.sha }}-${{ github.run_number }}"
         helm upgrade --debug --install -n ${{ inputs.namespace}} -f CI/values.yaml ${{ inputs.name}} elvia-charts/elvia-deployment \
           --set environment=dev --set image.tag=$image_tag --set labels.repositoryName=$repo --set labels.commitHash=${{ github.sha }}
-        echo "::endgroup::"
 
     - name: rollout status
       shell: bash
       run: |
-        echo "::group::Rollout status"
+        # rollout status
         kubectl -n ${{ inputs.namespace}} rollout status deploy ${{ inputs.name}}
-        echo "::endgroup::"
 
     - name: get events
       shell: bash
       if: always()
       continue-on-error: true
       run: |
-        echo "::group::Get events"
+        # get events
         kubectl -n ${{ inputs.namespace}} get events --sort-by='.lastTimestamp' |grep ${{ inputs.name}} || true
-        echo "::endgroup::"
 
 
     - name: Read secrets from vault

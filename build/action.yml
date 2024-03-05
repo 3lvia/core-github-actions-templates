@@ -40,24 +40,16 @@ runs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # - name: Output github
-    #   shell: bash
-    #   run: |
-    #     echo '${{ toJSON(github) }}' 
-
-    - name: Output env
-      shell: bash
-      run: |
-        echo '${{ toJSON(env) }}' 
-
     - name: Parse input
       shell: bash
       run: |
+        # Parse input
         echo "IMAGE_LONG_NAME=containerregistryelvia.azurecr.io/${{ inputs.namespace }}-${{ inputs.name }}:${{ github.sha }}-${{ github.run_number }}" >> "$GITHUB_ENV"
 
     - name: Build image
       shell: bash
       run: |
+        # Build docker image
         if [ -z "${{ inputs.dockerBuildContext}}" ]
         then
             dir=`dirname ${{ inputs.dockerfile}}` # default to the directory of the Dockerfile
