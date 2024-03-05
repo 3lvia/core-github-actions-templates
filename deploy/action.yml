@@ -147,6 +147,7 @@ runs:
       shell: bash
       if: always()
       run: |
+        # Add deploy annotiation to Grafana Cloud
         gitMessage=$(git log -1 --no-merges --pretty=%B)
         python3 ${{ github.action_path }}/post-grafana-annotations.py \
           --what "Deploy ${{ job.status }} - " \

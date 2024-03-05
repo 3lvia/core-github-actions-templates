@@ -53,12 +53,9 @@ runs:
         if [ -z "${{ inputs.dockerBuildContext}}" ]
         then
             dir=`dirname ${{ inputs.dockerfile}}` # default to the directory of the Dockerfile
-            echo "dockerBuildContext empty - dir: $dir"
         else
             dir=${{ inputs.dockerBuildContext}}
-            echo "dockerBuildContext set - dir: $dir"
         fi
-        echo "dir: $dir"
         docker build --tag ${{ env.IMAGE_LONG_NAME}} -f ${{ inputs.dockerfile}} $dir
 
     - name: Run Trivy vulnerability scanner
@@ -88,7 +85,9 @@ runs:
     # https://github.com/aquasecurity/trivy/issues/5003#issuecomment-1780415058
     - name: Fix Trivy output
       shell: bash
-      run: sed -i 's#git::https:/##g' "trivy.sarif"
+      run: |
+        # Fix Trivy output
+        sed -i 's#git::https:/##g' "trivy.sarif"
       if: github.event_name == 'push'
 
     - name: Upload Trivy scan results to GitHub Security tab
