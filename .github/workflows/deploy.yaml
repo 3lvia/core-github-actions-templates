@@ -4,41 +4,41 @@ on:
   workflow_call:
     inputs:
       name:
-        description: "Name of application. Do not include namespace."
+        description: 'Name of application. Do not include namespace.'
         required: true
         type: string
       namespace:
-        description: "Namespace or system of the application."
+        description: 'Namespace or system of the application.'
         required: true
         type: string
       environment:
-        description: "Environment to deploy to. Must be from dev, test or prod"
+        description: 'Environment to deploy to. Must be from dev, test or prod'
         required: true
         type: string
       AZURE_CLIENT_ID:
-        description: "ClientId of a service principal that can deploy to AKS."
+        description: 'ClientId of a service principal that can deploy to AKS.'
         required: false
-        default: ""
+        default: ''
         type: string
       AZURE_TENANT_ID:
-        description: "TenantId of a service principal that can deploy to AKS."
+        description: 'TenantId of a service principal that can deploy to AKS.'
         required: false
-        default: ""
+        default: ''
         type: string
       AKS_SUBSCRIPTION_ID:
-        description: "Subscription ID of AKS to deploy to."
+        description: 'Subscription ID of AKS to deploy to.'
         required: false
-        default: ""
+        default: ''
         type: string
       AKS_CLUSTER_NAME:
-        description: "Subscription ID of AKS to deploy to."
+        description: 'Subscription ID of AKS to deploy to.'
         required: false
-        default: ""
+        default: ''
         type: string
       AKS_RESOURCE_GROUP:
-        description: "Subscription ID of AKS to deploy to."
+        description: 'Subscription ID of AKS to deploy to.'
         required: false
-        default: ""
+        default: ''
         type: string
 
 env:
@@ -95,15 +95,15 @@ jobs:
       - name: setup kubelogin
         uses: azure/use-kubelogin@v1
         with:
-          kubelogin-version: "v0.0.24"
+          kubelogin-version: 'v0.0.24'
 
       - name: set AKS context
         uses: azure/aks-set-context@v3
         with:
           cluster-name: ${{ env.AKS_CLUSTER_NAME }}
           resource-group: ${{ env.AKS_RESOURCE_GROUP }}
-          admin: "false"
-          use-kubelogin: "true"
+          admin: 'false'
+          use-kubelogin: 'true'
           subscription: ${{ env.AKS_SUBSCRIPTION_ID }}
 
       - name: helm deploy

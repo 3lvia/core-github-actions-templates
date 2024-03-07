@@ -4,23 +4,23 @@ on:
   workflow_call:
     inputs:
       name:
-        description: "Name of application. Do not include namespace."
+        description: 'Name of application. Do not include namespace.'
         required: true
         type: string
       namespace:
-        description: "Namespace or system of the application."
+        description: 'Namespace or system of the application.'
         required: true
         type: string
       environment:
-        description: "Github Environment."
+        description: 'Github Environment.'
         required: true
         type: string
       dockerfile:
-        description: "Path to Dockerfile."
+        description: 'Path to Dockerfile.'
         required: true
         type: string
       dockerBuildContext:
-        description: "Docker build context. It is the working directory needed to build the dockerfile. Defaults to the directory with the Dockerfile."
+        description: 'Docker build context. It is the working directory needed to build the dockerfile. Defaults to the directory with the Dockerfile.'
         required: false
         type: string
       languages:
@@ -29,27 +29,27 @@ on:
         default: '["csharp"]'
         type: string
       severity:
-        description: "Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information."
+        description: 'Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.'
         required: false
-        default: "CRITICAL,HIGH"
+        default: 'CRITICAL,HIGH'
         type: string
       AZURE_CLIENT_ID:
-        description: "ClientId of a service principal that can push to Container Registry."
+        description: 'ClientId of a service principal that can push to Container Registry.'
         required: false
-        default: ""
+        default: ''
         type: string
       AZURE_TENANT_ID:
-        description: "TenantId of a service principal that can push to Azure Container Registry."
+        description: 'TenantId of a service principal that can push to Azure Container Registry.'
         required: false
-        default: ""
+        default: ''
         type: string
       ACR_SUBSCRIPTION_ID:
-        description: "Subscription ID of the Azure Container Registry to push to."
+        description: 'Subscription ID of the Azure Container Registry to push to.'
         required: false
-        default: ""
+        default: ''
         type: string
       ACR_NAME:
-        description: "Name of the Azure Container Registry to push to."
+        description: 'Name of the Azure Container Registry to push to.'
         required: false
         default: containerregistryelvia
         type: string
@@ -60,7 +60,7 @@ env:
 jobs:
   analyze:
     name: CodeQL Analyze
-    runs-on: "ubuntu-latest"
+    runs-on: 'ubuntu-latest'
     timeout-minutes: 15
     strategy:
       fail-fast: false
@@ -162,8 +162,8 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.image_full_name}}
-          format: "table"
-          exit-code: "1"
+          format: 'table'
+          exit-code: '1'
           ignore-unfixed: true
           severity: ${{ inputs.severity }}
           github-pat: ${{ secrets.GITHUB_TOKEN }}
@@ -173,8 +173,8 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.image_full_name}}
-          format: "sarif"
-          template: "@/contrib/sarif.tpl"
+          format: 'sarif'
+          template: '@/contrib/sarif.tpl'
           output: trivy.sarif
           severity: ${{ inputs.severity }}
           github-pat: ${{ secrets.GITHUB_TOKEN }}
@@ -191,7 +191,7 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: trivy.sarif
-          category: "Trivy"
+          category: 'Trivy'
         if: github.event_name == 'push'
 
       - name: Authenticate with Azure

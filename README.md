@@ -1,27 +1,24 @@
 # core-github-actions-templates
 
-
-
-
 ## Build
 
 Template that build docker image, analyze it using CodeQL, scans for vulnerabilities and uploads to Azure Container Registry.
 
 ### Inputs
 
-| Name                  | Type   | Default                  | Description 
-| --------------------- | ------ | ------------------------ | ------------
-| `name`                | String |                          | Name of application.
-| `namespace`           | String |                          | Namespace of application.
-| `environment`         | String |                          | Github environment. This environment should contain the variable AZURE_CLIENT_ID, AZURE_TENANT_ID and ACR_SUBSCRIPTION_ID.
-| `dockerfile`          | String |                          | Path to Dockerfile.
-| `dockerBuildContext`  | String | directory of dockerfile  | Path to Docker build context.
-| `languages`           | String | `[csharp]`               | List of language to run CodeQL on. The supported languages are c-cpp, csharp, go, java-kotlin, javascript-typescript, python, ruby, swift.
-| `severity`            | String | `CRITICAL,HIGH`          | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.
-| `AZURE_CLIENT_ID`     | String | `$AZURE_CLIENT_ID`       | ClientId of a service principal that can push to Container Registry.
-| `AZURE_TENANT_ID`     | String | `$AZURE_TENANT_ID`       | TenantId of a service principal that can push to Azure Container Registry.
-| `ACR_SUBSCRIPTION_ID` | String | `$ACR_SUBSCRIPTION_ID`   | Subscription ID of the Azure Container Registry to push to.
-| `acrName `            | String | `containerregistryelvia` | Name of the Azure Container Registry to push to.
+| Name                  | Type   | Default                  | Description                                                                                                                                |
+| --------------------- | ------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`                | String |                          | Name of application.                                                                                                                       |
+| `namespace`           | String |                          | Namespace of application.                                                                                                                  |
+| `environment`         | String |                          | Github environment. This environment should contain the variable AZURE_CLIENT_ID, AZURE_TENANT_ID and ACR_SUBSCRIPTION_ID.                 |
+| `dockerfile`          | String |                          | Path to Dockerfile.                                                                                                                        |
+| `dockerBuildContext`  | String | directory of dockerfile  | Path to Docker build context.                                                                                                              |
+| `languages`           | String | `[csharp]`               | List of language to run CodeQL on. The supported languages are c-cpp, csharp, go, java-kotlin, javascript-typescript, python, ruby, swift. |
+| `severity`            | String | `CRITICAL,HIGH`          | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.              |
+| `AZURE_CLIENT_ID`     | String | `$AZURE_CLIENT_ID`       | ClientId of a service principal that can push to Container Registry.                                                                       |
+| `AZURE_TENANT_ID`     | String | `$AZURE_TENANT_ID`       | TenantId of a service principal that can push to Azure Container Registry.                                                                 |
+| `ACR_SUBSCRIPTION_ID` | String | `$ACR_SUBSCRIPTION_ID`   | Subscription ID of the Azure Container Registry to push to.                                                                                |
+| `acrName `            | String | `containerregistryelvia` | Name of the Azure Container Registry to push to.                                                                                           |
 
 ### Example
 
@@ -49,24 +46,23 @@ jobs:
       dockerfile: 'src/Dockerfile'
 ```
 
-
 ## Deploy
 
 Template that deploys an Elvia Helm chart to Kubernetes
 
 ### Inputs
 
-| Name                  | Type   | Default                  | Description 
-| --------------------- | ------ | ------------------------ | ------------
-| `name`                | String |                          | Name of application.
-| `namespace`           | String |                          | Namespace of application.
-| `environment`         | String |                          | Github environment. This environment should contain the variable AZURE_CLIENT_ID, AZURE_TENANT_ID, AKS_SUBSCRIPTION_ID, AKS_CLUSTER_NAME and AKS_RESOURCE_GROUP.
-| `AZURE_CLIENT_ID`     | String | `$AZURE_CLIENT_ID`       | ClientId of a service principal that can push to Container Registry.
-| `AZURE_TENANT_ID`     | String | `$AZURE_TENANT_ID`       | TenantId of a service principal that can push to Azure Container Registry.
-| `AKS_SUBSCRIPTION_ID` | String | `$AKS_SUBSCRIPTION_ID`   | Subscription ID of the Azure Container Registry to push to.
-| `AKS_CLUSTER_NAME`    | String | `$AKS_CLUSTER_NAME`      | Name of the AKS cluster
-| `AKS_RESOURCE_GROUP`  | String | `$AKS_RESOURCE_GROUP`    | Resource group of the AKS cluster
-| `acrName `            | String | `containerregistryelvia` | Name of the Azure Container Registry to push to.
+| Name                  | Type   | Default                  | Description                                                                                                                                                      |
+| --------------------- | ------ | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                | String |                          | Name of application.                                                                                                                                             |
+| `namespace`           | String |                          | Namespace of application.                                                                                                                                        |
+| `environment`         | String |                          | Github environment. This environment should contain the variable AZURE_CLIENT_ID, AZURE_TENANT_ID, AKS_SUBSCRIPTION_ID, AKS_CLUSTER_NAME and AKS_RESOURCE_GROUP. |
+| `AZURE_CLIENT_ID`     | String | `$AZURE_CLIENT_ID`       | ClientId of a service principal that can push to Container Registry.                                                                                             |
+| `AZURE_TENANT_ID`     | String | `$AZURE_TENANT_ID`       | TenantId of a service principal that can push to Azure Container Registry.                                                                                       |
+| `AKS_SUBSCRIPTION_ID` | String | `$AKS_SUBSCRIPTION_ID`   | Subscription ID of the Azure Container Registry to push to.                                                                                                      |
+| `AKS_CLUSTER_NAME`    | String | `$AKS_CLUSTER_NAME`      | Name of the AKS cluster                                                                                                                                          |
+| `AKS_RESOURCE_GROUP`  | String | `$AKS_RESOURCE_GROUP`    | Resource group of the AKS cluster                                                                                                                                |
+| `acrName `            | String | `containerregistryelvia` | Name of the Azure Container Registry to push to.                                                                                                                 |
 
 ### Example
 
@@ -90,8 +86,6 @@ jobs:
       namespace: 'my-system'
       environment: 'dev'
 ```
-
-
 
 ## Trivy scanning
 
@@ -133,7 +127,6 @@ jobs:
       skip-dirs: 'frontend'
       upload-report: false
 ```
-
 
 ## Terraform format
 
