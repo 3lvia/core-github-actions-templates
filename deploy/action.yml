@@ -85,7 +85,7 @@ runs:
         fi
 
     - name: authenticate with Azure
-      uses: azure/login@v1
+      uses: azure/login@v2
       with:
         client-id: ${{ inputs.AZURE_CLIENT_ID}}
         tenant-id: ${{ inputs.AZURE_TENANT_ID}}
