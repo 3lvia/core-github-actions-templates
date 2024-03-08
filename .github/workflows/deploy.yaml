@@ -126,7 +126,7 @@ jobs:
           kubectl -n ${{ inputs.namespace}} get events --sort-by='.lastTimestamp' |grep ${{ inputs.name}} || true
 
       - name: Read secrets from vault
-        uses: hashicorp/vault-action@v2
+        uses: hashicorp/vault-action@v3
         if: always()
         with:
           url: https://vault.dev-elvia.io/
