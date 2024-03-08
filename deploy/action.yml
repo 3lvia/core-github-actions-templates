@@ -97,7 +97,7 @@ runs:
         kubelogin-version: "v0.0.24"
 
     - name: set AKS context
-      uses: azure/aks-set-context@v3
+      uses: azure/aks-set-context@v4
       with:
         cluster-name: ${{ env.AKS_CLUSTER_NAME }}
         resource-group: ${{ env.AKS_RESOURCE_GROUP }}
