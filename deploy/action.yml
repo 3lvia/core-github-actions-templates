@@ -1,50 +1,60 @@
 name: Deploy to kubernetes
-description: "Deploys an application to Kubernetes using the Elvia Helm chart"
+description: 'Deploys an application to Kubernetes using the Elvia Helm chart'
 
 inputs:
   name:
-    description: "Name of application. Do not include namespace."
+    description: 'Name of application. Do not include namespace.'
     required: true
   namespace:
-    description: "Namespace or system of the application."
+    description: 'Namespace or system of the application.'
     required: true
   environment:
-    description: "Environment to deploy to."
+    description: 'Environment to deploy to.'
     required: true
+  helmValuesPath:
+    description: 'Path to Helm values file, relative to the root of the repository. Defaults to .github/deploy/values.yaml.'
+    required: false
+    default: '.github/deploy/values.yaml'
+  checkout:
+    description: 'If true, the action will check out the repository. If false, the action will assume the repository is already checked out.'
+    required: false
+    default: true
   AZURE_CLIENT_ID:
-    description: "ClientId of a service principal that can push to Container Registry."
+    description: 'ClientId of a service principal that has access to AKS.'
     required: true
   AZURE_TENANT_ID:
-    description: "TenantId of a service principal that can push to Azure Container Registry. Default to Elvia's Tenant ID"
+    description: "TenantId of a service principal that has access to AKS. Default to Elvia's Tenant ID."
     required: false
-    default: "2186a6ec-c227-4291-9806-d95340bf439d"
+    default: '2186a6ec-c227-4291-9806-d95340bf439d'
   AKS_SUBSCRIPTION_ID:
-    description: "Subscription ID of AKS to deploy to. Defaults to Elvias normal clusters. "
+    description: 'Subscription ID of AKS to deploy to. Defaults to Elvias normal clusters.'
     required: false
-    default: ""
+    default: ''
   AKS_CLUSTER_NAME:
-    description: "Subscription ID of AKS to deploy to. Defaults to Elvias normal clusters. "
+    description: 'Subscription ID of AKS to deploy to. Defaults to Elvias normal clusters.'
     required: false
-    default: ""
+    default: ''
   AKS_RESOURCE_GROUP:
-    description: "Subscription ID of AKS to deploy to. Defaults to Elvias normal clusters. "
+    description: 'Subscription ID of AKS to deploy to. Defaults to Elvias normal clusters.'
     required: false
-    default: ""
+    default: ''
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Checkout repository
+      if: ${{ inputs.checkout == true }}
       uses: actions/checkout@v4
 
-    - name: Parse input
+    - name: Parse input and set environment variables
       shell: bash
       run: |
-        # Parse input
+        # Parse input and set environment variables
         if [ -z "${{ inputs.environment }}" ]
         then
           echo "This action can only be used with an environment"
         fi
+
         if [ "${{ inputs.environment }}" == "dev" ]
         then
           sub_id="ceb9518c-528f-4c91-9b5a-c051d383e7a8"
@@ -71,12 +81,14 @@ runs:
         else
           echo "AKS_SUBSCRIPTION_ID=${{ inputs.AKS_SUBSCRIPTION_ID}}" >> "$GITHUB_ENV"
         fi
+
         if [ -z "${{ inputs.AKS_CLUSTER_NAME}}" ]
         then
           echo "AKS_CLUSTER_NAME=$cluster_name" >> "$GITHUB_ENV"
         else
           echo "AKS_CLUSTER_NAME=${{ inputs.AKS_CLUSTER_NAME}}" >> "$GITHUB_ENV"
         fi
+
         if [ -z "${{ inputs.AKS_RESOURCE_GROUP}}" ]
         then
           echo "AKS_RESOURCE_GROUP=$rg" >> "$GITHUB_ENV"
@@ -84,59 +96,64 @@ runs:
           echo "AKS_RESOURCE_GROUP=${{ inputs.AKS_RESOURCE_GROUP}}" >> "$GITHUB_ENV"
         fi
 
-    - name: authenticate with Azure
+        echo "REPO_SHORT_NAME=${GITHUB_REPOSITORY##*/}" >> "$GITHUB_ENV"
+
+    - name: Authenticate with Azure
       uses: azure/login@v2
       with:
         client-id: ${{ inputs.AZURE_CLIENT_ID}}
         tenant-id: ${{ inputs.AZURE_TENANT_ID}}
         subscription-id: ${{ env.AKS_SUBSCRIPTION_ID}}
 
-    - name: setup kubelogin
+    - name: Setup kubelogin
       uses: azure/use-kubelogin@v1
       with:
-        kubelogin-version: "v0.0.24"
+        kubelogin-version: 'v0.0.24'
 
-    - name: set AKS context
+    - name: Set AKS context
       uses: azure/aks-set-context@v4
       with:
         cluster-name: ${{ env.AKS_CLUSTER_NAME }}
         resource-group: ${{ env.AKS_RESOURCE_GROUP }}
-        admin: "false"
-        use-kubelogin: "true"
+        admin: 'false'
+        use-kubelogin: 'true'
         subscription: ${{ env.AKS_SUBSCRIPTION_ID }}
 
-    - name: helm deploy
+    - name: Helm deploy
       shell: bash
       run: |
         # Helm deploy
         helm repo add elvia-charts https://raw.githubusercontent.com/3lvia/kubernetes-charts/master
         helm repo update
-        repo="${GITHUB_REPOSITORY##*/}"
-        image_tag="${{ github.sha }}-${{ github.run_number }}"
-        helm upgrade --debug --install -n ${{ inputs.namespace}} -f CI/values.yaml ${{ inputs.name}} elvia-charts/elvia-deployment \
-          --set environment=dev --set image.tag=$image_tag --set labels.repositoryName=$repo --set labels.commitHash=${{ github.sha }}
+        helm upgrade --debug \
+          --install \
+          -n ${{ inputs.namespace}} \
+          -f ${{ inputs.helmValuesPath }} ${{ inputs.name }} elvia-charts/elvia-deployment \
+          --set="environment=dev" \
+          --set="image.tag=${{ github.sha }}-${{ github.run_number }}" \
+          --set="labels.repositoryName=${{ env.REPO_SHORT_NAME }}" \
+          --set="labels.commitHash=${{ github.sha }}"
 
-    - name: rollout status
+    - name: Rollout status
       shell: bash
       run: |
-        # rollout status
-        kubectl -n ${{ inputs.namespace}} rollout status deploy ${{ inputs.name}}
+        # Rollout status
+        kubectl -n ${{ inputs.namespace }} rollout status deploy ${{ inputs.name }}
 
-    - name: get events
+    - name: Get events
       shell: bash
       if: always()
       continue-on-error: true
       run: |
-        # get events
-        kubectl -n ${{ inputs.namespace}} get events --sort-by='.lastTimestamp' |grep ${{ inputs.name}} || true
+        # Get events
+        kubectl -n ${{ inputs.namespace }} get events --sort-by='.lastTimestamp' | grep ${{ inputs.name }} || true
 
-
-    - name: Read secrets from vault
+    - name: Read secrets from Vault
       uses: hashicorp/vault-action@v3
       if: always()
       with:
         url: https://vault.dev-elvia.io/
-        role: jwt-github-${{ inputs.namespace }}
+        role: jwt-github-${{ inputs.namespace }}-${{ env.REPO_SHORT_NAME }}
         method: jwt
         path: jwt-github
         secrets: |
