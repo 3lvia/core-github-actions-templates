@@ -16,7 +16,7 @@ inputs:
     required: false
     default: '.github/deploy/values.yaml'
   checkout:
-    description: 'If true, the action will check out the repository. If false, the action will assume the repository is already checked out.'
+    description: 'If true, the action will check out the repository. If false, the action will assume the repository has already been checked out.'
     required: false
     default: true
   AZURE_CLIENT_ID:
@@ -31,11 +31,11 @@ inputs:
     required: false
     default: ''
   AKS_CLUSTER_NAME:
-    description: 'Subscription ID of AKS to deploy to. Defaults to Elvias normal clusters.'
+    description: 'Name of the AKS cluster to deploy to. Defaults to Elvias normal clusters.'
     required: false
     default: ''
   AKS_RESOURCE_GROUP:
-    description: 'Subscription ID of AKS to deploy to. Defaults to Elvias normal clusters.'
+    description: 'Resource group of the AKS cluster to deploy to. Defaults to Elvias normal clusters.'
     required: false
     default: ''
 

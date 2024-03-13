@@ -18,7 +18,7 @@ inputs:
     required: false
     default: 'CRITICAL,HIGH'
   trivy-cve-ignores:
-    description: 'CVEs for Trivy to ignore. See https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore for syntax.'
+    description: 'Comma-separated list of CVEs for Trivy to ignore. See https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore for syntax.'
     required: false
   trivy-enable-secret-scanner:
     description: 'Enable Trivy secret scanner.'
