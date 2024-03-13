@@ -1,6 +1,8 @@
 # core-github-actions-templates
 
+
 ## Build and Deploy
+To use the build and deploy actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform.
 
 ### Example
 
