@@ -21,4 +21,4 @@ jobs:
         run: yarn global add prettier@3.2.4
 
       - name: Check format of workflows and README
-        run: prettier --check --single-quote .github/workflows/* README.md
+        run: prettier --check --single-quote .github/workflows/* **/action.yml README.md

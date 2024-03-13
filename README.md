@@ -1,7 +1,7 @@
 # core-github-actions-templates
 
-
 ## Build and Deploy
+
 To use the build and deploy actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform.
 
 ### Example
@@ -57,24 +57,26 @@ jobs:
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
 ```
 
-### Build 
+### Build
 
-Template that build docker image, analyze it using CodeQL, scans for vulnerabilities and uploads to Azure Container Registry.
+Template that builds Docker image, scans for vulnerabilities and uploads to Azure Container Registry.
 
 ### Inputs
 
-| Name                  | Type   | Default                  | Description                                                                                                                                |
-| --------------------- | ------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `name`                | String |                          | Name of application.                                                                                                                       |
-| `namespace`           | String |                          | Namespace of application.                                                                                                                  |
-| `dockerfile`          | String |                          | Path to Dockerfile.                                                                                                                        |
-| `dockerBuildContext`  | String | directory of dockerfile  | Path to Docker build context.                                                                                                              |
-| `languages`           | String | `[csharp]`               | List of language to run CodeQL on. The supported languages are c-cpp, csharp, go, java-kotlin, javascript-typescript, python, ruby, swift. |
-| `severity`            | String | `CRITICAL,HIGH`          | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.              |
-| `AZURE_CLIENT_ID`     | String | Elvia default AKS        | ClientId of a service principal that can push to Container Registry.                                                                       |
-| `AZURE_TENANT_ID`     | String | Elvia Tenant             | TenantId of a service principal that can push to Azure Container Registry.                                                                 |
-| `ACR_SUBSCRIPTION_ID` | String | Elvia default ACR        | Subscription ID of the Azure Container Registry to push to.                                                                                |
-| `ACR_NAME`            | String | Elvia default ACR        | Name of the Azure Container Registry to push to.                                                                                           |
+| Name                          | Type    | Default                 | Description                                                                                                                                            |
+| ----------------------------- | ------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`                        | String  |                         | Name of application.                                                                                                                                   |
+| `namespace`                   | String  |                         | Namespace of application.                                                                                                                              |
+| `dockerfile`                  | String  |                         | Path to Dockerfile.                                                                                                                                    |
+| `dockerBuildContext`          | String  | directory of Dockerfile | Path to Docker build context.                                                                                                                          |
+| `severity`                    | String  | `CRITICAL,HIGH`         | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                          |
+| `trivy-cve-ignores`           | String  |                         | Comma-separated list of CVEs for Trivy to ignore. See https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore for syntax. |
+| `trivy-enable-secret-scanner` | Boolean | `true`                  | Enable Trivy secret scanner.                                                                                                                           |
+| `trivy-skip-dirs`             | String  |                         | Directories/files skipped by Trivy. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                   |
+| `AZURE_CLIENT_ID`             | String  | Elvia default AKS       | ClientId of a service principal that can push to Container Registry.                                                                                   |
+| `AZURE_TENANT_ID`             | String  | Elvia Tenant            | TenantId of a service principal that can push to Azure Container Registry.                                                                             |
+| `ACR_SUBSCRIPTION_ID`         | String  | Elvia default ACR       | Subscription ID of the Azure Container Registry to push to.                                                                                            |
+| `ACR_NAME`                    | String  | Elvia default ACR       | Name of the Azure Container Registry to push to.                                                                                                       |
 
 ### Deploy
 
@@ -82,18 +84,18 @@ Template that deploys an Elvia Helm chart to Kubernetes
 
 ### Inputs
 
-| Name                  | Type   | Default                  | Description         
-| --------------------- | ------ | ------------------------ | --------------------
-| `name`                | String |                          | Name of application.
-| `namespace`           | String |                          | Namespace of application.
-| `environment`         | String |                          | Environment to deploy to. `dev`, `test` or `prod`.
-| `AZURE_CLIENT_ID`     | String | Elvia default AKS        | ClientId of a service principal that can push to Container Registry.
-| `AZURE_TENANT_ID`     | String | Elvia Tenant             | TenantId of a service principal that can push to Azure Container Registry.
-| `AKS_SUBSCRIPTION_ID` | String | Elvia default AKS        | Subscription ID of the AKS cluster.
-| `AKS_CLUSTER_NAME`    | String | Elvia default AKS        | Name of the AKS cluster.
-| `AKS_RESOURCE_GROUP`  | String | Elvia default AKS        | Resource group of the AKS cluster.
-
-
+| Name                  | Type    | Default                      | Description                                                                                                                      |
+| --------------------- | ------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                | String  |                              | Name of application.                                                                                                             |
+| `namespace`           | String  |                              | Namespace of application.                                                                                                        |
+| `environment`         | String  |                              | Environment to deploy to. `dev`, `test` or `prod`.                                                                               |
+| `helmValuesPath`      | String  | `.github/deploy/values.yaml` | Path to Helm values file, relative to the root of the repository.                                                                |
+| `checkout`            | Boolean | `true`                       | If true, the action will check out the repository. If false, the action will assume the repository has already been checked out. |
+| `AZURE_CLIENT_ID`     | String  | Elvia default AKS            | ClientId of a service principal that has access to AKS.                                                                          |
+| `AZURE_TENANT_ID`     | String  | Elvia Tenant                 | TenantId of a service principal that has access to AKS.                                                                          |
+| `AKS_SUBSCRIPTION_ID` | String  | Elvia default AKS            | Subscription ID of the AKS cluster to deploy to.                                                                                 |
+| `AKS_CLUSTER_NAME`    | String  | Elvia default AKS            | Name of the AKS cluster to deploy to.                                                                                            |
+| `AKS_RESOURCE_GROUP`  | String  | Elvia default AKS            | Resource group of the AKS cluster to deploy to.                                                                                  |
 
 ## Trivy scanning
 
