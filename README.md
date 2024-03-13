@@ -27,14 +27,14 @@ jobs:
     name: Analyze
     runs-on: ubuntu-latest
     steps:
-      - uses: 3lvia/core-github-actions-templates/analyze@feature/build-deploy
+      - uses: 3lvia/core-github-actions-templates/analyze@trunk
 
   build:
     name: Build and Scan
     runs-on: ubuntu-latest
     environment: build
     steps:
-      - uses: 3lvia/core-github-actions-templates/build@feature/build-deploy
+      - uses: 3lvia/core-github-actions-templates/build@trunk
         with:
           name: demo-api
           namespace: core
@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: dev
     steps:
-      - uses: 3lvia/core-github-actions-templates/deploy@feature/build-deploy
+      - uses: 3lvia/core-github-actions-templates/deploy@trunk
         with:
           name: demo-api
           namespace: core
