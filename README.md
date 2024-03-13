@@ -97,45 +97,46 @@ Template that deploys an Elvia Helm chart to Kubernetes
 | `AKS_CLUSTER_NAME`    | String  | Elvia default AKS            | Name of the AKS cluster to deploy to.                                                                                            |
 | `AKS_RESOURCE_GROUP`  | String  | Elvia default AKS            | Resource group of the AKS cluster to deploy to.                                                                                  |
 
-## Trivy scanning
+## Trivy IaC scanning
 
 Uses https://github.com/aquasecurity/trivy-action to scan IaC and report security issues.
-The action will report any vulnerabilities to GitHub Advanced Security, which will be visible
-in the Security tab on GitHub.
+The action will report any vulnerabilities to GitHub Advanced Security, which will be visible in the Security tab on GitHub.
 
 ### Inputs
 
-| Name             | Type    | Default                            | Description                                                                                                                   |
-| ---------------- | ------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `path`           | String  | `.`                                | Path to IaC to scan.                                                                                                          |
-| `skip-dirs`      | String  |                                    | Comma-separated list of directories to skip                                                                                   |
-| `severity`       | String  | `CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN` | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information. |
-| `upload-report`  | Boolean | `true`                             | Upload Trivy report to GitHub Security tab.                                                                                   |
-| `ignore-unfixed` | Boolean | `false`                            | Ignore unpatched/unfixed vulnerabilities.                                                                                     |
+| Name            | Type    | Default                            | Description                                                                                                                      |
+| --------------- | ------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `path`          | String  | `.`                                | Path to IaC to scan.                                                                                                             |
+| `skip-dirs`     | String  |                                    | Comma-separated list of directories to skip                                                                                      |
+| `severity`      | String  | `CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN` | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.    |
+| `upload-report` | Boolean | `true`                             | Upload Trivy report to GitHub Security tab.                                                                                      |
+| `checkout`      | Boolean | `true`                             | If true, the action will check out the repository. If false, the action will assume the repository has already been checked out. |
 
 ### Example
 
 ```yaml
-name: Scan Terraform code with Trivy
-
+name: Scan IaC with Trivy
 on:
   push:
     branches: [develop, master]
   pull_request:
     branches: [develop, master]
   schedule:
-    - cron: '0 0 * * 0' # every sunday at 00:00
+    - cron: '1 2 * * 3' # every Wednesday at 02:01
 
 jobs:
   trivy_scan:
+    runs-on: ubuntu-latest
+    name: 'Scan IaC with Trivy'
     permissions:
       actions: read
       contents: read
       security-events: write
-    uses: 3lvia/core-github-actions-templates/.github/workflows/trivy-scan.yaml@v2
-    with:
-      skip-dirs: 'frontend'
-      upload-report: false
+    steps:
+      - uses: 3lvia/core-github-actions-templates/trivy-iac-scan@trunk
+        with:
+          path: 'terraform'
+          skip-dirs: 'terraform/modules'
 ```
 
 ## Terraform format
@@ -144,9 +145,10 @@ Uses built-in formatter for Terraform CLI to check format of Terraform code.
 
 ### Inputs
 
-| Name   | Type   | Default | Description      |
-| ------ | ------ | ------- | ---------------- |
-| `path` | String | `.`     | Path to process. |
+| Name       | Type    | Default | Description                                                                                                                      |
+| ---------- | ------- | ------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `path`     | String  | `.`     | Path to process.                                                                                                                 |
+| `checkout` | Boolean | `true`  | If true, the action will check out the repository. If false, the action will assume the repository has already been checked out. |
 
 ### Example
 
@@ -161,5 +163,8 @@ jobs:
   terraform_format_check:
     permissions:
       contents: read
-    uses: 3lvia/core-github-actions-templates/.github/workflows/terraform-format.yaml@v2
+    steps:
+      - uses: 3lvia/core-github-actions-templates/terraform-format@trunk
+        with:
+          path: 'terraform'
 ```
