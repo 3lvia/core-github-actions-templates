@@ -20,14 +20,18 @@ jobs:
     name: Analyze
     runs-on: ubuntu-latest
     steps:
-      - uses: 3lvia/core-github-actions-templates/analyze@trunk
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - uses: ./analyze
 
   build:
     name: Build and Scan
     runs-on: ubuntu-latest
     environment: build
     steps:
-      - uses: 3lvia/core-github-actions-templates/build@trunk
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - uses: ./build
         with:
           name: demo-api
           namespace: core
@@ -40,7 +44,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: dev
     steps:
-      - uses: 3lvia/core-github-actions-templates/deploy@trunk
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - uses: ./deploy
         with:
           name: demo-api
           namespace: core
