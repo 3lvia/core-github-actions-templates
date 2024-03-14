@@ -1,0 +1,77 @@
+name: Trivy IaC scan
+description: 'Scan IaC with Trivy and report to GitHub Advanced Security.'
+inputs:
+  path:
+    description: 'Path to the directory containing the IaC files.'
+    required: false
+    default: '.'
+    type: string
+  skip-dirs:
+    description: 'Comma-separated list of directories to skip.'
+    required: false
+    type: string
+  severity:
+    description: 'Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.'
+    required: false
+    default: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
+    type: string
+  upload-report:
+    description: 'Upload Trivy report to GitHub Security tab. GitHub Advanced Security must be enabled for the repository to use this feature.'
+    required: false
+    default: 'true'
+    type: string
+  checkout:
+    description: 'If true, the action will check out the repository. If false, the action will assume the repository has already been checked out.'
+    required: false
+    default: 'true'
+    type: string
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout repository
+      if: ${{ inputs.checkout == 'true' }}
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set env
+      shell: bash
+      run: |
+        echo "TRIVY_SARIF=trivy.sarif" >> $GITHUB_ENV
+
+    - name: Install Trivy
+      shell: bash
+      run: |
+        # Install Trivy
+        sudo apt-get install wget apt-transport-https gnupg lsb-release -y
+        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+        echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+        sudo apt-get update
+        sudo apt-get install trivy -y
+
+    - name: Run Trivy vulnerability scanner in IaC mode
+      shell: bash
+      run: |
+        # Run Trivy
+        trivy config ${{ inputs.path }} \
+          --format sarif \
+          --output "${{ env.TRIVY_SARIF }}" \
+          --exit-code 0 \
+          --severity "${{ inputs.severity }}" \
+          ${{ inputs.skip-dirs != '' && format('--skip-dirs {0}', inputs.skip-dirs) || '' }}
+
+      # GitHub Security tab does not support SARIF files with `git::` or `https:/` URL's:
+      # https://github.com/aquasecurity/trivy/issues/5003#issuecomment-1780415058
+    - name: Workaround for Trivy SARIF output
+      shell: bash
+      run: |
+        # Remove `git::` and `https:/` from SARIF file
+        sed -i 's#git::https:/##g' "${{ env.TRIVY_SARIF }}"
+
+    - name: Upload Trivy report to GitHub Security tab
+      if: ${{ inputs.upload-report == 'true' }}
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ env.TRIVY_SARIF }}
+        category: 'Trivy'
