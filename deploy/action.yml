@@ -16,9 +16,9 @@ inputs:
     required: false
     default: '.github/deploy/values.yaml'
   checkout:
-    description: 'If true, the action will check out the repository. If false, the action will assume the repository has already been checked out.'
+    description: 'If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.'
     required: false
-    default: true
+    default: "true"
   AZURE_CLIENT_ID:
     description: 'ClientId of a service principal that has access to AKS.'
     required: true
@@ -43,7 +43,7 @@ runs:
   using: 'composite'
   steps:
     - name: Checkout repository
-      if: ${{ inputs.checkout == true }}
+      if: ${{ inputs.checkout == "true" }}
       uses: actions/checkout@v4
 
     - name: Parse input and set environment variables
