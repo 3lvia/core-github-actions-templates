@@ -60,16 +60,19 @@ runs:
           sub_id="ceb9518c-528f-4c91-9b5a-c051d383e7a8"
           rg="RUNTIMESERVICE-RGdev"
           cluster_name="aksclusterdev"
+          echo "VAULT_ADDR=https://vault.dev-elvia.io" >> "$GITHUB_ENV"
         elif [ "${{ inputs.environment }}" == "test" ]
         then
           sub_id="ceb9518c-528f-4c91-9b5a-c051d383e7a8"
           rg="RUNTIMESERVICE-RGtest"
           cluster_name="aksclustertest"
+          echo "VAULT_ADDR=https://vault.test-elvia.io" >> "$GITHUB_ENV"
         elif [ "${{ inputs.environment }}" == "prod" ]
         then
           sub_id="9edbf217-b7c1-4f6a-ae76-d046cf932ff0"
           rg="RUNTIMESERVICE-RGprod"
           cluster_name="aksclusterprod"
+          echo "VAULT_ADDR=https://vault.elvia.io" >> "$GITHUB_ENV"
         else
           echo "unsupported environment: ${{ inputs.environment }}"
           exit 1
@@ -129,7 +132,7 @@ runs:
           --install \
           -n ${{ inputs.namespace}} \
           -f ${{ inputs.helmValuesPath }} ${{ inputs.name }} elvia-charts/elvia-deployment \
-          --set="environment=dev" \
+          --set="environment=${{ inputs.environment }}" \
           --set="image.tag=${{ github.sha }}-${{ github.run_number }}" \
           --set="labels.repositoryName=${{ env.REPO_SHORT_NAME }}" \
           --set="labels.commitHash=${{ github.sha }}"
@@ -152,7 +155,7 @@ runs:
       uses: hashicorp/vault-action@v3
       if: always()
       with:
-        url: https://vault.dev-elvia.io/
+        url: ${{ env.VAULT_ADDR }}
         role: jwt-github-${{ inputs.namespace }}-${{ env.REPO_SHORT_NAME }}
         method: jwt
         path: jwt-github
@@ -169,6 +172,6 @@ runs:
         python3 ${{ github.action_path }}/post-grafana-annotations.py \
           --what "Deploy ${{ job.status }} - " \
           --data "$GITHUB_RUN_ID $gitMessage <a href="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID">Link</a>" \
-          --tags "{app: ${{ inputs.name }}, system: ${{ inputs.namespace }}, env: dev, event: deploy}" \
+          --tags "{app: ${{ inputs.name }}, system: ${{ inputs.namespace }}, env: ${{ inputs.environment }}, event: deploy}" \
           --grafana_url $GRAFANA_URL \
           --grafana_api_key $GRAFANA_API_KEY
