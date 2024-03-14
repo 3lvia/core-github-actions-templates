@@ -43,7 +43,7 @@ runs:
   using: 'composite'
   steps:
     - name: Checkout repository
-      if: ${{ inputs.checkout == "true" }}
+      if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@v4
 
     - name: Parse input and set environment variables
