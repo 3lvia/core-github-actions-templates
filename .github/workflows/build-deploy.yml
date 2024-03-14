@@ -1,0 +1,49 @@
+name: Build and Deploy to Kubernetes
+
+on:
+  push:
+    branches: [trunk]
+  pull_request:
+    branches: [trunk]
+  workflow_dispatch:
+    branches:
+      - feature/github-action
+
+permissions:
+  actions: read
+  contents: read
+  id-token: write
+  security-events: write
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: 3lvia/core-github-actions-templates/analyze@trunk
+
+  build:
+    name: Build and Scan
+    runs-on: ubuntu-latest
+    environment: build
+    steps:
+      - uses: 3lvia/core-github-actions-templates/build@trunk
+        with:
+          name: demo-api
+          namespace: core
+          dockerfile: .github/test/src/Dockerfile
+          AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
+
+  deploy_dev:
+    name: Deploy
+    needs: [build, analyze]
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: 3lvia/core-github-actions-templates/deploy@trunk
+        with:
+          name: demo-api
+          namespace: core
+          environment: dev
+          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          helmValuesPath: '.github/test/deploy/values.yaml'
