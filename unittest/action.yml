@@ -1,0 +1,28 @@
+name: Unit Test
+description: Run dotnet unit tests
+inputs:
+  checkout:
+    description: 'If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout repository
+      if: ${{ inputs.checkout == 'true' }}
+      uses: actions/checkout@v4
+    - name: Run unit tests
+      shell: bash
+      run: |
+        testprojects=`find . -iname "*unit*test*csproj"`
+        for testproject in $testprojects;
+        do
+          dotnet test -l:trx $testproject
+        done
+    - name: Publish test results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        files: |
+          ${{ github.workspace }}/**/TestResults/*.trx

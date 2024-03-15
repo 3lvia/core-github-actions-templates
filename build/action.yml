@@ -23,12 +23,11 @@ inputs:
   trivy-enable-secret-scanner:
     description: 'Enable Trivy secret scanner.'
     required: false
-    default: true
-    type: 'boolean'
+    default: 'true'
   trivy-skip-dirs:
     description: 'Directories/files skipped by Trivy. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.'
     required: false
-    type: 'string'
+    default: ''
   AZURE_CLIENT_ID:
     description: 'ClientId of a service principal that can push to Container Registry.'
     required: true
@@ -116,7 +115,7 @@ runs:
         severity: ${{ inputs.severity }}
         trivyignores: '.trivyignore'
         ignore-unfixed: true
-        scanners: ${{ inputs.trivy-enable-secret-scanner == true && 'vuln,misconfig,secret' || 'vuln,misconfig' }}
+        scanners: ${{ inputs.trivy-enable-secret-scanner == 'true' && 'vuln,misconfig,secret' || 'vuln,misconfig' }}
         skip-dirs: ${{ inputs.trivy-skip-dirs }}
       if: github.event_name == 'pull_request'
 
@@ -130,7 +129,7 @@ runs:
         severity: ${{ inputs.severity }}
         trivyignores: '.trivyignore'
         ignore-unfixed: true
-        scanners: ${{ inputs.trivy-enable-secret-scanner == true && 'vuln,misconfig,secret' || 'vuln,misconfig' }}
+        scanners: ${{ inputs.trivy-enable-secret-scanner == 'true' && 'vuln,misconfig,secret' || 'vuln,misconfig' }}
         skip-dirs: ${{ inputs.trivy-skip-dirs }}
       if: github.event_name == 'push'
 
