@@ -56,7 +56,7 @@ jobs:
   deploy_dev:
     name: Deploy Dev
     needs: [build, unittests]
-    # if: github.ref == 'refs/heads/trunk' 
+    # if: github.ref == 'refs/heads/trunk'
     runs-on: ubuntu-latest
     environment: dev
     steps:
@@ -97,7 +97,6 @@ jobs:
           environment: prod
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
           helmValuesPath: '.github/deploy/values.yaml'
-
 ```
 
 ### Build
