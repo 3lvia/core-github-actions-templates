@@ -16,6 +16,12 @@ permissions:
   security-events: write
 
 jobs:
+  unittests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: 3lvia/core-github-actions-templates/unittest@feature/add-unittests
+      
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
