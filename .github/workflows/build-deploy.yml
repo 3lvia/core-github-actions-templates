@@ -23,7 +23,7 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: 3lvia/core-github-actions-templates/unittest@feature/add-unittests
+      - uses: ./unittest
 
   analyze:
     name: Analyze
