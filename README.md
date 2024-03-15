@@ -168,3 +168,14 @@ jobs:
         with:
           path: 'terraform'
 ```
+
+
+# Development
+
+## Yaml format
+```bash
+yarn global add prettier 
+prettier --single-quote .github/workflows/* **/action.yml README.md -w 
+# OR
+prettier --single-quote .github/workflows/* **/action.yml README.md -w --end-of-line crlf
+```
