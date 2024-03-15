@@ -23,11 +23,21 @@ permissions:
   contents: read
   id-token: write
   security-events: write
+  issues: read
+  checks: write
+  pull-requests: write
 
 jobs:
+  unittests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: 3lvia/core-github-actions-templates/unittest@trunk
+
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/trunk' # only run analyze on PR
     steps:
       - uses: 3lvia/core-github-actions-templates/analyze@trunk
 
@@ -44,8 +54,9 @@ jobs:
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
 
   deploy_dev:
-    name: Deploy
-    needs: [build, analyze]
+    name: Deploy Dev
+    needs: [build, unittests]
+    # if: github.ref == 'refs/heads/trunk' 
     runs-on: ubuntu-latest
     environment: dev
     steps:
@@ -55,6 +66,38 @@ jobs:
           namespace: core
           environment: dev
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          helmValuesPath: '.github/deploy/values.yaml'
+
+  deploy_test:
+    name: Deploy Test
+    needs: [deploy_dev]
+    runs-on: ubuntu-latest
+    environment: test
+    if: github.ref == 'refs/heads/trunk'
+    steps:
+      - uses: 3lvia/core-github-actions-templates/deploy@trunk
+        with:
+          name: demo-api
+          namespace: core
+          environment: test
+          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          helmValuesPath: '.github/deploy/values.yaml'
+
+  deploy_prod:
+    name: Deploy Prod
+    needs: [deploy_test]
+    runs-on: ubuntu-latest
+    environment: prod
+    if: github.ref == 'refs/heads/trunk'
+    steps:
+      - uses: 3lvia/core-github-actions-templates/deploy@trunk
+        with:
+          name: demo-api
+          namespace: core
+          environment: prod
+          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          helmValuesPath: '.github/deploy/values.yaml'
+
 ```
 
 ### Build
