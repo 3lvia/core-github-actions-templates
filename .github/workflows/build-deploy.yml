@@ -14,8 +14,19 @@ permissions:
   contents: read
   id-token: write
   security-events: write
+  issues: read
+  checks: write
+  pull-requests: write
 
 jobs:
+  unittests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - uses: ./unittest
+
   analyze:
     name: Analyze
     runs-on: ubuntu-latest

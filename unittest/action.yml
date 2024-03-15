@@ -1,0 +1,23 @@
+name: Unit Test
+description: Run dotnet unit tests
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Run unit tests
+      shell: bash
+      run: |
+        testprojects=`find . -iname "*unit*test*csproj"`
+        for testproject in $testprojects;
+        do
+          dotnet test -l:trx $testproject
+        done
+    - name: Publish test results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        files: |
+          **/TestResults/*.trx
+          .github/**/TestResults/*.trx
