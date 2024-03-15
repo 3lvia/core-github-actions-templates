@@ -20,3 +20,4 @@ runs:
       with:
         files: |
           **/TestResults/*.trx
+          .github/**/TestResults/*.trx
