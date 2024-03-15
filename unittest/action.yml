@@ -19,4 +19,4 @@ runs:
       if: always()
       with:
         files: |
-          ${{ github.workspace }}/**/TestResults/*.trx
+          **/TestResults/*.trx
