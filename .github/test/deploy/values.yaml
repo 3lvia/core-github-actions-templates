@@ -7,25 +7,25 @@ namespace: core
 microserviceType: webapi
 
 # replicaCount: 2
-replicaCount: 
+replicaCount:
   dev: 1
   sandbox: 1
   test: 1
   prod: 2
 
 env:
-- name: ASPNETCORE_URLS
-  value: http://+:8080
+  - name: ASPNETCORE_URLS
+    value: http://+:8080
 
 # nodePool: high-iops
 
 service:
- port: 80
- targetPort: 8080
+  port: 80
+  targetPort: 8080
 
 ingress:
   subdomain: core
-  path: "/demo-api"
+  path: '/demo-api'
 
 resources:
   limits:
@@ -44,8 +44,8 @@ lifecycle:
   preStop:
     exec:
       command:
-      - sleep
-      - "1"
+        - sleep
+        - '1'
 
 readinessProbe:
   failureThreshold: 3
@@ -79,7 +79,6 @@ startupProbe:
   periodSeconds: 3
   successThreshold: 1
   timeoutSeconds: 2
-
 # configmap:
 #   dev:
 #     bigtable.project: "hafslund-mdm-dev"

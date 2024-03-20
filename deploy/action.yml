@@ -19,11 +19,15 @@ inputs:
     description: 'If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.'
     required: false
     default: 'true'
+  runtimeCloudProvider:
+    description: "Kubernetes cloud provider to deploy to: 'AKS' or 'GKE'. Defaults to AKS."
+    required: false
+    default: 'AKS'
   AZURE_CLIENT_ID:
-    description: 'ClientId of a service principal that has access to AKS.'
-    required: true
+    description: 'Client ID of a service principal that has access to AKS. Only required for deploying to AKS.'
+    required: false
   AZURE_TENANT_ID:
-    description: "TenantId of a service principal that has access to AKS. Default to Elvia's Tenant ID."
+    description: "Tenant ID of a service principal that has access to AKS. Default to Elvia's Tenant ID."
     required: false
     default: '2186a6ec-c227-4291-9806-d95340bf439d'
   AKS_SUBSCRIPTION_ID:
@@ -38,6 +42,22 @@ inputs:
     description: 'Resource group of the AKS cluster to deploy to. Defaults to Elvias normal clusters.'
     required: false
     default: ''
+  GC_SERVICE_ACCOUNT:
+    description: 'Service account to use for deploying to GKE. Only required for deploying to GKE.'
+    required: false
+  GC_WORKLOAD_IDENTITY_PROVIDER:
+    description: 'Workload identity provider to use for deploying to GKE. Only required for deploying to GKE.'
+    required: false
+  GC_PROJECT_ID:
+    description: 'Project ID of GKE to deploy to. Defaults to Elvias normal clusters.'
+    required: false
+  GC_CLUSTER_NAME:
+    description: 'Name of the GKE cluster to deploy to. Defaults to Elvias normal clusters.'
+    required: false
+  GC_CLUSTER_LOCATION:
+    description: 'Location of the GKE cluster to deploy to. Defaults to locations of Elvias normal clusters.'
+    required: false
+    default: 'europe-west1'
 
 runs:
   using: 'composite'
@@ -50,77 +70,121 @@ runs:
       shell: bash
       run: |
         # Parse input and set environment variables
-        if [ -z "${{ inputs.environment }}" ]
-        then
-          echo "This action can only be used with an environment"
+        if [[ -z "${{ inputs.environment }}" ]]; then
+          echo "This action can only be used with an environment."
         fi
 
-        if [ "${{ inputs.environment }}" == "dev" ]
-        then
-          sub_id="ceb9518c-528f-4c91-9b5a-c051d383e7a8"
-          rg="RUNTIMESERVICE-RGdev"
-          cluster_name="aksclusterdev"
-          echo "VAULT_ADDR=https://vault.dev-elvia.io" >> "$GITHUB_ENV"
-        elif [ "${{ inputs.environment }}" == "test" ]
-        then
-          sub_id="ceb9518c-528f-4c91-9b5a-c051d383e7a8"
-          rg="RUNTIMESERVICE-RGtest"
-          cluster_name="aksclustertest"
-          echo "VAULT_ADDR=https://vault.test-elvia.io" >> "$GITHUB_ENV"
-        elif [ "${{ inputs.environment }}" == "prod" ]
-        then
-          sub_id="9edbf217-b7c1-4f6a-ae76-d046cf932ff0"
-          rg="RUNTIMESERVICE-RGprod"
-          cluster_name="aksclusterprod"
-          echo "VAULT_ADDR=https://vault.elvia.io" >> "$GITHUB_ENV"
-        else
-          echo "unsupported environment: ${{ inputs.environment }}"
+        if [[ -z "${{ inputs.AZURE_CLIENT_ID }}" && "${{ inputs.cloudProvider }}" == "AKS" ]]; then
+          echo "AZURE_CLIENT_ID is required for AKS deployment."
           exit 1
         fi
 
-        if [ -z "${{ inputs.AKS_SUBSCRIPTION_ID}}" ]
-        then
-          echo "AKS_SUBSCRIPTION_ID=$sub_id" >> "$GITHUB_ENV"
-        else
-          echo "AKS_SUBSCRIPTION_ID=${{ inputs.AKS_SUBSCRIPTION_ID}}" >> "$GITHUB_ENV"
+        if [[ "${{ inputs.runtimeCloudProvider }}" == "GKE" ]]; then
+          if [ -z "${{ inputs.GC_SERVICE_ACCOUNT }}" ]; then
+            echo "GC_SERVICE_ACCOUNT is required for GKE deployment."
+            exit 1
+          fi
+          if [[ -z "${{ inputs.GC_WORKLOAD_IDENTITY_PROVIDER }}" ]]; then
+            echo "GC_WORKLOAD_IDENTITY_PROVIDER is required for GKE deployment."
+            exit 1
+          fi
         fi
 
-        if [ -z "${{ inputs.AKS_CLUSTER_NAME}}" ]
-        then
-          echo "AKS_CLUSTER_NAME=$cluster_name" >> "$GITHUB_ENV"
+        if [[ "${{ inputs.environment }}" == "dev" ]]; then
+          aks_sub_id="ceb9518c-528f-4c91-9b5a-c051d383e7a8"
+          echo "VAULT_ADDR=https://vault.dev-elvia.io" >> "$GITHUB_ENV"
+        elif [[ "${{ inputs.environment }}" == "test" ]]; then
+          aks_sub_id="ceb9518c-528f-4c91-9b5a-c051d383e7a8"
+          echo "VAULT_ADDR=https://vault.test-elvia.io" >> "$GITHUB_ENV"
+        elif [[ "${{ inputs.environment }}" == "prod" ]]; then
+          aks_sub_id="9edbf217-b7c1-4f6a-ae76-d046cf932ff0"
+          echo "VAULT_ADDR=https://vault.elvia.io" >> "$GITHUB_ENV"
         else
-          echo "AKS_CLUSTER_NAME=${{ inputs.AKS_CLUSTER_NAME}}" >> "$GITHUB_ENV"
+          echo "Unsupported environment: ${{ inputs.environment }}"
+          exit 1
         fi
 
-        if [ -z "${{ inputs.AKS_RESOURCE_GROUP}}" ]
-        then
-          echo "AKS_RESOURCE_GROUP=$rg" >> "$GITHUB_ENV"
+        aks_rg="RUNTIMESERVICE-RG${{ inputs.environment }}"
+        aks_cluster_name="akscluster${{ inputs.environment }}"
+        gc_project_id="elvia-runtimeservice-${{ inputs.environment }}"
+        gc_cluster_name="runtimeservice-gke-${{ inputs.environment }}"
+
+        if [[ -z "${{ inputs.AKS_SUBSCRIPTION_ID }}" ]]; then
+          echo "AKS_SUBSCRIPTION_ID=$aks_sub_id" >> "$GITHUB_ENV"
         else
-          echo "AKS_RESOURCE_GROUP=${{ inputs.AKS_RESOURCE_GROUP}}" >> "$GITHUB_ENV"
+          echo "AKS_SUBSCRIPTION_ID=${{ inputs.AKS_SUBSCRIPTION_ID }}" >> "$GITHUB_ENV"
+        fi
+
+        if [[ -z "${{ inputs.AKS_CLUSTER_NAME }}" ]]; then
+          echo "AKS_CLUSTER_NAME=$aks_cluster_name" >> "$GITHUB_ENV"
+        else
+          echo "AKS_CLUSTER_NAME=${{ inputs.AKS_CLUSTER_NAME }}" >> "$GITHUB_ENV"
+        fi
+
+        if [[ -z "${{ inputs.AKS_RESOURCE_GROUP }}" ]]; then
+          echo "AKS_RESOURCE_GROUP=$aks_rg" >> "$GITHUB_ENV"
+        else
+          echo "AKS_RESOURCE_GROUP=${{ inputs.AKS_RESOURCE_GROUP }}" >> "$GITHUB_ENV"
+        fi
+
+        if [[ -z "${{ inputs.GC_PROJECT_ID }}" ]]; then
+          echo "GC_PROJECT_ID=$gc_project_id" >> "$GITHUB_ENV"
+        else
+          echo "GC_PROJECT_ID=${{ inputs.GC_PROJECT_ID }}" >> "$GITHUB_ENV"
+        fi
+
+        if [[ -z "${{ inputs.GC_CLUSTER_NAME }}" ]]; then
+          echo "GC_CLUSTER_NAME=$gc_cluster_name" >> "$GITHUB_ENV"
+        else
+          echo "GC_CLUSTER_NAME=${{ inputs.GC_CLUSTER_NAME }}" >> "$GITHUB_ENV"
+        fi
+
+        if [[ -z "${{ inputs.GC_CLUSTER_LOCATION }}" ]]; then
+          echo "GC_CLUSTER_LOCATION=europe-west1" >> "$GITHUB_ENV"
+        else
+          echo "GC_CLUSTER_LOCATION=${{ inputs.GC_CLUSTER_LOCATION }}" >> "$GITHUB_ENV"
         fi
 
         echo "REPO_SHORT_NAME=${GITHUB_REPOSITORY##*/}" >> "$GITHUB_ENV"
 
     - name: Authenticate with Azure
       uses: azure/login@v2
+      if: ${{ inputs.runtimeCloudProvider == 'AKS' }}
       with:
-        client-id: ${{ inputs.AZURE_CLIENT_ID}}
-        tenant-id: ${{ inputs.AZURE_TENANT_ID}}
-        subscription-id: ${{ env.AKS_SUBSCRIPTION_ID}}
+        client-id: ${{ inputs.AZURE_CLIENT_ID }}
+        tenant-id: ${{ inputs.AZURE_TENANT_ID }}
+        subscription-id: ${{ env.AKS_SUBSCRIPTION_ID }}
 
     - name: Setup kubelogin
       uses: azure/use-kubelogin@v1
+      if: ${{ inputs.runtimeCloudProvider == 'AKS' }}
       with:
         kubelogin-version: 'v0.0.24'
 
     - name: Set AKS context
       uses: azure/aks-set-context@v4
+      if: ${{ inputs.runtimeCloudProvider == 'AKS' }}
       with:
         cluster-name: ${{ env.AKS_CLUSTER_NAME }}
         resource-group: ${{ env.AKS_RESOURCE_GROUP }}
         admin: 'false'
         use-kubelogin: 'true'
         subscription: ${{ env.AKS_SUBSCRIPTION_ID }}
+
+    - name: Authenticate with Google Cloud
+      uses: google-github-actions/auth@v2.1.2
+      if: ${{ inputs.runtimeCloudProvider == 'GKE' }}
+      with:
+        workload_identity_provider: ${{ inputs.GC_WORKLOAD_IDENTITY_PROVIDER }}
+        service_account: ${{ inputs.GC_SERVICE_ACCOUNT }}
+
+    - name: Connect to GKE
+      uses: google-github-actions/get-gke-credentials@v2.1.0
+      if: ${{ inputs.runtimeCloudProvider == 'GKE' }}
+      with:
+        cluster_name: ${{ env.GC_CLUSTER_NAME }}
+        location: ${{ env.GC_CLUSTER_LOCATION }}
+        project_id: ${{ env.GC_PROJECT_ID }}
 
     - name: Helm deploy
       shell: bash
@@ -130,7 +194,7 @@ runs:
         helm repo update
         helm upgrade --debug \
           --install \
-          -n ${{ inputs.namespace}} \
+          -n ${{ inputs.namespace }} \
           -f ${{ inputs.helmValuesPath }} ${{ inputs.name }} elvia-charts/elvia-deployment \
           --set="environment=${{ inputs.environment }}" \
           --set="image.tag=${{ github.sha }}-${{ github.run_number }}" \

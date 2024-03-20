@@ -105,20 +105,20 @@ Template that builds Docker image, scans for vulnerabilities and uploads to Azur
 
 ### Inputs
 
-| Name                          | Type    | Default                 | Description                                                                                                                                            |
-| ----------------------------- | ------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `name`                        | String  |                         | Name of application.                                                                                                                                   |
-| `namespace`                   | String  |                         | Namespace of application.                                                                                                                              |
-| `dockerfile`                  | String  |                         | Path to Dockerfile.                                                                                                                                    |
-| `dockerBuildContext`          | String  | directory of Dockerfile | Path to Docker build context.                                                                                                                          |
-| `severity`                    | String  | `CRITICAL,HIGH`         | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                          |
-| `trivy-cve-ignores`           | String  |                         | Comma-separated list of CVEs for Trivy to ignore. See https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore for syntax. |
-| `trivy-enable-secret-scanner` | Boolean | `true`                  | Enable Trivy secret scanner.                                                                                                                           |
-| `trivy-skip-dirs`             | String  |                         | Directories/files skipped by Trivy. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                   |
-| `AZURE_CLIENT_ID`             | String  | Elvia default AKS       | ClientId of a service principal that can push to Container Registry.                                                                                   |
-| `AZURE_TENANT_ID`             | String  | Elvia Tenant            | TenantId of a service principal that can push to Azure Container Registry.                                                                             |
-| `ACR_SUBSCRIPTION_ID`         | String  | Elvia default ACR       | Subscription ID of the Azure Container Registry to push to.                                                                                            |
-| `ACR_NAME`                    | String  | Elvia default ACR       | Name of the Azure Container Registry to push to.                                                                                                       |
+| Name                          | Type    | Required | Default                 | Description                                                                                                                                            |
+| ----------------------------- | ------- | -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`                        | String  | yes      |                         | Name of application.                                                                                                                                   |
+| `namespace`                   | String  | yes      |                         | Namespace of application.                                                                                                                              |
+| `dockerfile`                  | String  | yes      |                         | Path to Dockerfile.                                                                                                                                    |
+| `dockerBuildContext`          | String  |          | directory of Dockerfile | Path to Docker build context.                                                                                                                          |
+| `severity`                    | String  |          | `CRITICAL,HIGH`         | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                          |
+| `trivy-cve-ignores`           | String  |          |                         | Comma-separated list of CVEs for Trivy to ignore. See https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore for syntax. |
+| `trivy-enable-secret-scanner` | Boolean |          | `true`                  | Enable Trivy secret scanner.                                                                                                                           |
+| `trivy-skip-dirs`             | String  |          |                         | Directories/files skipped by Trivy. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                   |
+| `AZURE_CLIENT_ID`             | String  | yes      | Elvia default AKS       | ClientId of a service principal that can push to Container Registry.                                                                                   |
+| `AZURE_TENANT_ID`             | String  |          | Elvia Tenant            | TenantId of a service principal that can push to Azure Container Registry.                                                                             |
+| `ACR_SUBSCRIPTION_ID`         | String  |          | Elvia default ACR       | Subscription ID of the Azure Container Registry to push to.                                                                                            |
+| `ACR_NAME`                    | String  |          | Elvia default ACR       | Name of the Azure Container Registry to push to.                                                                                                       |
 
 ### Deploy
 
@@ -126,18 +126,24 @@ Template that deploys an Elvia Helm chart to Kubernetes
 
 ### Inputs
 
-| Name                  | Type    | Default                      | Description                                                                                                                      |
-| --------------------- | ------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                | String  |                              | Name of application.                                                                                                             |
-| `namespace`           | String  |                              | Namespace of application.                                                                                                        |
-| `environment`         | String  |                              | Environment to deploy to. `dev`, `test` or `prod`.                                                                               |
-| `helmValuesPath`      | String  | `.github/deploy/values.yaml` | Path to Helm values file, relative to the root of the repository.                                                                |
-| `checkout`            | Boolean | `true`                       | If true, the action will check out the repository. If false, the action will assume the repository has already been checked out. |
-| `AZURE_CLIENT_ID`     | String  | Elvia default AKS            | ClientId of a service principal that has access to AKS.                                                                          |
-| `AZURE_TENANT_ID`     | String  | Elvia Tenant                 | TenantId of a service principal that has access to AKS.                                                                          |
-| `AKS_SUBSCRIPTION_ID` | String  | Elvia default AKS            | Subscription ID of the AKS cluster to deploy to.                                                                                 |
-| `AKS_CLUSTER_NAME`    | String  | Elvia default AKS            | Name of the AKS cluster to deploy to.                                                                                            |
-| `AKS_RESOURCE_GROUP`  | String  | Elvia default AKS            | Resource group of the AKS cluster to deploy to.                                                                                  |
+| Name                            | Type    | Required            | Default                      | Description                                                                                                                      |
+| ------------------------------- | ------- | ------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                          | String  | yes                 |                              | Name of application.                                                                                                             |
+| `namespace`                     | String  | yes                 |                              | Namespace of application.                                                                                                        |
+| `environment`                   | String  | yes                 |                              | Environment to deploy to. `dev`, `test` or `prod`.                                                                               |
+| `helmValuesPath`                | String  |                     | `.github/deploy/values.yaml` | Path to Helm values file, relative to the root of the repository.                                                                |
+| `checkout`                      | Boolean |                     | `true`                       | If true, the action will check out the repository. If false, the action will assume the repository has already been checked out. |
+| `runtimeCloudProvuider`         | String  |                     | `AKS`                        | Kubernetes cloud provider to deploy to: 'AKS' or 'GKE'. Defaults to 'AKS'.                                                       |
+| `AZURE_CLIENT_ID`               | String  | only for AKS deploy |                              | ClientId of a service principal that has access to AKS. Only required for deploying to AKS.                                      |
+| `AZURE_TENANT_ID`               | String  |                     | Elvia Tenant                 | TenantId of a service principal that has access to AKS.                                                                          |
+| `AKS_SUBSCRIPTION_ID`           | String  |                     | Elvia default AKS            | Subscription ID of the AKS cluster to deploy to.                                                                                 |
+| `AKS_CLUSTER_NAME`              | String  |                     | Elvia default AKS            | Name of the AKS cluster to deploy to.                                                                                            |
+| `AKS_RESOURCE_GROUP`            | String  |                     | Elvia default AKS            | Resource group of the AKS cluster to deploy to.                                                                                  |
+| `GC_SERVICE_ACCOUNT`            | String  | only for GKE deploy |                              | Service account to use for deploying to GKE. Only required for deploying to GKE.                                                 |
+| `GC_WORKLOAD_IDENTITY_PROVIDER` | String  | only for GKE deploy | `gcp`                        | Workload identity provider to use for deploying to GKE. Only required for deploying to GKE.                                      |
+| `GC_PROJECT_ID`                 | String  |                     | Elvia default GKE            | Project ID of the GKE cluster to deploy to. Defaults to Elvias normal clusters.                                                  |
+| `GC_CLUSTER_NAME`               | String  |                     | Elvia default GKE            | Name of the GKE cluster to deploy to. Defaults to Elvias normal clusters.                                                        |
+| `GC_CLUSTER_LOCATION`           | String  |                     | Elvia default GKE            | Location of the GKE cluster to deploy to. Defaults to Elvias normal clusters.                                                    |
 
 ## Trivy IaC scanning
 
@@ -146,13 +152,13 @@ The action will report any vulnerabilities to GitHub Advanced Security, which wi
 
 ### Inputs
 
-| Name            | Type    | Default                            | Description                                                                                                                      |
-| --------------- | ------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `path`          | String  | `.`                                | Path to IaC to scan.                                                                                                             |
-| `skip-dirs`     | String  |                                    | Comma-separated list of directories to skip                                                                                      |
-| `severity`      | String  | `CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN` | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.    |
-| `upload-report` | Boolean | `true`                             | Upload Trivy report to GitHub Security tab.                                                                                      |
-| `checkout`      | Boolean | `true`                             | If true, the action will check out the repository. If false, the action will assume the repository has already been checked out. |
+| Name            | Type    | Required | Default                            | Description                                                                                                                      |
+| --------------- | ------- | -------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `path`          | String  | no       | `.`                                | Path to IaC to scan.                                                                                                             |
+| `skip-dirs`     | String  | no       |                                    | Comma-separated list of directories to skip                                                                                      |
+| `severity`      | String  | no       | `CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN` | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.    |
+| `upload-report` | Boolean | no       | `true`                             | Upload Trivy report to GitHub Security tab.                                                                                      |
+| `checkout`      | Boolean | no       | `true`                             | If true, the action will check out the repository. If false, the action will assume the repository has already been checked out. |
 
 ### Example
 
@@ -187,10 +193,10 @@ Uses built-in formatter for Terraform CLI to check format of Terraform code.
 
 ### Inputs
 
-| Name       | Type    | Default | Description                                                                                                                      |
-| ---------- | ------- | ------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `path`     | String  | `.`     | Path to process.                                                                                                                 |
-| `checkout` | Boolean | `true`  | If true, the action will check out the repository. If false, the action will assume the repository has already been checked out. |
+| Name       | Type    | Required | Default | Description                                                                                                                      |
+| ---------- | ------- | -------- | ------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `path`     | String  | no       | `.`     | Path to process.                                                                                                                 |
+| `checkout` | Boolean | no       | `true`  | If true, the action will check out the repository. If false, the action will assume the repository has already been checked out. |
 
 ### Example
 
