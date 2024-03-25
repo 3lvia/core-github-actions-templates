@@ -25,6 +25,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - uses: ./unittest
 
   analyze:
@@ -33,6 +34,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - uses: ./analyze
 
   build:
@@ -42,6 +44,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - uses: ./build
         with:
           name: demo-api
@@ -49,14 +52,15 @@ jobs:
           dockerfile: .github/test/src/Dockerfile
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
 
-  deploy_dev:
-    name: Deploy
+  deploy_aks_dev:
+    name: Deploy AKS
     needs: [build, analyze]
     runs-on: ubuntu-latest
     environment: dev
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - uses: ./deploy
         with:
           name: demo-api
@@ -64,3 +68,22 @@ jobs:
           environment: dev
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
           helmValuesPath: '.github/test/deploy/values.yaml'
+
+  deploy_gke_dev:
+    name: Deploy GKE
+    needs: [build, analyze]
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: ./deploy
+        with:
+          name: demo-api
+          namespace: core
+          environment: dev
+          GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
+          GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
+          helmValuesPath: '.github/test/deploy/values.yaml'
+          runtimeCloudProvider: GKE
