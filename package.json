@@ -5,7 +5,7 @@
   "author": "3lvia",
   "private": true,
   "scripts": {
-    "gen-docs": "action-docs -u -s",
+    "gen-docs": "action-docs -n -u -s",
     "format": "prettier --write --single-quote .github/workflows/** **/action.yml README.md",
     "format-check": "prettier --check --single-quote .github/workflows/** **/action.yml README.md"
   },
