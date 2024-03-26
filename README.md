@@ -2,10 +2,12 @@
 
 <!-- action-docs-header source="build/action.yml" -->
 
+## Build
+
 <!-- action-docs-header source="build/action.yml" -->
 <!-- action-docs-description source="build/action.yml" -->
 
-## Description
+### Description
 
 Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure Container Registry. To use the `Build` and `Deploy` actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform.
 
@@ -108,7 +110,7 @@ jobs:
 
 <!-- action-docs-inputs source="build/action.yml" -->
 
-## Inputs
+### Inputs
 
 | name                          | description                                                                                                                                                   | required | default                                |
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------- |
@@ -128,7 +130,7 @@ jobs:
 <!-- action-docs-inputs source="build/action.yml" -->
 <!-- action-docs-usage source="build/action.yml" project="core-github-actions-templates" version="trunk" -->
 
-## Usage
+### Usage
 
 ```yaml
 - uses: core-github-actions-templates@trunk
@@ -210,17 +212,19 @@ jobs:
 
 <!-- action-docs-header source="deploy/action.yml" -->
 
+## Deploy
+
 <!-- action-docs-header source="deploy/action.yml" -->
 <!-- action-docs-description source="deploy/action.yml" -->
 
-## Description
+### Description
 
 Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Build` and `Deploy` actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform.
 
 <!-- action-docs-description source="deploy/action.yml" -->
 <!-- action-docs-inputs source="deploy/action.yml" -->
 
-## Inputs
+### Inputs
 
 | name                            | description                                                                                                                                 | required | default                                |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------- |
@@ -244,7 +248,7 @@ Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Bui
 <!-- action-docs-inputs source="deploy/action.yml" -->
 <!-- action-docs-usage source="deploy/action.yml" project="core-github-actions-templates" version="trunk" -->
 
-## Usage
+### Usage
 
 ```yaml
 - uses: core-github-actions-templates@trunk
@@ -350,17 +354,19 @@ Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Bui
 
 <!-- action-docs-header source="trivy-iac-scan/action.yml" -->
 
+## Trivy IaC scan
+
 <!-- action-docs-header source="trivy-iac-scan/action.yml" -->
 <!-- action-docs-description source="trivy-iac-scan/action.yml" -->
 
-## Description
+### Description
 
 Uses https://github.com/aquasecurity/trivy-action to scan IaC and report security issues. The action will report any vulnerabilities to GitHub Advanced Security, which will be visible in the Security tab on GitHub.
 
 <!-- action-docs-description source="trivy-iac-scan/action.yml" -->
 <!-- action-docs-inputs source="trivy-iac-scan/action.yml" -->
 
-## Inputs
+### Inputs
 
 | name            | description                                                                                                                             | required | default                            |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------- |
@@ -373,7 +379,7 @@ Uses https://github.com/aquasecurity/trivy-action to scan IaC and report securit
 <!-- action-docs-inputs source="trivy-iac-scan/action.yml" -->
 <!-- action-docs-usage source="trivy-iac-scan/action.yml" project="core-github-actions-templates" version="trunk" -->
 
-## Usage
+### Usage
 
 ```yaml
 - uses: core-github-actions-templates@trunk
@@ -413,17 +419,19 @@ Uses https://github.com/aquasecurity/trivy-action to scan IaC and report securit
 
 <!-- action-docs-header source="terraform-format/action.yml" -->
 
+## Terraform format check
+
 <!-- action-docs-header source="terraform-format/action.yml" -->
 <!-- action-docs-description source="terraform-format/action.yml" -->
 
-## Description
+### Description
 
 Uses the built-in formatter from the Terraform CLI to check the format of Terraform code.
 
 <!-- action-docs-description source="terraform-format/action.yml" -->
 <!-- action-docs-inputs source="terraform-format/action.yml" -->
 
-## Inputs
+### Inputs
 
 | name       | description                                                                                                                             | required | default |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------- |
@@ -433,7 +441,7 @@ Uses the built-in formatter from the Terraform CLI to check the format of Terraf
 <!-- action-docs-inputs source="terraform-format/action.yml" -->
 <!-- action-docs-usage source="terraform-format/action.yml" project="core-github-actions-templates" version="trunk" -->
 
-## Usage
+### Usage
 
 ```yaml
 - uses: core-github-actions-templates@trunk
