@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ACTION_DIRS: 'build,deploy,trivy-iac-scan,terraform-format'
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
