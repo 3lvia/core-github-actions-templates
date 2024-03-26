@@ -1,0 +1,46 @@
+name: Generate action documentation
+
+on:
+  push:
+    branches: [trunk]
+
+jobs:
+  generate_docs:
+    name: Generate action documentation
+    runs-on: ubuntu-latest
+    env:
+      ACTION_DIRS: 'build,deploy,trivy-iac-scan,terraform-format'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Generate action documentation
+        run: |
+          for ACTION_FILE in $(echo "$ACTION_DIRS" | tr ','); do
+            yarn gen-docs "$ACTION_FILE"
+          done
+
+      - name: Format README
+        run: yarn prettier -w README.md
+
+      - name: Commit changes
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "Update action documentation"
+          git push

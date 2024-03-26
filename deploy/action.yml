@@ -1,6 +1,5 @@
-name: Deploy to kubernetes
-description: 'Deploys an application to Kubernetes using the Elvia Helm chart'
-
+name: 'Deploy'
+description: 'Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Build` and `Deploy` actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform.'
 inputs:
   name:
     description: 'Name of application. Do not include namespace.'
@@ -33,15 +32,12 @@ inputs:
   AKS_SUBSCRIPTION_ID:
     description: 'Subscription ID of AKS to deploy to. Defaults to Elvias normal clusters.'
     required: false
-    default: ''
   AKS_CLUSTER_NAME:
     description: 'Name of the AKS cluster to deploy to. Defaults to Elvias normal clusters.'
     required: false
-    default: ''
   AKS_RESOURCE_GROUP:
     description: 'Resource group of the AKS cluster to deploy to. Defaults to Elvias normal clusters.'
     required: false
-    default: ''
   GC_SERVICE_ACCOUNT:
     description: 'Service account to use for deploying to GKE. Only required for deploying to GKE.'
     required: false

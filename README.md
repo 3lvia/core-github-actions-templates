@@ -1,10 +1,9 @@
 # core-github-actions-templates
 
-## Build and Deploy
+<!-- action-docs-header source="build/action.yml" -->
+<!-- action-docs-description source="build/action.yml" -->
 
-To use the build and deploy actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform.
-
-### Example
+### Example usage in a full workflow
 
 ```yaml
 name: Build and Deploy to Kubernetes
@@ -99,131 +98,73 @@ jobs:
           helmValuesPath: '.github/deploy/values.yaml'
 ```
 
-### Build
+<!-- action-docs-inputs source="build/action.yml" -->
+<!-- action-docs-usage source="build/action.yml" project="core-github-actions-templates" version="trunk" -->
 
-Template that builds Docker image, scans for vulnerabilities and uploads to Azure Container Registry.
+<!-- action-docs-header source="deploy/action.yml" -->
+<!-- action-docs-description source="deploy/action.yml" -->
+<!-- action-docs-inputs source="deploy/action.yml" -->
+<!-- action-docs-usage source="deploy/action.yml" project="core-github-actions-templates" version="trunk" -->
 
-### Inputs
+<!-- action-docs-header source="trivy-iac-scan/action.yml" -->
+<!-- action-docs-description source="trivy-iac-scan/action.yml" -->
+<!-- action-docs-inputs source="trivy-iac-scan/action.yml" -->
+<!-- action-docs-usage source="trivy-iac-scan/action.yml" project="core-github-actions-templates" version="trunk" -->
 
-| Name                          | Type    | Required | Default                 | Description                                                                                                                                            |
-| ----------------------------- | ------- | -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `name`                        | String  | yes      |                         | Name of application.                                                                                                                                   |
-| `namespace`                   | String  | yes      |                         | Namespace of application.                                                                                                                              |
-| `dockerfile`                  | String  | yes      |                         | Path to Dockerfile.                                                                                                                                    |
-| `dockerBuildContext`          | String  |          | directory of Dockerfile | Path to Docker build context.                                                                                                                          |
-| `severity`                    | String  |          | `CRITICAL,HIGH`         | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                          |
-| `trivy-cve-ignores`           | String  |          |                         | Comma-separated list of CVEs for Trivy to ignore. See https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore for syntax. |
-| `trivy-enable-secret-scanner` | Boolean |          | `true`                  | Enable Trivy secret scanner.                                                                                                                           |
-| `trivy-skip-dirs`             | String  |          |                         | Directories/files skipped by Trivy. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                   |
-| `AZURE_CLIENT_ID`             | String  | yes      | Elvia default AKS       | ClientId of a service principal that can push to Container Registry.                                                                                   |
-| `AZURE_TENANT_ID`             | String  |          | Elvia Tenant            | TenantId of a service principal that can push to Azure Container Registry.                                                                             |
-| `ACR_SUBSCRIPTION_ID`         | String  |          | Elvia default ACR       | Subscription ID of the Azure Container Registry to push to.                                                                                            |
-| `ACR_NAME`                    | String  |          | Elvia default ACR       | Name of the Azure Container Registry to push to.                                                                                                       |
-
-### Deploy
-
-Template that deploys an Elvia Helm chart to Kubernetes
-
-### Inputs
-
-| Name                            | Type    | Required            | Default                      | Description                                                                                                                      |
-| ------------------------------- | ------- | ------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                          | String  | yes                 |                              | Name of application.                                                                                                             |
-| `namespace`                     | String  | yes                 |                              | Namespace of application.                                                                                                        |
-| `environment`                   | String  | yes                 |                              | Environment to deploy to. `dev`, `test` or `prod`.                                                                               |
-| `helmValuesPath`                | String  |                     | `.github/deploy/values.yaml` | Path to Helm values file, relative to the root of the repository.                                                                |
-| `checkout`                      | Boolean |                     | `true`                       | If true, the action will check out the repository. If false, the action will assume the repository has already been checked out. |
-| `runtimeCloudProvuider`         | String  |                     | `AKS`                        | Kubernetes cloud provider to deploy to: 'AKS' or 'GKE'. Defaults to 'AKS'.                                                       |
-| `AZURE_CLIENT_ID`               | String  | only for AKS deploy |                              | ClientId of a service principal that has access to AKS. Only required for deploying to AKS.                                      |
-| `AZURE_TENANT_ID`               | String  |                     | Elvia Tenant                 | TenantId of a service principal that has access to AKS.                                                                          |
-| `AKS_SUBSCRIPTION_ID`           | String  |                     | Elvia default AKS            | Subscription ID of the AKS cluster to deploy to.                                                                                 |
-| `AKS_CLUSTER_NAME`              | String  |                     | Elvia default AKS            | Name of the AKS cluster to deploy to.                                                                                            |
-| `AKS_RESOURCE_GROUP`            | String  |                     | Elvia default AKS            | Resource group of the AKS cluster to deploy to.                                                                                  |
-| `GC_SERVICE_ACCOUNT`            | String  | only for GKE deploy |                              | Service account to use for deploying to GKE. Only required for deploying to GKE.                                                 |
-| `GC_WORKLOAD_IDENTITY_PROVIDER` | String  | only for GKE deploy | `gcp`                        | Workload identity provider to use for deploying to GKE. Only required for deploying to GKE.                                      |
-| `GC_PROJECT_ID`                 | String  |                     | Elvia default GKE            | Project ID of the GKE cluster to deploy to. Defaults to Elvias normal clusters.                                                  |
-| `GC_CLUSTER_NAME`               | String  |                     | Elvia default GKE            | Name of the GKE cluster to deploy to. Defaults to Elvias normal clusters.                                                        |
-| `GC_CLUSTER_LOCATION`           | String  |                     | Elvia default GKE            | Location of the GKE cluster to deploy to. Defaults to Elvias normal clusters.                                                    |
-
-## Trivy IaC scanning
-
-Uses https://github.com/aquasecurity/trivy-action to scan IaC and report security issues.
-The action will report any vulnerabilities to GitHub Advanced Security, which will be visible in the Security tab on GitHub.
-
-### Inputs
-
-| Name            | Type    | Required | Default                            | Description                                                                                                                      |
-| --------------- | ------- | -------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `path`          | String  | no       | `.`                                | Path to IaC to scan.                                                                                                             |
-| `skip-dirs`     | String  | no       |                                    | Comma-separated list of directories to skip                                                                                      |
-| `severity`      | String  | no       | `CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN` | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.    |
-| `upload-report` | Boolean | no       | `true`                             | Upload Trivy report to GitHub Security tab.                                                                                      |
-| `checkout`      | Boolean | no       | `true`                             | If true, the action will check out the repository. If false, the action will assume the repository has already been checked out. |
-
-### Example
-
-```yaml
-name: Scan IaC with Trivy
-on:
-  push:
-    branches: [develop, master]
-  pull_request:
-    branches: [develop, master]
-  schedule:
-    - cron: '1 2 * * 3' # every Wednesday at 02:01
-
-jobs:
-  trivy_scan:
-    runs-on: ubuntu-latest
-    name: 'Scan IaC with Trivy'
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    steps:
-      - uses: 3lvia/core-github-actions-templates/trivy-iac-scan@trunk
-        with:
-          path: 'terraform'
-          skip-dirs: 'terraform/modules'
-```
-
-## Terraform format
-
-Uses built-in formatter for Terraform CLI to check format of Terraform code.
-
-### Inputs
-
-| Name       | Type    | Required | Default | Description                                                                                                                      |
-| ---------- | ------- | -------- | ------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `path`     | String  | no       | `.`     | Path to process.                                                                                                                 |
-| `checkout` | Boolean | no       | `true`  | If true, the action will check out the repository. If false, the action will assume the repository has already been checked out. |
-
-### Example
-
-```yaml
-name: Check Terraform code formatting
-
-on:
-  pull_request:
-    branches: [develop]
-
-jobs:
-  terraform_format_check:
-    permissions:
-      contents: read
-    steps:
-      - uses: 3lvia/core-github-actions-templates/terraform-format@trunk
-        with:
-          path: 'terraform'
-```
+<!-- action-docs-header source="terraform-format/action.yml" -->
+<!-- action-docs-description source="terraform-format/action.yml" -->
+<!-- action-docs-inputs source="terraform-format/action.yml" -->
+<!-- action-docs-usage source="terraform-format/action.yml" project="core-github-actions-templates" version="trunk" -->
 
 # Development
 
-## Yaml format
+## Setup
+
+Install the dependencies using [yarn](https://yarnpkg.com):
 
 ```bash
-yarn global add prettier
-prettier --single-quote .github/workflows/* **/action.yml README.md -w
+yarn install
+```
+
+## Action documentation
+
+We use [action-docs](https://github.com/npalm/action-docs) to auto-generate the documentation for the actions.
+To add documentation for your new action, add these tags to the `README.md` file:
+
+```markdown
+<!-- action-docs-header source="my-new-action/action.yml" -->
+<!-- action-docs-description source="my-new-action/action.yml" -->
+<!-- action-docs-inputs source="my-new-action/action.yml" -->
+<!-- action-docs-usage source="my-new-action/action.yml" project="core-github-actions-templates" version="trunk" -->
+```
+
+and add the action to the comma-separated list `ACTION_DIRS` in [`.github/workflows/autogenerate-docs.yml`](.github/workflows/autogenerate-docs.yml):
+
+```yaml
+name: Generate action documentation for ${{ matrix.action-file }}
+runs-on: ubuntu-latest
+env:
+  ACTION_DIRS: 'build,deploy,trivy-iac-scan,terraform-format,my-new-action' # Add your action here
+steps:
+```
+
+The documentation will then be autogenerated and commited on push to the `trunk` branch.
+
+### Check autogenerated documentation locally
+
+You can run [action-docs](https://github.com/npalm/action-docs) locally to check the generated documentation:
+
+```bash
+yarn gen-docs new-action/action.yaml
+cat README.md
+```
+
+## Formatting
+
+We use [prettier](https://prettier.io) to format the README and yaml files:
+
+```bash
+yarn format
 # OR
-prettier --single-quote .github/workflows/* **/action.yml README.md -w --end-of-line crlf
+yarn format --end-of-line crlf
 ```

@@ -1,9 +1,10 @@
-name: Build and Scan
-description: Build Docker image and scan for vulnerabilities
+name: 'Build'
+description: 'Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure Container Registry. To use the `Build` and `Deploy` actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform.'
 inputs:
   name:
     description: 'Name of application. Do not include namespace.'
     required: true
+    default: halloj
   namespace:
     description: 'Namespace or system of the application.'
     required: true
@@ -11,7 +12,7 @@ inputs:
     description: 'Path to Dockerfile.'
     required: true
   dockerBuildContext:
-    description: 'Docker build context. It is the working directory needed to build the dockerfile. Defaults to the directory with the Dockerfile.'
+    description: 'Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.'
     required: false
   severity:
     description: 'Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.'
@@ -27,16 +28,15 @@ inputs:
   trivy-skip-dirs:
     description: 'Directories/files skipped by Trivy. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.'
     required: false
-    default: ''
   AZURE_CLIENT_ID:
     description: 'ClientId of a service principal that can push to Container Registry.'
     required: true
   AZURE_TENANT_ID:
-    description: "TenantId of a service principal that can push to Azure Container Registry. Default to Elvia's Tenant ID"
+    description: "TenantId of a service principal that can push to Azure Container Registry. Default to Elvia's Tenant ID."
     required: false
     default: '2186a6ec-c227-4291-9806-d95340bf439d'
   ACR_SUBSCRIPTION_ID:
-    description: "Subscription ID of the Azure Container Registry to push to. Defaults to Elvia's standard ACR."
+    description: "Subscription ID of the Azure Container Registry to push to. Defaults to subscription ID of Elvia's standard ACR."
     required: false
     default: '9edbf217-b7c1-4f6a-ae76-d046cf932ff0'
   ACR_NAME:

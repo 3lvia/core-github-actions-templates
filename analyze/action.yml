@@ -1,5 +1,5 @@
-name: Analyze
-description: Run CodeQL
+name: 'Analyze'
+description: 'Run CodeQL analysis.'
 
 runs:
   using: 'composite'

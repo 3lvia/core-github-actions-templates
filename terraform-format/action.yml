@@ -1,5 +1,5 @@
-name: Terraform format
-description: 'Checks formatting of Terraform files.'
+name: 'Terraform format check'
+description: 'Uses the built-in formatter from the Terraform CLI to check the format of Terraform code.'
 inputs:
   path:
     description: 'Path to process.'
