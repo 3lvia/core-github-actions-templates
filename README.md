@@ -65,7 +65,7 @@ jobs:
           namespace: core
           environment: dev
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
-          helmValuesPath: ".github/deploy/values.yaml"
+          helmValuesPath: '.github/deploy/values.yaml'
 
   deploy_test:
     name: Deploy Test
@@ -80,7 +80,7 @@ jobs:
           namespace: core
           environment: test
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
-          helmValuesPath: ".github/deploy/values.yaml"
+          helmValuesPath: '.github/deploy/values.yaml'
 
   deploy_prod:
     name: Deploy Prod
@@ -95,7 +95,7 @@ jobs:
           namespace: core
           environment: prod
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
-          helmValuesPath: ".github/deploy/values.yaml"
+          helmValuesPath: '.github/deploy/values.yaml'
 ```
 
 <!-- action-docs-inputs source="build/action.yml" -->
@@ -144,7 +144,7 @@ and add the action to the comma-separated list `ACTION_DIRS` in [`.github/workfl
 name: Generate action documentation for ${{ matrix.action-file }}
 runs-on: ubuntu-latest
 env:
-  ACTION_DIRS: "build,deploy,trivy-iac-scan,terraform-format,my-new-action" # Add your action here
+  ACTION_DIRS: 'build,deploy,trivy-iac-scan,terraform-format,my-new-action' # Add your action here
 steps:
 ```
 
