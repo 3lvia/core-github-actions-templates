@@ -86,8 +86,8 @@ runs:
         context: ${{ env.DOCKER_DIR }}
         push: false
         load: true
-        tags: ${{ env.IMAGE_LONG_NAME }}
-        cache-from: 'type=registry,ref=${{ env.IMAGE_NAME }}'
+        tags: '${{ env.IMAGE_LONG_NAME }},${{ env.IMAGE_NAME }}:latest-cache'
+        cache-from: 'type=registry,ref=${{ env.IMAGE_NAME }}:latest-cache'
         cache-to: 'type=inline'
 
     - name: Setup Trivy ignore file
@@ -151,4 +151,4 @@ runs:
 
     - name: Push image
       shell: bash
-      run: docker push ${{ env.IMAGE_LONG_NAME }}
+      run: docker push '${{ env.IMAGE_NAME }}' --all-tags
