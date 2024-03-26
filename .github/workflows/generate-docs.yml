@@ -33,7 +33,7 @@ jobs:
       - name: Generate action documentation
         run: |
           for ACTION_FILE in $(echo "$ACTION_DIRS" | tr ',' '\n'); do
-            yarn gen-docs "$ACTION_FILE"
+            yarn gen-docs "$ACTION_FILE/action.yml"
           done
 
       - name: Format README
