@@ -36,6 +36,14 @@ jobs:
             yarn gen-docs "$ACTION_FILE/action.yml"
           done
 
+      - name: Generate table of contents using gh-md-toc
+        run: |
+          wget "https://raw.githubusercontent.com/ekalinin/github-markdown-toc/$GH_MD_TOC_VERSION/gh-md-toc"
+          chmod +x gh-md-toc
+          ./gh-md-toc --insert --no-backup --hide-footer --skip-header README.md
+        env:
+          GH_MD_TOC_VERSION: 0.10.0
+
       - name: Format README
         run: yarn prettier -w --single-quote README.md
 
