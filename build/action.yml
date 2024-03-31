@@ -68,6 +68,12 @@ runs:
         fi
         echo "DOCKER_DIR=$DOCKER_DIR" >> "$GITHUB_ENV"
 
+        if [ -z "${{ inputs.AZURE_CLIENT_ID }}" ]
+        then
+            echo "Missing required input AZURE_CLIENT_ID. Ensure that this is set and non-empty".
+            exit 1
+        fi
+
     - name: Authenticate with Azure
       uses: azure/login@v2
       with:
