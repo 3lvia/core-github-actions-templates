@@ -3,13 +3,13 @@ name: Generate action documentation
 on:
   push:
     branches: [trunk]
+  pull_request: # TODO: remove
+    branches: [trunk]
 
 jobs:
   generate_docs:
     name: Generate action documentation
     runs-on: ubuntu-latest
-    env:
-      ACTION_DIRS: 'build,deploy,trivy-iac-scan,terraform-format'
     permissions:
       contents: write
     steps:
@@ -31,23 +31,16 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Generate action documentation
-        run: |
-          for ACTION_FILE in $(echo "$ACTION_DIRS" | tr ',' '\n'); do
-            yarn gen-docs "$ACTION_FILE/action.yml"
-          done
-
-      - name: Generate table of contents using gh-md-toc
-        run: |
-          wget "https://raw.githubusercontent.com/ekalinin/github-markdown-toc/$GH_MD_TOC_VERSION/gh-md-toc"
-          chmod +x gh-md-toc
-          ./gh-md-toc --insert --no-backup --skip-header README.md
-        env:
-          GH_MD_TOC_VERSION: 0.10.0
+        uses: ./internal/gh-actions-docs
 
       - name: Format README
         run: yarn prettier -w --single-quote README.md
 
+      - name: Debug, remove this # TODO: remove
+        run: cat README.md
+
       - name: Commit changes
+        if: false
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com

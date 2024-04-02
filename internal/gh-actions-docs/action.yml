@@ -1,0 +1,19 @@
+name: 'gh-actions-docs'
+description: 'Automatically generate documentation for your GitHub Actions composite actions.'
+
+inputs:
+  readmeFile:
+    description: 'Name of README file to generate.'
+    required: false
+    default: 'README.md'
+  debug:
+    description: 'Enable debug mode.'
+    required: false
+    default: false
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - README_FILE=${{ inputs.readmeFile }}
+    - DEBUG=${{ inputs.debug }}
