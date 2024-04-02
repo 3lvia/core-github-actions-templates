@@ -2,17 +2,17 @@ name: Playwright Test
 description: Run playwright tests written in dotnet
 inputs:
   testproject:
-    description: "Name of test project file to run"
+    description: 'Name of test project file to run'
     required: true
   environment:
-    description: "Environment is used to find correct vault instance."
+    description: 'Environment is used to find correct vault instance.'
     required: true
   system:
-    description: "System is used to log in to Vault using correct role."
+    description: 'System is used to log in to Vault using correct role.'
     required: true
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Parse input and set environment variables
       shell: bash
