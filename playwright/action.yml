@@ -1,0 +1,48 @@
+name: Playwright Test
+description: Run playwright tests written in dotnet
+inputs:
+  testproject:
+    description: "Name of test project file to run"
+    required: true
+  environment:
+    description: "Environment is used to find correct vault instance."
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Parse input and set environment variables
+      shell: bash
+      run: |
+        if [[ "${{ inputs.environment }}" == "dev" ]]; then
+          echo "VAULT_ADDR=https://vault.dev-elvia.io" >> "$GITHUB_ENV"
+        elif [[ "${{ inputs.environment }}" == "test" ]]; then
+          echo "VAULT_ADDR=https://vault.test-elvia.io" >> "$GITHUB_ENV"
+        elif [[ "${{ inputs.environment }}" == "prod" ]]; then
+          echo "VAULT_ADDR=https://vault.elvia.io" >> "$GITHUB_ENV"
+        else
+          echo "Unsupported environment: ${{ inputs.environment }}"
+          exit 1
+        fi
+    - name: Login Vault
+      uses: hashicorp/vault-action@v3
+      with:
+        url: ${{ env.VAULT_ADDR }}
+        role: jwt-github-core-core
+        method: jwt
+        path: jwt-github
+        exportToken: true
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: dotnet build
+      shell: bash
+      run: dotnet build ${{ inputs.testproject }}
+    - name: install playwright
+      shell: pwsh
+      run: |
+        $dirName = [System.IO.Path]::GetDirectoryName(${{ inputs.testproject }})
+        $playwrightscript = Get-ChildItem -Path $dirName -Filter playwright.ps1 -Recurse -ErrorAction SilentlyContinue -Force
+        &$playwrightscript.FullName install
+    - name: dotnet test
+      shell: bash
+      run: dotnet test ${{ inputs.testproject }}
