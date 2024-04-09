@@ -103,7 +103,7 @@ prettyPrintAction (Action name' description' inputs') actionMetadata =
         ++ description'
         ++ "\n\n"
         ++ prettyPrintInputs inputs'
-        ++ prettyPrintUsage name' inputs' actionMetadata
+        ++ prettyPrintUsage inputs' actionMetadata
 
 prettyPrintInputs :: Maybe Inputs -> String
 prettyPrintInputs (Just inputs') =
@@ -125,8 +125,8 @@ prettyPrintInputs (Just inputs') =
             ++ "\n"
 prettyPrintInputs _ = ""
 
-prettyPrintUsage :: String -> Maybe Inputs -> ActionMetadata -> String
-prettyPrintUsage name' inputs' (ActionMetadata _ (Just owner') (Just project') (Just version')) =
+prettyPrintUsage :: Maybe Inputs -> ActionMetadata -> String
+prettyPrintUsage inputs' (ActionMetadata path' (Just owner') (Just project') (Just version')) =
     "### Usage\n"++
     "```yaml\n"
         ++ "uses: "
@@ -134,13 +134,13 @@ prettyPrintUsage name' inputs' (ActionMetadata _ (Just owner') (Just project') (
         ++ "/"
         ++ project'
         ++ "/"
-        ++ unpack (toLower $ pack name')
+        ++ unpack ((head . splitOn "/") $ pack path')
         ++ "@"
         ++ version'
         ++ "\n"
         ++ prettyPrintUsageWith inputs'
         ++ "```\n"
-prettyPrintUsage _ _ _ = ""
+prettyPrintUsage _ _ = ""
 
 prettyPrintUsageWith :: Maybe Inputs -> String
 prettyPrintUsageWith (Just inputs'') = "with:\n" ++ concatMap (uncurry prettyPrintUsageInputs) (toList inputs'')
