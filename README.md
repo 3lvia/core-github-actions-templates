@@ -71,7 +71,7 @@ Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure C
 ### Usage
 
 ```yaml
-uses: 3lvia/core-github-actions-templates@trunk
+uses: 3lvia/core-github-actions-templates/build@trunk
 with:
   ACR_NAME:
   # Name of the Azure Container Registry to push to. Defaults to Elvia's standard ACR.
@@ -268,7 +268,7 @@ Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Bui
 ### Usage
 
 ```yaml
-uses: 3lvia/core-github-actions-templates@trunk
+uses: 3lvia/core-github-actions-templates/deploy@trunk
 with:
   AKS_CLUSTER_NAME:
   # Name of the AKS cluster to deploy to. Defaults to Elvias normal clusters.
@@ -369,7 +369,7 @@ Run dotnet unit tests
 ### Usage
 
 ```yaml
-uses: 3lvia/core-github-actions-templates@trunk
+uses: 3lvia/core-github-actions-templates/unit test@trunk
 ```
 
 <!-- gh-actions-docs-end -->
@@ -391,7 +391,7 @@ Run CodeQL analysis.
 ### Usage
 
 ```yaml
-uses: 3lvia/core-github-actions-templates@trunk
+uses: 3lvia/core-github-actions-templates/analyze@trunk
 with:
   working-directory:
   # Will run CodeQL Analysis on projects under this working directory
@@ -423,7 +423,7 @@ Uses https://github.com/aquasecurity/trivy-action to scan IaC and report securit
 ### Usage
 
 ```yaml
-uses: 3lvia/core-github-actions-templates@trunk
+uses: 3lvia/core-github-actions-templates/trivy iac scan@trunk
 with:
   checkout:
   # If true, the action will check out the repository. If false, the action will assume the repository has already been checked out.
@@ -476,7 +476,7 @@ Run playwright tests written in dotnet
 ### Usage
 
 ```yaml
-uses: 3lvia/core-github-actions-templates@trunk
+uses: 3lvia/core-github-actions-templates/playwright test@trunk
 with:
   environment:
   # Environment is used to find correct vault instance.
@@ -514,7 +514,7 @@ Uses the built-in formatter from the Terraform CLI to check the format of Terraf
 ### Usage
 
 ```yaml
-uses: 3lvia/core-github-actions-templates@trunk
+uses: 3lvia/core-github-actions-templates/terraform format check@trunk
 with:
   checkout:
   # If true, the action will check out the repository. If false, the action will assume the repository has already been checked out.
