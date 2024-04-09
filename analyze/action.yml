@@ -1,5 +1,10 @@
 name: 'Analyze'
 description: 'Run CodeQL analysis.'
+inputs:
+  working-directory:
+    description: 'Will run CodeQL Analysis on projects under this working directory'
+    required: false
+    default: './'
 
 runs:
   using: 'composite'
@@ -10,8 +15,15 @@ runs:
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
 
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v3
+    - name: Build projects
+      shell: bash
+      run: |
+        projects=`find . -iname "*csproj"`
+        for project in $projects;
+        do
+          dotnet build $project
+        done
+      working-directory: ${{ inputs.working-directory }}
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
