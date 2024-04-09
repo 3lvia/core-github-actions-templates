@@ -48,4 +48,11 @@ runs:
         &$playwrightscript.FullName install
     - name: dotnet test
       shell: bash
-      run: dotnet test ${{ inputs.testproject }}
+      run: dotnet test -l:trx ${{ inputs.testproject }}
+    - name: Publish test results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        files: |
+          **/TestResults/*.trx
+          .github/**/TestResults/*.trx
