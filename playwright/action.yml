@@ -40,7 +40,7 @@ runs:
     - name: install playwright
       shell: pwsh
       run: |
-        $dirName = [System.IO.Path]::GetDirectoryName(${{ inputs.testproject }})
+        $dirName = [System.IO.Path]::GetDirectoryName("${{ inputs.testproject }}")
         $playwrightscript = Get-ChildItem -Path $dirName -Filter playwright.ps1 -Recurse -ErrorAction SilentlyContinue -Force
         &$playwrightscript.FullName install
     - name: dotnet test
