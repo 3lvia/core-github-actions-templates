@@ -56,3 +56,4 @@ runs:
         files: |
           **/TestResults/*.trx
           .github/**/TestResults/*.trx
+        check_name: Smoketest Results
