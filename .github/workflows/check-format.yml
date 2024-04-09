@@ -8,7 +8,6 @@ jobs:
   prettier_check:
     name: 'Prettier check'
     runs-on: ubuntu-latest
-    if: false
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -22,7 +21,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          key: "${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}"
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
