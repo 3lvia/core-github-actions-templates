@@ -369,7 +369,7 @@ Run dotnet unit tests
 ### Usage
 
 ```yaml
-uses: 3lvia/core-github-actions-templates/unit test@trunk
+uses: 3lvia/core-github-actions-templates/unittest@trunk
 ```
 
 <!-- gh-actions-docs-end -->
@@ -423,7 +423,7 @@ Uses https://github.com/aquasecurity/trivy-action to scan IaC and report securit
 ### Usage
 
 ```yaml
-uses: 3lvia/core-github-actions-templates/trivy iac scan@trunk
+uses: 3lvia/core-github-actions-templates/trivy-iac-scan@trunk
 with:
   checkout:
   # If true, the action will check out the repository. If false, the action will assume the repository has already been checked out.
@@ -476,7 +476,7 @@ Run playwright tests written in dotnet
 ### Usage
 
 ```yaml
-uses: 3lvia/core-github-actions-templates/playwright test@trunk
+uses: 3lvia/core-github-actions-templates/playwright@trunk
 with:
   environment:
   # Environment is used to find correct vault instance.
@@ -514,7 +514,7 @@ Uses the built-in formatter from the Terraform CLI to check the format of Terraf
 ### Usage
 
 ```yaml
-uses: 3lvia/core-github-actions-templates/terraform format check@trunk
+uses: 3lvia/core-github-actions-templates/terraform-format@trunk
 with:
   checkout:
   # If true, the action will check out the repository. If false, the action will assume the repository has already been checked out.
