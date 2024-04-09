@@ -7,6 +7,9 @@ inputs:
   environment:
     description: "Environment is used to find correct vault instance."
     required: true
+  system:
+    description: "System is used to log in to Vault using correct role."
+    required: true
 
 runs:
   using: "composite"
@@ -28,7 +31,7 @@ runs:
       uses: hashicorp/vault-action@v3
       with:
         url: ${{ env.VAULT_ADDR }}
-        role: jwt-github-core-core
+        role: jwt-github-${{ inputs.system }}
         method: jwt
         path: jwt-github
         exportToken: true
