@@ -297,8 +297,10 @@ actionMetadataParser = do
         manyTill anySingle (char ' ')
     permissions' <- optional $ do
         _ <- string "permissions="
-        permissionParser `sepBy` char ','
-    _ <- string " -->"
+        permissions' <- permissionParser `sepBy` char ','
+        _ <- char ' '
+        return permissions'
+    _ <- string "-->"
     _ <- skipManyTill anySingle $ string $ pack actionEndTag
     return $ ActionMetadata path' owner' project' version' (fromList <$> permissions')
 
