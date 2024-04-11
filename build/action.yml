@@ -35,15 +35,15 @@ inputs:
     description: 'ClientId of a service principal that can push to Container Registry.'
     required: true
   AZURE_TENANT_ID:
-    description: "TenantId of a service principal that can push to Azure Container Registry. Default to Elvia's Tenant ID."
+    description: "TenantId of a service principal that can push to Azure Container Registry."
     required: false
     default: '2186a6ec-c227-4291-9806-d95340bf439d'
   ACR_SUBSCRIPTION_ID:
-    description: "Subscription ID of the Azure Container Registry to push to. Defaults to subscription ID of Elvia's standard ACR."
+    description: "Subscription ID of the Azure Container Registry to push to."
     required: false
     default: '9edbf217-b7c1-4f6a-ae76-d046cf932ff0'
   ACR_NAME:
-    description: "Name of the Azure Container Registry to push to. Defaults to Elvia's standard ACR."
+    description: "Name of the Azure Container Registry to push to."
     required: false
     default: containerregistryelvia
 

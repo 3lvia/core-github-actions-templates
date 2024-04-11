@@ -19,14 +19,14 @@ inputs:
     required: false
     default: 'true'
   runtimeCloudProvider:
-    description: "Kubernetes cloud provider to deploy to: 'AKS' or 'GKE'. Defaults to AKS."
+    description: "Kubernetes cloud provider to deploy to: 'AKS' or 'GKE'."
     required: false
     default: 'AKS'
   AZURE_CLIENT_ID:
     description: 'Client ID of a service principal that has access to AKS. Only required for deploying to AKS.'
     required: false
   AZURE_TENANT_ID:
-    description: "Tenant ID of a service principal that has access to AKS. Default to Elvia's Tenant ID."
+    description: "Tenant ID of a service principal that has access to AKS."
     required: false
     default: '2186a6ec-c227-4291-9806-d95340bf439d'
   AKS_SUBSCRIPTION_ID:
@@ -51,7 +51,7 @@ inputs:
     description: 'Name of the GKE cluster to deploy to. Defaults to Elvias normal clusters.'
     required: false
   GC_CLUSTER_LOCATION:
-    description: 'Location of the GKE cluster to deploy to. Defaults to locations of Elvias normal clusters.'
+    description: 'Location of the GKE cluster to deploy to.'
     required: false
     default: 'europe-west1'
 
