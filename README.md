@@ -50,7 +50,7 @@ GitHub Actions templates for the Elvia organization.
 
 ### Description
 
-Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure Container Registry. To use the `Build` and `Deploy` actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform. Required permissions: `contents: read` and `id-token: write`.
+Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure Container Registry. To use the `Build` and `Deploy` actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform.
 
 ### Inputs
 
@@ -251,7 +251,7 @@ jobs:
 
 ### Description
 
-Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Build` and `Deploy` actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform. Required permissions: `contents: read` and `id-token: write`.
+Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Build` and `Deploy` actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform.
 
 ### Inputs
 
@@ -403,7 +403,7 @@ Run dotnet unit tests. Required permissions: `checks: write`, `contents: read`, 
 
 ### Description
 
-Run CodeQL analysis. Required permissions: `actions: read`, `contents: read` and `security-events: write`.
+Run CodeQL analysis.
 
 ### Inputs
 
@@ -439,7 +439,7 @@ Run CodeQL analysis. Required permissions: `actions: read`, `contents: read` and
 
 ### Description
 
-Uses https://github.com/aquasecurity/trivy-action to scan IaC and report security issues. The action will report any vulnerabilities to GitHub Advanced Security, which will be visible in the Security tab on GitHub. Required permissions: `actions: read`, `contents: read` and `security-events: write`.
+Uses https://github.com/aquasecurity/trivy-action to scan IaC and report security issues. The action will report any vulnerabilities to GitHub Advanced Security, which will be visible in the Security tab on GitHub.
 
 ### Inputs
 
