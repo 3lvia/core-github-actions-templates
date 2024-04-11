@@ -18,22 +18,23 @@ GitHub Actions templates for the Elvia organization.
     - [Usage](#usage-1)
   - [Unit Test](#unit-test)
     - [Description](#description-2)
+    - [Inputs](#inputs-2)
     - [Usage](#usage-2)
   - [Analyze](#analyze)
     - [Description](#description-3)
-    - [Inputs](#inputs-2)
+    - [Inputs](#inputs-3)
     - [Usage](#usage-3)
   - [Trivy IaC scan](#trivy-iac-scan)
     - [Description](#description-4)
-    - [Inputs](#inputs-3)
+    - [Inputs](#inputs-4)
     - [Usage](#usage-4)
   - [Playwright Test](#playwright-test)
     - [Description](#description-5)
-    - [Inputs](#inputs-4)
+    - [Inputs](#inputs-5)
     - [Usage](#usage-5)
   - [Terraform format check](#terraform-format-check)
     - [Description](#description-6)
-    - [Inputs](#inputs-5)
+    - [Inputs](#inputs-6)
     - [Usage](#usage-6)
 - [Development](#development)
   - [Setup](#setup)
@@ -49,7 +50,7 @@ GitHub Actions templates for the Elvia organization.
 
 ### Description
 
-Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure Container Registry. To use the `Build` and `Deploy` actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform.
+Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure Container Registry. To use the `Build` and `Deploy` actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform. Required permissions: `contents: read` and `id-token: write`.
 
 ### Inputs
 
@@ -59,6 +60,7 @@ Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure C
 | `ACR_SUBSCRIPTION_ID`         | Subscription ID of the Azure Container Registry to push to. Defaults to subscription ID of Elvia's standard ACR.                                       | no       | `9edbf217-b7c1-4f6a-ae76-d046cf932ff0` |
 | `AZURE_CLIENT_ID`             | ClientId of a service principal that can push to Container Registry.                                                                                   | yes      |                                        |
 | `AZURE_TENANT_ID`             | TenantId of a service principal that can push to Azure Container Registry. Default to Elvia's Tenant ID.                                               | no       | `2186a6ec-c227-4291-9806-d95340bf439d` |
+| `checkout`                    | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.                   | no       | `true`                                 |
 | `dockerBuildContext`          | Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.                      | no       |                                        |
 | `dockerfile`                  | Path to Dockerfile.                                                                                                                                    | yes      |                                        |
 | `name`                        | Name of application. Do not include namespace.                                                                                                         | yes      |                                        |
@@ -95,6 +97,12 @@ with:
   #
   # Required: no
   # Default: '2186a6ec-c227-4291-9806-d95340bf439d'
+
+  checkout:
+  # If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.
+  #
+  # Required: no
+  # Default: 'true'
 
   dockerBuildContext:
   # Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.
@@ -242,7 +250,7 @@ jobs:
 
 ### Description
 
-Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Build` and `Deploy` actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform.
+Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Build` and `Deploy` actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform. Required permissions: `contents: read` and `id-token: write`.
 
 ### Inputs
 
@@ -364,12 +372,24 @@ with:
 
 ### Description
 
-Run dotnet unit tests
+Run dotnet unit tests. Required permissions: `checks: write`, `contents: read`, `issues: read`, and `pull-requests: write`.
+
+### Inputs
+
+| Name       | Description                                                                                                                          | Required | Default |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- |
+| `checkout` | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`  |
 
 ### Usage
 
 ```yaml
 uses: 3lvia/core-github-actions-templates/unittest@trunk
+with:
+  checkout:
+  # If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.
+  #
+  # Required: no
+  # Default: 'true'
 ```
 
 <!-- gh-actions-docs-end -->
@@ -380,19 +400,26 @@ uses: 3lvia/core-github-actions-templates/unittest@trunk
 
 ### Description
 
-Run CodeQL analysis.
+Run CodeQL analysis. Required permissions: `actions: read`, `contents: read` and `security-events: write`.
 
 ### Inputs
 
-| Name                | Description                                                       | Required | Default |
-| ------------------- | ----------------------------------------------------------------- | -------- | ------- |
-| `working-directory` | Will run CodeQL Analysis on projects under this working directory | no       | `./`    |
+| Name                | Description                                                                                                                          | Required | Default |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- |
+| `checkout`          | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`  |
+| `working-directory` | Will run CodeQL Analysis on projects under this working directory                                                                    | no       | `./`    |
 
 ### Usage
 
 ```yaml
 uses: 3lvia/core-github-actions-templates/analyze@trunk
 with:
+  checkout:
+  # If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.
+  #
+  # Required: no
+  # Default: 'true'
+
   working-directory:
   # Will run CodeQL Analysis on projects under this working directory
   #
@@ -408,7 +435,7 @@ with:
 
 ### Description
 
-Uses https://github.com/aquasecurity/trivy-action to scan IaC and report security issues. The action will report any vulnerabilities to GitHub Advanced Security, which will be visible in the Security tab on GitHub.
+Uses https://github.com/aquasecurity/trivy-action to scan IaC and report security issues. The action will report any vulnerabilities to GitHub Advanced Security, which will be visible in the Security tab on GitHub. Required permissions: `actions: read`, `contents: read` and `security-events: write`.
 
 ### Inputs
 
@@ -463,7 +490,7 @@ with:
 
 ### Description
 
-Run playwright tests written in dotnet
+Run Playwright tests written in dotnet. Required permissions: `checks: write`, `contents: read`, `id-token: write`, `issues: read`, and `pull-requests: write`.
 
 ### Inputs
 
