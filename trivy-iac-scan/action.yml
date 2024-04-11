@@ -1,5 +1,5 @@
 name: Trivy IaC scan
-description: 'Uses https://github.com/aquasecurity/trivy-action to scan IaC and report security issues. The action will report any vulnerabilities to GitHub Advanced Security, which will be visible in the Security tab on GitHub.'
+description: 'Uses https://github.com/aquasecurity/trivy-action to scan IaC and report security issues. The action will report any vulnerabilities to GitHub Advanced Security, which will be visible in the Security tab on GitHub. Required permissions: `actions: read`, `contents: read` and `security-events: write`.'
 inputs:
   path:
     description: 'Path to the directory containing the IaC files.'

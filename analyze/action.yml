@@ -1,15 +1,20 @@
 name: 'Analyze'
-description: 'Run CodeQL analysis.'
+description: 'Run CodeQL analysis. Required permissions: `contents: read` and `security-events: write`.'
 inputs:
   working-directory:
     description: 'Will run CodeQL Analysis on projects under this working directory'
     required: false
     default: './'
+  checkout:
+    description: 'If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.'
+    required: false
+    default: 'true'
 
 runs:
   using: 'composite'
   steps:
     - name: Checkout repository
+      if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@v4
 
     - name: Initialize CodeQL

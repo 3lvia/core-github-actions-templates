@@ -1,5 +1,5 @@
 name: 'Build'
-description: 'Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure Container Registry. To use the `Build` and `Deploy` actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform.'
+description: 'Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure Container Registry. To use the `Build` and `Deploy` actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform. Required permissions: `contents: read` and `id-token: write`.'
 inputs:
   name:
     description: 'Name of application. Do not include namespace.'
@@ -27,6 +27,10 @@ inputs:
   trivy-skip-dirs:
     description: 'Directories/files skipped by Trivy. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.'
     required: false
+  checkout:
+    description: 'If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.'
+    required: false
+    default: 'true'
   AZURE_CLIENT_ID:
     description: 'ClientId of a service principal that can push to Container Registry.'
     required: true
@@ -47,6 +51,7 @@ runs:
   using: 'composite'
   steps:
     - name: Checkout repository
+      if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@v4
 
     - name: Set up Docker Buildx

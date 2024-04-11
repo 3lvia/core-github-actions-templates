@@ -1,5 +1,5 @@
 name: Playwright Test
-description: Run playwright tests written in dotnet
+description: 'Run Playwright tests written in dotnet. Required permissions: `checks: write`, `contents: read`, `id-token: write`, `issues: read`, and `pull-requests: write`.'
 inputs:
   testproject:
     description: 'Name of test project file to run'
@@ -27,6 +27,7 @@ runs:
           echo "Unsupported environment: ${{ inputs.environment }}"
           exit 1
         fi
+
     - name: Login Vault
       uses: hashicorp/vault-action@v3
       with:
@@ -35,20 +36,25 @@ runs:
         method: jwt
         path: jwt-github
         exportToken: true
+
     - name: Checkout repository
       uses: actions/checkout@v4
-    - name: dotnet build
+
+    - name: Dotnet build
       shell: bash
       run: dotnet build ${{ inputs.testproject }}
-    - name: install playwright
+
+    - name: Install playwright
       shell: pwsh
       run: |
         $dirName = [System.IO.Path]::GetDirectoryName("${{ inputs.testproject }}")
         $playwrightscript = Get-ChildItem -Path $dirName -Filter playwright.ps1 -Recurse -ErrorAction SilentlyContinue -Force
         &$playwrightscript.FullName install
-    - name: dotnet test
+
+    - name: Dotnet test
       shell: bash
       run: dotnet test -l:trx ${{ inputs.testproject }}
+
     - name: Publish test results
       uses: EnricoMi/publish-unit-test-result-action@v2
       if: always()
