@@ -44,7 +44,7 @@ GitHub Actions templates for the Elvia organization.
 
 # Actions
 
-<!-- gh-actions-docs-start path=build/action.yml owner=3lvia project=core-github-actions-templates version=trunk -->
+<!-- gh-actions-docs-start path=build/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
 
 ## Build
 
@@ -245,7 +245,7 @@ jobs:
           helmValuesPath: '.github/deploy/values.yaml'
 ```
 
-<!-- gh-actions-docs-start path=deploy/action.yml owner=3lvia project=core-github-actions-templates version=trunk -->
+<!-- gh-actions-docs-start path=deploy/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
 
 ## Deploy
 
@@ -368,7 +368,7 @@ Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Bui
 
 <!-- gh-actions-docs-end -->
 
-<!-- gh-actions-docs-start path=unittest/action.yml owner=3lvia project=core-github-actions-templates version=trunk -->
+<!-- gh-actions-docs-start path=unittest/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=checks:write,contents:read,issues:read,pull-requests:write -->
 
 ## Unit Test
 
@@ -397,7 +397,7 @@ Run dotnet unit tests. Required permissions: `checks: write`, `contents: read`, 
 
 <!-- gh-actions-docs-end -->
 
-<!-- gh-actions-docs-start path=analyze/action.yml owner=3lvia project=core-github-actions-templates version=trunk -->
+<!-- gh-actions-docs-start path=analyze/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=actions:read,contents:read,security-events:write -->
 
 ## Analyze
 
@@ -433,7 +433,7 @@ Run CodeQL analysis.
 
 <!-- gh-actions-docs-end -->
 
-<!-- gh-actions-docs-start path=trivy-iac-scan/action.yml owner=3lvia project=core-github-actions-templates version=trunk -->
+<!-- gh-actions-docs-start path=trivy-iac-scan/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=actions:read,contents:read,security-events:write -->
 
 ## Trivy IaC scan
 
@@ -489,7 +489,7 @@ Uses https://github.com/aquasecurity/trivy-action to scan IaC and report securit
 
 <!-- gh-actions-docs-end -->
 
-<!-- gh-actions-docs-start path=playwright/action.yml owner=3lvia project=core-github-actions-templates version=trunk -->
+<!-- gh-actions-docs-start path=playwright/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=checks:write,contents:read,id-token:write,issues:read,pull-requests:write -->
 
 ## Playwright Test
 
