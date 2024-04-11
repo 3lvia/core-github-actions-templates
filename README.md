@@ -56,10 +56,10 @@ Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure C
 
 | Name                          | Description                                                                                                                                            | Required | Default                                |
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------------------------------------- |
-| `ACR_NAME`                    | Name of the Azure Container Registry to push to. Defaults to Elvia's standard ACR.                                                                     | no       | `containerregistryelvia`               |
-| `ACR_SUBSCRIPTION_ID`         | Subscription ID of the Azure Container Registry to push to. Defaults to subscription ID of Elvia's standard ACR.                                       | no       | `9edbf217-b7c1-4f6a-ae76-d046cf932ff0` |
+| `ACR_NAME`                    | Name of the Azure Container Registry to push to.                                                                                                       | no       | `containerregistryelvia`               |
+| `ACR_SUBSCRIPTION_ID`         | Subscription ID of the Azure Container Registry to push to.                                                                                            | no       | `9edbf217-b7c1-4f6a-ae76-d046cf932ff0` |
 | `AZURE_CLIENT_ID`             | ClientId of a service principal that can push to Container Registry.                                                                                   | yes      |                                        |
-| `AZURE_TENANT_ID`             | TenantId of a service principal that can push to Azure Container Registry. Default to Elvia's Tenant ID.                                               | no       | `2186a6ec-c227-4291-9806-d95340bf439d` |
+| `AZURE_TENANT_ID`             | TenantId of a service principal that can push to Azure Container Registry.                                                                             | no       | `2186a6ec-c227-4291-9806-d95340bf439d` |
 | `checkout`                    | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.                   | no       | `true`                                 |
 | `dockerBuildContext`          | Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.                      | no       |                                        |
 | `dockerfile`                  | Path to Dockerfile.                                                                                                                                    | yes      |                                        |
@@ -77,13 +77,13 @@ Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure C
   uses: 3lvia/core-github-actions-templates/build@trunk
   with:
     ACR_NAME:
-    # Name of the Azure Container Registry to push to. Defaults to Elvia's standard ACR.
+    # Name of the Azure Container Registry to push to.
     #
     # Required: no
     # Default: 'containerregistryelvia'
 
     ACR_SUBSCRIPTION_ID:
-    # Subscription ID of the Azure Container Registry to push to. Defaults to subscription ID of Elvia's standard ACR.
+    # Subscription ID of the Azure Container Registry to push to.
     #
     # Required: no
     # Default: '9edbf217-b7c1-4f6a-ae76-d046cf932ff0'
@@ -94,7 +94,7 @@ Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure C
     # Required: yes
 
     AZURE_TENANT_ID:
-    # TenantId of a service principal that can push to Azure Container Registry. Default to Elvia's Tenant ID.
+    # TenantId of a service principal that can push to Azure Container Registry.
     #
     # Required: no
     # Default: '2186a6ec-c227-4291-9806-d95340bf439d'
@@ -261,8 +261,8 @@ Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Bui
 | `AKS_RESOURCE_GROUP`            | Resource group of the AKS cluster to deploy to. Defaults to Elvias normal clusters.                                                  | no       |                                        |
 | `AKS_SUBSCRIPTION_ID`           | Subscription ID of AKS to deploy to. Defaults to Elvias normal clusters.                                                             | no       |                                        |
 | `AZURE_CLIENT_ID`               | Client ID of a service principal that has access to AKS. Only required for deploying to AKS.                                         | no       |                                        |
-| `AZURE_TENANT_ID`               | Tenant ID of a service principal that has access to AKS. Default to Elvia's Tenant ID.                                               | no       | `2186a6ec-c227-4291-9806-d95340bf439d` |
-| `GC_CLUSTER_LOCATION`           | Location of the GKE cluster to deploy to. Defaults to locations of Elvias normal clusters.                                           | no       | `europe-west1`                         |
+| `AZURE_TENANT_ID`               | Tenant ID of a service principal that has access to AKS.                                                                             | no       | `2186a6ec-c227-4291-9806-d95340bf439d` |
+| `GC_CLUSTER_LOCATION`           | Location of the GKE cluster to deploy to.                                                                                            | no       | `europe-west1`                         |
 | `GC_CLUSTER_NAME`               | Name of the GKE cluster to deploy to. Defaults to Elvias normal clusters.                                                            | no       |                                        |
 | `GC_PROJECT_ID`                 | Project ID of GKE to deploy to. Defaults to Elvias normal clusters.                                                                  | no       |                                        |
 | `GC_SERVICE_ACCOUNT`            | Service account to use for deploying to GKE. Only required for deploying to GKE.                                                     | no       |                                        |
@@ -272,7 +272,7 @@ Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Bui
 | `helmValuesPath`                | Path to Helm values file, relative to the root of the repository. Defaults to .github/deploy/values.yaml.                            | no       | `.github/deploy/values.yaml`           |
 | `name`                          | Name of application. Do not include namespace.                                                                                       | yes      |                                        |
 | `namespace`                     | Namespace or system of the application.                                                                                              | yes      |                                        |
-| `runtimeCloudProvider`          | Kubernetes cloud provider to deploy to: 'AKS' or 'GKE'. Defaults to AKS.                                                             | no       | `AKS`                                  |
+| `runtimeCloudProvider`          | Kubernetes cloud provider to deploy to: 'AKS' or 'GKE'.                                                                              | no       | `AKS`                                  |
 
 ### Usage
 
@@ -301,13 +301,13 @@ Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Bui
     # Required: no
 
     AZURE_TENANT_ID:
-    # Tenant ID of a service principal that has access to AKS. Default to Elvia's Tenant ID.
+    # Tenant ID of a service principal that has access to AKS.
     #
     # Required: no
     # Default: '2186a6ec-c227-4291-9806-d95340bf439d'
 
     GC_CLUSTER_LOCATION:
-    # Location of the GKE cluster to deploy to. Defaults to locations of Elvias normal clusters.
+    # Location of the GKE cluster to deploy to.
     #
     # Required: no
     # Default: 'europe-west1'
@@ -360,7 +360,7 @@ Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Bui
     # Required: yes
 
     runtimeCloudProvider:
-    # Kubernetes cloud provider to deploy to: 'AKS' or 'GKE'. Defaults to AKS.
+    # Kubernetes cloud provider to deploy to: 'AKS' or 'GKE'.
     #
     # Required: no
     # Default: 'AKS'
