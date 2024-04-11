@@ -103,7 +103,7 @@ prettyPrintAction (Action name' description' inputs') actionMetadata =
         ++ description'
         ++ "\n\n"
         ++ prettyPrintInputs inputs'
-        ++ prettyPrintUsage inputs' actionMetadata
+        ++ prettyPrintUsage name' inputs' actionMetadata
 
 prettyPrintInputs :: Maybe Inputs -> String
 prettyPrintInputs (Just inputs') =
@@ -125,11 +125,12 @@ prettyPrintInputs (Just inputs') =
             ++ "\n"
 prettyPrintInputs _ = ""
 
-prettyPrintUsage :: Maybe Inputs -> ActionMetadata -> String
-prettyPrintUsage inputs' (ActionMetadata path' (Just owner') (Just project') (Just version')) =
+prettyPrintUsage :: String -> Maybe Inputs -> ActionMetadata -> String
+prettyPrintUsage name' inputs' (ActionMetadata path' (Just owner') (Just project') (Just version')) =
     "### Usage\n"++
     "```yaml\n"
-        ++ "uses: "
+        ++ "- name: " ++ name' ++ "\n"
+        ++ "  uses: "
         ++ owner'
         ++ "/"
         ++ project'
@@ -140,10 +141,10 @@ prettyPrintUsage inputs' (ActionMetadata path' (Just owner') (Just project') (Ju
         ++ "\n"
         ++ prettyPrintUsageWith inputs'
         ++ "```\n"
-prettyPrintUsage _ _ = ""
+prettyPrintUsage _ _ _ = ""
 
 prettyPrintUsageWith :: Maybe Inputs -> String
-prettyPrintUsageWith (Just inputs'') = "with:\n" ++ concatMap (uncurry prettyPrintUsageInputs) (toList inputs'')
+prettyPrintUsageWith (Just inputs'') = "  with:\n" ++ concatMap (uncurry prettyPrintUsageInputs) (toList inputs'')
 prettyPrintUsageWith Nothing = ""
 
 prettyPrintUsageInputs :: String -> ActionInput -> String
@@ -165,7 +166,7 @@ prettyPrintUsageInputs name' (ActionInput des req def) =
            )
         ++ "\n"
   where
-    indent = replicate 4 ' '
+    indent = replicate 6 ' '
     formatDescription des' = indent ++ "# " ++ des' ++ "\n" ++ indent ++ "#\n"
     formatRequired req' = indent ++ "# Required: " ++ toEnglishBool req' ++ "\n"
     formatDefault def' = indent ++ "# Default: '" ++ def' ++ "'\n"
