@@ -73,78 +73,79 @@ Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure C
 ### Usage
 
 ```yaml
-uses: 3lvia/core-github-actions-templates/build@trunk
-with:
-  ACR_NAME:
-  # Name of the Azure Container Registry to push to. Defaults to Elvia's standard ACR.
-  #
-  # Required: no
-  # Default: 'containerregistryelvia'
+- name: Build
+  uses: 3lvia/core-github-actions-templates/build@trunk
+  with:
+    ACR_NAME:
+    # Name of the Azure Container Registry to push to. Defaults to Elvia's standard ACR.
+    #
+    # Required: no
+    # Default: 'containerregistryelvia'
 
-  ACR_SUBSCRIPTION_ID:
-  # Subscription ID of the Azure Container Registry to push to. Defaults to subscription ID of Elvia's standard ACR.
-  #
-  # Required: no
-  # Default: '9edbf217-b7c1-4f6a-ae76-d046cf932ff0'
+    ACR_SUBSCRIPTION_ID:
+    # Subscription ID of the Azure Container Registry to push to. Defaults to subscription ID of Elvia's standard ACR.
+    #
+    # Required: no
+    # Default: '9edbf217-b7c1-4f6a-ae76-d046cf932ff0'
 
-  AZURE_CLIENT_ID:
-  # ClientId of a service principal that can push to Container Registry.
-  #
-  # Required: yes
+    AZURE_CLIENT_ID:
+    # ClientId of a service principal that can push to Container Registry.
+    #
+    # Required: yes
 
-  AZURE_TENANT_ID:
-  # TenantId of a service principal that can push to Azure Container Registry. Default to Elvia's Tenant ID.
-  #
-  # Required: no
-  # Default: '2186a6ec-c227-4291-9806-d95340bf439d'
+    AZURE_TENANT_ID:
+    # TenantId of a service principal that can push to Azure Container Registry. Default to Elvia's Tenant ID.
+    #
+    # Required: no
+    # Default: '2186a6ec-c227-4291-9806-d95340bf439d'
 
-  checkout:
-  # If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.
-  #
-  # Required: no
-  # Default: 'true'
+    checkout:
+    # If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.
+    #
+    # Required: no
+    # Default: 'true'
 
-  dockerBuildContext:
-  # Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.
-  #
-  # Required: no
+    dockerBuildContext:
+    # Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.
+    #
+    # Required: no
 
-  dockerfile:
-  # Path to Dockerfile.
-  #
-  # Required: yes
+    dockerfile:
+    # Path to Dockerfile.
+    #
+    # Required: yes
 
-  name:
-  # Name of application. Do not include namespace.
-  #
-  # Required: yes
+    name:
+    # Name of application. Do not include namespace.
+    #
+    # Required: yes
 
-  namespace:
-  # Namespace or system of the application.
-  #
-  # Required: yes
+    namespace:
+    # Namespace or system of the application.
+    #
+    # Required: yes
 
-  severity:
-  # Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.
-  #
-  # Required: no
-  # Default: 'CRITICAL,HIGH'
+    severity:
+    # Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.
+    #
+    # Required: no
+    # Default: 'CRITICAL,HIGH'
 
-  trivy-cve-ignores:
-  # Comma-separated list of CVEs for Trivy to ignore. See https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore for syntax.
-  #
-  # Required: no
+    trivy-cve-ignores:
+    # Comma-separated list of CVEs for Trivy to ignore. See https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore for syntax.
+    #
+    # Required: no
 
-  trivy-enable-secret-scanner:
-  # Enable Trivy secret scanner.
-  #
-  # Required: no
-  # Default: 'true'
+    trivy-enable-secret-scanner:
+    # Enable Trivy secret scanner.
+    #
+    # Required: no
+    # Default: 'true'
 
-  trivy-skip-dirs:
-  # Directories/files skipped by Trivy. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.
-  #
-  # Required: no
+    trivy-skip-dirs:
+    # Directories/files skipped by Trivy. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.
+    #
+    # Required: no
 ```
 
 <!-- gh-actions-docs-end -->
@@ -276,92 +277,93 @@ Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Bui
 ### Usage
 
 ```yaml
-uses: 3lvia/core-github-actions-templates/deploy@trunk
-with:
-  AKS_CLUSTER_NAME:
-  # Name of the AKS cluster to deploy to. Defaults to Elvias normal clusters.
-  #
-  # Required: no
+- name: Deploy
+  uses: 3lvia/core-github-actions-templates/deploy@trunk
+  with:
+    AKS_CLUSTER_NAME:
+    # Name of the AKS cluster to deploy to. Defaults to Elvias normal clusters.
+    #
+    # Required: no
 
-  AKS_RESOURCE_GROUP:
-  # Resource group of the AKS cluster to deploy to. Defaults to Elvias normal clusters.
-  #
-  # Required: no
+    AKS_RESOURCE_GROUP:
+    # Resource group of the AKS cluster to deploy to. Defaults to Elvias normal clusters.
+    #
+    # Required: no
 
-  AKS_SUBSCRIPTION_ID:
-  # Subscription ID of AKS to deploy to. Defaults to Elvias normal clusters.
-  #
-  # Required: no
+    AKS_SUBSCRIPTION_ID:
+    # Subscription ID of AKS to deploy to. Defaults to Elvias normal clusters.
+    #
+    # Required: no
 
-  AZURE_CLIENT_ID:
-  # Client ID of a service principal that has access to AKS. Only required for deploying to AKS.
-  #
-  # Required: no
+    AZURE_CLIENT_ID:
+    # Client ID of a service principal that has access to AKS. Only required for deploying to AKS.
+    #
+    # Required: no
 
-  AZURE_TENANT_ID:
-  # Tenant ID of a service principal that has access to AKS. Default to Elvia's Tenant ID.
-  #
-  # Required: no
-  # Default: '2186a6ec-c227-4291-9806-d95340bf439d'
+    AZURE_TENANT_ID:
+    # Tenant ID of a service principal that has access to AKS. Default to Elvia's Tenant ID.
+    #
+    # Required: no
+    # Default: '2186a6ec-c227-4291-9806-d95340bf439d'
 
-  GC_CLUSTER_LOCATION:
-  # Location of the GKE cluster to deploy to. Defaults to locations of Elvias normal clusters.
-  #
-  # Required: no
-  # Default: 'europe-west1'
+    GC_CLUSTER_LOCATION:
+    # Location of the GKE cluster to deploy to. Defaults to locations of Elvias normal clusters.
+    #
+    # Required: no
+    # Default: 'europe-west1'
 
-  GC_CLUSTER_NAME:
-  # Name of the GKE cluster to deploy to. Defaults to Elvias normal clusters.
-  #
-  # Required: no
+    GC_CLUSTER_NAME:
+    # Name of the GKE cluster to deploy to. Defaults to Elvias normal clusters.
+    #
+    # Required: no
 
-  GC_PROJECT_ID:
-  # Project ID of GKE to deploy to. Defaults to Elvias normal clusters.
-  #
-  # Required: no
+    GC_PROJECT_ID:
+    # Project ID of GKE to deploy to. Defaults to Elvias normal clusters.
+    #
+    # Required: no
 
-  GC_SERVICE_ACCOUNT:
-  # Service account to use for deploying to GKE. Only required for deploying to GKE.
-  #
-  # Required: no
+    GC_SERVICE_ACCOUNT:
+    # Service account to use for deploying to GKE. Only required for deploying to GKE.
+    #
+    # Required: no
 
-  GC_WORKLOAD_IDENTITY_PROVIDER:
-  # Workload identity provider to use for deploying to GKE. Only required for deploying to GKE.
-  #
-  # Required: no
+    GC_WORKLOAD_IDENTITY_PROVIDER:
+    # Workload identity provider to use for deploying to GKE. Only required for deploying to GKE.
+    #
+    # Required: no
 
-  checkout:
-  # If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.
-  #
-  # Required: no
-  # Default: 'true'
+    checkout:
+    # If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.
+    #
+    # Required: no
+    # Default: 'true'
 
-  environment:
-  # Environment to deploy to.
-  #
-  # Required: yes
+    environment:
+    # Environment to deploy to.
+    #
+    # Required: yes
 
-  helmValuesPath:
-  # Path to Helm values file, relative to the root of the repository. Defaults to .github/deploy/values.yaml.
-  #
-  # Required: no
-  # Default: '.github/deploy/values.yaml'
+    helmValuesPath:
+    # Path to Helm values file, relative to the root of the repository. Defaults to .github/deploy/values.yaml.
+    #
+    # Required: no
+    # Default: '.github/deploy/values.yaml'
 
-  name:
-  # Name of application. Do not include namespace.
-  #
-  # Required: yes
+    name:
+    # Name of application. Do not include namespace.
+    #
+    # Required: yes
 
-  namespace:
-  # Namespace or system of the application.
-  #
-  # Required: yes
+    namespace:
+    # Namespace or system of the application.
+    #
+    # Required: yes
 
-  runtimeCloudProvider:
-  # Kubernetes cloud provider to deploy to: 'AKS' or 'GKE'. Defaults to AKS.
-  #
-  # Required: no
-  # Default: 'AKS'
+    runtimeCloudProvider:
+    # Kubernetes cloud provider to deploy to: 'AKS' or 'GKE'. Defaults to AKS.
+    #
+    # Required: no
+    # Default: 'AKS'
 ```
 
 <!-- gh-actions-docs-end -->
@@ -383,13 +385,14 @@ Run dotnet unit tests. Required permissions: `checks: write`, `contents: read`, 
 ### Usage
 
 ```yaml
-uses: 3lvia/core-github-actions-templates/unittest@trunk
-with:
-  checkout:
-  # If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.
-  #
-  # Required: no
-  # Default: 'true'
+- name: Unit Test
+  uses: 3lvia/core-github-actions-templates/unittest@trunk
+  with:
+    checkout:
+    # If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.
+    #
+    # Required: no
+    # Default: 'true'
 ```
 
 <!-- gh-actions-docs-end -->
@@ -412,19 +415,20 @@ Run CodeQL analysis. Required permissions: `actions: read`, `contents: read` and
 ### Usage
 
 ```yaml
-uses: 3lvia/core-github-actions-templates/analyze@trunk
-with:
-  checkout:
-  # If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.
-  #
-  # Required: no
-  # Default: 'true'
+- name: Analyze
+  uses: 3lvia/core-github-actions-templates/analyze@trunk
+  with:
+    checkout:
+    # If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.
+    #
+    # Required: no
+    # Default: 'true'
 
-  working-directory:
-  # Will run CodeQL Analysis on projects under this working directory
-  #
-  # Required: no
-  # Default: './'
+    working-directory:
+    # Will run CodeQL Analysis on projects under this working directory
+    #
+    # Required: no
+    # Default: './'
 ```
 
 <!-- gh-actions-docs-end -->
@@ -450,36 +454,37 @@ Uses https://github.com/aquasecurity/trivy-action to scan IaC and report securit
 ### Usage
 
 ```yaml
-uses: 3lvia/core-github-actions-templates/trivy-iac-scan@trunk
-with:
-  checkout:
-  # If true, the action will check out the repository. If false, the action will assume the repository has already been checked out.
-  #
-  # Required: no
-  # Default: 'true'
+- name: Trivy IaC scan
+  uses: 3lvia/core-github-actions-templates/trivy-iac-scan@trunk
+  with:
+    checkout:
+    # If true, the action will check out the repository. If false, the action will assume the repository has already been checked out.
+    #
+    # Required: no
+    # Default: 'true'
 
-  path:
-  # Path to the directory containing the IaC files.
-  #
-  # Required: no
-  # Default: '.'
+    path:
+    # Path to the directory containing the IaC files.
+    #
+    # Required: no
+    # Default: '.'
 
-  severity:
-  # Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.
-  #
-  # Required: no
-  # Default: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
+    severity:
+    # Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.
+    #
+    # Required: no
+    # Default: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
 
-  skip-dirs:
-  # Comma-separated list of directories to skip.
-  #
-  # Required: no
+    skip-dirs:
+    # Comma-separated list of directories to skip.
+    #
+    # Required: no
 
-  upload-report:
-  # Upload Trivy report to GitHub Security tab. GitHub Advanced Security must be enabled for the repository to use this feature.
-  #
-  # Required: no
-  # Default: 'true'
+    upload-report:
+    # Upload Trivy report to GitHub Security tab. GitHub Advanced Security must be enabled for the repository to use this feature.
+    #
+    # Required: no
+    # Default: 'true'
 ```
 
 <!-- gh-actions-docs-end -->
@@ -503,22 +508,23 @@ Run Playwright tests written in dotnet. Required permissions: `checks: write`, `
 ### Usage
 
 ```yaml
-uses: 3lvia/core-github-actions-templates/playwright@trunk
-with:
-  environment:
-  # Environment is used to find correct vault instance.
-  #
-  # Required: yes
+- name: Playwright Test
+  uses: 3lvia/core-github-actions-templates/playwright@trunk
+  with:
+    environment:
+    # Environment is used to find correct vault instance.
+    #
+    # Required: yes
 
-  system:
-  # System is used to log in to Vault using correct role.
-  #
-  # Required: yes
+    system:
+    # System is used to log in to Vault using correct role.
+    #
+    # Required: yes
 
-  testproject:
-  # Name of test project file to run
-  #
-  # Required: yes
+    testproject:
+    # Name of test project file to run
+    #
+    # Required: yes
 ```
 
 <!-- gh-actions-docs-end -->
@@ -541,19 +547,20 @@ Uses the built-in formatter from the Terraform CLI to check the format of Terraf
 ### Usage
 
 ```yaml
-uses: 3lvia/core-github-actions-templates/terraform-format@trunk
-with:
-  checkout:
-  # If true, the action will check out the repository. If false, the action will assume the repository has already been checked out.
-  #
-  # Required: no
-  # Default: 'true'
+- name: Terraform format check
+  uses: 3lvia/core-github-actions-templates/terraform-format@trunk
+  with:
+    checkout:
+    # If true, the action will check out the repository. If false, the action will assume the repository has already been checked out.
+    #
+    # Required: no
+    # Default: 'true'
 
-  path:
-  # Path to process.
-  #
-  # Required: no
-  # Default: '.'
+    path:
+    # Path to process.
+    #
+    # Required: no
+    # Default: '.'
 ```
 
 <!-- gh-actions-docs-end -->
