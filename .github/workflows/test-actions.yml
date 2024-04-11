@@ -1,45 +1,49 @@
-name: Build and Deploy to Kubernetes
+name: Test actions
 
 on:
   push:
     branches: [trunk]
   pull_request:
     branches: [trunk]
-  workflow_dispatch:
-    branches:
-      - feature/github-action
-
-permissions:
-  actions: read
-  contents: read
-  id-token: write
-  security-events: write
-  issues: read
-  checks: write
-  pull-requests: write
 
 jobs:
   unittests:
     name: Unit Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      issues: read
+      pull-requests: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - uses: ./unittest
+        with:
+          checkout: 'false'
 
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - uses: ./analyze
+        with:
+          checkout: 'false'
 
   build:
     name: Build and Scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     environment: build
     steps:
       - name: Checkout repository
@@ -47,15 +51,19 @@ jobs:
 
       - uses: ./build
         with:
-          name: demo-api
-          namespace: core
-          dockerfile: .github/test/src/Dockerfile
+          checkout: 'false'
+          name: 'demo-api'
+          namespace: 'core'
+          dockerfile: '.github/test/src/Dockerfile'
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
 
   deploy_aks_dev:
     name: Deploy AKS
     needs: [build, analyze]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     environment: dev
     steps:
       - name: Checkout repository
@@ -63,16 +71,20 @@ jobs:
 
       - uses: ./deploy
         with:
-          name: demo-api
-          namespace: core
-          environment: dev
-          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          checkout: 'false'
+          name: 'demo-api'
+          namespace: 'core'
+          environment: 'dev'
           helmValuesPath: '.github/test/deploy/values.yaml'
+          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
 
   deploy_gke_dev:
     name: Deploy GKE
     needs: [build, analyze]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     environment: dev
     steps:
       - name: Checkout repository
@@ -80,10 +92,11 @@ jobs:
 
       - uses: ./deploy
         with:
-          name: demo-api
-          namespace: core
-          environment: dev
+          checkout: 'false'
+          name: 'demo-api'
+          namespace: 'core'
+          environment: 'dev'
+          helmValuesPath: '.github/test/deploy/values.yaml'
+          runtimeCloudProvider: 'GKE'
           GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
           GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
-          helmValuesPath: '.github/test/deploy/values.yaml'
-          runtimeCloudProvider: GKE
