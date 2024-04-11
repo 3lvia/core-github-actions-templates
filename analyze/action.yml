@@ -1,5 +1,5 @@
 name: 'Analyze'
-description: 'Run CodeQL analysis. Required permissions: `contents: read` and `security-events: write`.'
+description: 'Run CodeQL analysis. Required permissions: `actions: read`, `contents: read` and `security-events: write`.'
 inputs:
   working-directory:
     description: 'Will run CodeQL Analysis on projects under this working directory'
