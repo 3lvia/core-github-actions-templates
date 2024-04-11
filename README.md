@@ -10,27 +10,33 @@ GitHub Actions templates for the Elvia organization.
   - [Build](#build)
     - [Description](#description)
     - [Inputs](#inputs)
+    - [Permissions](#permissions)
     - [Usage](#usage)
     - [Example usage in a full workflow](#example-usage-in-a-full-workflow)
   - [Deploy](#deploy)
     - [Description](#description-1)
     - [Inputs](#inputs-1)
+    - [Permissions](#permissions-1)
     - [Usage](#usage-1)
   - [Unit Test](#unit-test)
     - [Description](#description-2)
     - [Inputs](#inputs-2)
+    - [Permissions](#permissions-2)
     - [Usage](#usage-2)
   - [Analyze](#analyze)
     - [Description](#description-3)
     - [Inputs](#inputs-3)
+    - [Permissions](#permissions-3)
     - [Usage](#usage-3)
   - [Trivy IaC scan](#trivy-iac-scan)
     - [Description](#description-4)
     - [Inputs](#inputs-4)
+    - [Permissions](#permissions-4)
     - [Usage](#usage-4)
   - [Playwright Test](#playwright-test)
     - [Description](#description-5)
     - [Inputs](#inputs-5)
+    - [Permissions](#permissions-5)
     - [Usage](#usage-5)
   - [Terraform format check](#terraform-format-check)
     - [Description](#description-6)
@@ -69,6 +75,13 @@ Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure C
 | `trivy-cve-ignores`           | Comma-separated list of CVEs for Trivy to ignore. See https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore for syntax. | no       |                                        |
 | `trivy-enable-secret-scanner` | Enable Trivy secret scanner.                                                                                                                           | no       | `true`                                 |
 | `trivy-skip-dirs`             | Directories/files skipped by Trivy. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                   | no       |                                        |
+
+### Permissions
+
+This action requires the following permissions:
+
+- `contents: read`
+- `id-token: write`
 
 ### Usage
 
@@ -274,6 +287,13 @@ Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Bui
 | `namespace`                     | Namespace or system of the application.                                                                                              | yes      |                                        |
 | `runtimeCloudProvider`          | Kubernetes cloud provider to deploy to: 'AKS' or 'GKE'.                                                                              | no       | `AKS`                                  |
 
+### Permissions
+
+This action requires the following permissions:
+
+- `contents: read`
+- `id-token: write`
+
 ### Usage
 
 ```yaml
@@ -382,6 +402,15 @@ Run dotnet unit tests. Required permissions: `checks: write`, `contents: read`, 
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- |
 | `checkout` | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`  |
 
+### Permissions
+
+This action requires the following permissions:
+
+- `checks: write`
+- `contents: read`
+- `issues: read`
+- `pull-requests: write`
+
 ### Usage
 
 ```yaml
@@ -411,6 +440,14 @@ Run CodeQL analysis.
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- |
 | `checkout`          | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`  |
 | `working-directory` | Will run CodeQL Analysis on projects under this working directory                                                                    | no       | `./`    |
+
+### Permissions
+
+This action requires the following permissions:
+
+- `actions: read`
+- `contents: read`
+- `security-events: write`
 
 ### Usage
 
@@ -450,6 +487,14 @@ Uses https://github.com/aquasecurity/trivy-action to scan IaC and report securit
 | `severity`      | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.    | no       | `CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN` |
 | `skip-dirs`     | Comma-separated list of directories to skip.                                                                                     | no       |                                    |
 | `upload-report` | Upload Trivy report to GitHub Security tab. GitHub Advanced Security must be enabled for the repository to use this feature.     | no       | `true`                             |
+
+### Permissions
+
+This action requires the following permissions:
+
+- `actions: read`
+- `contents: read`
+- `security-events: write`
 
 ### Usage
 
@@ -504,6 +549,16 @@ Run Playwright tests written in dotnet. Required permissions: `checks: write`, `
 | `environment` | Environment is used to find correct vault instance.   | yes      |         |
 | `system`      | System is used to log in to Vault using correct role. | yes      |         |
 | `testproject` | Name of test project file to run                      | yes      |         |
+
+### Permissions
+
+This action requires the following permissions:
+
+- `checks: write`
+- `contents: read`
+- `id-token: write`
+- `issues: read`
+- `pull-requests: write`
 
 ### Usage
 
