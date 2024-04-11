@@ -1,5 +1,5 @@
 name: 'Build'
-description: 'Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure Container Registry. To use the `Build` and `Deploy` actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform. Required permissions: `contents: read` and `id-token: write`.'
+description: 'Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure Container Registry. To use the `Build` and `Deploy` actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform.'
 inputs:
   name:
     description: 'Name of application. Do not include namespace.'
@@ -35,15 +35,15 @@ inputs:
     description: 'ClientId of a service principal that can push to Container Registry.'
     required: true
   AZURE_TENANT_ID:
-    description: "TenantId of a service principal that can push to Azure Container Registry."
+    description: 'TenantId of a service principal that can push to Azure Container Registry.'
     required: false
     default: '2186a6ec-c227-4291-9806-d95340bf439d'
   ACR_SUBSCRIPTION_ID:
-    description: "Subscription ID of the Azure Container Registry to push to."
+    description: 'Subscription ID of the Azure Container Registry to push to.'
     required: false
     default: '9edbf217-b7c1-4f6a-ae76-d046cf932ff0'
   ACR_NAME:
-    description: "Name of the Azure Container Registry to push to."
+    description: 'Name of the Azure Container Registry to push to.'
     required: false
     default: containerregistryelvia
 

@@ -9,7 +9,8 @@ import           Control.Monad        (void, when)
 import           Data.Aeson.TH        (defaultOptions, deriveJSON,
                                        fieldLabelModifier, omitNothingFields)
 import           Data.Either          (fromRight, isLeft, lefts, rights)
-import           Data.Map             (Map, toList)
+import           Data.List            (intercalate)
+import           Data.Map             (Map, fromList, toList)
 import           Data.Maybe           (fromMaybe)
 import           Data.Text            (Text, isPrefixOf, pack, replace, splitOn,
                                        toLower, unpack)
@@ -19,8 +20,8 @@ import           System.Environment   (getEnvironment)
 import           System.Exit          (exitFailure)
 import           Text.Megaparsec      (Parsec, anySingle, eof,
                                        errorBundlePretty, many, manyTill,
-                                       manyTill_, optional, parse, skipManyTill,
-                                       some, try, (<|>))
+                                       manyTill_, optional, parse, sepBy,
+                                       skipManyTill, some, try, (<|>))
 import           Text.Megaparsec.Char (char, latin1Char, newline, string)
 import           Text.Pretty.Simple   (pPrint)
 
@@ -75,12 +76,29 @@ data Action
 
 $(deriveJSON defaultOptions{omitNothingFields = True, fieldLabelModifier = filter (/= '\'')} ''Action)
 
+data ActionPermissionAccess
+    = ReadAccess
+    | WriteAccess
+    deriving Eq
+
+instance Read ActionPermissionAccess where
+    readsPrec _ "read"  = [(ReadAccess, "")]
+    readsPrec _ "write" = [(WriteAccess, "")]
+    readsPrec _ _       = []
+
+instance Show ActionPermissionAccess where
+    show ReadAccess  = "read"
+    show WriteAccess = "write"
+
+type Permissions = Map String ActionPermissionAccess
+
 data ActionMetadata
     = ActionMetadata
-    { path    :: String
-    , owner   :: Maybe String
-    , project :: Maybe String
-    , version :: Maybe String
+    { path        :: String
+    , owner       :: Maybe String
+    , project     :: Maybe String
+    , version     :: Maybe String
+    , permissions :: Maybe Permissions
     }
     deriving (Show, Eq)
 
@@ -103,6 +121,7 @@ prettyPrintAction (Action name' description' inputs') actionMetadata =
         ++ description'
         ++ "\n\n"
         ++ prettyPrintInputs inputs'
+        ++ prettyPrintPermissions actionMetadata
         ++ prettyPrintUsage name' inputs' actionMetadata
 
 prettyPrintInputs :: Maybe Inputs -> String
@@ -125,8 +144,21 @@ prettyPrintInputs (Just inputs') =
             ++ "\n"
 prettyPrintInputs _ = ""
 
+prettyPrintPermissions :: ActionMetadata -> String
+prettyPrintPermissions (ActionMetadata _ _ _ _ (Just permissions')) =
+    "### Permissions\n"
+    ++ "This action requires the following permissions:\n"
+    ++ concatMap
+            ( \(name', access) ->
+                "- `" ++ name' ++ ": " ++ show access ++ "`\n"
+            )
+            (toList permissions')
+    ++ "\n"
+prettyPrintPermissions _ = ""
+
+
 prettyPrintUsage :: String -> Maybe Inputs -> ActionMetadata -> String
-prettyPrintUsage name' inputs' (ActionMetadata path' (Just owner') (Just project') (Just version')) =
+prettyPrintUsage name' inputs' (ActionMetadata path' (Just owner') (Just project') (Just version') _) =
     "### Usage\n"++
     "```yaml\n"
         ++ "- name: " ++ name' ++ "\n"
@@ -172,14 +204,25 @@ prettyPrintUsageInputs name' (ActionInput des req def) =
     formatDefault def' = indent ++ "# Default: '" ++ def' ++ "'\n"
 
 actionMetadataToString :: ActionMetadata -> String
-actionMetadataToString (ActionMetadata path' owner' project' version') =
+actionMetadataToString (ActionMetadata path' owner' project' version' permissions') =
     actionStartTagPrefix
         ++ " path="
         ++ path'
         ++ maybe "" (" owner=" ++) owner'
         ++ maybe "" (" project=" ++) project'
         ++ maybe "" (" version=" ++) version'
+        ++ maybe "" permissionsToString permissions'
         ++ " -->"
+
+permissionsToString :: Permissions -> String
+permissionsToString permissions' =
+    " permissions="
+    ++ intercalate "," permissionStrList
+    where
+        permissionStrList =
+            map
+                (\(name', access) -> name' ++ ":" ++ show access)
+                (toList permissions')
 
 replaceActionTagWithDocs :: String -> (ActionMetadata, Action) -> String
 replaceActionTagWithDocs readme (meta, action) =
@@ -252,9 +295,18 @@ actionMetadataParser = do
     version' <- optional $ do
         _ <- string "version="
         manyTill anySingle (char ' ')
-    _ <- string "-->"
+    permissions' <- optional $ do
+        _ <- string "permissions="
+        permissionParser `sepBy` char ','
+    _ <- string " -->"
     _ <- skipManyTill anySingle $ string $ pack actionEndTag
-    return $ ActionMetadata path' owner' project' version'
+    return $ ActionMetadata path' owner' project' version' (fromList <$> permissions')
+
+permissionParser :: Parser (String, ActionPermissionAccess)
+permissionParser = do
+    name' <- manyTill anySingle (char ':')
+    access' <- read . unpack <$> (string "read" <|> string "write")
+    return (name', access')
 
 fromTextActionMetadataParser :: Parser [ActionMetadata]
 fromTextActionMetadataParser = do

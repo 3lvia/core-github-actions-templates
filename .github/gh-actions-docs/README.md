@@ -8,13 +8,17 @@ The documentation will be added to the file `README.md` in the current directory
 To specify where the documentation should be added, add the following two comments to the file:
 
 ```markdown
-<!--gh-actions-docs path=your/cool/action.yml owner=3lvia project=cool-action version=v3 -->
+<!--gh-actions-docs path=your/cool/action.yml owner=3lvia project=cool-action version=v3 permissions=contents:read,issues:write -->
 <!--gh-actions-docs-end -->
 ```
 
-The `path` parameter is required, and the `owner`, `project`, and `version` parameters are optional.
-The latter three are only used to generate the "Usage" section of the documentation.
-If any of these are omitted, the "Usage" section will not be generated.
+Only the `path` parameter is required, and the `owner`, `project`, `version` and `permissions` parameters are optional.
+
+The parameters `owner`, `project` and `version` are used to generate the "Usage" section.
+If any of these parameters are missing, the "Usage" section will not be generated.
+
+The `permissions` parameter is used to generate the "Permissions" section.
+If this parameter is missing, the "Permissions" section will not be generated.
 
 ### Docker
 
