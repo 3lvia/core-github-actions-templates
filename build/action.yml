@@ -8,9 +8,9 @@ inputs:
     description: 'Namespace or system of the application.'
     required: true
   dockerfile:
-    description: 'Path to Dockerfile.'
+    description: "Path to Dockerfile, e.g. 'src/Dockerfile'."
     required: true
-  dockerBuildContext:
+  docker-build-context:
     description: 'Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.'
     required: false
   severity:
@@ -65,16 +65,14 @@ runs:
         echo "IMAGE_NAME=$IMAGE_NAME" >> "$GITHUB_ENV"
         echo "IMAGE_LONG_NAME=$IMAGE_NAME:${{ github.sha }}-${{ github.run_number }}" >> "$GITHUB_ENV"
 
-        if [ -z "${{ inputs.dockerBuildContext }}" ]
-        then
+        if [[ -z "${{ inputs.docker-build-context }}" ]]; then
             export DOCKER_DIR=`dirname ${{ inputs.dockerfile }}` # default to the directory of the Dockerfile
         else
-            export DOCKER_DIR=${{ inputs.dockerBuildContext }}
+            export DOCKER_DIR=${{ inputs.docker-build-context }}
         fi
         echo "DOCKER_DIR=$DOCKER_DIR" >> "$GITHUB_ENV"
 
-        if [ -z "${{ inputs.AZURE_CLIENT_ID }}" ]
-        then
+        if [[ -z "${{ inputs.AZURE_CLIENT_ID }}" ]]; then
             echo "Missing required input AZURE_CLIENT_ID. Ensure that this is set and non-empty".
             exit 1
         fi
@@ -94,6 +92,7 @@ runs:
       uses: docker/build-push-action@v5
       with:
         context: ${{ env.DOCKER_DIR }}
+        file: ${{ inputs.dockerfile }}
         push: false
         load: true
         tags: '${{ env.IMAGE_LONG_NAME }},${{ env.IMAGE_NAME }}:latest-cache'
