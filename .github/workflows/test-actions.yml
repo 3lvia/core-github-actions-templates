@@ -6,9 +6,13 @@ on:
   pull_request:
     branches: [trunk]
 
+env:
+  APPLICATION_NAME: demo-api
+  SYSTEM_NAMESPACE: core
+
 jobs:
   unittests:
-    name: Unit Tests
+    name: Run unit tests
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -24,7 +28,7 @@ jobs:
           checkout: 'false'
 
   analyze:
-    name: Analyze
+    name: Run CodeQL analysis
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -39,7 +43,7 @@ jobs:
           checkout: 'false'
 
   build:
-    name: Build and Scan
+    name: Build
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -52,13 +56,13 @@ jobs:
       - uses: ./build
         with:
           checkout: 'false'
-          name: 'demo-api'
-          namespace: 'core'
+          name: ${{ env.APPLICATION_NAME }}
+          namespace: ${{ env.SYSTEM_NAMESPACE }}
           dockerfile: '.github/test/src/Dockerfile'
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
 
   deploy_aks_dev:
-    name: Deploy AKS
+    name: Deploy to dev on AKS
     needs: [build, analyze]
     runs-on: ubuntu-latest
     permissions:
@@ -72,14 +76,14 @@ jobs:
       - uses: ./deploy
         with:
           checkout: 'false'
-          name: 'demo-api'
-          namespace: 'core'
+          name: ${{ env.APPLICATION_NAME }}
+          namespace: ${{ env.SYSTEM_NAMESPACE }}
           environment: 'dev'
           helm-values-path: '.github/test/deploy/values.yaml'
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
 
   deploy_gke_dev:
-    name: Deploy GKE
+    name: Deploy to dev on GKE
     needs: [build, analyze]
     runs-on: ubuntu-latest
     permissions:
@@ -93,8 +97,8 @@ jobs:
       - uses: ./deploy
         with:
           checkout: 'false'
-          name: 'demo-api'
-          namespace: 'core'
+          name: ${{ env.APPLICATION_NAME }}
+          namespace: ${{ env.SYSTEM_NAMESPACE }}
           environment: 'dev'
           helm-values-path: '.github/test/deploy/values.yaml'
           runtime-cloud-provider: 'GKE'
