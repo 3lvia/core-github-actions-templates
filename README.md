@@ -282,10 +282,10 @@ Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Bui
 | `GC_WORKLOAD_IDENTITY_PROVIDER` | Workload identity provider to use for deploying to GKE. Only required for deploying to GKE.                                          | no       |                                        |
 | `checkout`                      | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`                                 |
 | `environment`                   | Environment to deploy to.                                                                                                            | yes      |                                        |
-| `helmValuesPath`                | Path to Helm values file, relative to the root of the repository. Defaults to .github/deploy/values.yaml.                            | no       | `.github/deploy/values.yaml`           |
+| `helm-values-path`              | Path to Helm values file, relative to the root of the repository. Defaults to .github/deploy/values.yaml.                            | no       | `.github/deploy/values.yaml`           |
 | `name`                          | Name of application. Do not include namespace.                                                                                       | yes      |                                        |
 | `namespace`                     | Namespace or system of the application.                                                                                              | yes      |                                        |
-| `runtimeCloudProvider`          | Kubernetes cloud provider to deploy to: 'AKS' or 'GKE'.                                                                              | no       | `AKS`                                  |
+| `runtime-cloud-provider`        | Kubernetes cloud provider to deploy to: 'AKS' or 'GKE'.                                                                              | no       | `AKS`                                  |
 
 ### Permissions
 
@@ -363,7 +363,7 @@ This action requires the following permissions:
     #
     # Required: yes
 
-    helmValuesPath:
+    helm-values-path:
     # Path to Helm values file, relative to the root of the repository. Defaults to .github/deploy/values.yaml.
     #
     # Required: no
@@ -379,7 +379,7 @@ This action requires the following permissions:
     #
     # Required: yes
 
-    runtimeCloudProvider:
+    runtime-cloud-provider:
     # Kubernetes cloud provider to deploy to: 'AKS' or 'GKE'.
     #
     # Required: no
@@ -551,11 +551,11 @@ Run Playwright tests written in dotnet. Required permissions: `checks: write`, `
 
 ### Inputs
 
-| Name          | Description                                           | Required | Default |
-| ------------- | ----------------------------------------------------- | -------- | ------- |
-| `environment` | Environment is used to find correct vault instance.   | yes      |         |
-| `system`      | System is used to log in to Vault using correct role. | yes      |         |
-| `testproject` | Name of test project file to run                      | yes      |         |
+| Name           | Description                                           | Required | Default |
+| -------------- | ----------------------------------------------------- | -------- | ------- |
+| `environment`  | Environment is used to find correct vault instance.   | yes      |         |
+| `system`       | System is used to log in to Vault using correct role. | yes      |         |
+| `test-project` | Name of test project file to run                      | yes      |         |
 
 ### Permissions
 
@@ -583,7 +583,7 @@ This action requires the following permissions:
     #
     # Required: yes
 
-    testproject:
+    test-project:
     # Name of test project file to run
     #
     # Required: yes
