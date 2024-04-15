@@ -10,7 +10,7 @@ inputs:
   environment:
     description: 'Environment to deploy to.'
     required: true
-  helmValuesPath:
+  helm-values-path:
     description: 'Path to Helm values file, relative to the root of the repository. Defaults to .github/deploy/values.yaml.'
     required: false
     default: '.github/deploy/values.yaml'
@@ -18,7 +18,7 @@ inputs:
     description: 'If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.'
     required: false
     default: 'true'
-  runtimeCloudProvider:
+  runtime-cloud-provider:
     description: "Kubernetes cloud provider to deploy to: 'AKS' or 'GKE'."
     required: false
     default: 'AKS'
@@ -75,7 +75,7 @@ runs:
           exit 1
         fi
 
-        if [[ "${{ inputs.runtimeCloudProvider }}" == "GKE" ]]; then
+        if [[ "${{ inputs.runtime-cloud-provider }}" == "GKE" ]]; then
           if [ -z "${{ inputs.GC_SERVICE_ACCOUNT }}" ]; then
             echo "GC_SERVICE_ACCOUNT is required for GKE deployment."
             exit 1
@@ -145,7 +145,7 @@ runs:
 
     - name: Authenticate with Azure
       uses: azure/login@v2
-      if: ${{ inputs.runtimeCloudProvider == 'AKS' }}
+      if: ${{ inputs.runtime-cloud-provider == 'AKS' }}
       with:
         client-id: ${{ inputs.AZURE_CLIENT_ID }}
         tenant-id: ${{ inputs.AZURE_TENANT_ID }}
@@ -153,13 +153,13 @@ runs:
 
     - name: Setup kubelogin
       uses: azure/use-kubelogin@v1
-      if: ${{ inputs.runtimeCloudProvider == 'AKS' }}
+      if: ${{ inputs.runtime-cloud-provider == 'AKS' }}
       with:
         kubelogin-version: 'v0.0.24'
 
     - name: Set AKS context
       uses: azure/aks-set-context@v4
-      if: ${{ inputs.runtimeCloudProvider == 'AKS' }}
+      if: ${{ inputs.runtime-cloud-provider == 'AKS' }}
       with:
         cluster-name: ${{ env.AKS_CLUSTER_NAME }}
         resource-group: ${{ env.AKS_RESOURCE_GROUP }}
@@ -169,14 +169,14 @@ runs:
 
     - name: Authenticate with Google Cloud
       uses: google-github-actions/auth@v2.1.2
-      if: ${{ inputs.runtimeCloudProvider == 'GKE' }}
+      if: ${{ inputs.runtime-cloud-provider == 'GKE' }}
       with:
         workload_identity_provider: ${{ inputs.GC_WORKLOAD_IDENTITY_PROVIDER }}
         service_account: ${{ inputs.GC_SERVICE_ACCOUNT }}
 
     - name: Connect to GKE
       uses: google-github-actions/get-gke-credentials@v2.1.0
-      if: ${{ inputs.runtimeCloudProvider == 'GKE' }}
+      if: ${{ inputs.runtime-cloud-provider == 'GKE' }}
       with:
         cluster_name: ${{ env.GC_CLUSTER_NAME }}
         location: ${{ env.GC_CLUSTER_LOCATION }}
@@ -191,7 +191,7 @@ runs:
         helm upgrade --debug \
           --install \
           -n ${{ inputs.namespace }} \
-          -f ${{ inputs.helmValuesPath }} ${{ inputs.name }} elvia-charts/elvia-deployment \
+          -f ${{ inputs.helm-values-path }} ${{ inputs.name }} elvia-charts/elvia-deployment \
           --set="environment=${{ inputs.environment }}" \
           --set="image.tag=${{ github.sha }}-${{ github.run_number }}" \
           --set="labels.repositoryName=${{ env.REPO_SHORT_NAME }}" \

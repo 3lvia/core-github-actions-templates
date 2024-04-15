@@ -1,7 +1,7 @@
 name: Playwright Test
 description: 'Run Playwright tests written in dotnet. Required permissions: `checks: write`, `contents: read`, `id-token: write`, `issues: read`, and `pull-requests: write`.'
 inputs:
-  testproject:
+  test-project:
     description: 'Name of test project file to run'
     required: true
   environment:
@@ -42,18 +42,18 @@ runs:
 
     - name: Dotnet build
       shell: bash
-      run: dotnet build ${{ inputs.testproject }}
+      run: dotnet build ${{ inputs.test-project }}
 
     - name: Install playwright
       shell: pwsh
       run: |
-        $dirName = [System.IO.Path]::GetDirectoryName("${{ inputs.testproject }}")
+        $dirName = [System.IO.Path]::GetDirectoryName("${{ inputs.test-project }}")
         $playwrightscript = Get-ChildItem -Path $dirName -Filter playwright.ps1 -Recurse -ErrorAction SilentlyContinue -Force
         &$playwrightscript.FullName install
 
     - name: Dotnet test
       shell: bash
-      run: dotnet test -l:trx ${{ inputs.testproject }}
+      run: dotnet test -l:trx ${{ inputs.test-project }}
 
     - name: Publish test results
       uses: EnricoMi/publish-unit-test-result-action@v2

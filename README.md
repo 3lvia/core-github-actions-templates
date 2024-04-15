@@ -225,7 +225,7 @@ jobs:
           namespace: core
           environment: dev
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
-          helmValuesPath: '.github/deploy/values.yaml'
+          helm-values-path: '.github/deploy/values.yaml'
 
   deploy_test:
     name: Deploy Test
@@ -240,7 +240,7 @@ jobs:
           namespace: core
           environment: test
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
-          helmValuesPath: '.github/deploy/values.yaml'
+          helm-values-path: '.github/deploy/values.yaml'
 
   deploy_prod:
     name: Deploy Prod
@@ -255,7 +255,7 @@ jobs:
           namespace: core
           environment: prod
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
-          helmValuesPath: '.github/deploy/values.yaml'
+          helm-values-path: '.github/deploy/values.yaml'
 ```
 
 <!-- gh-actions-docs-start path=deploy/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->

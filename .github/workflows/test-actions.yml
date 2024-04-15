@@ -75,7 +75,7 @@ jobs:
           name: 'demo-api'
           namespace: 'core'
           environment: 'dev'
-          helmValuesPath: '.github/test/deploy/values.yaml'
+          helm-values-path: '.github/test/deploy/values.yaml'
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
 
   deploy_gke_dev:
@@ -96,7 +96,7 @@ jobs:
           name: 'demo-api'
           namespace: 'core'
           environment: 'dev'
-          helmValuesPath: '.github/test/deploy/values.yaml'
-          runtimeCloudProvider: 'GKE'
+          helm-values-path: '.github/test/deploy/values.yaml'
+          runtime-cloud-provider: 'GKE'
           GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
           GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
