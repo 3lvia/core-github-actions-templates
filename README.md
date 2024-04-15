@@ -283,26 +283,26 @@ jobs:
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
           helm-values-path: '.github/deploy/values.yaml'
 
-# Example for deploying to GKE:
-#
-# deploy_gke_dev:
-#   name: Deploy to dev on GKE
-#   needs: [build, analyze]
-#   runs-on: ubuntu-latest
-#   permissions:
-#     contents: read
-#     id-token: write
-#   environment: dev
-#   steps:
-#     - uses: 3lvia/core-github-actions-templates/deploy@trunk
-#       with:
-#         name: ${{ env.APPLICATION_NAME }}
-#         namespace: ${{ env.SYSTEM_NAMESPACE }}
-#         environment: 'dev'
-#         helm-values-path: '.github/test/deploy/values.yaml'
-#         runtime-cloud-provider: 'GKE'
-#         GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
-#         GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
+ #Example for deploying to GKE:
+ #
+ #deploy_gke_dev:
+ #  name: Deploy to dev on GKE
+ #  needs: [build, analyze]
+ #  runs-on: ubuntu-latest
+ #  permissions:
+ #    contents: read
+ #    id-token: write
+ #  environment: dev
+ #  steps:
+ #    - uses: 3lvia/core-github-actions-templates/deploy@trunk
+ #      with:
+ #        name: ${{ env.APPLICATION_NAME }}
+ #        namespace: ${{ env.SYSTEM_NAMESPACE }}
+ #        environment: 'dev'
+ #        helm-values-path: '.github/test/deploy/values.yaml'
+ #        runtime-cloud-provider: 'GKE'
+ #        GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
+ #        GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
 ```
 
 <!-- gh-actions-docs-start path=deploy/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
