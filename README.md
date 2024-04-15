@@ -67,8 +67,8 @@ Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure C
 | `AZURE_CLIENT_ID`             | ClientId of a service principal that can push to Container Registry.                                                                                   | yes      |                                        |
 | `AZURE_TENANT_ID`             | TenantId of a service principal that can push to Azure Container Registry.                                                                             | no       | `2186a6ec-c227-4291-9806-d95340bf439d` |
 | `checkout`                    | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.                   | no       | `true`                                 |
-| `dockerBuildContext`          | Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.                      | no       |                                        |
-| `dockerfile`                  | Path to Dockerfile.                                                                                                                                    | yes      |                                        |
+| `docker-build-context`        | Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.                      | no       |                                        |
+| `dockerfile`                  | Path to Dockerfile, e.g. 'src/Dockerfile'.                                                                                                             | yes      |                                        |
 | `name`                        | Name of application. Do not include namespace.                                                                                                         | yes      |                                        |
 | `namespace`                   | Namespace or system of the application.                                                                                                                | yes      |                                        |
 | `severity`                    | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                          | no       | `CRITICAL,HIGH`                        |
@@ -118,13 +118,13 @@ This action requires the following permissions:
     # Required: no
     # Default: 'true'
 
-    dockerBuildContext:
+    docker-build-context:
     # Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.
     #
     # Required: no
 
     dockerfile:
-    # Path to Dockerfile.
+    # Path to Dockerfile, e.g. 'src/Dockerfile'.
     #
     # Required: yes
 
