@@ -480,13 +480,14 @@ Uses https://github.com/aquasecurity/trivy-action to scan IaC and report securit
 
 ### Inputs
 
-| Name            | Description                                                                                                                      | Required | Default                            |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------- |
-| `checkout`      | If true, the action will check out the repository. If false, the action will assume the repository has already been checked out. | no       | `true`                             |
-| `path`          | Path to the directory containing the IaC files.                                                                                  | no       | `.`                                |
-| `severity`      | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.    | no       | `CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN` |
-| `skip-dirs`     | Comma-separated list of directories to skip.                                                                                     | no       |                                    |
-| `upload-report` | Upload Trivy report to GitHub Security tab. GitHub Advanced Security must be enabled for the repository to use this feature.     | no       | `true`                             |
+| Name            | Description                                                                                                                                                                                                                                                                                                                                                           | Required | Default                            |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------- |
+| `checkout`      | If true, the action will check out the repository. If false, the action will assume the repository has already been checked out.                                                                                                                                                                                                                                      | no       | `true`                             |
+| `path`          | Path to the directory containing the IaC files.                                                                                                                                                                                                                                                                                                                       | no       | `.`                                |
+| `severity`      | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                                                                                                                                                                                                                                         | no       | `CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN` |
+| `skip-dirs`     | Comma-separated list of directories to skip.                                                                                                                                                                                                                                                                                                                          | no       |                                    |
+| `trivyignore`   | Path to the Trivy ignore file in the repository. This action will add a default set of CVE's that are ignored for all scans. If you wish to add more CVE's to ignore, add them to the .trivyignore, or create a new file and specify the path here. See https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids for more information. | no       | `.trivyignore`                     |
+| `upload-report` | Upload Trivy report to GitHub Security tab. GitHub Advanced Security must be enabled for the repository to use this feature.                                                                                                                                                                                                                                          | no       | `true`                             |
 
 ### Permissions
 
@@ -524,6 +525,12 @@ This action requires the following permissions:
     # Comma-separated list of directories to skip.
     #
     # Required: no
+
+    trivyignore:
+    # Path to the Trivy ignore file in the repository. This action will add a default set of CVE's that are ignored for all scans. If you wish to add more CVE's to ignore, add them to the .trivyignore, or create a new file and specify the path here. See https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids for more information.
+    #
+    # Required: no
+    # Default: '.trivyignore'
 
     upload-report:
     # Upload Trivy report to GitHub Security tab. GitHub Advanced Security must be enabled for the repository to use this feature.
