@@ -245,8 +245,8 @@ jobs:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAMESPACE }}
           environment: 'test'
-          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
           helm-values-path: '.github/deploy/values.yaml'
+          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
 
   deploy_prod:
     name: Deploy Prod
@@ -261,8 +261,8 @@ jobs:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAMESPACE }}
           environment: 'prod'
-          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
           helm-values-path: '.github/deploy/values.yaml'
+          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
 
  #Example for deploying to GKE:
  #
