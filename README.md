@@ -43,9 +43,8 @@ GitHub Actions templates for the Elvia organization.
     - [Inputs](#inputs-6)
     - [Usage](#usage-6)
 - [Development](#development)
-  - [Setup](#setup)
-  - [Action documentation & table of contents](#action-documentation--table-of-contents)
   - [Formatting](#formatting)
+  - [Action documentation & table of contents](#action-documentation--table-of-contents)
   <!-- gh-actions-docs-toc-end -->
 
 # Actions
@@ -422,7 +421,7 @@ This action requires the following permissions:
 
 ### Description
 
-Run dotnet unit tests. Required permissions: `checks: write`, `contents: read`, `issues: read`, and `pull-requests: write`.
+Run dotnet unit tests.
 
 ### Inputs
 
@@ -575,7 +574,7 @@ This action requires the following permissions:
 
 ### Description
 
-Run Playwright tests written in dotnet. Required permissions: `checks: write`, `contents: read`, `id-token: write`, `issues: read`, and `pull-requests: write`.
+Run Playwright tests written in dotnet.
 
 ### Inputs
 
