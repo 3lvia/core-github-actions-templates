@@ -1,5 +1,5 @@
 name: Playwright Test
-description: 'Run Playwright tests written in dotnet. Required permissions: `checks: write`, `contents: read`, `id-token: write`, `issues: read`, and `pull-requests: write`.'
+description: 'Run Playwright tests written in dotnet.'
 inputs:
   test-project:
     description: 'Name of test project file to run'

@@ -657,7 +657,9 @@ Uses the built-in formatter from the Terraform CLI to check the format of Terraf
 
 # Development
 
-## Setup
+## Formatting
+
+We use [prettier](https://prettier.io) to format the README and yaml files.
 
 Install the dependencies using [yarn](https://yarnpkg.com):
 
@@ -665,9 +667,17 @@ Install the dependencies using [yarn](https://yarnpkg.com):
 yarn install
 ```
 
+Run the formatter:
+
+```bash
+yarn format
+#OR
+yarn format --end-of-line crlf
+```
+
 ## Action documentation & table of contents
 
-Documentation is auto-generated for any actions in the repository.
+Documentation in the README is auto-generated for any actions in the repository.
 The table of contents is also auto-generated, using the headers in this README.
 To add documentation for a new action, add these two tags to the `README.md` file:
 
@@ -678,15 +688,6 @@ To add documentation for a new action, add these two tags to the `README.md` fil
 
 Replace `path` with the path to the action yaml file from the root of the repository.
 The fields `owner`, `project` and `version` are optional, but should be set to `3lvia`, `core-github-actions-templates` and `trunk` respectively.
+The field `permissions` is also optional, but should be set to the permissions required for the action to run, e.g. `permissions=actions:read,contents:read`.
 
 The documentation will then be auto-generated, added to the table of contents and commited on push to the `trunk` branch.
-
-## Formatting
-
-We use [prettier](https://prettier.io) to format the README and yaml files:
-
-```bash
-yarn format
-#OR
-yarn format --end-of-line crlf
-```
