@@ -524,6 +524,7 @@ Uses https://github.com/aquasecurity/trivy-action to scan IaC and report securit
 | Name            | Description                                                                                                                                                                                                                                                                                                                                                           | Required | Default                            |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------- |
 | `checkout`      | If true, the action will check out the repository. If false, the action will assume the repository has already been checked out.                                                                                                                                                                                                                                      | no       | `true`                             |
+| `debug`         | If true, the action will output debug information.                                                                                                                                                                                                                                                                                                                    | no       | `false`                            |
 | `path`          | Path to the directory containing the IaC files.                                                                                                                                                                                                                                                                                                                       | no       | `.`                                |
 | `severity`      | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                                                                                                                                                                                                                                         | no       | `CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN` |
 | `skip-dirs`     | Comma-separated list of directories to skip.                                                                                                                                                                                                                                                                                                                          | no       |                                    |
@@ -549,6 +550,12 @@ This action requires the following permissions:
     #
     # Required: no
     # Default: 'true'
+
+    debug:
+    # If true, the action will output debug information.
+    #
+    # Required: no
+    # Default: 'false'
 
     path:
     # Path to the directory containing the IaC files.
