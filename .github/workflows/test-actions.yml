@@ -104,3 +104,29 @@ jobs:
           runtime-cloud-provider: 'GKE'
           GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
           GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
+
+  trivy_iac_scan:
+    runs-on: ubuntu-latest
+    name: Scan IaC with Trivy
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: ./trivy-iac-scan
+        with:
+          checkout: 'false'
+
+  terraform_format_check:
+    runs-on: ubuntu-latest
+    name: Check Terraform code formatting
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: ./terraform-format
+        with:
+          checkout: 'false'
