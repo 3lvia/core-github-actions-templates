@@ -49,7 +49,7 @@ runs:
       shell: bash
       run: |
         # Add default set of CVE's to ignore
-        echo "AVD-DS-0026" >> "${{ inputs.trivyignore }}"
+        echo "AVD-DS-0026" >> '${{ inputs.trivyignore }}'
 
     - name: Install Trivy
       shell: bash
@@ -65,12 +65,12 @@ runs:
       shell: bash
       run: |
         # Run Trivy
-        trivy config ${{ inputs.path }} \
+        trivy config '${{ inputs.path }}' \
           --format sarif \
-          --output "${{ env.TRIVY_SARIF }}" \
+          --output '${{ env.TRIVY_SARIF }}' \
           --exit-code 0 \
-          --severity "${{ inputs.severity }}" \
-          --ignorefile ${{ inputs.trivyignore }} \
+          --severity '${{ inputs.severity }}' \
+          --ignorefile '${{ inputs.trivyignore }}' \
           ${{ inputs.skip-dirs != '' && format('--skip-dirs {0}', inputs.skip-dirs) || '' }}
 
     # GitHub Security tab does not support SARIF files with `git::` or `https:/` URL's:
@@ -79,7 +79,7 @@ runs:
       shell: bash
       run: |
         # Remove `git::` and `https:/` from SARIF file
-        sed -i 's#git::https:/##g' "${{ env.TRIVY_SARIF }}"
+        sed -i 's#git::https:/##g' '${{ env.TRIVY_SARIF }}'
 
     - name: Upload Trivy report to GitHub Security tab
       if: ${{ inputs.upload-report == 'true' }}
