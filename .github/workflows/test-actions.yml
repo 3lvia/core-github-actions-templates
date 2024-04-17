@@ -13,12 +13,15 @@ env:
 jobs:
   unittests:
     name: Run unit tests
-    runs-on: ubuntu-latest
     permissions:
       contents: read
       checks: write
       issues: read
       pull-requests: write
+    strategy:
+      matrix:
+        runner: [ubuntu-latest, Azure Spot]
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -29,11 +32,14 @@ jobs:
 
   analyze:
     name: Run CodeQL analysis
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     permissions:
       actions: read
       contents: read
       security-events: write
+    strategy:
+      matrix:
+        runner: [ubuntu-latest, Azure Spot]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -44,11 +50,14 @@ jobs:
 
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
       id-token: write
     environment: build
+    strategy:
+      matrix:
+        runner: [ubuntu-latest, Azure Spot]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -64,11 +73,13 @@ jobs:
   deploy_aks_dev:
     name: Deploy to dev on AKS
     needs: [build, analyze]
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
       id-token: write
-    environment: dev
+    strategy:
+      matrix:
+        runner: [ubuntu-latest, Azure Spot]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -85,10 +96,13 @@ jobs:
   deploy_gke_dev:
     name: Deploy to dev on GKE
     needs: [build, analyze]
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
       id-token: write
+    strategy:
+      matrix:
+        runner: [ubuntu-latest, Azure Spot]
     environment: dev
     steps:
       - name: Checkout repository
@@ -106,12 +120,15 @@ jobs:
           GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
 
   trivy_iac_scan:
-    runs-on: ubuntu-latest
     name: Scan IaC with Trivy
+    runs-on: ${{ matrix.runner }}
     permissions:
       actions: read
       contents: read
       security-events: write
+    strategy:
+      matrix:
+        runner: [ubuntu-latest, Azure Spot]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -121,8 +138,11 @@ jobs:
           checkout: 'false'
 
   terraform_format_check:
-    runs-on: ubuntu-latest
     name: Check Terraform code formatting
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        runner: [ubuntu-latest, Azure Spot]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
