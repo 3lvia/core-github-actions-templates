@@ -5,31 +5,29 @@ inputs:
     description: 'Path to the directory containing the IaC files.'
     required: false
     default: '.'
-    type: string
   skip-dirs:
     description: 'Comma-separated list of directories to skip.'
     required: false
-    type: string
   severity:
     description: 'Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.'
     required: false
     default: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
-    type: string
   upload-report:
     description: 'Upload Trivy report to GitHub Security tab. GitHub Advanced Security must be enabled for the repository to use this feature.'
     required: false
     default: 'true'
-    type: string
   checkout:
     description: 'If true, the action will check out the repository. If false, the action will assume the repository has already been checked out.'
     required: false
     default: 'true'
-    type: string
   trivyignore:
     description: "Path to the Trivy ignore file in the repository. This action will add a default set of CVE's that are ignored for all scans. If you wish to add more CVE's to ignore, add them to the .trivyignore, or create a new file and specify the path here. See https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids for more information."
     required: false
     default: '.trivyignore'
-    type: string
+  debug:
+    description: 'If true, the action will output debug information.'
+    required: false
+    default: 'false'
 
 runs:
   using: 'composite'
@@ -71,6 +69,7 @@ runs:
           --exit-code 0 \
           --severity '${{ inputs.severity }}' \
           --ignorefile '${{ inputs.trivyignore }}' \
+          ${{ inputs.debug == 'true' && '--debug' || '' }} \
           ${{ inputs.skip-dirs != '' && format('--skip-dirs {0}', inputs.skip-dirs) || '' }}
 
     # GitHub Security tab does not support SARIF files with `git::` or `https:/` URL's:
