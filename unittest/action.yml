@@ -5,6 +5,14 @@ inputs:
     description: 'If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.'
     required: false
     default: 'true'
+  working-directory:
+    description: 'Will run unit tests on projects under this working directory'
+    required: false
+    default: './'
+  test-projects:
+    description: 'Pattern to use to find test projects. Defaults to *unit*test*csproj'
+    required: false
+    default: '*unit*test*csproj'
 
 runs:
   using: 'composite'
@@ -16,11 +24,12 @@ runs:
     - name: Run unit tests
       shell: bash
       run: |
-        testprojects=`find . -iname "*unit*test*csproj"`
+        testprojects=`find . -iname "${{ inputs.test-projects }}"`
         for testproject in $testprojects;
         do
           dotnet test -l:trx $testproject
         done
+      working-directory: ${{ inputs.working-directory }}
 
     - name: Publish test results
       uses: EnricoMi/publish-unit-test-result-action@v2
