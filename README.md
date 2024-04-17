@@ -425,9 +425,11 @@ Run dotnet unit tests.
 
 ### Inputs
 
-| Name       | Description                                                                                                                          | Required | Default |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- |
-| `checkout` | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`  |
+| Name                | Description                                                                                                                          | Required | Default             |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------- |
+| `checkout`          | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`              |
+| `test-projects`     | Pattern to use to find test projects. Defaults to *unit*test\*csproj                                                                 | no       | `*unit*test*csproj` |
+| `working-directory` | Will run unit tests on projects under this working directory                                                                         | no       | `./`                |
 
 ### Permissions
 
@@ -449,6 +451,18 @@ This action requires the following permissions:
     #
     # Required: no
     # Default: 'true'
+
+    test-projects:
+    # Pattern to use to find test projects. Defaults to *unit*test*csproj
+    #
+    # Required: no
+    # Default: '*unit*test*csproj'
+
+    working-directory:
+    # Will run unit tests on projects under this working directory
+    #
+    # Required: no
+    # Default: './'
 ```
 
 <!-- gh-actions-docs-end -->
