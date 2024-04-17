@@ -24,7 +24,7 @@ If this parameter is missing, the "Permissions" section will not be generated.
 
 ```bash
 docker build . -t gh-actions-docs:latest
-docker run -v $(pwd):/app gh-actions-docs:latest
+docker run -v $(pwd):/opt/app gh-actions-docs:latest
 ```
 
 ### Local
