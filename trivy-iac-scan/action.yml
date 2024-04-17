@@ -28,6 +28,9 @@ inputs:
     description: 'If true, the action will output debug information.'
     required: false
     default: 'false'
+  policy-bundle-repository:
+    description: 'OCI registry URL to retrieve policy bundle from. Maps to `--policy-bundle-repository` in Trivy CLI.'
+    required: false
 
 runs:
   using: 'composite'
@@ -69,6 +72,7 @@ runs:
           --exit-code 0 \
           --severity '${{ inputs.severity }}' \
           --ignorefile '${{ inputs.trivyignore }}' \
+          ${{ inputs.policy-bundle-repository != '' && format('--policy-bundle-repository {0}', inputs.policy-bundle-repository) || '' }} \
           ${{ inputs.debug == 'true' && '--debug' || '' }} \
           ${{ inputs.skip-dirs != '' && format('--skip-dirs {0}', inputs.skip-dirs) || '' }}
 
