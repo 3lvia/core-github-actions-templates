@@ -186,7 +186,7 @@ runs:
       shell: bash
       run: |
         # Helm deploy
-        helm repo add elvia-charts https://raw.githubusercontent.com/3lvia/kubernetes-charts/master
+        helm repo add elvia-charts https://raw.githubusercontent.com/3lvia/kubernetes-charts/feature/runAsNonRoot
         helm repo update
         helm upgrade --debug \
           --install \
