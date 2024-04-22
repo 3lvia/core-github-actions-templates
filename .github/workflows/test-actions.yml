@@ -13,7 +13,7 @@ env:
 jobs:
   unittests:
     name: Run unit tests
-    runs-on: ubuntu-latest
+    runs-on: 3lvia-runner
     permissions:
       contents: read
       checks: write
@@ -29,7 +29,7 @@ jobs:
 
   analyze:
     name: Run CodeQL analysis
-    runs-on: ubuntu-latest
+    runs-on: 3lvia-runner
     permissions:
       actions: read
       contents: read
@@ -44,7 +44,7 @@ jobs:
 
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: 3lvia-runner
     permissions:
       contents: read
       id-token: write
@@ -64,7 +64,7 @@ jobs:
   deploy_aks_dev:
     name: Deploy to dev on AKS
     needs: [build, analyze]
-    runs-on: ubuntu-latest
+    runs-on: 3lvia-runner
     permissions:
       contents: read
       id-token: write
@@ -85,7 +85,7 @@ jobs:
   deploy_gke_dev:
     name: Deploy to dev on GKE
     needs: [build, analyze]
-    runs-on: ubuntu-latest
+    runs-on: 3lvia-runner
     permissions:
       contents: read
       id-token: write
@@ -106,7 +106,7 @@ jobs:
           GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
 
   trivy_iac_scan:
-    runs-on: ubuntu-latest
+    runs-on: 3lvia-runner
     name: Scan IaC with Trivy
     permissions:
       actions: read
@@ -121,7 +121,7 @@ jobs:
           checkout: 'false'
 
   terraform_format_check:
-    runs-on: ubuntu-latest
+    runs-on: 3lvia-runner
     name: Check Terraform code formatting
     steps:
       - name: Checkout repository
