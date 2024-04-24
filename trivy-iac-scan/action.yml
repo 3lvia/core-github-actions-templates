@@ -56,11 +56,14 @@ runs:
       shell: bash
       run: |
         # Install Trivy
-        sudo apt-get install wget apt-transport-https gnupg lsb-release -y
-        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
-        echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
-        sudo apt-get update
-        sudo apt-get install trivy -y
+        trivy_tmp="$(mktemp -d)"
+        cd "$trivy_tmp"
+        trivy_tarball="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+        wget -q "https://github.com/aquasecurity/trivy/releases/download/v$TRIVY_VERSION/$trivy_tarball" # TODO: verify checksum & signature
+        tar -xzf "$trivy_tarball"
+        chmod +x trivy && mv trivy /usr/local/bin
+      env:
+        TRIVY_VERSION: '0.50.4'
 
     - name: Run Trivy vulnerability scanner in IaC mode
       shell: bash
