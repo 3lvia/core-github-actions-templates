@@ -52,16 +52,55 @@ runs:
         # Add default set of CVE's to ignore
         echo "AVD-DS-0026" >> '${{ inputs.trivyignore }}'
 
+    - name: Install cosign
+      uses: sigstore/cosign-installer@v3.5.0
+
     - name: Install Trivy
       shell: bash
       run: |
         # Install Trivy
-        trivy_tmp="$(mktemp -d)"
-        cd "$trivy_tmp"
         trivy_tarball="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
-        wget -q "https://github.com/aquasecurity/trivy/releases/download/v$TRIVY_VERSION/$trivy_tarball" # TODO: verify checksum & signature
+        trivy_checksums="trivy_${TRIVY_VERSION}_checksums.txt"
+
+        trivy_tmp="$(mktemp -d)"
+        cd "$trivy_tmp" || exit 1
+
+        printf "Downloading Trivy v%s...\n" "$TRIVY_VERSION"
+        wget -q "https://github.com/aquasecurity/trivy/releases/download/v$TRIVY_VERSION/$trivy_tarball"
+        wget -q "https://github.com/aquasecurity/trivy/releases/download/v$TRIVY_VERSION/$trivy_tarball.sig"
+        wget -q "https://github.com/aquasecurity/trivy/releases/download/v$TRIVY_VERSION/$trivy_tarball.pem"
+        printf "Done.\n\n"
+
+        printf "Verifying signature...\n"
+        cosign verify-blob "$trivy_tarball" \
+            --certificate "$trivy_tarball.pem" \
+            --signature "$trivy_tarball.sig" \
+            --certificate-identity-regexp 'https://github\.com/aquasecurity/trivy/\.github/workflows/.+' \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
+        printf "Done.\n\n"
+
+        printf "Downloading checksums...\n"
+        wget -q "https://github.com/aquasecurity/trivy/releases/download/v$TRIVY_VERSION/$trivy_checksums"
+        wget -q "https://github.com/aquasecurity/trivy/releases/download/v$TRIVY_VERSION/$trivy_checksums.sig"
+        wget -q "https://github.com/aquasecurity/trivy/releases/download/v$TRIVY_VERSION/$trivy_checksums.pem"
+        printf "Done.\n\n"
+
+        printf "Verifying checksums signature...\n"
+        cosign verify-blob "$trivy_checksums" \
+            --certificate "$trivy_checksums.pem" \
+            --signature "$trivy_checksums.sig" \
+            --certificate-identity-regexp 'https://github\.com/aquasecurity/trivy/\.github/workflows/.+' \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
+        printf "Done.\n\n"
+
+        printf "Verifying checksums...\n"
+        grep "$trivy_tarball" "$trivy_checksums" | sha256sum -c
+        printf "Done.\n\n"
+
+        printf "Installing Trivy v%s...\n" "$TRIVY_VERSION"
         tar -xzf "$trivy_tarball"
-        chmod +x trivy && mv trivy /usr/local/bin
+        sudo install -m 755 trivy /usr/local/bin
+        printf "Done.\n\n"
       env:
         TRIVY_VERSION: '0.50.4'
 
@@ -78,14 +117,6 @@ runs:
           ${{ inputs.policy-bundle-repository != '' && format('--policy-bundle-repository {0}', inputs.policy-bundle-repository) || '' }} \
           ${{ inputs.debug == 'true' && '--debug' || '' }} \
           ${{ inputs.skip-dirs != '' && format('--skip-dirs {0}', inputs.skip-dirs) || '' }}
-
-    # GitHub Security tab does not support SARIF files with `git::` or `https:/` URL's:
-    # https://github.com/aquasecurity/trivy/issues/5003#issuecomment-1780415058
-    - name: Workaround for Trivy SARIF output
-      shell: bash
-      run: |
-        # Remove `git::` and `https:/` from SARIF file
-        sed -i 's#git::https:/##g' '${{ env.TRIVY_SARIF }}'
 
     - name: Upload Trivy report to GitHub Security tab
       if: ${{ inputs.upload-report == 'true' }}
