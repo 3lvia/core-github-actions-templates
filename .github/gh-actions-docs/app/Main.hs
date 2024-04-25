@@ -158,7 +158,7 @@ prettyPrintPermissions _ = ""
 
 
 prettyPrintUsage :: String -> Maybe Inputs -> ActionMetadata -> String
-prettyPrintUsage name' inputs' (ActionMetadata path' (Just owner') (Just project') (Just version') _) =
+prettyPrintUsage name' inputs' (ActionMetadata path' (Just owner') (Just project') (Just version') permissions') =
     "### Usage\n"++
     "```yaml\n"
         ++ "- name: " ++ name' ++ "\n"
@@ -171,9 +171,20 @@ prettyPrintUsage name' inputs' (ActionMetadata path' (Just owner') (Just project
         ++ "@"
         ++ version'
         ++ "\n"
+        ++ prettyPrintUsagePermissions permissions'
         ++ prettyPrintUsageWith inputs'
         ++ "```\n"
 prettyPrintUsage _ _ _ = ""
+
+prettyPrintUsagePermissions :: Maybe Permissions -> String
+prettyPrintUsagePermissions (Just permissions'') =
+    "  permissions:\n"
+        ++ concatMap
+            ( \(name', access) ->
+                "    " ++ name' ++ ": " ++ show access ++ "\n"
+            )
+            (toList permissions'')
+prettyPrintUsagePermissions Nothing = ""
 
 prettyPrintUsageWith :: Maybe Inputs -> String
 prettyPrintUsageWith (Just inputs'') = "  with:\n" ++ concatMap (uncurry prettyPrintUsageInputs) (toList inputs'')
@@ -198,7 +209,7 @@ prettyPrintUsageInputs name' (ActionInput des req def) =
            )
         ++ "\n"
   where
-    indent = replicate 6 ' '
+    indent = replicate 4 ' '
     formatDescription des' = indent ++ "# " ++ des' ++ "\n" ++ indent ++ "#\n"
     formatRequired req' = indent ++ "# Required: " ++ toEnglishBool req' ++ "\n"
     formatDefault def' = indent ++ "# Default: '" ++ def' ++ "'\n"
@@ -234,6 +245,7 @@ replaceActionTagWithDocs readme (meta, action) =
              in unpack $ replace (pack match') (pack docs) (pack readme)
         Left err ->
             error $ errorBundlePretty err
+
 
 -- TABLE OF CONTENTS
 
@@ -276,6 +288,7 @@ replaceTableOfContentsTagWithTableOfContents toc readme =
              in unpack $ replace (pack match') (pack toc') (pack readme)
         Left err ->
             error $ errorBundlePretty err
+
 
 -- PARSERS
 
@@ -335,8 +348,8 @@ tableOfContentsTagParser = do
     (between', end) <- manyTill_ anySingle $ string $ pack tocEndTag
     return $ unpack start ++ between' ++ unpack end
 
--- MAIN
 
+-- MAIN
 
 updateActions :: Config -> String -> IO String
 updateActions config readme = do
