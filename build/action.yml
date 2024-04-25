@@ -133,7 +133,6 @@ runs:
       with:
         image-ref: ${{ env.IMAGE_LONG_NAME }}
         format: 'sarif'
-        template: '@/contrib/sarif.tpl'
         output: 'trivy.sarif'
         severity: ${{ inputs.severity }}
         trivyignores: '.trivyignore'
