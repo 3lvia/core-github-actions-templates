@@ -181,13 +181,12 @@ prettyPrintPermissions _ = ""
 
 
 prettyPrintUsage :: String -> Maybe Inputs -> ActionMetadata -> String
-prettyPrintUsage name' inputs' (ActionMetadata path' (Just owner') (Just project') (Just version') permissions') =
+prettyPrintUsage name' inputs' (ActionMetadata path' (Just owner') (Just project') (Just version') _) =
     "### Usage\n"++
     "```yaml\n"
         ++ "- name: " ++ name' ++ "\n"
         ++ "  uses: "
         ++ owner' ++ "/" ++ project' ++ actionPathWithoutFile ++ "@" ++ version' ++ "\n"
-        ++ prettyPrintUsagePermissions permissions'
         ++ prettyPrintUsageWith inputs'
         ++ "```\n"
     where
@@ -196,18 +195,8 @@ prettyPrintUsage name' inputs' (ActionMetadata path' (Just owner') (Just project
         prependSlashIfNotEmpty x  = "/" ++ x
 prettyPrintUsage _ _ _ = ""
 
-prettyPrintUsagePermissions :: Maybe Permissions -> String
-prettyPrintUsagePermissions (Just permissions'') =
-    "  permissions:\n"
-        ++ concatMap
-            ( \(name', access) ->
-                "    " ++ name' ++ ": " ++ show access ++ "\n"
-            )
-            (toList permissions'')
-prettyPrintUsagePermissions Nothing = ""
-
 prettyPrintUsageWith :: Maybe Inputs -> String
-prettyPrintUsageWith (Just inputs'') = "  with:\n" ++ concatMap (uncurry prettyPrintUsageInputs) (toList inputs'')
+prettyPrintUsageWith (Just inputs') = "  with:\n" ++ concatMap (uncurry prettyPrintUsageInputs) (toList inputs')
 prettyPrintUsageWith Nothing = ""
 
 prettyPrintUsageInputs :: String -> ActionInput -> String
