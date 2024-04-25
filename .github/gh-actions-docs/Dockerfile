@@ -1,4 +1,4 @@
-FROM haskell:9.4.8-slim AS build
+FROM haskell:9.4.8-slim
 
 WORKDIR /opt/app
 

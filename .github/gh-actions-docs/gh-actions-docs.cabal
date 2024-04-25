@@ -76,6 +76,7 @@ executable gh-actions-docs
                     , text
                     , pretty-simple
                     , megaparsec
+                    , process
 
     -- Directories containing source files.
     hs-source-dirs:   app

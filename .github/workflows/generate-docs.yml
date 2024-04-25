@@ -99,7 +99,7 @@ jobs:
       - name: Commit changes
         run: |
           if [[ -z "$(git status --porcelain)" ]]; then
-            echo "No changes to commit"
+            echo "No changes to commit."
             exit 0
           fi
           git config user.name github-actions
