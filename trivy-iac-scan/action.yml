@@ -24,13 +24,6 @@ inputs:
     description: "Path to the Trivy ignore file in the repository. This action will add a default set of CVE's that are ignored for all scans. If you wish to add more CVE's to ignore, add them to the .trivyignore, or create a new file and specify the path here. See https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids for more information."
     required: false
     default: '.trivyignore'
-  debug:
-    description: 'If true, the action will output debug information.'
-    required: false
-    default: 'false'
-  policy-bundle-repository:
-    description: 'OCI registry URL to retrieve policy bundle from. Maps to `--policy-bundle-repository` in Trivy CLI.'
-    required: false
 
 runs:
   using: 'composite'
@@ -52,40 +45,17 @@ runs:
         # Add default set of CVE's to ignore
         echo "AVD-DS-0026" >> '${{ inputs.trivyignore }}'
 
-    - name: Install Trivy
-      shell: bash
-      run: |
-        # Install Trivy
-        trivy_tmp="$(mktemp -d)"
-        cd "$trivy_tmp"
-        trivy_tarball="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
-        wget -q "https://github.com/aquasecurity/trivy/releases/download/v$TRIVY_VERSION/$trivy_tarball" # TODO: verify checksum & signature
-        tar -xzf "$trivy_tarball"
-        chmod +x trivy && mv trivy /usr/local/bin
-      env:
-        TRIVY_VERSION: '0.50.4'
-
     - name: Run Trivy vulnerability scanner in IaC mode
-      shell: bash
-      run: |
-        # Run Trivy
-        trivy config '${{ inputs.path }}' \
-          --format sarif \
-          --output '${{ env.TRIVY_SARIF }}' \
-          --exit-code 0 \
-          --severity '${{ inputs.severity }}' \
-          --ignorefile '${{ inputs.trivyignore }}' \
-          ${{ inputs.policy-bundle-repository != '' && format('--policy-bundle-repository {0}', inputs.policy-bundle-repository) || '' }} \
-          ${{ inputs.debug == 'true' && '--debug' || '' }} \
-          ${{ inputs.skip-dirs != '' && format('--skip-dirs {0}', inputs.skip-dirs) || '' }}
-
-    # GitHub Security tab does not support SARIF files with `git::` or `https:/` URL's:
-    # https://github.com/aquasecurity/trivy/issues/5003#issuecomment-1780415058
-    - name: Workaround for Trivy SARIF output
-      shell: bash
-      run: |
-        # Remove `git::` and `https:/` from SARIF file
-        sed -i 's#git::https:/##g' '${{ env.TRIVY_SARIF }}'
+      uses: aquasecurity/trivy-action@0.19.0
+      with:
+        scan-type: 'config'
+        format: 'sarif'
+        exit-code: '0'
+        output: ${{ env.TRIVY_SARIF }}
+        severity: ${{ inputs.severity }}
+        trivyignores: ${{ inputs.trivyignore }}
+        ignore-unfixed: 'true'
+        skip-dirs: ${{ inputs.skip-dirs }}
 
     - name: Upload Trivy report to GitHub Security tab
       if: ${{ inputs.upload-report == 'true' }}
