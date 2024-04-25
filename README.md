@@ -87,6 +87,9 @@ This action requires the following permissions:
 ```yaml
 - name: Build
   uses: 3lvia/core-github-actions-templates/build@trunk
+  permissions:
+    contents: read
+    id-token: write
   with:
     ACR_NAME:
     # Name of the Azure Container Registry to push to.
@@ -326,6 +329,9 @@ This action requires the following permissions:
 ```yaml
 - name: Deploy
   uses: 3lvia/core-github-actions-templates/deploy@trunk
+  permissions:
+    contents: read
+    id-token: write
   with:
     AKS_CLUSTER_NAME:
     # Name of the AKS cluster to deploy to. Defaults to Elvias normal clusters.
@@ -445,6 +451,11 @@ This action requires the following permissions:
 ```yaml
 - name: Unit Test
   uses: 3lvia/core-github-actions-templates/unittest@trunk
+  permissions:
+    checks: write
+    contents: read
+    issues: read
+    pull-requests: write
   with:
     checkout:
     # If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.
@@ -495,6 +506,10 @@ This action requires the following permissions:
 ```yaml
 - name: Analyze
   uses: 3lvia/core-github-actions-templates/analyze@trunk
+  permissions:
+    actions: read
+    contents: read
+    security-events: write
   with:
     checkout:
     # If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.
@@ -543,6 +558,10 @@ This action requires the following permissions:
 ```yaml
 - name: Trivy IaC scan
   uses: 3lvia/core-github-actions-templates/trivy-iac-scan@trunk
+  permissions:
+    actions: read
+    contents: read
+    security-events: write
   with:
     checkout:
     # If true, the action will check out the repository. If false, the action will assume the repository has already been checked out.
@@ -613,6 +632,12 @@ This action requires the following permissions:
 ```yaml
 - name: Playwright Test
   uses: 3lvia/core-github-actions-templates/playwright@trunk
+  permissions:
+    checks: write
+    contents: read
+    id-token: write
+    issues: read
+    pull-requests: write
   with:
     environment:
     # Environment is used to find correct vault instance.
