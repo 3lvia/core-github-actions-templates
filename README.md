@@ -672,20 +672,15 @@ Uses the built-in formatter from the Terraform CLI to check the format of Terraf
 
 ## Formatting
 
-We use [prettier](https://prettier.io) to format the README and yaml files.
+We use [Prettier](https://prettier.io) to format the README and yaml files.
+See the [installation guide](https://prettier.io/docs/en/install) for how to install it.
 
-Install the dependencies using [yarn](https://yarnpkg.com):
-
-```bash
-yarn install
-```
-
-Run the formatter:
+Run Prettier with this command:
 
 ```bash
-yarn format
+prettier -w --single-quote "**/*.yml" "**/*.md"
 #OR
-yarn format --end-of-line crlf
+prettier -w --single-quote --end-of-line crlf "**/*.yml" "**/*.md"
 ```
 
 ## Action documentation & table of contents
