@@ -3,6 +3,8 @@ name: Check format of workflows
 on:
   pull_request:
     branches: [trunk]
+  push:
+    branches: [trunk]
 
 jobs:
   prettier_check:
@@ -17,14 +19,8 @@ jobs:
         with:
           node-version: 20
 
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: '**/node_modules'
-          key: "${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}"
-
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn global add prettier
 
       - name: Check format of workflows and README
-        run: yarn format-check
+        run: yarn prettier -c --single-quote "**/*.yml" "**/*.md"
