@@ -23,4 +23,4 @@ jobs:
         run: yarn global add prettier
 
       - name: Check format of workflows and README
-        run: yarn prettier -c --single-quote "**/*.yml" "**/*.md"
+        run: prettier -c --single-quote "**/*.yml" "**/*.md"
