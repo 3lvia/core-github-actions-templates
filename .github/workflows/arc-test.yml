@@ -1,0 +1,41 @@
+name: ARC testing
+on:
+  pull_request:
+    branches: [trunk]
+
+jobs:
+  arc-container-test-job:
+    name: ARC container test job
+    runs-on: 3lvia-runner-${{ matrix.runtime-provider }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime-provider: [aks, gke]
+    container:
+      image: debian:latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run tests
+        run: |
+          echo "Running tests..."
+          sleep 10
+          echo "Tests completed"
+
+  arc-no-container-test-job:
+    name: ARC no container test job
+    runs-on: 3lvia-runner-${{ matrix.runtime-provider }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime-provider: [aks, gke]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run tests
+        run: |
+          echo "Running tests..."
+          sleep 10
+          echo "Tests completed"

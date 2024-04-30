@@ -3,8 +3,6 @@ name: Generate action documentation
 on:
   push:
     branches: [trunk]
-  pull_request:
-    branches: [trunk]
 
 jobs:
   set-env:
