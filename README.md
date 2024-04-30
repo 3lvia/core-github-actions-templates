@@ -77,7 +77,7 @@ Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure C
 
 ### Permissions
 
-This action requires the following permissions:
+This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
 - `contents: read`
 - `id-token: write`
@@ -316,7 +316,7 @@ Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Bui
 
 ### Permissions
 
-This action requires the following permissions:
+This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
 - `contents: read`
 - `id-token: write`
@@ -433,7 +433,7 @@ Run dotnet unit tests.
 
 ### Permissions
 
-This action requires the following permissions:
+This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
 - `checks: write`
 - `contents: read`
@@ -484,7 +484,7 @@ Run CodeQL analysis.
 
 ### Permissions
 
-This action requires the following permissions:
+This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
 - `actions: read`
 - `contents: read`
@@ -532,7 +532,7 @@ Uses https://github.com/aquasecurity/trivy-action to scan IaC and report securit
 
 ### Permissions
 
-This action requires the following permissions:
+This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
 - `actions: read`
 - `contents: read`
@@ -600,7 +600,7 @@ Run Playwright tests written in dotnet.
 
 ### Permissions
 
-This action requires the following permissions:
+This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
 - `checks: write`
 - `contents: read`
