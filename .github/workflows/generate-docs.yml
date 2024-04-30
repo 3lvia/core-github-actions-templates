@@ -60,6 +60,7 @@ jobs:
     needs: [build_docs_image, set_env]
     container:
       image: '${{ needs.set_env.outputs.image_name }}:${{ needs.set_env.outputs.image_tag }}'
+      options: '--user 1001'
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
