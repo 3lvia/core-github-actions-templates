@@ -313,6 +313,7 @@ Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Bui
 | `name`                          | Name of application. Do not include namespace.                                                                                       | yes      |                                        |
 | `namespace`                     | Namespace or system of the application.                                                                                              | yes      |                                        |
 | `runtime-cloud-provider`        | Kubernetes cloud provider to deploy to: 'AKS' or 'GKE'.                                                                              | no       | `AKS`                                  |
+| `workload-type`                 | The type of workload to deploy to kubernetes. Must be 'deployment' or 'statefulset'.                                                 | no       | `deployment`                           |
 
 ### Permissions
 
@@ -411,6 +412,12 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     #
     # Required: no
     # Default: 'AKS'
+
+    workload-type:
+    # The type of workload to deploy to kubernetes. Must be 'deployment' or 'statefulset'.
+    #
+    # Required: no
+    # Default: 'deployment'
 ```
 
 <!-- gh-actions-docs-end -->
