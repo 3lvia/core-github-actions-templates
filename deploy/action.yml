@@ -14,6 +14,10 @@ inputs:
     description: 'Path to Helm values file, relative to the root of the repository. Defaults to .github/deploy/values.yaml.'
     required: false
     default: '.github/deploy/values.yaml'
+  workload-type:
+    description: "The type of workload to deploy to kubernetes. Must be 'deployment' or 'statefulset'."
+    required: false
+    default: 'deployment'
   checkout:
     description: 'If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.'
     required: false
@@ -188,20 +192,38 @@ runs:
         # Helm deploy
         helm repo add elvia-charts https://raw.githubusercontent.com/3lvia/kubernetes-charts/master
         helm repo update
-        helm upgrade --debug \
-          --install \
-          -n ${{ inputs.namespace }} \
-          -f ${{ inputs.helm-values-path }} ${{ inputs.name }} elvia-charts/elvia-deployment \
-          --set="environment=${{ inputs.environment }}" \
-          --set="image.tag=${{ github.sha }}-${{ github.run_number }}" \
-          --set="labels.repositoryName=${{ env.REPO_SHORT_NAME }}" \
-          --set="labels.commitHash=${{ github.sha }}"
+        if [[ "${{ inputs.workload-type }}" == "deployment" ]]; then
+          helm upgrade --debug --install \
+            -n ${{ inputs.namespace }} \
+            -f ${{ inputs.helm-values-path }} ${{ inputs.name }} elvia-charts/elvia-deployment \
+            --set="environment=${{ inputs.environment }}" \
+            --set="image.tag=${{ github.sha }}-${{ github.run_number }}" \
+            --set="labels.repositoryName=${{ env.REPO_SHORT_NAME }}" \
+            --set="labels.commitHash=${{ github.sha }}"
+        elif [[ "${{ inputs.workload-type }}" == "statefulset" ]]; then
+          helm upgrade --debug --install \
+            -n ${{ inputs.namespace }} \
+            -f ${{ inputs.helm-values-path }} ${{ inputs.name }} elvia-charts/elvia-statefulset \
+            --set="environment=${{ inputs.environment }}" \
+            --set="image.tag=${{ github.sha }}-${{ github.run_number }}" \
+            --set="labels.repositoryName=${{ env.REPO_SHORT_NAME }}" \
+            --set="labels.commitHash=${{ github.sha }}"
+        else
+          echo "Unsupported inputs.workload-type: ${{ inputs.workload-type }}"
+          exit 1
+        fi
 
     - name: Rollout status
       shell: bash
       run: |
-        # Rollout status
-        kubectl -n ${{ inputs.namespace }} rollout status deploy ${{ inputs.name }}
+        if [[ "${{ inputs.workload-type }}" == "deployment" ]]; then
+          kubectl -n ${{ inputs.namespace }} rollout status deployment ${{ inputs.name }}
+        elif [[ "${{ inputs.workload-type }}" == "statefulset" ]]; then
+          kubectl -n ${{ inputs.namespace }} rollout status statefulset ${{ inputs.name }}
+        else
+          echo "Unsupported inputs.workload-type: ${{ inputs.workload-type }}"
+          exit 1
+        fi
 
     - name: Get events
       shell: bash
