@@ -1,5 +1,5 @@
 name: Playwright Test
-description: 'Run Playwright tests written in dotnet.'
+description: 'Run Playwright tests written in .NET.'
 inputs:
   test-project:
     description: 'Name of test project file to run'
@@ -10,10 +10,17 @@ inputs:
   system:
     description: 'System is used to log in to Vault using correct role.'
     required: true
+  dotnet-version:
+    description: 'Version of .NET to use.'
+    required: false
+    default: '8.x'
 
 runs:
   using: 'composite'
   steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
     - name: Parse input and set environment variables
       shell: bash
       run: |
@@ -37,10 +44,12 @@ runs:
         path: jwt-github
         exportToken: true
 
-    - name: Checkout repository
-      uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}
 
-    - name: Dotnet build
+    - name: Build .NET project
       shell: bash
       run: dotnet build ${{ inputs.test-project }}
 
@@ -51,7 +60,7 @@ runs:
         $playwrightscript = Get-ChildItem -Path $dirName -Filter playwright.ps1 -Recurse -ErrorAction SilentlyContinue -Force
         &$playwrightscript.FullName install
 
-    - name: Dotnet test
+    - name: Run .NET tests
       shell: bash
       run: dotnet test -l:trx ${{ inputs.test-project }}
 
