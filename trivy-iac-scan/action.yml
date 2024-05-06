@@ -46,16 +46,16 @@ runs:
         echo "AVD-DS-0026" >> '${{ inputs.trivyignore }}'
 
     - name: Run Trivy vulnerability scanner in IaC mode
-      uses: aquasecurity/trivy-action@0.20.0
-      with:
-        scan-type: 'config'
-        format: 'sarif'
-        exit-code: '0'
-        output: ${{ env.TRIVY_SARIF }}
-        severity: ${{ inputs.severity }}
-        trivyignores: ${{ inputs.trivyignore }}
-        ignore-unfixed: 'true'
-        skip-dirs: ${{ inputs.skip-dirs }}
+      shell: bash
+      run: |
+        # Run Trivy
+        trivy config '${{ inputs.path }}' \
+          --format 'sarif' \
+          --output '${{ env.TRIVY_SARIF }}' \
+          --exit-code '0' \
+          --severity '${{ inputs.severity }}' \
+          --ignorefile '${{ inputs.trivyignore }}' \
+          ${{ inputs.skip-dirs != '' && format('--skip-dirs {0}', inputs.skip-dirs) || '' }}
 
     - name: Upload Trivy report to GitHub Security tab
       if: ${{ inputs.upload-report == 'true' }}

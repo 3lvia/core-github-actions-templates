@@ -13,7 +13,10 @@ env:
 jobs:
   unittests:
     name: Run unit tests
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        runner-provider: [gke]
+    runs-on: '3lvia-runner-${{ matrix.runner-provider }}-dev'
     permissions:
       contents: read
       checks: write
@@ -29,7 +32,11 @@ jobs:
 
   analyze:
     name: Run CodeQL analysis
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        runner-provider: [gke]
+    runs-on: '3lvia-runner-${{ matrix.runner-provider }}-dev'
+    if: false # TODO: fix, runs out of space
     permissions:
       actions: read
       contents: read
@@ -44,7 +51,10 @@ jobs:
 
   build:
     name: Build
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        runner-provider: [gke]
+    runs-on: '3lvia-runner-${{ matrix.runner-provider }}-dev'
     permissions:
       contents: read
       id-token: write
@@ -65,7 +75,10 @@ jobs:
   deploy_aks_dev:
     name: Deploy to dev on AKS
     needs: [build]
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        runner-provider: [gke]
+    runs-on: '3lvia-runner-${{ matrix.runner-provider }}-dev'
     permissions:
       contents: read
       id-token: write
@@ -86,7 +99,10 @@ jobs:
   deploy_gke_dev:
     name: Deploy to dev on GKE
     needs: [build]
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        runner-provider: [gke]
+    runs-on: '3lvia-runner-${{ matrix.runner-provider }}-dev'
     permissions:
       contents: read
       id-token: write
@@ -107,8 +123,11 @@ jobs:
           GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
 
   trivy_iac_scan:
-    runs-on: ubuntu-latest
     name: Scan IaC with Trivy
+    strategy:
+      matrix:
+        runner-provider: [gke]
+    runs-on: '3lvia-runner-${{ matrix.runner-provider }}-dev'
     permissions:
       actions: read
       contents: read
@@ -122,8 +141,11 @@ jobs:
           checkout: 'false'
 
   terraform_format_check:
-    runs-on: ubuntu-latest
     name: Check Terraform code formatting
+    strategy:
+      matrix:
+        runner-provider: [gke]
+    runs-on: '3lvia-runner-${{ matrix.runner-provider }}-dev'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

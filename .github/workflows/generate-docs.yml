@@ -9,7 +9,8 @@ on:
 jobs:
   set-env:
     name: Set environment variables
-    runs-on: ubuntu-latest
+    runs-on: 3lvia-runner-aks-dev
+    if: false
     outputs:
       image_name: ${{ steps.set-output.outputs.image_name }}
       image_tag: ${{ steps.set-output.outputs.image_tag }}
@@ -26,7 +27,8 @@ jobs:
 
   build-docs-image:
     name: Build image for gh-actions-docs
-    runs-on: ubuntu-latest
+    runs-on: 3lvia-runner-aks-dev
+    if: false
     permissions:
       contents: read
       packages: write
@@ -56,7 +58,8 @@ jobs:
 
   generate-docs:
     name: Generate action documentation
-    runs-on: ubuntu-latest
+    runs-on: 3lvia-runner-aks-dev
+    if: false
     needs: [build-docs-image, set-env]
     outputs:
       readme: ${{ steps.set-output.outputs.readme }}
@@ -90,11 +93,12 @@ jobs:
 
   commit-docs:
     name: Commit action documentation on push
-    runs-on: ubuntu-latest
+    runs-on: 3lvia-runner-aks-dev
     needs: [generate-docs]
     permissions:
       contents: write
-    if: github.event_name == 'push'
+  # if: github.event_name == 'push'
+    if: false
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
