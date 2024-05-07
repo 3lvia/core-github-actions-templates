@@ -257,7 +257,8 @@ runs:
       run: |
         # Add deploy annotiation to Grafana Cloud
         git_message="$(git log -1 --no-merges --pretty=%B)"
-        python3 ${{ github.action_path }}/post-grafana-annotations.py \
+        pip install -r '${{ github.action_path }}/requirements.txt'
+        python '${{ github.action_path }}/post-grafana-annotations.py' \
           --what 'Deploy ${{ job.status }} - ' \
           --data "$GITHUB_RUN_ID $git_message <a href="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID">Link</a>" \
           --tags '{app: ${{ inputs.name }}, system: ${{ inputs.namespace }}, env: ${{ inputs.environment }}, event: deploy}' \
