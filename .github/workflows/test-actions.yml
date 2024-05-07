@@ -59,6 +59,7 @@ jobs:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAMESPACE }}
           dockerfile: '.github/test/src/Dockerfile'
+          severity: 'CRITICAL'
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
 
   deploy_aks_dev:
