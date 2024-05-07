@@ -63,7 +63,7 @@ jobs:
 
   deploy_aks_dev:
     name: Deploy to dev on AKS
-    needs: [build, analyze]
+    needs: [build]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -84,7 +84,7 @@ jobs:
 
   deploy_gke_dev:
     name: Deploy to dev on GKE
-    needs: [build, analyze]
+    needs: [build]
     runs-on: ubuntu-latest
     permissions:
       contents: read
