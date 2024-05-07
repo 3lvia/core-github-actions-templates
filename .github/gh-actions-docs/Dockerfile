@@ -2,9 +2,9 @@ FROM haskell:9.4.8-slim
 
 WORKDIR /opt/app
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends npm
-RUN npm install -g prettier@2.8.8
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y --no-install-recommends nodejs
+RUN npm install -g prettier
 RUN export PATH=$PATH:/root/.node/bin
 
 RUN cabal update
