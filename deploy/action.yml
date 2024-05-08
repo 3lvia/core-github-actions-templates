@@ -244,9 +244,9 @@ runs:
       if: always()
       with:
         url: ${{ env.VAULT_ADDR }}
-        role: jwt-github-${{ inputs.namespace }}-${{ env.REPO_SHORT_NAME }}
-        method: jwt
-        path: jwt-github
+        role: 'jwt-github-${{ inputs.namespace }}-${{ env.REPO_SHORT_NAME }}'
+        method: 'jwt'
+        path: 'jwt-github'
         secrets: |
           monitoring/kv/data/shared grafana_api_url        | GRAFANA_URL ;
           monitoring/kv/data/shared grafana_editor_api_key | GRAFANA_API_KEY

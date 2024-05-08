@@ -1,5 +1,5 @@
 name: Integration Test
-description: 'Run dotnet integration tests.'
+description: 'Run .NET integration tests.'
 inputs:
   system:
     description: 'System is used to log in to Vault using correct role.'
@@ -9,11 +9,11 @@ inputs:
     required: false
     default: 'true'
   working-directory:
-    description: 'Will run integration tests on projects under this working directory'
+    description: 'Will run integration tests on projects under this working directory.'
     required: false
     default: './'
   test-projects:
-    description: 'Pattern to use to find test projects. Defaults to *integration*test*csproj'
+    description: 'Pattern to use to find test projects.'
     required: false
     default: '*integration*test*csproj'
   dotnet-version:
@@ -79,4 +79,4 @@ runs:
         files: |
           **/TestResults/*.trx
           .github/**/TestResults/*.trx
-        check_name: Integration Test Results
+        check_name: 'Integration Test Results'

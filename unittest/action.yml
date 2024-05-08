@@ -1,16 +1,16 @@
 name: Unit Test
-description: 'Run dotnet unit tests.'
+description: 'Run .NET unit tests.'
 inputs:
   checkout:
     description: 'If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.'
     required: false
     default: 'true'
   working-directory:
-    description: 'Will run unit tests on projects under this working directory'
+    description: 'Will run unit tests on projects under this working directory.'
     required: false
     default: './'
   test-projects:
-    description: 'Pattern to use to find test projects. Defaults to *unit*test*csproj'
+    description: 'Pattern to use to find test projects.'
     required: false
     default: '*unit*test*csproj'
   dotnet-version:
@@ -47,4 +47,4 @@ runs:
         files: |
           **/TestResults/*.trx
           .github/**/TestResults/*.trx
-        check_name: Unit Test Results
+        check_name: 'Unit Test Results'
