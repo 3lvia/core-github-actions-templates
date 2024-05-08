@@ -432,7 +432,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
 ### Description
 
-Run dotnet unit tests.
+Run .NET unit tests.
 
 ### Inputs
 
@@ -440,8 +440,8 @@ Run dotnet unit tests.
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------- |
 | `checkout`          | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`              |
 | `dotnet-version`    | Version of .NET to use.                                                                                                              | no       | `8.x`               |
-| `test-projects`     | Pattern to use to find test projects. Defaults to *unit*test\*csproj                                                                 | no       | `*unit*test*csproj` |
-| `working-directory` | Will run unit tests on projects under this working directory                                                                         | no       | `./`                |
+| `test-projects`     | Pattern to use to find test projects.                                                                                                | no       | `*unit*test*csproj` |
+| `working-directory` | Will run unit tests on projects under this working directory.                                                                        | no       | `./`                |
 
 ### Permissions
 
@@ -471,13 +471,13 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Default: '8.x'
 
     test-projects:
-    # Pattern to use to find test projects. Defaults to *unit*test*csproj
+    # Pattern to use to find test projects.
     #
     # Required: no
     # Default: '*unit*test*csproj'
 
     working-directory:
-    # Will run unit tests on projects under this working directory
+    # Will run unit tests on projects under this working directory.
     #
     # Required: no
     # Default: './'
@@ -491,7 +491,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
 ### Description
 
-Run dotnet integration tests.
+Run .NET integration tests.
 
 ### Inputs
 
@@ -501,8 +501,8 @@ Run dotnet integration tests.
 | `dotnet-version`    | Version of .NET to use.                                                                                                              | no       | `8.x`                      |
 | `environment`       | Environment is used to find correct vault instance.                                                                                  | yes      | `dev`                      |
 | `system`            | System is used to log in to Vault using correct role.                                                                                | yes      |                            |
-| `test-projects`     | Pattern to use to find test projects. Defaults to *integration*test\*csproj                                                          | no       | `*integration*test*csproj` |
-| `working-directory` | Will run integration tests on projects under this working directory                                                                  | no       | `./`                       |
+| `test-projects`     | Pattern to use to find test projects.                                                                                                | no       | `*integration*test*csproj` |
+| `working-directory` | Will run integration tests on projects under this working directory.                                                                 | no       | `./`                       |
 
 ### Usage
 
@@ -534,13 +534,13 @@ Run dotnet integration tests.
     # Required: yes
 
     test-projects:
-    # Pattern to use to find test projects. Defaults to *integration*test*csproj
+    # Pattern to use to find test projects.
     #
     # Required: no
     # Default: '*integration*test*csproj'
 
     working-directory:
-    # Will run integration tests on projects under this working directory
+    # Will run integration tests on projects under this working directory.
     #
     # Required: no
     # Default: './'
