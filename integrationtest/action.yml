@@ -16,10 +16,6 @@ inputs:
     description: 'Pattern to use to find test projects.'
     required: false
     default: '*integration*test*csproj'
-  dotnet-version:
-    description: 'Version of .NET to use.'
-    required: false
-    default: '8.x'
   environment:
     description: 'Environment is used to find correct vault instance.'
     required: true
@@ -56,11 +52,6 @@ runs:
         method: 'jwt'
         path: 'jwt-github'
         exportToken: 'true'
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ inputs.dotnet-version }}
 
     - name: Run integration tests
       shell: bash

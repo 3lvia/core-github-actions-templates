@@ -10,10 +10,6 @@ inputs:
   system:
     description: 'System is used to log in to Vault using correct role.'
     required: true
-  dotnet-version:
-    description: 'Version of .NET to use.'
-    required: false
-    default: '8.x'
 
 runs:
   using: 'composite'
@@ -43,11 +39,6 @@ runs:
         method: jwt
         path: jwt-github
         exportToken: true
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ inputs.dotnet-version }}
 
     - name: Build .NET project
       shell: bash
