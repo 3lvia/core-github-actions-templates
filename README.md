@@ -23,25 +23,29 @@ GitHub Actions templates for the Elvia organization.
     - [Inputs](#inputs-2)
     - [Permissions](#permissions-2)
     - [Usage](#usage-2)
-  - [Analyze](#analyze)
+  - [Integration Test](#integration-test)
     - [Description](#description-3)
     - [Inputs](#inputs-3)
-    - [Permissions](#permissions-3)
     - [Usage](#usage-3)
-  - [Trivy IaC scan](#trivy-iac-scan)
+  - [Analyze](#analyze)
     - [Description](#description-4)
     - [Inputs](#inputs-4)
-    - [Permissions](#permissions-4)
+    - [Permissions](#permissions-3)
     - [Usage](#usage-4)
-  - [Playwright Test](#playwright-test)
+  - [Trivy IaC scan](#trivy-iac-scan)
     - [Description](#description-5)
     - [Inputs](#inputs-5)
-    - [Permissions](#permissions-5)
+    - [Permissions](#permissions-4)
     - [Usage](#usage-5)
-  - [Terraform format check](#terraform-format-check)
+  - [Playwright Test](#playwright-test)
     - [Description](#description-6)
     - [Inputs](#inputs-6)
+    - [Permissions](#permissions-5)
     - [Usage](#usage-6)
+  - [Terraform format check](#terraform-format-check)
+    - [Description](#description-7)
+    - [Inputs](#inputs-7)
+    - [Usage](#usage-7)
 - [Development](#development)
   - [Formatting](#formatting)
   - [Action documentation & table of contents](#action-documentation--table-of-contents)
@@ -482,6 +486,65 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 <!-- gh-actions-docs-end -->
 
 <!-- gh-actions-docs-start path=integrationtest/action.yml owner=3lvia project=core-github-actions-templates version=trunk -->
+
+## Integration Test
+
+### Description
+
+Run dotnet integration tests.
+
+### Inputs
+
+| Name                | Description                                                                                                                          | Required | Default                    |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------------------------- |
+| `checkout`          | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`                     |
+| `dotnet-version`    | Version of .NET to use.                                                                                                              | no       | `8.x`                      |
+| `environment`       | Environment is used to find correct vault instance.                                                                                  | yes      | `dev`                      |
+| `system`            | System is used to log in to Vault using correct role.                                                                                | yes      |                            |
+| `test-projects`     | Pattern to use to find test projects. Defaults to *integration*test\*csproj                                                          | no       | `*integration*test*csproj` |
+| `working-directory` | Will run integration tests on projects under this working directory                                                                  | no       | `./`                       |
+
+### Usage
+
+```yaml
+- name: Integration Test
+  uses: 3lvia/core-github-actions-templates/integrationtest@trunk
+  with:
+    checkout:
+    # If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.
+    #
+    # Required: no
+    # Default: 'true'
+
+    dotnet-version:
+    # Version of .NET to use.
+    #
+    # Required: no
+    # Default: '8.x'
+
+    environment:
+    # Environment is used to find correct vault instance.
+    #
+    # Required: yes
+    # Default: 'dev'
+
+    system:
+    # System is used to log in to Vault using correct role.
+    #
+    # Required: yes
+
+    test-projects:
+    # Pattern to use to find test projects. Defaults to *integration*test*csproj
+    #
+    # Required: no
+    # Default: '*integration*test*csproj'
+
+    working-directory:
+    # Will run integration tests on projects under this working directory
+    #
+    # Required: no
+    # Default: './'
+```
 
 <!-- gh-actions-docs-end -->
 
