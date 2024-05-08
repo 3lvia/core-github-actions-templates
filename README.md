@@ -439,7 +439,6 @@ Run .NET unit tests.
 | Name                | Description                                                                                                                          | Required | Default             |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------- |
 | `checkout`          | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`              |
-| `dotnet-version`    | Version of .NET to use.                                                                                                              | no       | `8.x`               |
 | `test-projects`     | Pattern to use to find test projects.                                                                                                | no       | `*unit*test*csproj` |
 | `working-directory` | Will run unit tests on projects under this working directory.                                                                        | no       | `./`                |
 
@@ -463,12 +462,6 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     #
     # Required: no
     # Default: 'true'
-
-    dotnet-version:
-    # Version of .NET to use.
-    #
-    # Required: no
-    # Default: '8.x'
 
     test-projects:
     # Pattern to use to find test projects.
@@ -498,7 +491,6 @@ Run .NET integration tests.
 | Name                | Description                                                                                                                          | Required | Default                    |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------------------------- |
 | `checkout`          | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`                     |
-| `dotnet-version`    | Version of .NET to use.                                                                                                              | no       | `8.x`                      |
 | `environment`       | Environment is used to find correct vault instance.                                                                                  | yes      | `dev`                      |
 | `system`            | System is used to log in to Vault using correct role.                                                                                | yes      |                            |
 | `test-projects`     | Pattern to use to find test projects.                                                                                                | no       | `*integration*test*csproj` |
@@ -515,12 +507,6 @@ Run .NET integration tests.
     #
     # Required: no
     # Default: 'true'
-
-    dotnet-version:
-    # Version of .NET to use.
-    #
-    # Required: no
-    # Default: '8.x'
 
     environment:
     # Environment is used to find correct vault instance.
@@ -561,7 +547,6 @@ Run CodeQL analysis.
 | Name                | Description                                                                                                                          | Required | Default |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- |
 | `checkout`          | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`  |
-| `dotnet-version`    | Version of .NET to use.                                                                                                              | no       | `8.x`   |
 | `working-directory` | Will run CodeQL Analysis on projects under this working directory                                                                    | no       | `./`    |
 
 ### Permissions
@@ -583,12 +568,6 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     #
     # Required: no
     # Default: 'true'
-
-    dotnet-version:
-    # Version of .NET to use.
-    #
-    # Required: no
-    # Default: '8.x'
 
     working-directory:
     # Will run CodeQL Analysis on projects under this working directory
@@ -680,12 +659,11 @@ Run Playwright tests written in .NET.
 
 ### Inputs
 
-| Name             | Description                                           | Required | Default |
-| ---------------- | ----------------------------------------------------- | -------- | ------- |
-| `dotnet-version` | Version of .NET to use.                               | no       | `8.x`   |
-| `environment`    | Environment is used to find correct vault instance.   | yes      |         |
-| `system`         | System is used to log in to Vault using correct role. | yes      |         |
-| `test-project`   | Name of test project file to run                      | yes      |         |
+| Name           | Description                                           | Required | Default |
+| -------------- | ----------------------------------------------------- | -------- | ------- |
+| `environment`  | Environment is used to find correct vault instance.   | yes      |         |
+| `system`       | System is used to log in to Vault using correct role. | yes      |         |
+| `test-project` | Name of test project file to run                      | yes      |         |
 
 ### Permissions
 
@@ -703,12 +681,6 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 - name: Playwright Test
   uses: 3lvia/core-github-actions-templates/playwright@trunk
   with:
-    dotnet-version:
-    # Version of .NET to use.
-    #
-    # Required: no
-    # Default: '8.x'
-
     environment:
     # Environment is used to find correct vault instance.
     #
