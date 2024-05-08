@@ -46,14 +46,16 @@ runs:
           exit 1
         fi
 
-    - name: Login Vault
+        echo "REPO_SHORT_NAME=${GITHUB_REPOSITORY##*/}" >> "$GITHUB_ENV"
+
+    - name: Login Vault and export token
       uses: hashicorp/vault-action@v3
       with:
         url: ${{ env.VAULT_ADDR }}
-        role: jwt-github-${{ inputs.system }}
-        method: jwt
-        path: jwt-github
-        exportToken: true
+        role: 'jwt-github-${{ inputs.system }}-${{ env.REPO_SHORT_NAME }}'
+        method: 'jwt'
+        path: 'jwt-github'
+        exportToken: 'true'
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
