@@ -116,7 +116,7 @@ runs:
         done
 
     - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@0.19.0
+      uses: aquasecurity/trivy-action@0.20.0
       with:
         image-ref: ${{ env.IMAGE_LONG_NAME }}
         exit-code: '1'
@@ -129,7 +129,7 @@ runs:
       if: github.event_name == 'pull_request'
 
     - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@0.19.0
+      uses: aquasecurity/trivy-action@0.20.0
       with:
         image-ref: ${{ env.IMAGE_LONG_NAME }}
         format: 'sarif'
