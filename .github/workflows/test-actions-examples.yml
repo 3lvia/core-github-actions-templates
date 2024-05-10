@@ -1,0 +1,22 @@
+name: Test workflow examples
+
+on:
+  push:
+    branches: [trunk]
+  # TODO: remove
+  pull_request:
+    branches: [trunk]
+
+jobs:
+  test-examples:
+    name: Test examples
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Test 'build-deploy.yml'
+        uses: ./examples/build-deploy.yml
+
+      - name: Test 'build-deploy-google.yml'
+        uses: ./examples/build-deploy-google.yml

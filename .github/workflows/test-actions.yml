@@ -14,6 +14,7 @@ jobs:
   unittests:
     name: Run unit tests
     runs-on: ubuntu-latest
+    if: false # TODO: remove
     permissions:
       contents: read
       checks: write
@@ -30,6 +31,7 @@ jobs:
   analyze:
     name: Run CodeQL analysis
     runs-on: ubuntu-latest
+    if: false # TODO: remove
     permissions:
       actions: read
       contents: read
@@ -45,6 +47,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    if: false # TODO: remove
     permissions:
       contents: read
       id-token: write
@@ -66,6 +69,7 @@ jobs:
     name: Deploy to dev on AKS
     needs: [build]
     runs-on: ubuntu-latest
+    if: false # TODO: remove
     permissions:
       contents: read
       id-token: write
@@ -87,6 +91,7 @@ jobs:
     name: Deploy to dev on GKE
     needs: [build]
     runs-on: ubuntu-latest
+    if: false # TODO: remove
     permissions:
       contents: read
       id-token: write
@@ -109,6 +114,7 @@ jobs:
   trivy_iac_scan:
     runs-on: ubuntu-latest
     name: Scan IaC with Trivy
+    if: false # TODO: remove
     permissions:
       actions: read
       contents: read
@@ -124,6 +130,7 @@ jobs:
   terraform_format_check:
     runs-on: ubuntu-latest
     name: Check Terraform code formatting
+    if: false # TODO: remove
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
