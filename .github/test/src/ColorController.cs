@@ -13,7 +13,7 @@ namespace core_demo_api
     /// </remarks>
     /// <response code="200">Healthy</response>
     [Route("[controller]")]
-    [AllowAnonymous]
+    [Authorize]
     public class ColorController : Controller
     {
         [HttpGet]
