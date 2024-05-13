@@ -81,7 +81,7 @@ runs:
         hide_branch_rate: false
         hide_complexity: false
         indicators: true
-        output: console
+        output: both
         thresholds: "50 75"
 
     - name: Add Coverage PR Comment
