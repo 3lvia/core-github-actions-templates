@@ -51,6 +51,158 @@ GitHub Actions templates for the Elvia organization.
   - [Action documentation & table of contents](#action-documentation--table-of-contents)
   <!-- gh-actions-docs-toc-end -->
 
+
+<!-- gh-actions-docs-end -->
+
+### Example usage in a full workflow
+
+```yaml
+name: Build and Deploy to Kubernetes
+
+on:
+  push:
+    branches: [trunk]
+  pull_request:
+    branches: [trunk]
+
+env:
+  APPLICATION_NAME: demo-api
+  SYSTEM_NAMESPACE: core
+  DOCKER_FILE: core-demo-api/Dockerfile
+  HELM_VALUES: '.github/deploy/values.yaml'
+
+jobs:
+  unittests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      issues: read
+      pull-requests: write
+    steps:
+      - uses: 3lvia/core-github-actions-templates/unittest@trunk
+        with:
+          test-coverage: 'true'
+
+  integrationtests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      issues: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: 3lvia/core-github-actions-templates/integrationtest@trunk
+        with:
+          system: core
+
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    if: github.event_name == 'pull_request' # only run analyze on PR
+    steps:
+      - uses: 3lvia/core-github-actions-templates/analyze@trunk
+
+  build:
+    name: Build and Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    environment: build
+    steps:
+      - uses: 3lvia/core-github-actions-templates/build@trunk
+        with:
+          name: ${{ env.APPLICATION_NAME }}
+          namespace: ${{ env.SYSTEM_NAMESPACE }}
+          dockerfile: ${{ env.DOCKER_FILE }}
+          AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
+
+  deploy_dev:
+    name: Deploy Dev
+    needs: [build, unittests, integrationtests]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    environment: dev
+    steps:
+      - uses: 3lvia/core-github-actions-templates/deploy@trunk
+        with:
+          name: ${{ env.APPLICATION_NAME }}
+          namespace: ${{ env.SYSTEM_NAMESPACE }}
+          environment: 'dev'
+          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          helm-values-path: ${{ env.HELM_VALUES }}
+
+  deploy_test:
+    name: Deploy Test
+    needs: [deploy_dev]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    environment: test
+    # Only on push to trunk
+    if: github.ref == 'refs/heads/trunk'
+    steps:
+      - uses: 3lvia/core-github-actions-templates/deploy@trunk
+        with:
+          name: ${{ env.APPLICATION_NAME }}
+          namespace: ${{ env.SYSTEM_NAMESPACE }}
+          environment: 'test'
+          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          helm-values-path: ${{ env.HELM_VALUES }}
+
+  deploy_prod:
+    name: Deploy Prod
+    needs: [deploy_test]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    environment: prod
+    # Only on push to trunk
+    if: github.ref == 'refs/heads/trunk'
+    steps:
+      - uses: 3lvia/core-github-actions-templates/deploy@trunk
+        with:
+          name: ${{ env.APPLICATION_NAME }}
+          namespace: ${{ env.SYSTEM_NAMESPACE }}
+          environment: 'prod'
+          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          helm-values-path: ${{ env.HELM_VALUES }}
+
+
+  #Example for deploying to GKE:
+  #
+  #deploy_gke_dev:
+  #  name: Deploy to dev on GKE
+  #  needs: [build, unittests, integrationtests]
+  #  runs-on: ubuntu-latest
+  #  permissions:
+  #    contents: read
+  #    id-token: write
+  #  environment: dev
+  #  steps:
+  #    - uses: 3lvia/core-github-actions-templates/deploy@trunk
+  #      with:
+  #        name: ${{ env.APPLICATION_NAME }}
+  #        namespace: ${{ env.SYSTEM_NAMESPACE }}
+  #        environment: 'dev'
+  #        helm-values-path: ${{ env.HELM_VALUES }}
+  #        runtime-cloud-provider: 'GKE'
+  #        GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
+  #        GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
+```
+
 # Actions
 
 <!-- gh-actions-docs-start path=build/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
@@ -164,148 +316,6 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Required: no
 ```
 
-<!-- gh-actions-docs-end -->
-
-### Example usage in a full workflow
-
-```yaml
-name: Build and Deploy to Kubernetes
-
-on:
-  push:
-    branches: [trunk]
-  pull_request:
-    branches: [trunk]
-
-env:
-  APPLICATION_NAME: demo-api
-  SYSTEM_NAMESPACE: core
-  DOCKER_FILE: core-demo-api/Dockerfile
-
-jobs:
-  unittests:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      checks: write
-      issues: read
-      pull-requests: write
-    steps:
-      - uses: 3lvia/core-github-actions-templates/unittest@trunk
-        with:
-          test-coverage: 'true'
-
-  integrationtests:
-    name: Integration Tests
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      checks: write
-      issues: read
-      pull-requests: write
-      id-token: write
-    steps:
-      - uses: 3lvia/core-github-actions-templates/integrationtest@trunk
-        with:
-          system: core
-
-  analyze:
-    name: Analyze
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    if: github.event_name == 'pull_request' # only run analyze on PR
-    steps:
-      - uses: 3lvia/core-github-actions-templates/analyze@trunk
-
-  build:
-    name: Build and Scan
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-    environment: build
-    steps:
-      - uses: 3lvia/core-github-actions-templates/build@trunk
-        with:
-          name: ${{ env.APPLICATION_NAME }}
-          namespace: ${{ env.SYSTEM_NAMESPACE }}
-          dockerfile: ${{ env.DOCKER_FILE }}
-          AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
-
-  deploy_dev:
-    name: Deploy Dev
-    needs: [build, unittests]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-    environment: dev
-    steps:
-      - uses: 3lvia/core-github-actions-templates/deploy@trunk
-        with:
-          name: ${{ env.APPLICATION_NAME }}
-          namespace: ${{ env.SYSTEM_NAMESPACE }}
-          environment: 'dev'
-          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
-          helm-values-path: '.github/deploy/values.yaml'
-
-  deploy_test:
-    name: Deploy Test
-    needs: [deploy_dev]
-    runs-on: ubuntu-latest
-    environment: test
-    # Only on push to trunk
-    if: github.ref == 'refs/heads/trunk'
-    steps:
-      - uses: 3lvia/core-github-actions-templates/deploy@trunk
-        with:
-          name: ${{ env.APPLICATION_NAME }}
-          namespace: ${{ env.SYSTEM_NAMESPACE }}
-          environment: 'test'
-          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
-          helm-values-path: '.github/deploy/values.yaml'
-
-  deploy_prod:
-    name: Deploy Prod
-    needs: [deploy_test]
-    runs-on: ubuntu-latest
-    environment: prod
-    # Only on push to trunk
-    if: github.ref == 'refs/heads/trunk'
-    steps:
-      - uses: 3lvia/core-github-actions-templates/deploy@trunk
-        with:
-          name: ${{ env.APPLICATION_NAME }}
-          namespace: ${{ env.SYSTEM_NAMESPACE }}
-          environment: 'prod'
-          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
-          helm-values-path: '.github/deploy/values.yaml'
-
-  #Example for deploying to GKE:
-  #
-  #deploy_gke_dev:
-  #  name: Deploy to dev on GKE
-  #  needs: [build, analyze]
-  #  runs-on: ubuntu-latest
-  #  permissions:
-  #    contents: read
-  #    id-token: write
-  #  environment: dev
-  #  steps:
-  #    - uses: 3lvia/core-github-actions-templates/deploy@trunk
-  #      with:
-  #        name: ${{ env.APPLICATION_NAME }}
-  #        namespace: ${{ env.SYSTEM_NAMESPACE }}
-  #        environment: 'dev'
-  #        helm-values-path: '.github/test/deploy/values.yaml'
-  #        runtime-cloud-provider: 'GKE'
-  #        GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
-  #        GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
-```
 
 <!-- gh-actions-docs-start path=deploy/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
 
