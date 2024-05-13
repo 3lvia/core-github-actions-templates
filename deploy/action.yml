@@ -99,6 +99,9 @@ runs:
         elif [[ "${{ inputs.environment }}" == "prod" ]]; then
           aks_sub_id="9edbf217-b7c1-4f6a-ae76-d046cf932ff0"
           echo "VAULT_ADDR=https://vault.elvia.io" >> "$GITHUB_ENV"
+        elif [[ "${{ inputs.environment }}" == "sandbox" ]]; then
+          aks_sub_id="ceb9518c-528f-4c91-9b5a-c051d383e7a8"
+          echo "VAULT_ADDR=https://vault.dev-elvia.io" >> "$GITHUB_ENV"
         else
           echo "Unsupported environment: ${{ inputs.environment }}"
           exit 1
