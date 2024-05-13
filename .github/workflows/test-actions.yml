@@ -1,8 +1,6 @@
 name: Test actions
 
 on:
-  push:
-    branches: [trunk]
   pull_request:
     branches: [trunk]
 
@@ -11,8 +9,8 @@ env:
   SYSTEM_NAMESPACE: 'core'
 
 jobs:
-  unittests:
-    name: Run unit tests
+  unit-tests:
+    name: Unit Tests
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -28,7 +26,7 @@ jobs:
           checkout: 'false'
 
   analyze:
-    name: Run CodeQL analysis
+    name: Analyze
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -62,8 +60,8 @@ jobs:
           severity: 'CRITICAL'
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
 
-  deploy_aks_dev:
-    name: Deploy to dev on AKS
+  deploy-dev:
+    name: Deploy Dev
     needs: [build]
     runs-on: ubuntu-latest
     permissions:
@@ -80,11 +78,11 @@ jobs:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAMESPACE }}
           environment: 'dev'
-          helm-values-path: '.github/test/deploy/values.yaml'
+          helm-values-path: '.github/test/deploy/values.yml'
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
 
-  deploy_gke_dev:
-    name: Deploy to dev on GKE
+  deploy-dev-gke:
+    name: Deploy Dev GKE
     needs: [build]
     runs-on: ubuntu-latest
     permissions:
@@ -101,14 +99,14 @@ jobs:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAMESPACE }}
           environment: 'dev'
-          helm-values-path: '.github/test/deploy/values.yaml'
+          helm-values-path: '.github/test/deploy/values.yml'
           runtime-cloud-provider: 'GKE'
           GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
           GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
 
-  trivy_iac_scan:
+  trivy-iac-scan:
+    name: Trivy IaC Scan
     runs-on: ubuntu-latest
-    name: Scan IaC with Trivy
     permissions:
       actions: read
       contents: read
@@ -121,9 +119,9 @@ jobs:
         with:
           checkout: 'false'
 
-  terraform_format_check:
+  terraform-format-check:
+    name: Terraform Format Check
     runs-on: ubuntu-latest
-    name: Check Terraform code formatting
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
