@@ -16,7 +16,7 @@ inputs:
   severity:
     description: 'Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.'
     required: false
-    default: 'CRITICAL,HIGH'
+    default: 'CRITICAL'
   trivy-cve-ignores:
     description: 'Comma-separated list of CVEs for Trivy to ignore. See https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore for syntax.'
     required: false
