@@ -48,11 +48,11 @@ jobs:
             new_workflow_properties_file="dotgithub/workflow-templates/${file_name%.*}.properties.json"
             if [ ! -f "$new_workflow_properties_file" ]; then
               echo "Creating properties.json file for $new_workflow_path."
-              new_workflow_name=$(yq '.name' "$new_workflow_path")
+              new_workflow_name=$(yq -r '.name' "$new_workflow_path")
               cat << EOF > "$new_workflow_properties_file"
             {
-              "name": $new_workflow_name,
-              "description": $new_workflow_name
+              "name": "$new_workflow_name",
+              "description": "$new_workflow_name"
             }
           EOF
             else
