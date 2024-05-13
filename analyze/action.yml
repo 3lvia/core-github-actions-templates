@@ -28,7 +28,9 @@ runs:
         name: "CodeQL config"
         paths:
           - ${{ inputs.working-directory }}
-        EOF 
+        EOF
+        echo "codeql-config.yml"
+        cat codeql-config.yml
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
