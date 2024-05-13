@@ -51,7 +51,6 @@ GitHub Actions templates for the Elvia organization.
   - [Action documentation & table of contents](#action-documentation--table-of-contents)
   <!-- gh-actions-docs-toc-end -->
 
-
 <!-- gh-actions-docs-end -->
 
 ### Example usage in a full workflow
@@ -179,7 +178,6 @@ jobs:
           environment: 'prod'
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
           helm-values-path: ${{ env.HELM_VALUES }}
-
 
   #Example for deploying to GKE:
   #
@@ -315,7 +313,6 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     #
     # Required: no
 ```
-
 
 <!-- gh-actions-docs-start path=deploy/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
 
