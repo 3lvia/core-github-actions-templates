@@ -372,7 +372,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
 <!-- gh-actions-docs-end -->
 
-<!-- gh-actions-docs-start path=integrationtest/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=context:read,checks:write,issues:read,pull-requests:write,id-token:write -->
+<!-- gh-actions-docs-start path=integrationtest/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,checks:write,issues:read,pull-requests:write,id-token:write -->
 
 ## Integration Test
 
