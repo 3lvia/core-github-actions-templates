@@ -12,7 +12,7 @@ inputs:
   languages:
     description: 'Languages to run CodeQL analyze on.'
     required: false
-    default: 'javascript, csharp, python'
+    default: 'javascript-typescript, csharp, python, go'
 
 runs:
   using: 'composite'
