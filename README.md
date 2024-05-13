@@ -169,7 +169,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 ### Example usage in a full workflow
 
 ```yaml
-name: Build and deploy to Kubernetes
+name: Build and Deploy to Kubernetes
 
 on:
   push:
@@ -180,6 +180,7 @@ on:
 env:
   APPLICATION_NAME: demo-api
   SYSTEM_NAMESPACE: core
+  DOCKER_FILE: core-demo-api/Dockerfile
 
 jobs:
   unittests:
@@ -192,19 +193,36 @@ jobs:
       pull-requests: write
     steps:
       - uses: 3lvia/core-github-actions-templates/unittest@trunk
+        with:
+          test-coverage: 'true'
+
+  integrationtests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      issues: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: 3lvia/core-github-actions-templates/integrationtest@trunk
+        with:
+          system: core
 
   analyze:
-    name: Run CodeQL analysis
+    name: Analyze
     runs-on: ubuntu-latest
     permissions:
       actions: read
       contents: read
       security-events: write
+    if: github.event_name == 'pull_request' # only run analyze on PR
     steps:
-      - uses: 3lvia/core-github-actions-templates/unittest@trunk
+      - uses: 3lvia/core-github-actions-templates/analyze@trunk
 
   build:
-    name: Build
+    name: Build and Scan
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -215,12 +233,12 @@ jobs:
         with:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAMESPACE }}
-          dockerfile: '.github/test/src/Dockerfile'
+          dockerfile: ${{ env.DOCKER_FILE }}
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
 
   deploy_dev:
-    name: Deploy to dev
-    needs: [build, analyze]
+    name: Deploy Dev
+    needs: [build, unittests]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -232,11 +250,11 @@ jobs:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAMESPACE }}
           environment: 'dev'
-          helm-values-path: '.github/test/deploy/values.yaml'
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          helm-values-path: '.github/deploy/values.yaml'
 
-    deploy_test:
-    name: Deploy to test
+  deploy_test:
+    name: Deploy Test
     needs: [deploy_dev]
     runs-on: ubuntu-latest
     environment: test
@@ -248,8 +266,8 @@ jobs:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAMESPACE }}
           environment: 'test'
-          helm-values-path: '.github/deploy/values.yaml'
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          helm-values-path: '.github/deploy/values.yaml'
 
   deploy_prod:
     name: Deploy Prod
@@ -264,8 +282,9 @@ jobs:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAMESPACE }}
           environment: 'prod'
-          helm-values-path: '.github/deploy/values.yaml'
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          helm-values-path: '.github/deploy/values.yaml'
+
 
  #Example for deploying to GKE:
  #
