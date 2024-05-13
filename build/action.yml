@@ -16,7 +16,7 @@ inputs:
   severity:
     description: 'Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.'
     required: false
-    default: 'CRITICAL,HIGH'
+    default: 'CRITICAL'
   trivy-cve-ignores:
     description: 'Comma-separated list of CVEs for Trivy to ignore. See https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore for syntax.'
     required: false
@@ -45,7 +45,7 @@ inputs:
   ACR_NAME:
     description: 'Name of the Azure Container Registry to push to.'
     required: false
-    default: containerregistryelvia
+    default: 'containerregistryelvia'
 
 runs:
   using: 'composite'
@@ -61,7 +61,7 @@ runs:
       shell: bash
       run: |
         # Parse input and set environment variables
-        export IMAGE_NAME="containerregistryelvia.azurecr.io/${{ inputs.namespace }}-${{ inputs.name }}"
+        export IMAGE_NAME="${{ inputs.ACR_NAME }}.azurecr.io/${{ inputs.namespace }}-${{ inputs.name }}"
         echo "IMAGE_NAME=$IMAGE_NAME" >> "$GITHUB_ENV"
         echo "IMAGE_LONG_NAME=$IMAGE_NAME:${{ github.sha }}-${{ github.run_number }}" >> "$GITHUB_ENV"
 
@@ -86,15 +86,15 @@ runs:
 
     - name: Login to ACR
       shell: bash
-      run: az acr login --name ${{ inputs.ACR_NAME }}
+      run: az acr login --name '${{ inputs.ACR_NAME }}'
 
     - name: Build image
       uses: docker/build-push-action@v5
       with:
         context: ${{ env.DOCKER_DIR }}
         file: ${{ inputs.dockerfile }}
-        push: false
-        load: true
+        push: 'false'
+        load: 'true'
         tags: '${{ env.IMAGE_LONG_NAME }},${{ env.IMAGE_NAME }}:latest-cache'
         cache-from: 'type=registry,ref=${{ env.IMAGE_NAME }}:latest-cache'
         cache-to: 'type=inline'
@@ -116,7 +116,7 @@ runs:
         done
 
     - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
+      uses: aquasecurity/trivy-action@0.20.0
       with:
         image-ref: ${{ env.IMAGE_LONG_NAME }}
         exit-code: '1'
@@ -129,11 +129,10 @@ runs:
       if: github.event_name == 'pull_request'
 
     - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
+      uses: aquasecurity/trivy-action@0.20.0
       with:
         image-ref: ${{ env.IMAGE_LONG_NAME }}
         format: 'sarif'
-        template: '@/contrib/sarif.tpl'
         output: 'trivy.sarif'
         severity: ${{ inputs.severity }}
         trivyignores: '.trivyignore'
@@ -141,15 +140,6 @@ runs:
         scanners: ${{ inputs.trivy-enable-secret-scanner == 'true' && 'vuln,misconfig,secret' || 'vuln,misconfig' }}
         skip-dirs: ${{ inputs.trivy-skip-dirs }}
       if: github.event_name == 'push'
-
-    # GitHub Security tab does not support SARIF files with `git::` or `https:/` URL's:
-    # https://github.com/aquasecurity/trivy/issues/5003#issuecomment-1780415058
-    - name: Fix Trivy output
-      shell: bash
-      run: |
-        # Fix Trivy output
-        sed -i 's#git::https:/##g' "trivy.sarif"
-      if: github.event_name == 'push' && failure()
 
     - name: Upload Trivy scan results to GitHub Security tab
       uses: github/codeql-action/upload-sarif@v3

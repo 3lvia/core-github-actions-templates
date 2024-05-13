@@ -10,14 +10,16 @@ import           Data.Aeson.TH        (defaultOptions, deriveJSON,
                                        fieldLabelModifier, omitNothingFields)
 import           Data.Either          (fromRight, isLeft, lefts, rights)
 import           Data.List            (intercalate)
+import           Data.List.Split      (splitOn)
 import           Data.Map             (Map, fromList, toList)
 import           Data.Maybe           (fromMaybe)
-import           Data.Text            (Text, isPrefixOf, pack, replace, splitOn,
-                                       toLower, unpack)
+import           Data.Text            (Text, isPrefixOf, pack, replace, toLower,
+                                       unpack)
 import           Data.Void            (Void)
 import           Data.Yaml            (ParseException, decodeFileEither)
 import           System.Environment   (getEnvironment)
 import           System.Exit          (exitFailure)
+import           System.Process       (callCommand)
 import           Text.Megaparsec      (Parsec, anySingle, eof,
                                        errorBundlePretty, many, manyTill,
                                        manyTill_, optional, parse, sepBy,
@@ -33,8 +35,14 @@ data Config
     , debug         :: Bool
     , ignoreHeaders :: [String]
     , ignoreFiles   :: [String]
+    , runPrettier   :: Bool
     , noActions     :: Bool
     , noToc         :: Bool
+    , noName        :: Bool
+    , noDescription :: Bool
+    , noInputs      :: Bool
+    , noPermissions :: Bool
+    , noUsage       :: Bool
     }
     deriving (Show)
 
@@ -43,14 +51,33 @@ getConfig = do
     env <- getEnvironment
     let readmeFile' = fromMaybe "README.md" $ lookup "README_FILE" env
     let debug' = lookup "DEBUG" env == Just "true"
-    let ignoreHeaders' = maybe [] (splitOn "," . pack) $ lookup "IGNORE_HEADERS" env
-    let ignoreFiles' = maybe [] (splitOn "," . pack) $ lookup "IGNORE_FILES" env
+    let ignoreHeaders' = maybe [] (splitOn ",") $ lookup "IGNORE_HEADERS" env
+    let ignoreFiles' = maybe [] (splitOn ",") $ lookup "IGNORE_FILES" env
+    let runPrettier' = lookup "RUN_PRETTIER" env == Just "true"
     let noActions' = lookup "NO_ACTIONS" env == Just "true"
     let noToc' = lookup "NO_TOC" env == Just "true"
+    let noName' = lookup "NO_NAME" env == Just "true"
+    let noDescription' = lookup "NO_DESCRIPTION" env == Just "true"
+    let noInputs' = lookup "NO_INPUTS" env == Just "true"
+    let noPermissions' = lookup "NO_PERMISSIONS" env == Just "true"
+    let noUsage' = lookup "NO_USAGE" env == Just "true"
     when (noToc' && noActions') do
         putStrLn "Both NO_TOC and NO_ACTIONS are set to true, nothing to do."
         exitFailure
-    return $ Config readmeFile' debug' (map unpack ignoreHeaders') (map unpack ignoreFiles') noActions' noToc'
+    return $ Config
+                readmeFile'
+                debug'
+                ignoreHeaders'
+                ignoreFiles'
+                runPrettier'
+                noActions'
+                noToc'
+                noName'
+                noDescription'
+                noInputs'
+                noPermissions'
+                noUsage'
+
 
 -- ACTIONS
 
@@ -112,42 +139,38 @@ actionStartTagPrefix = "<!-- gh-actions-docs-start"
 actionEndTag :: String
 actionEndTag = "<!-- gh-actions-docs-end -->"
 
-prettyPrintAction :: Action -> ActionMetadata -> String
-prettyPrintAction (Action name' description' inputs') actionMetadata =
-    "## "
-        ++ name'
-        ++ "\n\n"
-        ++ "### Description\n"
-        ++ description'
-        ++ "\n\n"
-        ++ prettyPrintInputs inputs'
-        ++ prettyPrintPermissions actionMetadata
-        ++ prettyPrintUsage name' inputs' actionMetadata
+prettyPrintAction :: Config -> Action -> ActionMetadata -> String
+prettyPrintAction config (Action name' description' inputs') actionMetadata =
+    (if noName config then "" else "## " ++ name' ++ "\n\n") ++
+    (if noDescription config then "" else "### Description\n" ++ description' ++ "\n\n") ++
+    (if noInputs config then "" else prettyPrintInputs inputs') ++
+    (if noPermissions config then "" else prettyPrintPermissions actionMetadata) ++
+    (if noUsage config then "" else prettyPrintUsage name' inputs' actionMetadata)
 
 prettyPrintInputs :: Maybe Inputs -> String
 prettyPrintInputs (Just inputs') =
-        "### Inputs\n" ++
-        "|Name|Description|Required|Default|\n"
-            ++ "|-|-|-|-|\n"
-            ++ concatMap
-                ( \(name', ActionInput des req def) ->
-                    "`" ++ name' ++ "`"
-                        ++ "|"
-                        ++ fromMaybe "" des
-                        ++ "|"
-                        ++ maybe "no" toEnglishBool req
-                        ++ "|"
-                        ++ maybe "" (\def' -> "`" ++ def' ++ "`") def
-                        ++ "|\n"
-                )
-                (toList inputs')
-            ++ "\n"
+    "### Inputs\n" ++
+    "|Name|Description|Required|Default|\n"
+        ++ "|-|-|-|-|\n"
+        ++ concatMap
+            ( \(name', ActionInput des req def) ->
+                "`" ++ name' ++ "`"
+                    ++ "|"
+                    ++ fromMaybe "" des
+                    ++ "|"
+                    ++ maybe "no" toEnglishBool req
+                    ++ "|"
+                    ++ maybe "" (\def' -> "`" ++ def' ++ "`") def
+                    ++ "|\n"
+            )
+            (toList inputs')
+        ++ "\n"
 prettyPrintInputs _ = ""
 
 prettyPrintPermissions :: ActionMetadata -> String
 prettyPrintPermissions (ActionMetadata _ _ _ _ (Just permissions')) =
     "### Permissions\n"
-    ++ "This action requires the following permissions:\n"
+    ++ "This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):\n"
     ++ concatMap
             ( \(name', access) ->
                 "- `" ++ name' ++ ": " ++ show access ++ "`\n"
@@ -163,20 +186,17 @@ prettyPrintUsage name' inputs' (ActionMetadata path' (Just owner') (Just project
     "```yaml\n"
         ++ "- name: " ++ name' ++ "\n"
         ++ "  uses: "
-        ++ owner'
-        ++ "/"
-        ++ project'
-        ++ "/"
-        ++ unpack ((head . splitOn "/") $ pack path')
-        ++ "@"
-        ++ version'
-        ++ "\n"
+        ++ owner' ++ "/" ++ project' ++ actionPathWithoutFile ++ "@" ++ version' ++ "\n"
         ++ prettyPrintUsageWith inputs'
         ++ "```\n"
+    where
+        actionPathWithoutFile = prependSlashIfNotEmpty $ intercalate "/" . init . splitOn "/" $ path'
+        prependSlashIfNotEmpty "" = ""
+        prependSlashIfNotEmpty x  = "/" ++ x
 prettyPrintUsage _ _ _ = ""
 
 prettyPrintUsageWith :: Maybe Inputs -> String
-prettyPrintUsageWith (Just inputs'') = "  with:\n" ++ concatMap (uncurry prettyPrintUsageInputs) (toList inputs'')
+prettyPrintUsageWith (Just inputs') = "  with:\n" ++ concatMap (uncurry prettyPrintUsageInputs) (toList inputs')
 prettyPrintUsageWith Nothing = ""
 
 prettyPrintUsageInputs :: String -> ActionInput -> String
@@ -198,7 +218,7 @@ prettyPrintUsageInputs name' (ActionInput des req def) =
            )
         ++ "\n"
   where
-    indent = replicate 6 ' '
+    indent = replicate 4 ' '
     formatDescription des' = indent ++ "# " ++ des' ++ "\n" ++ indent ++ "#\n"
     formatRequired req' = indent ++ "# Required: " ++ toEnglishBool req' ++ "\n"
     formatDefault def' = indent ++ "# Default: '" ++ def' ++ "'\n"
@@ -224,16 +244,17 @@ permissionsToString permissions' =
                 (\(name', access) -> name' ++ ":" ++ show access)
                 (toList permissions')
 
-replaceActionTagWithDocs :: String -> (ActionMetadata, Action) -> String
-replaceActionTagWithDocs readme (meta, action) =
+replaceActionTagWithDocs :: Config -> String -> (ActionMetadata, Action) -> String
+replaceActionTagWithDocs config readme (meta, action) =
     case parse (skipManyTill latin1Char (specificActionMetadataParser_ meta)) "" (pack readme) of
         Right "" ->
             readme
         Right match' ->
-            let docs = actionMetadataToString meta ++ "\n" ++ prettyPrintAction action meta ++ actionEndTag
+            let docs = actionMetadataToString meta ++ "\n" ++ prettyPrintAction config action meta ++ actionEndTag
              in unpack $ replace (pack match') (pack docs) (pack readme)
         Left err ->
             error $ errorBundlePretty err
+
 
 -- TABLE OF CONTENTS
 
@@ -276,6 +297,7 @@ replaceTableOfContentsTagWithTableOfContents toc readme =
              in unpack $ replace (pack match') (pack toc') (pack readme)
         Left err ->
             error $ errorBundlePretty err
+
 
 -- PARSERS
 
@@ -335,8 +357,8 @@ tableOfContentsTagParser = do
     (between', end) <- manyTill_ anySingle $ string $ pack tocEndTag
     return $ unpack start ++ between' ++ unpack end
 
--- MAIN
 
+-- MAIN
 
 updateActions :: Config -> String -> IO String
 updateActions config readme = do
@@ -370,7 +392,7 @@ updateActions config readme = do
         pPrint parsedFilesWithMetadata
 
     -- Update README with action docs
-    let readmeWithActions = foldl replaceActionTagWithDocs readme parsedFilesWithMetadata
+    let readmeWithActions = foldl (replaceActionTagWithDocs config) readme parsedFilesWithMetadata
     if readmeWithActions /= readme
         then do
             putStrLn $ readmeFile config ++ " updated successfully with documentation for actions!"
@@ -434,3 +456,6 @@ main = do
         (True, True) -> do
             putStrLn "Both NO_TOC and NO_ACTIONS are set to true, nothing to do."
             exitFailure
+
+    when (runPrettier config) $
+        callCommand ("prettier --write --single-quote " ++ readmeFile config)

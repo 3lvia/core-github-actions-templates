@@ -1,0 +1,73 @@
+name: Integration Test
+description: 'Run .NET integration tests.'
+inputs:
+  system:
+    description: 'System is used to log in to Vault using correct role.'
+    required: true
+  checkout:
+    description: 'If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.'
+    required: false
+    default: 'true'
+  working-directory:
+    description: 'Will run integration tests on projects under this working directory.'
+    required: false
+    default: './'
+  test-projects:
+    description: 'Pattern to use to find test projects.'
+    required: false
+    default: '*integration*test*csproj'
+  environment:
+    description: 'Environment is used to find correct vault instance.'
+    required: true
+    default: 'dev'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout repository
+      if: ${{ inputs.checkout == 'true' }}
+      uses: actions/checkout@v4
+
+    - name: Parse input and set environment variables
+      shell: bash
+      run: |
+        if [[ "${{ inputs.environment }}" == "dev" ]]; then
+          echo "VAULT_ADDR=https://vault.dev-elvia.io" >> "$GITHUB_ENV"
+        elif [[ "${{ inputs.environment }}" == "test" ]]; then
+          echo "VAULT_ADDR=https://vault.test-elvia.io" >> "$GITHUB_ENV"
+        elif [[ "${{ inputs.environment }}" == "prod" ]]; then
+          echo "VAULT_ADDR=https://vault.elvia.io" >> "$GITHUB_ENV"
+        else
+          echo "Unsupported environment: ${{ inputs.environment }}"
+          exit 1
+        fi
+
+        echo "REPO_SHORT_NAME=${GITHUB_REPOSITORY##*/}" >> "$GITHUB_ENV"
+
+    - name: Login Vault and export token
+      uses: hashicorp/vault-action@v3
+      with:
+        url: ${{ env.VAULT_ADDR }}
+        role: 'jwt-github-${{ inputs.system }}-${{ env.REPO_SHORT_NAME }}'
+        method: 'jwt'
+        path: 'jwt-github'
+        exportToken: 'true'
+
+    - name: Run integration tests
+      shell: bash
+      run: |
+        testprojects=`find . -iname "${{ inputs.test-projects }}"`
+        for testproject in $testprojects;
+        do
+          dotnet test -l:trx $testproject
+        done
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: Publish test results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        files: |
+          **/TestResults/*.trx
+          .github/**/TestResults/*.trx
+        check_name: 'Integration Test Results'

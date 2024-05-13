@@ -6,13 +6,13 @@ GitHub Actions templates for the Elvia organization.
 
 <!-- gh-actions-docs-toc-start -->
 
+- [Examples](#examples)
 - [Actions](#actions)
   - [Build](#build)
     - [Description](#description)
     - [Inputs](#inputs)
     - [Permissions](#permissions)
     - [Usage](#usage)
-    - [Example usage in a full workflow](#example-usage-in-a-full-workflow)
   - [Deploy](#deploy)
     - [Description](#description-1)
     - [Inputs](#inputs-1)
@@ -23,29 +23,41 @@ GitHub Actions templates for the Elvia organization.
     - [Inputs](#inputs-2)
     - [Permissions](#permissions-2)
     - [Usage](#usage-2)
-  - [Analyze](#analyze)
+  - [Integration Test](#integration-test)
     - [Description](#description-3)
     - [Inputs](#inputs-3)
-    - [Permissions](#permissions-3)
     - [Usage](#usage-3)
-  - [Trivy IaC scan](#trivy-iac-scan)
+  - [Analyze](#analyze)
     - [Description](#description-4)
     - [Inputs](#inputs-4)
-    - [Permissions](#permissions-4)
+    - [Permissions](#permissions-3)
     - [Usage](#usage-4)
-  - [Playwright Test](#playwright-test)
+  - [Trivy IaC scan](#trivy-iac-scan)
     - [Description](#description-5)
     - [Inputs](#inputs-5)
-    - [Permissions](#permissions-5)
+    - [Permissions](#permissions-4)
     - [Usage](#usage-5)
-  - [Terraform format check](#terraform-format-check)
+  - [Playwright Test](#playwright-test)
     - [Description](#description-6)
     - [Inputs](#inputs-6)
+    - [Permissions](#permissions-5)
     - [Usage](#usage-6)
+  - [Terraform format check](#terraform-format-check)
+    - [Description](#description-7)
+    - [Inputs](#inputs-7)
+    - [Usage](#usage-7)
 - [Development](#development)
   - [Formatting](#formatting)
   - [Action documentation & table of contents](#action-documentation--table-of-contents)
   <!-- gh-actions-docs-toc-end -->
+
+# Examples
+
+The files beginning with `example-` in the folder [.github/workflows](.github/workflows) are working examples of how to use these actions.
+
+You can also click on the 'Actions' tab on your repository and click 'New workflow' to get a selection of Elvia templates.
+Some values in these templates are placeholders and need to be replaced with your own values; anything resembling `<your xxx here>` should be replaced.
+See the [GitHub docs](https://docs.github.com/en/actions/learn-github-actions/using-starter-workflows#choosing-and-using-a-starter-workflow) for more detailed information.
 
 # Actions
 
@@ -70,14 +82,14 @@ Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure C
 | `dockerfile`                  | Path to Dockerfile, e.g. 'src/Dockerfile'.                                                                                                             | yes      |                                        |
 | `name`                        | Name of application. Do not include namespace.                                                                                                         | yes      |                                        |
 | `namespace`                   | Namespace or system of the application.                                                                                                                | yes      |                                        |
-| `severity`                    | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                          | no       | `CRITICAL,HIGH`                        |
+| `severity`                    | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                          | no       | `CRITICAL`                             |
 | `trivy-cve-ignores`           | Comma-separated list of CVEs for Trivy to ignore. See https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore for syntax. | no       |                                        |
 | `trivy-enable-secret-scanner` | Enable Trivy secret scanner.                                                                                                                           | no       | `true`                                 |
 | `trivy-skip-dirs`             | Directories/files skipped by Trivy. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                   | no       |                                        |
 
 ### Permissions
 
-This action requires the following permissions:
+This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
 - `contents: read`
 - `id-token: write`
@@ -141,7 +153,7 @@ This action requires the following permissions:
     # Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.
     #
     # Required: no
-    # Default: 'CRITICAL,HIGH'
+    # Default: 'CRITICAL'
 
     trivy-cve-ignores:
     # Comma-separated list of CVEs for Trivy to ignore. See https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore for syntax.
@@ -161,129 +173,6 @@ This action requires the following permissions:
 ```
 
 <!-- gh-actions-docs-end -->
-
-### Example usage in a full workflow
-
-```yaml
-name: Build and deploy to Kubernetes
-
-on:
-  push:
-    branches: [trunk]
-  pull_request:
-    branches: [trunk]
-
-env:
-  APPLICATION_NAME: demo-api
-  SYSTEM_NAMESPACE: core
-
-jobs:
-  unittests:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      checks: write
-      issues: read
-      pull-requests: write
-    steps:
-      - uses: 3lvia/core-github-actions-templates/unittest@trunk
-
-  analyze:
-    name: Run CodeQL analysis
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    steps:
-      - uses: 3lvia/core-github-actions-templates/unittest@trunk
-
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-    environment: build
-    steps:
-      - uses: 3lvia/core-github-actions-templates/build@trunk
-        with:
-          name: ${{ env.APPLICATION_NAME }}
-          namespace: ${{ env.SYSTEM_NAMESPACE }}
-          dockerfile: '.github/test/src/Dockerfile'
-          AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
-
-  deploy_dev:
-    name: Deploy to dev
-    needs: [build, analyze]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-    environment: dev
-    steps:
-      - uses: 3lvia/core-github-actions-templates/deploy@trunk
-        with:
-          name: ${{ env.APPLICATION_NAME }}
-          namespace: ${{ env.SYSTEM_NAMESPACE }}
-          environment: 'dev'
-          helm-values-path: '.github/test/deploy/values.yaml'
-          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
-
-    deploy_test:
-    name: Deploy to test
-    needs: [deploy_dev]
-    runs-on: ubuntu-latest
-    environment: test
-    # Only on push to trunk
-    if: github.ref == 'refs/heads/trunk'
-    steps:
-      - uses: 3lvia/core-github-actions-templates/deploy@trunk
-        with:
-          name: ${{ env.APPLICATION_NAME }}
-          namespace: ${{ env.SYSTEM_NAMESPACE }}
-          environment: 'test'
-          helm-values-path: '.github/deploy/values.yaml'
-          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
-
-  deploy_prod:
-    name: Deploy Prod
-    needs: [deploy_test]
-    runs-on: ubuntu-latest
-    environment: prod
-    # Only on push to trunk
-    if: github.ref == 'refs/heads/trunk'
-    steps:
-      - uses: 3lvia/core-github-actions-templates/deploy@trunk
-        with:
-          name: ${{ env.APPLICATION_NAME }}
-          namespace: ${{ env.SYSTEM_NAMESPACE }}
-          environment: 'prod'
-          helm-values-path: '.github/deploy/values.yaml'
-          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
-
- #Example for deploying to GKE:
- #
- #deploy_gke_dev:
- #  name: Deploy to dev on GKE
- #  needs: [build, analyze]
- #  runs-on: ubuntu-latest
- #  permissions:
- #    contents: read
- #    id-token: write
- #  environment: dev
- #  steps:
- #    - uses: 3lvia/core-github-actions-templates/deploy@trunk
- #      with:
- #        name: ${{ env.APPLICATION_NAME }}
- #        namespace: ${{ env.SYSTEM_NAMESPACE }}
- #        environment: 'dev'
- #        helm-values-path: '.github/test/deploy/values.yaml'
- #        runtime-cloud-provider: 'GKE'
- #        GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
- #        GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
-```
 
 <!-- gh-actions-docs-start path=deploy/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
 
@@ -313,10 +202,11 @@ Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Bui
 | `name`                          | Name of application. Do not include namespace.                                                                                       | yes      |                                        |
 | `namespace`                     | Namespace or system of the application.                                                                                              | yes      |                                        |
 | `runtime-cloud-provider`        | Kubernetes cloud provider to deploy to: 'AKS' or 'GKE'.                                                                              | no       | `AKS`                                  |
+| `workload-type`                 | The type of workload to deploy to kubernetes. Must be 'deployment' or 'statefulset'.                                                 | no       | `deployment`                           |
 
 ### Permissions
 
-This action requires the following permissions:
+This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
 - `contents: read`
 - `id-token: write`
@@ -411,6 +301,12 @@ This action requires the following permissions:
     #
     # Required: no
     # Default: 'AKS'
+
+    workload-type:
+    # The type of workload to deploy to kubernetes. Must be 'deployment' or 'statefulset'.
+    #
+    # Required: no
+    # Default: 'deployment'
 ```
 
 <!-- gh-actions-docs-end -->
@@ -421,19 +317,20 @@ This action requires the following permissions:
 
 ### Description
 
-Run dotnet unit tests.
+Run .NET unit tests.
 
 ### Inputs
 
 | Name                | Description                                                                                                                          | Required | Default             |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------- |
 | `checkout`          | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`              |
-| `test-projects`     | Pattern to use to find test projects. Defaults to *unit*test\*csproj                                                                 | no       | `*unit*test*csproj` |
-| `working-directory` | Will run unit tests on projects under this working directory                                                                         | no       | `./`                |
+| `test-coverage`     | If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector.                   | no       | `false`             |
+| `test-projects`     | Pattern to use to find test projects.                                                                                                | no       | `*unit*test*csproj` |
+| `working-directory` | Will run unit tests on projects under this working directory.                                                                        | no       | `./`                |
 
 ### Permissions
 
-This action requires the following permissions:
+This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
 - `checks: write`
 - `contents: read`
@@ -452,14 +349,76 @@ This action requires the following permissions:
     # Required: no
     # Default: 'true'
 
+    test-coverage:
+    # If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector.
+    #
+    # Required: no
+    # Default: 'false'
+
     test-projects:
-    # Pattern to use to find test projects. Defaults to *unit*test*csproj
+    # Pattern to use to find test projects.
     #
     # Required: no
     # Default: '*unit*test*csproj'
 
     working-directory:
-    # Will run unit tests on projects under this working directory
+    # Will run unit tests on projects under this working directory.
+    #
+    # Required: no
+    # Default: './'
+```
+
+<!-- gh-actions-docs-end -->
+
+<!-- gh-actions-docs-start path=integrationtest/action.yml owner=3lvia project=core-github-actions-templates version=trunk -->
+
+## Integration Test
+
+### Description
+
+Run .NET integration tests.
+
+### Inputs
+
+| Name                | Description                                                                                                                          | Required | Default                    |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------------------------- |
+| `checkout`          | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`                     |
+| `environment`       | Environment is used to find correct vault instance.                                                                                  | yes      | `dev`                      |
+| `system`            | System is used to log in to Vault using correct role.                                                                                | yes      |                            |
+| `test-projects`     | Pattern to use to find test projects.                                                                                                | no       | `*integration*test*csproj` |
+| `working-directory` | Will run integration tests on projects under this working directory.                                                                 | no       | `./`                       |
+
+### Usage
+
+```yaml
+- name: Integration Test
+  uses: 3lvia/core-github-actions-templates/integrationtest@trunk
+  with:
+    checkout:
+    # If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.
+    #
+    # Required: no
+    # Default: 'true'
+
+    environment:
+    # Environment is used to find correct vault instance.
+    #
+    # Required: yes
+    # Default: 'dev'
+
+    system:
+    # System is used to log in to Vault using correct role.
+    #
+    # Required: yes
+
+    test-projects:
+    # Pattern to use to find test projects.
+    #
+    # Required: no
+    # Default: '*integration*test*csproj'
+
+    working-directory:
+    # Will run integration tests on projects under this working directory.
     #
     # Required: no
     # Default: './'
@@ -484,7 +443,7 @@ Run CodeQL analysis.
 
 ### Permissions
 
-This action requires the following permissions:
+This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
 - `actions: read`
 - `contents: read`
@@ -517,24 +476,22 @@ This action requires the following permissions:
 
 ### Description
 
-Uses https://github.com/aquasecurity/trivy-action to scan IaC and report security issues. The action will report any vulnerabilities to GitHub Advanced Security, which will be visible in the Security tab on GitHub.
+Uses https://github.com/aquasecurity/trivy-action to scan IaC and report security issues. The action will report any vulnerabilities to GitHub Advanced Security, which will be visible in the Security tab on GitHub. If this action is ran on a pull request, GitHub Advanced Security will give a detailed report of any vulnerabilities introduced by new changes in the pull request.
 
 ### Inputs
 
-| Name                       | Description                                                                                                                                                                                                                                                                                                                                                           | Required | Default                            |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------- |
-| `checkout`                 | If true, the action will check out the repository. If false, the action will assume the repository has already been checked out.                                                                                                                                                                                                                                      | no       | `true`                             |
-| `debug`                    | If true, the action will output debug information.                                                                                                                                                                                                                                                                                                                    | no       | `false`                            |
-| `path`                     | Path to the directory containing the IaC files.                                                                                                                                                                                                                                                                                                                       | no       | `.`                                |
-| `policy-bundle-repository` | OCI registry URL to retrieve policy bundle from. Maps to `--policy-bundle-repository` in Trivy CLI.                                                                                                                                                                                                                                                                   | no       |                                    |
-| `severity`                 | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                                                                                                                                                                                                                                         | no       | `CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN` |
-| `skip-dirs`                | Comma-separated list of directories to skip.                                                                                                                                                                                                                                                                                                                          | no       |                                    |
-| `trivyignore`              | Path to the Trivy ignore file in the repository. This action will add a default set of CVE's that are ignored for all scans. If you wish to add more CVE's to ignore, add them to the .trivyignore, or create a new file and specify the path here. See https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids for more information. | no       | `.trivyignore`                     |
-| `upload-report`            | Upload Trivy report to GitHub Security tab. GitHub Advanced Security must be enabled for the repository to use this feature.                                                                                                                                                                                                                                          | no       | `true`                             |
+| Name            | Description                                                                                                                                                                                                                                                                                                                                                           | Required | Default                            |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------- |
+| `checkout`      | If true, the action will check out the repository. If false, the action will assume the repository has already been checked out.                                                                                                                                                                                                                                      | no       | `true`                             |
+| `path`          | Path to the directory containing the IaC files.                                                                                                                                                                                                                                                                                                                       | no       | `.`                                |
+| `severity`      | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                                                                                                                                                                                                                                         | no       | `CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN` |
+| `skip-dirs`     | Comma-separated list of directories to skip.                                                                                                                                                                                                                                                                                                                          | no       |                                    |
+| `trivyignore`   | Path to the Trivy ignore file in the repository. This action will add a default set of CVE's that are ignored for all scans. If you wish to add more CVE's to ignore, add them to the .trivyignore, or create a new file and specify the path here. See https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids for more information. | no       | `.trivyignore`                     |
+| `upload-report` | Upload Trivy report to GitHub Security tab. GitHub Advanced Security must be enabled for the repository to use this feature.                                                                                                                                                                                                                                          | no       | `true`                             |
 
 ### Permissions
 
-This action requires the following permissions:
+This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
 - `actions: read`
 - `contents: read`
@@ -552,22 +509,11 @@ This action requires the following permissions:
     # Required: no
     # Default: 'true'
 
-    debug:
-    # If true, the action will output debug information.
-    #
-    # Required: no
-    # Default: 'false'
-
     path:
     # Path to the directory containing the IaC files.
     #
     # Required: no
     # Default: '.'
-
-    policy-bundle-repository:
-    # OCI registry URL to retrieve policy bundle from. Maps to `--policy-bundle-repository` in Trivy CLI.
-    #
-    # Required: no
 
     severity:
     # Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.
@@ -601,7 +547,7 @@ This action requires the following permissions:
 
 ### Description
 
-Run Playwright tests written in dotnet.
+Run Playwright tests written in .NET.
 
 ### Inputs
 
@@ -613,7 +559,7 @@ Run Playwright tests written in dotnet.
 
 ### Permissions
 
-This action requires the following permissions:
+This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
 - `checks: write`
 - `contents: read`
@@ -685,20 +631,15 @@ Uses the built-in formatter from the Terraform CLI to check the format of Terraf
 
 ## Formatting
 
-We use [prettier](https://prettier.io) to format the README and yaml files.
+We use [Prettier](https://prettier.io) to format the README and yaml files.
+See the [installation guide](https://prettier.io/docs/en/install) for how to install it.
 
-Install the dependencies using [yarn](https://yarnpkg.com):
-
-```bash
-yarn install
-```
-
-Run the formatter:
+Run Prettier with this command:
 
 ```bash
-yarn format
+prettier -w --single-quote "**/*.yml" "**/*.md"
 #OR
-yarn format --end-of-line crlf
+prettier -w --single-quote --end-of-line crlf "**/*.yml" "**/*.md"
 ```
 
 ## Action documentation & table of contents

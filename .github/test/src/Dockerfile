@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 LABEL maintainer="elvia@elvia.no"
 
 WORKDIR /app
@@ -11,7 +11,7 @@ RUN dotnet restore \
         --output ./out
 
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runtime
 LABEL maintainer="elvia@elvia.no"
 
 RUN addgroup application-group --gid 1001 \

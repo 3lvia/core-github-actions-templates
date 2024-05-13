@@ -1,0 +1,80 @@
+name: Update starter workflows
+
+on:
+  push:
+    branches: [trunk]
+
+env:
+  REPOSITORY: 'core-github-actions-templates'
+
+jobs:
+  update-starter-workflows:
+    name: Update starter workflows
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get GitHub App token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{ env.REPOSITORY }}
+
+      - name: Checkout .github repository
+        uses: actions/checkout@v4
+        with:
+          path: 'dotgithub'
+          repository: '3lvia/.github'
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Update workflows-templates
+        shell: bash
+        run: |
+          mkdir -p dotgithub/workflow-templates
+          for workflow_path in ${{ env.REPOSITORY }}/.github/workflows/example-*.yml; do
+            file_name=$(basename "$workflow_path")
+            new_workflow_path="dotgithub/workflow-templates/${file_name#*-}"
+            cp "$workflow_path" "$new_workflow_path"
+            sed -i "s/  APPLICATION_NAME: 'demo-api'/  APPLICATION_NAME: '<your application name here>'/g" "$new_workflow_path"
+            sed -i "s/  SYSTEM_NAMESPACE: 'core'/  SYSTEM_NAMESPACE: '<your system namespace here>'/g" "$new_workflow_path"
+            sed -i "s/  HELM_VALUES_PATH: '.github\/test\/deploy\/values.yml'/  HELM_VALUES_PATH: '<your Helm values path here>'/g" "$new_workflow_path"
+            sed -i "s/  DOCKERFILE: '.github\/test\/src\/Dockerfile'/  DOCKERFILE: '<your Dockerfile path here (or leave empty if Dockerfile in root dir)>'/g" "$new_workflow_path"
+            sed -i 's/branches: \[trunk\]/branches: \[$default-branch\]/g' "$new_workflow_path"
+            new_workflow_properties_file="dotgithub/workflow-templates/${file_name%.*}.properties.json"
+            if [ ! -f "$new_workflow_properties_file" ]; then
+              echo "Creating properties.json file for $new_workflow_path."
+              new_workflow_name=$(yq '.name' "$new_workflow_path")
+              cat << EOF > "$new_workflow_properties_file"
+            {
+              "name": $new_workflow_name,
+              "description": $new_workflow_name
+            }
+          EOF
+            else
+              echo "Properties file already exists for $new_workflow_path, will not overwrite."
+            fi
+          done
+
+      - name: Commit changes
+        shell: bash
+        run: |
+          cd dotgithub
+          git config user.name "3lvia-core-admin[bot]"
+          git config user.email "158485594+3lvia-core-admin[bot]@users.noreply.github.com"
+          if [[ -z "$(git status --porcelain)" ]]; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git add workflow-templates
+          git commit -m 'Update starter workflows'
+          for git_file in $(git ls-files); do
+            cat "$git_file"
+          done
+          git push
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
