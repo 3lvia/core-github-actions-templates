@@ -67,6 +67,8 @@ jobs:
             echo 'No changes to commit.'
             exit 0
           fi
+          git config --global user.email "158485594+3lvia-core-admin[bot]@users.noreply.github.com"
+          git config --global user.name "3lvia-core-admin[bot]"
           git add workflow-templates
           git commit -m 'Update starter workflows'
           for git_file in $(git ls-files); do
