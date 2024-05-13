@@ -67,8 +67,6 @@ jobs:
             echo 'No changes to commit.'
             exit 0
           fi
-          git config user.name github-actions
-          git config user.email github-actions@github.com
           git add workflow-templates
           git commit -m 'Update starter workflows'
           for git_file in $(git ls-files); do
