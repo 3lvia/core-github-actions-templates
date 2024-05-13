@@ -6,13 +6,13 @@ GitHub Actions templates for the Elvia organization.
 
 <!-- gh-actions-docs-toc-start -->
 
+- [Examples](#examples)
 - [Actions](#actions)
   - [Build](#build)
     - [Description](#description)
     - [Inputs](#inputs)
     - [Permissions](#permissions)
     - [Usage](#usage)
-    - [Example usage in a full workflow](#example-usage-in-a-full-workflow)
   - [Deploy](#deploy)
     - [Description](#description-1)
     - [Inputs](#inputs-1)
