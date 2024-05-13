@@ -74,7 +74,7 @@ Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure C
 | `dockerfile`                  | Path to Dockerfile, e.g. 'src/Dockerfile'.                                                                                                             | yes      |                                        |
 | `name`                        | Name of application. Do not include namespace.                                                                                                         | yes      |                                        |
 | `namespace`                   | Namespace or system of the application.                                                                                                                | yes      |                                        |
-| `severity`                    | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                          | no       | `CRITICAL,HIGH`                        |
+| `severity`                    | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                          | no       | `CRITICAL`                             |
 | `trivy-cve-ignores`           | Comma-separated list of CVEs for Trivy to ignore. See https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore for syntax. | no       |                                        |
 | `trivy-enable-secret-scanner` | Enable Trivy secret scanner.                                                                                                                           | no       | `true`                                 |
 | `trivy-skip-dirs`             | Directories/files skipped by Trivy. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                   | no       |                                        |
@@ -145,7 +145,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.
     #
     # Required: no
-    # Default: 'CRITICAL,HIGH'
+    # Default: 'CRITICAL'
 
     trivy-cve-ignores:
     # Comma-separated list of CVEs for Trivy to ignore. See https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore for syntax.
