@@ -54,8 +54,10 @@ GitHub Actions templates for the Elvia organization.
 # Examples
 
 The files beginning with `example-` in the folder [.github/workflows](.github/workflows) are working examples of how to use these actions.
+Both of these examples require you to have added your system/application to the list in the [github-repositories-terraform](http://github.com/3lvia/github-repositories-terraform) repository.
+This is needed for the `Build` and `Deploy` actions to work correctly.
 
-You can also click on the 'Actions' tab on your repository and click 'New workflow' to get a selection of Elvia templates.
+You can also click on the **'Actions'** tab on your repository and click **'New workflow'** to get a selection of Elvia templates.
 Some values in these templates are placeholders and need to be replaced with your own values; anything resembling `<your xxx here>` should be replaced.
 See the [GitHub docs](https://docs.github.com/en/actions/learn-github-actions/using-starter-workflows#choosing-and-using-a-starter-workflow) for more detailed information.
 
@@ -370,7 +372,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
 <!-- gh-actions-docs-end -->
 
-<!-- gh-actions-docs-start path=integrationtest/action.yml owner=3lvia project=core-github-actions-templates version=trunk -->
+<!-- gh-actions-docs-start path=integrationtest/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=context:read,checks:write,issues:read,pull-requests:write,id-token:write -->
 
 ## Integration Test
 
