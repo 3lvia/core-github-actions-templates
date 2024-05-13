@@ -30,6 +30,16 @@ runs:
         done
       working-directory: ${{ inputs.working-directory }}
 
+    - name: Create codeql-config
+      shell: bash
+      run: |
+        cat <<EOF > codeql-config.yml
+        name: "CodeQL config"
+        paths:
+          - ${{ inputs.working-directory }}
+        EOF 
+
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
-      working-directory: ${{ inputs.working-directory }}
+      with:
+        config-file: codeql-config.yml
