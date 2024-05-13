@@ -439,6 +439,7 @@ Run .NET unit tests.
 | Name                | Description                                                                                                                          | Required | Default             |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------- |
 | `checkout`          | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`              |
+| `test-coverage`     | If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector.                   | no       | `false`             |
 | `test-projects`     | Pattern to use to find test projects.                                                                                                | no       | `*unit*test*csproj` |
 | `working-directory` | Will run unit tests on projects under this working directory.                                                                        | no       | `./`                |
 
@@ -462,6 +463,12 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     #
     # Required: no
     # Default: 'true'
+
+    test-coverage:
+    # If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector.
+    #
+    # Required: no
+    # Default: 'false'
 
     test-projects:
     # Pattern to use to find test projects.
