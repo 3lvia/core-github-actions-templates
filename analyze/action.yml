@@ -32,3 +32,4 @@ runs:
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
+      working-directory: ${{ inputs.working-directory }}
