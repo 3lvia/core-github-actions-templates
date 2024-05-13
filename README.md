@@ -26,21 +26,22 @@ GitHub Actions templates for the Elvia organization.
   - [Integration Test](#integration-test)
     - [Description](#description-3)
     - [Inputs](#inputs-3)
+    - [Permissions](#permissions-3)
     - [Usage](#usage-3)
   - [Analyze](#analyze)
     - [Description](#description-4)
     - [Inputs](#inputs-4)
-    - [Permissions](#permissions-3)
+    - [Permissions](#permissions-4)
     - [Usage](#usage-4)
   - [Trivy IaC scan](#trivy-iac-scan)
     - [Description](#description-5)
     - [Inputs](#inputs-5)
-    - [Permissions](#permissions-4)
+    - [Permissions](#permissions-5)
     - [Usage](#usage-5)
   - [Playwright Test](#playwright-test)
     - [Description](#description-6)
     - [Inputs](#inputs-6)
-    - [Permissions](#permissions-5)
+    - [Permissions](#permissions-6)
     - [Usage](#usage-6)
   - [Terraform format check](#terraform-format-check)
     - [Description](#description-7)
@@ -389,6 +390,16 @@ Run .NET integration tests.
 | `system`            | System is used to log in to Vault using correct role.                                                                                | yes      |                            |
 | `test-projects`     | Pattern to use to find test projects.                                                                                                | no       | `*integration*test*csproj` |
 | `working-directory` | Will run integration tests on projects under this working directory.                                                                 | no       | `./`                       |
+
+### Permissions
+
+This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+
+- `checks: write`
+- `contents: read`
+- `id-token: write`
+- `issues: read`
+- `pull-requests: write`
 
 ### Usage
 
