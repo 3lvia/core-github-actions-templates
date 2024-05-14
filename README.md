@@ -454,10 +454,11 @@ Run CodeQL analysis.
 
 ### Inputs
 
-| Name                | Description                                                                                                                          | Required | Default |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- |
-| `checkout`          | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`  |
-| `working-directory` | Will run CodeQL Analysis on projects under this working directory                                                                    | no       | `./`    |
+| Name                | Description                                                                                                                          | Required | Default  |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------- |
+| `checkout`          | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`   |
+| `language`          | Languages to run CodeQL analyze on.                                                                                                  | no       | `csharp` |
+| `working-directory` | Will run CodeQL Analysis on projects under this working directory                                                                    | no       | `./`     |
 
 ### Permissions
 
@@ -478,6 +479,12 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     #
     # Required: no
     # Default: 'true'
+
+    language:
+    # Languages to run CodeQL analyze on.
+    #
+    # Required: no
+    # Default: 'csharp'
 
     working-directory:
     # Will run CodeQL Analysis on projects under this working directory
