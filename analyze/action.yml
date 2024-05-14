@@ -29,7 +29,7 @@ runs:
         paths:
           - ${{ inputs.working-directory }}
         EOF
-        echo "codeql-config.yml"
+        echo "codeql-config.yml:"
         cat codeql-config.yml
 
     - name: Initialize CodeQL
