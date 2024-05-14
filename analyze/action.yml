@@ -39,6 +39,7 @@ runs:
         languages: ${{ inputs.language }}
 
     - name: Build projects
+      if: ${{ inputs.language == 'csharp' }}
       shell: bash
       run: |
         projects=`find . -iname "*csproj"`
