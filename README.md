@@ -26,21 +26,22 @@ GitHub Actions templates for the Elvia organization.
   - [Integration Test](#integration-test)
     - [Description](#description-3)
     - [Inputs](#inputs-3)
+    - [Permissions](#permissions-3)
     - [Usage](#usage-3)
   - [Analyze](#analyze)
     - [Description](#description-4)
     - [Inputs](#inputs-4)
-    - [Permissions](#permissions-3)
+    - [Permissions](#permissions-4)
     - [Usage](#usage-4)
   - [Trivy IaC scan](#trivy-iac-scan)
     - [Description](#description-5)
     - [Inputs](#inputs-5)
-    - [Permissions](#permissions-4)
+    - [Permissions](#permissions-5)
     - [Usage](#usage-5)
   - [Playwright Test](#playwright-test)
     - [Description](#description-6)
     - [Inputs](#inputs-6)
-    - [Permissions](#permissions-5)
+    - [Permissions](#permissions-6)
     - [Usage](#usage-6)
   - [Terraform format check](#terraform-format-check)
     - [Description](#description-7)
@@ -54,8 +55,10 @@ GitHub Actions templates for the Elvia organization.
 # Examples
 
 The files beginning with `example-` in the folder [.github/workflows](.github/workflows) are working examples of how to use these actions.
+Both of these examples require you to have added your system/application to the list in the [github-repositories-terraform](http://github.com/3lvia/github-repositories-terraform) repository.
+This is needed for the `Build` and `Deploy` actions to work correctly.
 
-You can also click on the 'Actions' tab on your repository and click 'New workflow' to get a selection of Elvia templates.
+You can also click on the **'Actions'** tab on your repository and click **'New workflow'** to get a selection of Elvia templates.
 Some values in these templates are placeholders and need to be replaced with your own values; anything resembling `<your xxx here>` should be replaced.
 See the [GitHub docs](https://docs.github.com/en/actions/learn-github-actions/using-starter-workflows#choosing-and-using-a-starter-workflow) for more detailed information.
 
@@ -370,7 +373,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
 <!-- gh-actions-docs-end -->
 
-<!-- gh-actions-docs-start path=integrationtest/action.yml owner=3lvia project=core-github-actions-templates version=trunk -->
+<!-- gh-actions-docs-start path=integrationtest/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=checks:write,contents:read,id-token:write,issues:read,pull-requests:write -->
 
 ## Integration Test
 
@@ -387,6 +390,16 @@ Run .NET integration tests.
 | `system`            | System is used to log in to Vault using correct role.                                                                                | yes      |                            |
 | `test-projects`     | Pattern to use to find test projects.                                                                                                | no       | `*integration*test*csproj` |
 | `working-directory` | Will run integration tests on projects under this working directory.                                                                 | no       | `./`                       |
+
+### Permissions
+
+This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+
+- `checks: write`
+- `contents: read`
+- `id-token: write`
+- `issues: read`
+- `pull-requests: write`
 
 ### Usage
 

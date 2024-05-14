@@ -41,7 +41,7 @@ jobs:
     steps:
       - uses: 3lvia/core-github-actions-templates/integrationtest@trunk
         with:
-          system: core
+          system: ${{ env.SYSTEM_NAMESPACE }}
 
   analyze:
     name: Analyze

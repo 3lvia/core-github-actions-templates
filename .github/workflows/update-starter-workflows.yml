@@ -38,21 +38,22 @@ jobs:
           mkdir -p dotgithub/workflow-templates
           for workflow_path in ${{ env.REPOSITORY }}/.github/workflows/example-*.yml; do
             file_name=$(basename "$workflow_path")
-            new_workflow_path="dotgithub/workflow-templates/${file_name#*-}"
+            file_name_no_prefix="${file_name#example-}"
+            new_workflow_path="dotgithub/workflow-templates/$file_name_no_prefix"
             cp "$workflow_path" "$new_workflow_path"
             sed -i "s/  APPLICATION_NAME: 'demo-api'/  APPLICATION_NAME: '<your application name here>'/g" "$new_workflow_path"
             sed -i "s/  SYSTEM_NAMESPACE: 'core'/  SYSTEM_NAMESPACE: '<your system namespace here>'/g" "$new_workflow_path"
             sed -i "s/  HELM_VALUES_PATH: '.github\/test\/deploy\/values.yml'/  HELM_VALUES_PATH: '<your Helm values path here>'/g" "$new_workflow_path"
             sed -i "s/  DOCKERFILE: '.github\/test\/src\/Dockerfile'/  DOCKERFILE: '<your Dockerfile path here (or leave empty if Dockerfile in root dir)>'/g" "$new_workflow_path"
             sed -i 's/branches: \[trunk\]/branches: \[$default-branch\]/g' "$new_workflow_path"
-            new_workflow_properties_file="dotgithub/workflow-templates/${file_name%.*}.properties.json"
+            new_workflow_properties_file="dotgithub/workflow-templates/${file_name_no_prefix%.yml}.properties.json"
             if [ ! -f "$new_workflow_properties_file" ]; then
               echo "Creating properties.json file for $new_workflow_path."
-              new_workflow_name=$(yq '.name' "$new_workflow_path")
+              new_workflow_name=$(yq -r '.name' "$new_workflow_path")
               cat << EOF > "$new_workflow_properties_file"
             {
-              "name": $new_workflow_name,
-              "description": $new_workflow_name
+              "name": "$new_workflow_name",
+              "description": "$new_workflow_name"
             }
           EOF
             else

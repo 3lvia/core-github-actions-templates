@@ -25,6 +25,24 @@ jobs:
         with:
           checkout: 'false'
 
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      issues: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: ./integrationtest
+        with:
+          checkout: 'false'
+          system: ${{ env.SYSTEM_NAMESPACE }}
+
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
