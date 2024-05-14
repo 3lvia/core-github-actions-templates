@@ -15,7 +15,7 @@ env:
 jobs:
   unit-tests:
     name: Unit Tests
-    runs-on: ubuntu-latest
+    runs-on: elvia-runner
     permissions:
       contents: read
       checks: write
@@ -28,7 +28,7 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    runs-on: ubuntu-latest
+    runs-on: elvia-runner
     permissions:
       contents: read
       checks: write
@@ -42,7 +42,7 @@ jobs:
 
   analyze:
     name: Analyze
-    runs-on: ubuntu-latest
+    runs-on: elvia-runner
     permissions:
       actions: read
       contents: read
@@ -52,7 +52,7 @@ jobs:
 
   build-scan:
     name: Build and Scan
-    runs-on: ubuntu-latest
+    runs-on: elvia-runner
     permissions:
       contents: read
       id-token: write
@@ -68,7 +68,7 @@ jobs:
   deploy-dev:
     name: Deploy Dev
     needs: [build-scan, analyze, unit-tests]
-    runs-on: ubuntu-latest
+    runs-on: elvia-runner
     permissions:
       contents: read
       id-token: write
@@ -89,7 +89,7 @@ jobs:
   deploy-test:
     name: Deploy Test
     needs: [deploy-dev]
-    runs-on: ubuntu-latest
+    runs-on: elvia-runner
     permissions:
       contents: read
       id-token: write
@@ -110,7 +110,7 @@ jobs:
   deploy-prod:
     name: Deploy Prod
     needs: [deploy-test]
-    runs-on: ubuntu-latest
+    runs-on: elvia-runner
     permissions:
       contents: read
       id-token: write

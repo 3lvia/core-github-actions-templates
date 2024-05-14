@@ -10,7 +10,7 @@ env:
 jobs:
   update-starter-workflows:
     name: Update starter workflows
-    runs-on: ubuntu-latest
+    runs-on: elvia-runner
     steps:
       - name: Get GitHub App token
         uses: actions/create-github-app-token@v1
