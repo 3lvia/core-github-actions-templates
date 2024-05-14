@@ -6,12 +6,17 @@ inputs:
     required: false
     default: 'true'
   working-directory:
-    description: 'Will run SonarCloud on projects under this working directory.'
+    description: 'Will run SonarCloud on the solution or project in this directory.'
     required: false
     default: './'
   sonarcloud-project-key:
     description: 'If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector. '
     required: true
+  test-projects:
+    description: 'Pattern to use to find test projects.'
+    required: false
+    default: '*unit*test*csproj'
+
 
 runs:
   using: 'composite'
@@ -40,17 +45,25 @@ runs:
         key: ${{ runner.os }}-sonar-scanner3
         restore-keys: ${{ runner.os }}-sonar-scanner3
     - name: Install SonarCloud scanner
+      shell: bash
       if: steps.cache-sonar-scanner3.outputs.cache-hit != 'true'
       run: |
         mkdir ./sonar ./sonar/scanner
         dotnet tool update dotnet-sonarscanner --tool-path ./sonar/scanner
         dotnet tool install dotnet-coverage --tool-path ./sonar/scanner
     - name: Build and analyze
+      shell: bash
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
         ./sonar/scanner/dotnet-sonarscanner begin /k:"${{ inputs.sonarcloud-project-key }}" /o:"elvia" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
-        dotnet build
-        ./sonar/scanner/dotnet-coverage collect 'dotnet test --filter "FullyQualifiedName!~Test.Integration"' -f xml  -o 'coverage.xml'
+        
+        testprojects=`find . -iname "${{ inputs.test-projects }}"`
+        for testproject in $testprojects;
+        do
+          ./sonar/scanner/dotnet-coverage collect 'dotnet test -l:trx $testproject' -f xml  -o 'coverage.xml'
+        done
+
         ./sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+      working-directory: ${{ inputs.working-directory }}
