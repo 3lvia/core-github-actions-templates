@@ -9,6 +9,10 @@ inputs:
     description: 'If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.'
     required: false
     default: 'true'
+  language:
+    description: 'Languages to run CodeQL analyze on.'
+    required: false
+    default: 'csharp'
 
 runs:
   using: 'composite'
@@ -17,10 +21,25 @@ runs:
       if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@v4
 
+    - name: Create codeql-config
+      shell: bash
+      run: |
+        cat <<EOF > codeql-config.yml
+        name: "CodeQL config"
+        paths:
+          - ${{ inputs.working-directory }}
+        EOF
+        echo "codeql-config.yml:"
+        cat codeql-config.yml
+
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
+      with:
+        config-file: codeql-config.yml
+        languages: ${{ inputs.language }}
 
     - name: Build projects
+      if: ${{ inputs.language == 'csharp' }}
       shell: bash
       run: |
         projects=`find . -iname "*csproj"`
@@ -32,3 +51,5 @@ runs:
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
+      with:
+        config-file: codeql-config.yml
