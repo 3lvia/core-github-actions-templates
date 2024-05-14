@@ -502,10 +502,10 @@ Run SonarCloud scanning on dotnet code.
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------- |
 | `checkout`               | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`              |
 | `github-token`           | Should normally be secrets.GITHUB_TOKEN                                                                                              | yes      |                     |
-| `sonarcloud-project-key` | If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector.                   | yes      |                     |
+| `sonarcloud-project-key` | The sonarcloud project key or id. Normally on the form 3lvia_repo-name. The project must be manually created on sonarcloud.io.       | yes      |                     |
 | `sonarcloud-token`       | Should normally be secrets.SONAR_TOKEN                                                                                               | yes      |                     |
 | `test-projects`          | Pattern to use to find test projects.                                                                                                | no       | `*unit*test*csproj` |
-| `working-directory`      | Will run SonarCloud on the solution or project in this directory.                                                                    | no       | `./`                |
+| `working-directory`      | Will run SonarCloud on projects under this working directory.                                                                        | no       | `./`                |
 
 ### Permissions
 
@@ -535,7 +535,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Required: yes
 
     sonarcloud-project-key:
-    # If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector.
+    # The sonarcloud project key or id. Normally on the form 3lvia_repo-name. The project must be manually created on sonarcloud.io.
     #
     # Required: yes
 
@@ -551,7 +551,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Default: '*unit*test*csproj'
 
     working-directory:
-    # Will run SonarCloud on the solution or project in this directory.
+    # Will run SonarCloud on projects under this working directory.
     #
     # Required: no
     # Default: './'
