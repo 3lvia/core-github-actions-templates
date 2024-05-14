@@ -33,20 +33,25 @@ GitHub Actions templates for the Elvia organization.
     - [Inputs](#inputs-4)
     - [Permissions](#permissions-4)
     - [Usage](#usage-4)
-  - [Trivy IaC scan](#trivy-iac-scan)
+  - [SonarCloud](#sonarcloud)
     - [Description](#description-5)
     - [Inputs](#inputs-5)
     - [Permissions](#permissions-5)
     - [Usage](#usage-5)
-  - [Playwright Test](#playwright-test)
+  - [Trivy IaC scan](#trivy-iac-scan)
     - [Description](#description-6)
     - [Inputs](#inputs-6)
     - [Permissions](#permissions-6)
     - [Usage](#usage-6)
-  - [Terraform format check](#terraform-format-check)
+  - [Playwright Test](#playwright-test)
     - [Description](#description-7)
     - [Inputs](#inputs-7)
+    - [Permissions](#permissions-7)
     - [Usage](#usage-7)
+  - [Terraform format check](#terraform-format-check)
+    - [Description](#description-8)
+    - [Inputs](#inputs-8)
+    - [Usage](#usage-8)
 - [Development](#development)
   - [Formatting](#formatting)
   - [Action documentation & table of contents](#action-documentation--table-of-contents)
@@ -484,6 +489,73 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 <!-- gh-actions-docs-end -->
 
 <!-- gh-actions-docs-start path=sonarcloud/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=checks:write,contents:read,id-token:write,issues:read,pull-requests:write -->
+
+## SonarCloud
+
+### Description
+
+Run SonarCloud scanning on dotnet code.
+
+### Inputs
+
+| Name                     | Description                                                                                                                          | Required | Default             |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------- |
+| `checkout`               | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`              |
+| `github-token`           | Should normally be secrets.GITHUB_TOKEN                                                                                              | yes      |                     |
+| `sonarcloud-project-key` | If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector.                   | yes      |                     |
+| `sonarcloud-token`       | Should normally be secrets.SONAR_TOKEN                                                                                               | yes      |                     |
+| `test-projects`          | Pattern to use to find test projects.                                                                                                | no       | `*unit*test*csproj` |
+| `working-directory`      | Will run SonarCloud on the solution or project in this directory.                                                                    | no       | `./`                |
+
+### Permissions
+
+This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+
+- `checks: write`
+- `contents: read`
+- `id-token: write`
+- `issues: read`
+- `pull-requests: write`
+
+### Usage
+
+```yaml
+- name: SonarCloud
+  uses: 3lvia/core-github-actions-templates/sonarcloud@trunk
+  with:
+    checkout:
+    # If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.
+    #
+    # Required: no
+    # Default: 'true'
+
+    github-token:
+    # Should normally be secrets.GITHUB_TOKEN
+    #
+    # Required: yes
+
+    sonarcloud-project-key:
+    # If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector.
+    #
+    # Required: yes
+
+    sonarcloud-token:
+    # Should normally be secrets.SONAR_TOKEN
+    #
+    # Required: yes
+
+    test-projects:
+    # Pattern to use to find test projects.
+    #
+    # Required: no
+    # Default: '*unit*test*csproj'
+
+    working-directory:
+    # Will run SonarCloud on the solution or project in this directory.
+    #
+    # Required: no
+    # Default: './'
+```
 
 <!-- gh-actions-docs-end -->
 
