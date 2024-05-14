@@ -24,7 +24,7 @@ If this parameter is missing, the "Permissions" section will not be generated.
 
 ```bash
 docker build . -t gh-actions-docs:latest
-docker run -v $(pwd):/opt/app gh-actions-docs:latest
+docker run -v "$(pwd):/opt/app" gh-actions-docs:latest
 ```
 
 ### Local
@@ -41,7 +41,7 @@ gh-actions-docs
 
 - `README_FILE`: The file to write the documentation to. Defaults to `README.md`.
 - `DEBUG`: Set to `true` to enable debug output.
-- `IGNORE_FILES`: Comma-separated list of `actions.yml`-files to ignore.
+- `IGNORE_FILES`: Comma-separated list of `action.yml`-files to ignore.
 - `IGNORE_HEADERS`: Comma-separated list of headers to ignore.
 - `RUN_PRETTIER`: Set to `true` to run Prettier on the generated documentation. This assumes Prettier is already installed.
 - `NO_ACTIONS`: Set to `true` to disable generation of actions documentation.
