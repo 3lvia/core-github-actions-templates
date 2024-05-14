@@ -12,11 +12,11 @@ inputs:
     required: false
     default: 'true'
   working-directory:
-    description: 'Will run SonarCloud on the solution or project in this directory.'
+    description: 'Will run SonarCloud on projects under this working directory.'
     required: false
     default: './'
   sonarcloud-project-key:
-    description: 'If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector. '
+    description: 'The sonarcloud project key or id. Normally on the form 3lvia_repo-name. The project must be manually created on sonarcloud.io. '
     required: true
   test-projects:
     description: 'Pattern to use to find test projects.'
