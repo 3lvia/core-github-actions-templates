@@ -14,9 +14,9 @@ inputs:
     required: false
     default: '*unit*test*csproj'
   test-coverage:
-    default: 'false'
-    description: 'If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector. '
+    description: 'If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector.'
     required: false
+    default: 'false'
 
 runs:
   using: 'composite'
@@ -74,18 +74,18 @@ runs:
       uses: irongut/CodeCoverageSummary@v1.3.0
       with:
         filename: 'Cobertura.xml'
-        badge: true
-        fail_below_min: false # just informative for now
-        format: markdown
-        hide_branch_rate: false
-        hide_complexity: false
-        indicators: true
-        output: both
+        badge: 'true'
+        fail_below_min: 'false' # just informative for now
+        format: 'markdown'
+        hide_branch_rate: 'false'
+        hide_complexity: 'false'
+        indicators: 'true'
+        output: 'both'
         thresholds: '50 75'
 
     - name: Add Coverage PR Comment
       if: ${{ inputs.test-coverage == 'true' && github.event_name == 'pull_request' }}
       uses: marocchino/sticky-pull-request-comment@v2
       with:
-        recreate: true
-        path: code-coverage-results.md
+        recreate: 'true'
+        path: 'code-coverage-results.md'

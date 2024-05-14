@@ -6,13 +6,13 @@ GitHub Actions templates for the Elvia organization.
 
 <!-- gh-actions-docs-toc-start -->
 
+- [Examples](#examples)
 - [Actions](#actions)
   - [Build](#build)
     - [Description](#description)
     - [Inputs](#inputs)
     - [Permissions](#permissions)
     - [Usage](#usage)
-    - [Example usage in a full workflow](#example-usage-in-a-full-workflow)
   - [Deploy](#deploy)
     - [Description](#description-1)
     - [Inputs](#inputs-1)
@@ -26,21 +26,22 @@ GitHub Actions templates for the Elvia organization.
   - [Integration Test](#integration-test)
     - [Description](#description-3)
     - [Inputs](#inputs-3)
+    - [Permissions](#permissions-3)
     - [Usage](#usage-3)
   - [Analyze](#analyze)
     - [Description](#description-4)
     - [Inputs](#inputs-4)
-    - [Permissions](#permissions-3)
+    - [Permissions](#permissions-4)
     - [Usage](#usage-4)
   - [Trivy IaC scan](#trivy-iac-scan)
     - [Description](#description-5)
     - [Inputs](#inputs-5)
-    - [Permissions](#permissions-4)
+    - [Permissions](#permissions-5)
     - [Usage](#usage-5)
   - [Playwright Test](#playwright-test)
     - [Description](#description-6)
     - [Inputs](#inputs-6)
-    - [Permissions](#permissions-5)
+    - [Permissions](#permissions-6)
     - [Usage](#usage-6)
   - [Terraform format check](#terraform-format-check)
     - [Description](#description-7)
@@ -50,6 +51,16 @@ GitHub Actions templates for the Elvia organization.
   - [Formatting](#formatting)
   - [Action documentation & table of contents](#action-documentation--table-of-contents)
   <!-- gh-actions-docs-toc-end -->
+
+# Examples
+
+The files beginning with `example-` in the folder [.github/workflows](.github/workflows) are working examples of how to use these actions.
+Both of these examples require you to have added your system/application to the list in the [github-repositories-terraform](http://github.com/3lvia/github-repositories-terraform) repository.
+This is needed for the `Build` and `Deploy` actions to work correctly.
+
+You can also click on the **'Actions'** tab on your repository and click **'New workflow'** to get a selection of Elvia templates.
+Some values in these templates are placeholders and need to be replaced with your own values; anything resembling `<your xxx here>` should be replaced.
+See the [GitHub docs](https://docs.github.com/en/actions/learn-github-actions/using-starter-workflows#choosing-and-using-a-starter-workflow) for more detailed information.
 
 # Actions
 
@@ -165,147 +176,6 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 ```
 
 <!-- gh-actions-docs-end -->
-
-### Example usage in a full workflow
-
-```yaml
-name: Build and Deploy to Kubernetes
-
-on:
-  push:
-    branches: [trunk]
-  pull_request:
-    branches: [trunk]
-
-env:
-  APPLICATION_NAME: demo-api
-  SYSTEM_NAMESPACE: core
-  DOCKER_FILE: core-demo-api/Dockerfile
-
-jobs:
-  unittests:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      checks: write
-      issues: read
-      pull-requests: write
-    steps:
-      - uses: 3lvia/core-github-actions-templates/unittest@trunk
-        with:
-          test-coverage: 'true'
-
-  integrationtests:
-    name: Integration Tests
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      checks: write
-      issues: read
-      pull-requests: write
-      id-token: write
-    steps:
-      - uses: 3lvia/core-github-actions-templates/integrationtest@trunk
-        with:
-          system: core
-
-  analyze:
-    name: Analyze
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    if: github.event_name == 'pull_request' # only run analyze on PR
-    steps:
-      - uses: 3lvia/core-github-actions-templates/analyze@trunk
-
-  build:
-    name: Build and Scan
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-    environment: build
-    steps:
-      - uses: 3lvia/core-github-actions-templates/build@trunk
-        with:
-          name: ${{ env.APPLICATION_NAME }}
-          namespace: ${{ env.SYSTEM_NAMESPACE }}
-          dockerfile: ${{ env.DOCKER_FILE }}
-          AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
-
-  deploy_dev:
-    name: Deploy Dev
-    needs: [build, unittests]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-    environment: dev
-    steps:
-      - uses: 3lvia/core-github-actions-templates/deploy@trunk
-        with:
-          name: ${{ env.APPLICATION_NAME }}
-          namespace: ${{ env.SYSTEM_NAMESPACE }}
-          environment: 'dev'
-          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
-          helm-values-path: '.github/deploy/values.yaml'
-
-  deploy_test:
-    name: Deploy Test
-    needs: [deploy_dev]
-    runs-on: ubuntu-latest
-    environment: test
-    # Only on push to trunk
-    if: github.ref == 'refs/heads/trunk'
-    steps:
-      - uses: 3lvia/core-github-actions-templates/deploy@trunk
-        with:
-          name: ${{ env.APPLICATION_NAME }}
-          namespace: ${{ env.SYSTEM_NAMESPACE }}
-          environment: 'test'
-          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
-          helm-values-path: '.github/deploy/values.yaml'
-
-  deploy_prod:
-    name: Deploy Prod
-    needs: [deploy_test]
-    runs-on: ubuntu-latest
-    environment: prod
-    # Only on push to trunk
-    if: github.ref == 'refs/heads/trunk'
-    steps:
-      - uses: 3lvia/core-github-actions-templates/deploy@trunk
-        with:
-          name: ${{ env.APPLICATION_NAME }}
-          namespace: ${{ env.SYSTEM_NAMESPACE }}
-          environment: 'prod'
-          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
-          helm-values-path: '.github/deploy/values.yaml'
-
-  #Example for deploying to GKE:
-  #
-  #deploy_gke_dev:
-  #  name: Deploy to dev on GKE
-  #  needs: [build, analyze]
-  #  runs-on: ubuntu-latest
-  #  permissions:
-  #    contents: read
-  #    id-token: write
-  #  environment: dev
-  #  steps:
-  #    - uses: 3lvia/core-github-actions-templates/deploy@trunk
-  #      with:
-  #        name: ${{ env.APPLICATION_NAME }}
-  #        namespace: ${{ env.SYSTEM_NAMESPACE }}
-  #        environment: 'dev'
-  #        helm-values-path: '.github/test/deploy/values.yaml'
-  #        runtime-cloud-provider: 'GKE'
-  #        GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
-  #        GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
-```
 
 <!-- gh-actions-docs-start path=deploy/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
 
@@ -503,7 +373,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
 <!-- gh-actions-docs-end -->
 
-<!-- gh-actions-docs-start path=integrationtest/action.yml owner=3lvia project=core-github-actions-templates version=trunk -->
+<!-- gh-actions-docs-start path=integrationtest/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=checks:write,contents:read,id-token:write,issues:read,pull-requests:write -->
 
 ## Integration Test
 
@@ -520,6 +390,16 @@ Run .NET integration tests.
 | `system`            | System is used to log in to Vault using correct role.                                                                                | yes      |                            |
 | `test-projects`     | Pattern to use to find test projects.                                                                                                | no       | `*integration*test*csproj` |
 | `working-directory` | Will run integration tests on projects under this working directory.                                                                 | no       | `./`                       |
+
+### Permissions
+
+This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+
+- `checks: write`
+- `contents: read`
+- `id-token: write`
+- `issues: read`
+- `pull-requests: write`
 
 ### Usage
 
