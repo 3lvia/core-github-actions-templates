@@ -198,7 +198,7 @@ runs:
       shell: bash
       run: |
         # Helm deploy
-        helm repo add elvia-charts https://raw.githubusercontent.com/3lvia/kubernetes-charts/feature/runAsNonRoot
+        helm repo add elvia-charts https://raw.githubusercontent.com/3lvia/kubernetes-charts/trunk
         helm repo update
         if [[ "${{ inputs.workload-type }}" == "deployment" ]]; then
           helm upgrade --debug --install \
