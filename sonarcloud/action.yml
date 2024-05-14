@@ -68,7 +68,7 @@ runs:
         testprojects=`find . -iname "${{ inputs.test-projects }}"`
         for testproject in $testprojects;
         do
-          ./sonar/scanner/dotnet-coverage collect 'dotnet test -l:trx $testproject' -f xml  -o 'coverage.xml'
+          ./sonar/scanner/dotnet-coverage collect "dotnet test -l:trx $testproject" -f xml  -o 'coverage.xml'
         done
 
         ./sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ inputs.sonarcloud-token }}"
