@@ -9,10 +9,10 @@ inputs:
     description: 'If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.'
     required: false
     default: 'true'
-  languages:
+  language:
     description: 'Languages to run CodeQL analyze on.'
     required: false
-    default: 'javascript-typescript, csharp, python, go'
+    default: 'csharp'
 
 runs:
   using: 'composite'
@@ -36,7 +36,7 @@ runs:
       uses: github/codeql-action/init@v3
       with:
         config-file: codeql-config.yml
-        languages: ${{ inputs.languages }}
+        languages: ${{ inputs.language }}
 
     - name: Build projects
       shell: bash
