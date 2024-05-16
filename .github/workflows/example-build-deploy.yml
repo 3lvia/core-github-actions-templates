@@ -3,11 +3,8 @@ name: Build and Deploy to Kubernetes
 on:
   push:
     branches: [trunk]
-# Uncomment to run on pull requests.
-# Will also deploy to dev.
-#
-# pull_request:
-#   branches: [trunk]
+  pull_request:
+    branches: [trunk]
 
 env:
   APPLICATION_NAME: 'demo-api'
@@ -82,6 +79,8 @@ jobs:
       contents: read
       id-token: write
     environment: dev
+    # Only on push to trunk
+    if: github.ref == 'refs/heads/trunk'
     steps:
       - uses: 3lvia/core-github-actions-templates/deploy@trunk
         with:
