@@ -85,9 +85,9 @@ Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure C
 | `ACR_SUBSCRIPTION_ID`         | Subscription ID of the Azure Container Registry to push to.                                                                                            | no       | `9edbf217-b7c1-4f6a-ae76-d046cf932ff0` |
 | `AZURE_CLIENT_ID`             | ClientId of a service principal that can push to Container Registry.                                                                                   | yes      |                                        |
 | `AZURE_TENANT_ID`             | TenantId of a service principal that can push to Azure Container Registry.                                                                             | no       | `2186a6ec-c227-4291-9806-d95340bf439d` |
-| `checkout`                    | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.                   | no       | `true`                                 |
+| `checkout`                    | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                   | no       | `true`                                 |
 | `docker-build-context`        | Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.                      | no       |                                        |
-| `dockerfile`                  | Path to Dockerfile, e.g. 'src/Dockerfile'.                                                                                                             | yes      |                                        |
+| `dockerfile`                  | Path to Dockerfile, e.g. `src/Dockerfile`.                                                                                                             | yes      |                                        |
 | `name`                        | Name of application. Do not include namespace.                                                                                                         | yes      |                                        |
 | `namespace`                   | Namespace or system of the application.                                                                                                                | yes      |                                        |
 | `severity`                    | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                          | no       | `CRITICAL`                             |
@@ -132,7 +132,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Default: '2186a6ec-c227-4291-9806-d95340bf439d'
 
     checkout:
-    # If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.
+    # If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.
     #
     # Required: no
     # Default: 'true'
@@ -143,7 +143,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Required: no
 
     dockerfile:
-    # Path to Dockerfile, e.g. 'src/Dockerfile'.
+    # Path to Dockerfile, e.g. `src/Dockerfile`.
     #
     # Required: yes
 
@@ -204,13 +204,13 @@ Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Bui
 | `GC_PROJECT_ID`                 | Project ID of GKE to deploy to. Defaults to Elvias normal clusters.                                                                  | no       |                                        |
 | `GC_SERVICE_ACCOUNT`            | Service account to use for deploying to GKE. Only required for deploying to GKE.                                                     | no       |                                        |
 | `GC_WORKLOAD_IDENTITY_PROVIDER` | Workload identity provider to use for deploying to GKE. Only required for deploying to GKE.                                          | no       |                                        |
-| `checkout`                      | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`                                 |
+| `checkout`                      | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`                                 |
 | `environment`                   | Environment to deploy to.                                                                                                            | yes      |                                        |
-| `helm-values-path`              | Path to Helm values file, relative to the root of the repository. Defaults to .github/deploy/values.yaml.                            | no       | `.github/deploy/values.yaml`           |
+| `helm-values-path`              | Path to Helm values file, relative to the root of the repository.                                                                    | no       | `.github/deploy/values.yaml`           |
 | `name`                          | Name of application. Do not include namespace.                                                                                       | yes      |                                        |
 | `namespace`                     | Namespace or system of the application.                                                                                              | yes      |                                        |
-| `runtime-cloud-provider`        | Kubernetes cloud provider to deploy to: 'AKS' or 'GKE'.                                                                              | no       | `AKS`                                  |
-| `workload-type`                 | The type of workload to deploy to kubernetes. Must be 'deployment' or 'statefulset'.                                                 | no       | `deployment`                           |
+| `runtime-cloud-provider`        | Kubernetes cloud provider to deploy to: `AKS` or `GKE`.                                                                              | no       | `AKS`                                  |
+| `workload-type`                 | The type of workload to deploy to kubernetes. Must be `deployment` or `statefulset`.                                                 | no       | `deployment`                           |
 
 ### Permissions
 
@@ -278,7 +278,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Required: no
 
     checkout:
-    # If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.
+    # If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.
     #
     # Required: no
     # Default: 'true'
@@ -289,7 +289,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Required: yes
 
     helm-values-path:
-    # Path to Helm values file, relative to the root of the repository. Defaults to .github/deploy/values.yaml.
+    # Path to Helm values file, relative to the root of the repository.
     #
     # Required: no
     # Default: '.github/deploy/values.yaml'
@@ -305,13 +305,13 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Required: yes
 
     runtime-cloud-provider:
-    # Kubernetes cloud provider to deploy to: 'AKS' or 'GKE'.
+    # Kubernetes cloud provider to deploy to: `AKS` or `GKE`.
     #
     # Required: no
     # Default: 'AKS'
 
     workload-type:
-    # The type of workload to deploy to kubernetes. Must be 'deployment' or 'statefulset'.
+    # The type of workload to deploy to kubernetes. Must be `deployment` or `statefulset`.
     #
     # Required: no
     # Default: 'deployment'
@@ -331,7 +331,7 @@ Run .NET unit tests.
 
 | Name                | Description                                                                                                                          | Required | Default             |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------- |
-| `checkout`          | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`              |
+| `checkout`          | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`              |
 | `test-coverage`     | If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector.                   | no       | `false`             |
 | `test-projects`     | Pattern to use to find test projects.                                                                                                | no       | `*unit*test*csproj` |
 | `working-directory` | Will run unit tests on projects under this working directory.                                                                        | no       | `./`                |
@@ -352,7 +352,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
   uses: 3lvia/core-github-actions-templates/unittest@trunk
   with:
     checkout:
-    # If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.
+    # If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.
     #
     # Required: no
     # Default: 'true'
@@ -390,7 +390,7 @@ Run .NET integration tests.
 
 | Name                | Description                                                                                                                          | Required | Default                    |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------------------------- |
-| `checkout`          | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`                     |
+| `checkout`          | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`                     |
 | `environment`       | Environment is used to find correct vault instance.                                                                                  | yes      | `dev`                      |
 | `system`            | System is used to log in to Vault using correct role.                                                                                | yes      |                            |
 | `test-projects`     | Pattern to use to find test projects.                                                                                                | no       | `*integration*test*csproj` |
@@ -413,7 +413,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
   uses: 3lvia/core-github-actions-templates/integrationtest@trunk
   with:
     checkout:
-    # If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.
+    # If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.
     #
     # Required: no
     # Default: 'true'
@@ -456,7 +456,7 @@ Run CodeQL analysis.
 
 | Name                | Description                                                                                                                          | Required | Default  |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------- |
-| `checkout`          | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`   |
+| `checkout`          | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`   |
 | `language`          | Languages to run CodeQL analyze on.                                                                                                  | no       | `csharp` |
 | `working-directory` | Will run CodeQL Analysis on projects under this working directory                                                                    | no       | `./`     |
 
@@ -475,7 +475,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
   uses: 3lvia/core-github-actions-templates/analyze@trunk
   with:
     checkout:
-    # If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.
+    # If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.
     #
     # Required: no
     # Default: 'true'
@@ -507,10 +507,10 @@ Run SonarCloud scanning on dotnet code.
 
 | Name                     | Description                                                                                                                          | Required | Default             |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------- |
-| `checkout`               | If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out. | no       | `true`              |
-| `github-token`           | Should normally be secrets.GITHUB_TOKEN                                                                                              | yes      |                     |
-| `sonarcloud-project-key` | The sonarcloud project key or id. Normally on the form 3lvia_repo-name. The project must be manually created on sonarcloud.io.       | yes      |                     |
-| `sonarcloud-token`       | Should normally be secrets.SONAR_TOKEN                                                                                               | yes      |                     |
+| `checkout`               | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`              |
+| `github-token`           | Should normally be `${{ secrets.GITHUB_TOKEN }}`.                                                                                    | yes      |                     |
+| `sonarcloud-project-key` | The sonarcloud project key or id. Normally on the form `3lvia_repo-name`. The project must be manually created on sonarcloud.io.     | yes      |                     |
+| `sonarcloud-token`       | Should normally be `${{ secrets.SONAR_TOKEN }}`.                                                                                     | yes      |                     |
 | `test-projects`          | Pattern to use to find test projects.                                                                                                | no       | `*unit*test*csproj` |
 | `working-directory`      | Will run SonarCloud on projects under this working directory.                                                                        | no       | `./`                |
 
@@ -531,23 +531,23 @@ This action requires the following [permissions](https://docs.github.com/en/acti
   uses: 3lvia/core-github-actions-templates/sonarcloud@trunk
   with:
     checkout:
-    # If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.
+    # If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.
     #
     # Required: no
     # Default: 'true'
 
     github-token:
-    # Should normally be secrets.GITHUB_TOKEN
+    # Should normally be `${{ secrets.GITHUB_TOKEN }}`.
     #
     # Required: yes
 
     sonarcloud-project-key:
-    # The sonarcloud project key or id. Normally on the form 3lvia_repo-name. The project must be manually created on sonarcloud.io.
+    # The sonarcloud project key or id. Normally on the form `3lvia_repo-name`. The project must be manually created on sonarcloud.io.
     #
     # Required: yes
 
     sonarcloud-token:
-    # Should normally be secrets.SONAR_TOKEN
+    # Should normally be `${{ secrets.SONAR_TOKEN }}`.
     #
     # Required: yes
 
@@ -647,11 +647,12 @@ Run Playwright tests written in .NET.
 
 ### Inputs
 
-| Name           | Description                                           | Required | Default |
-| -------------- | ----------------------------------------------------- | -------- | ------- |
-| `environment`  | Environment is used to find correct vault instance.   | yes      |         |
-| `system`       | System is used to log in to Vault using correct role. | yes      |         |
-| `test-project` | Name of test project file to run                      | yes      |         |
+| Name           | Description                                                                                                                          | Required | Default |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- |
+| `checkout`     | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`  |
+| `environment`  | Environment is used to find correct vault instance.                                                                                  | yes      |         |
+| `system`       | System is used to log in to Vault using correct role.                                                                                | yes      |         |
+| `test-project` | Name of test project file to run                                                                                                     | yes      |         |
 
 ### Permissions
 
@@ -669,6 +670,12 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 - name: Playwright Test
   uses: 3lvia/core-github-actions-templates/playwright@trunk
   with:
+    checkout:
+    # If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.
+    #
+    # Required: no
+    # Default: 'true'
+
     environment:
     # Environment is used to find correct vault instance.
     #
@@ -697,10 +704,10 @@ Uses the built-in formatter from the Terraform CLI to check the format of Terraf
 
 ### Inputs
 
-| Name       | Description                                                                                                                      | Required | Default |
-| ---------- | -------------------------------------------------------------------------------------------------------------------------------- | -------- | ------- |
-| `checkout` | If true, the action will check out the repository. If false, the action will assume the repository has already been checked out. | no       | `true`  |
-| `path`     | Path to process.                                                                                                                 | no       | `.`     |
+| Name       | Description                                                                                                                          | Required | Default |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- |
+| `checkout` | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`  |
+| `path`     | Path to process.                                                                                                                     | no       | `.`     |
 
 ### Usage
 
@@ -709,7 +716,7 @@ Uses the built-in formatter from the Terraform CLI to check the format of Terraf
   uses: 3lvia/core-github-actions-templates/terraform-format@trunk
   with:
     checkout:
-    # If true, the action will check out the repository. If false, the action will assume the repository has already been checked out.
+    # If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.
     #
     # Required: no
     # Default: 'true'
