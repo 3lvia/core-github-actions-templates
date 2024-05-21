@@ -8,7 +8,7 @@ inputs:
     description: 'Namespace or system of the application.'
     required: true
   dockerfile:
-    description: "Path to Dockerfile, e.g. 'src/Dockerfile'."
+    description: "Path to Dockerfile, e.g. `src/Dockerfile`."
     required: true
   docker-build-context:
     description: 'Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.'
@@ -28,7 +28,7 @@ inputs:
     description: 'Directories/files skipped by Trivy. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.'
     required: false
   checkout:
-    description: 'If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.'
+    description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
     required: false
     default: 'true'
   AZURE_CLIENT_ID:

@@ -6,7 +6,7 @@ inputs:
     required: false
     default: '.'
   checkout:
-    description: 'If true, the action will check out the repository. If false, the action will assume the repository has already been checked out.'
+    description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
     required: false
     default: 'true'
 

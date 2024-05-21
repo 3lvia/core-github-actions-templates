@@ -11,19 +11,19 @@ inputs:
     description: 'Environment to deploy to.'
     required: true
   helm-values-path:
-    description: 'Path to Helm values file, relative to the root of the repository. Defaults to .github/deploy/values.yaml.'
+    description: 'Path to Helm values file, relative to the root of the repository.'
     required: false
     default: '.github/deploy/values.yaml'
   workload-type:
-    description: "The type of workload to deploy to kubernetes. Must be 'deployment' or 'statefulset'."
+    description: "The type of workload to deploy to kubernetes. Must be `deployment` or `statefulset`."
     required: false
     default: 'deployment'
   checkout:
-    description: 'If "true", the action will check out the repository. If "false", the action will assume the repository has already been checked out.'
+    description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
     required: false
     default: 'true'
   runtime-cloud-provider:
-    description: "Kubernetes cloud provider to deploy to: 'AKS' or 'GKE'."
+    description: "Kubernetes cloud provider to deploy to: `AKS` or `GKE`."
     required: false
     default: 'AKS'
   AZURE_CLIENT_ID:

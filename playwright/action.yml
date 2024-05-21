@@ -10,11 +10,16 @@ inputs:
   system:
     description: 'System is used to log in to Vault using correct role.'
     required: true
+  checkout:
+    description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
+    required: false
+    default: 'true'
 
 runs:
   using: 'composite'
   steps:
     - name: Checkout repository
+      if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@v4
 
     - name: Parse input and set environment variables
