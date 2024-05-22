@@ -118,18 +118,15 @@ jobs:
             # exit 0
           fi
 
-          gh_app_username="$(gh api \
-                              -H "Accept: application/vnd.github+json" \
-                              -H "X-GitHub-Api-Version: 2022-11-28" \
-                              /app | jq -r '.name')[bot]"
-          gh_app_user_id="$(curl -gs https://api.github.com/users/$gh_app_username | jq -r '.id')"
-          gh_app_user_email="${gh_app_user_id}+${gh_app_username}@users.noreply.github.com"
+          gh_app_user_id="$(curl -gs https://api.github.com/users/$GH_APP_USERNAME | jq -r '.id')"
+          gh_app_user_email="$gh_app_user_id+$GH_APP_USERNAME@users.noreply.github.com"
 
           git config user.email "$gh_app_user_email"
-          git config user.name "$gh_app_username"
+          git config user.name "$GH_APP_USERNAME"
 
           git add README.md
           git commit -m 'Update action documentation'
           git push
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_APP_USERNAME: '3lvia-core-admin[bot]'
