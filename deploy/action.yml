@@ -15,7 +15,7 @@ inputs:
     required: false
     default: '.github/deploy/values.yaml'
   workload-type:
-    description: "The type of workload to deploy to kubernetes. Must be `deployment` or `statefulset`."
+    description: 'The type of workload to deploy to kubernetes. Must be `deployment` or `statefulset`.'
     required: false
     default: 'deployment'
   checkout:
@@ -23,7 +23,7 @@ inputs:
     required: false
     default: 'true'
   runtime-cloud-provider:
-    description: "Kubernetes cloud provider to deploy to: `AKS` or `GKE`."
+    description: 'Kubernetes cloud provider to deploy to: `AKS` or `GKE`.'
     required: false
     default: 'AKS'
   AZURE_CLIENT_ID:

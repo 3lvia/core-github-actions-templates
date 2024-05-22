@@ -8,7 +8,7 @@ inputs:
     description: 'Namespace or system of the application.'
     required: true
   dockerfile:
-    description: "Path to Dockerfile, e.g. `src/Dockerfile`."
+    description: 'Path to Dockerfile, e.g. `src/Dockerfile`.'
     required: true
   docker-build-context:
     description: 'Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.'
