@@ -21,6 +21,10 @@ runs:
       if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@v4
 
+    - name: Setup .NET
+      if: ${{ inputs.language == 'csharp' }}
+      uses: actions/setup-dotnet@v4
+
     - name: Create codeql-config
       shell: bash
       run: |
