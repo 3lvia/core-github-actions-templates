@@ -651,7 +651,7 @@ Run Playwright tests written in .NET.
 | Name           | Description                                                                                                                          | Required | Default |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- |
 | `checkout`     | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`  |
-| `environment`  | Environment is used to find correct vault instance.                                                                                  | yes      |         |
+| `environment`  | Environment is used to find correct Vault instance.                                                                                  | yes      |         |
 | `system`       | System is used to log in to Vault using correct role.                                                                                | yes      |         |
 | `test-project` | Name of test project file to run                                                                                                     | yes      |         |
 
@@ -678,7 +678,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Default: 'true'
 
     environment:
-    # Environment is used to find correct vault instance.
+    # Environment is used to find correct Vault instance.
     #
     # Required: yes
 
