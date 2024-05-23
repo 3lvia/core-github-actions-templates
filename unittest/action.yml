@@ -26,24 +26,16 @@ runs:
       uses: actions/checkout@v4
 
     - name: Run unit tests
-      if: ${{ inputs.test-coverage == 'false' }}
       shell: bash
       run: |
-        testprojects=`find . -iname "${{ inputs.test-projects }}"`
+        testprojects=$(find . -iname '${{ inputs.test-projects }}')
         for testproject in $testprojects;
         do
-          dotnet test -l:trx $testproject
-        done
-      working-directory: ${{ inputs.working-directory }}
-
-    - name: Run unit tests
-      if: ${{ inputs.test-coverage == 'true' }}
-      shell: bash
-      run: |
-        testprojects=`find . -iname "${{ inputs.test-projects }}"`
-        for testproject in $testprojects;
-        do
-          dotnet test -l:trx --collect:"XPlat Code Coverage" $testproject
+          if [[ '${{ inputs.test-coverage }}' == 'true' ]]; then
+            dotnet test -l:trx --collect:"XPlat Code Coverage" $testproject
+          else
+            dotnet test -l:trx $testproject
+          fi
         done
       working-directory: ${{ inputs.working-directory }}
 
