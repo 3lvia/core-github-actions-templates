@@ -5,7 +5,7 @@ inputs:
     description: 'Name of test project file to run'
     required: true
   environment:
-    description: 'Environment is used to find correct vault instance.'
+    description: 'Environment is used to find correct Vault instance.'
     required: true
   system:
     description: 'System is used to log in to Vault using correct role.'
@@ -25,25 +25,27 @@ runs:
     - name: Parse input and set environment variables
       shell: bash
       run: |
-        if [[ "${{ inputs.environment }}" == "dev" ]]; then
-          echo "VAULT_ADDR=https://vault.dev-elvia.io" >> "$GITHUB_ENV"
-        elif [[ "${{ inputs.environment }}" == "test" ]]; then
-          echo "VAULT_ADDR=https://vault.test-elvia.io" >> "$GITHUB_ENV"
-        elif [[ "${{ inputs.environment }}" == "prod" ]]; then
-          echo "VAULT_ADDR=https://vault.elvia.io" >> "$GITHUB_ENV"
+        if [[ '${{ inputs.environment }}' == 'dev' ]]; then
+          echo 'VAULT_ADDR=https://vault.dev-elvia.io' >> "$GITHUB_ENV"
+        elif [[ '${{ inputs.environment }}' == 'test' ]]; then
+          echo 'VAULT_ADDR=https://vault.test-elvia.io' >> "$GITHUB_ENV"
+        elif [[ '${{ inputs.environment }}' == 'prod' ]]; then
+          echo 'VAULT_ADDR=https://vault.elvia.io' >> "$GITHUB_ENV"
         else
-          echo "Unsupported environment: ${{ inputs.environment }}"
+          echo 'Unsupported environment: ${{ inputs.environment }}'
           exit 1
         fi
 
-    - name: Login Vault
+        echo "REPO_SHORT_NAME=${GITHUB_REPOSITORY##*/}" >> "$GITHUB_ENV"
+
+    - name: Login Vault and export token
       uses: hashicorp/vault-action@v3
       with:
         url: ${{ env.VAULT_ADDR }}
-        role: jwt-github-${{ inputs.system }}
-        method: jwt
-        path: jwt-github
-        exportToken: true
+        role: 'jwt-github-${{ inputs.system }}-${{ env.REPO_SHORT_NAME }}'
+        method: 'jwt'
+        path: 'jwt-github'
+        exportToken: 'true'
 
     - name: Build .NET project
       shell: bash
@@ -67,4 +69,4 @@ runs:
         files: |
           **/TestResults/*.trx
           .github/**/TestResults/*.trx
-        check_name: Smoketest Results
+        check_name: 'Smoketest Results'

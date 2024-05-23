@@ -31,14 +31,14 @@ runs:
     - name: Parse input and set environment variables
       shell: bash
       run: |
-        if [[ "${{ inputs.environment }}" == "dev" ]]; then
-          echo "VAULT_ADDR=https://vault.dev-elvia.io" >> "$GITHUB_ENV"
-        elif [[ "${{ inputs.environment }}" == "test" ]]; then
-          echo "VAULT_ADDR=https://vault.test-elvia.io" >> "$GITHUB_ENV"
-        elif [[ "${{ inputs.environment }}" == "prod" ]]; then
-          echo "VAULT_ADDR=https://vault.elvia.io" >> "$GITHUB_ENV"
+        if [[ '${{ inputs.environment }}' == 'dev' ]]; then
+          echo 'VAULT_ADDR=https://vault.dev-elvia.io' >> "$GITHUB_ENV"
+        elif [[ '${{ inputs.environment }}' == 'test' ]]; then
+          echo 'VAULT_ADDR=https://vault.test-elvia.io' >> "$GITHUB_ENV"
+        elif [[ '${{ inputs.environment }}' == 'prod' ]]; then
+          echo 'VAULT_ADDR=https://vault.elvia.io' >> "$GITHUB_ENV"
         else
-          echo "Unsupported environment: ${{ inputs.environment }}"
+          echo 'Unsupported environment: ${{ inputs.environment }}'
           exit 1
         fi
 
@@ -56,7 +56,7 @@ runs:
     - name: Run integration tests
       shell: bash
       run: |
-        testprojects=`find . -iname "${{ inputs.test-projects }}"`
+        testprojects=$(find . -iname '${{ inputs.test-projects }}')
         for testproject in $testprojects;
         do
           dotnet test -l:trx $testproject
