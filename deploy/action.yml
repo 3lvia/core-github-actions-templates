@@ -70,82 +70,87 @@ runs:
       shell: bash
       run: |
         # Parse input and set environment variables
-        if [[ -z "${{ inputs.environment }}" ]]; then
-          echo "This action can only be used with an environment."
+        if [[ -z '${{ inputs.environment }}' ]]; then
+          echo "Input 'environment' is required."
         fi
 
-        if [[ -z "${{ inputs.AZURE_CLIENT_ID }}" && "${{ inputs.cloudProvider }}" == "AKS" ]]; then
-          echo "AZURE_CLIENT_ID is required for AKS deployment."
+        if [[ '${{ inputs.runtime-cloud-provider }}' != 'AKS' && '${{ inputs.runtime-cloud-provider }}' != 'GKE' ]]; then
+          echo "Unsupported runtime-cloud-provider: ${{ inputs.runtime-cloud-provider }}"
           exit 1
         fi
 
-        if [[ "${{ inputs.runtime-cloud-provider }}" == "GKE" ]]; then
-          if [ -z "${{ inputs.GC_SERVICE_ACCOUNT }}" ]; then
-            echo "GC_SERVICE_ACCOUNT is required for GKE deployment."
+        if [[ -z '${{ inputs.AZURE_CLIENT_ID }}' && '${{ inputs.cloudProvider }}' == 'AKS' ]]; then
+          echo "Input 'AZURE_CLIENT_ID' is required for AKS deployment."
+          exit 1
+        fi
+
+        if [[ '${{ inputs.runtime-cloud-provider }}' == 'GKE' ]]; then
+          if [ -z '${{ inputs.GC_SERVICE_ACCOUNT }}' ]; then
+            echo "Input 'GC_SERVICE_ACCOUNT' is required for GKE deployment."
             exit 1
           fi
-          if [[ -z "${{ inputs.GC_WORKLOAD_IDENTITY_PROVIDER }}" ]]; then
-            echo "GC_WORKLOAD_IDENTITY_PROVIDER is required for GKE deployment."
+          if [[ -z '${{ inputs.GC_WORKLOAD_IDENTITY_PROVIDER }}' ]]; then
+            echo "Input 'GC_WORKLOAD_IDENTITY_PROVIDER' is required for GKE deployment."
             exit 1
           fi
         fi
 
-        if [[ "${{ inputs.environment }}" == "dev" ]]; then
-          aks_sub_id="ceb9518c-528f-4c91-9b5a-c051d383e7a8"
-          echo "VAULT_ADDR=https://vault.dev-elvia.io" >> "$GITHUB_ENV"
-        elif [[ "${{ inputs.environment }}" == "test" ]]; then
-          aks_sub_id="ceb9518c-528f-4c91-9b5a-c051d383e7a8"
-          echo "VAULT_ADDR=https://vault.test-elvia.io" >> "$GITHUB_ENV"
-        elif [[ "${{ inputs.environment }}" == "prod" ]]; then
+        if [[ '${{ inputs.environment }}' == 'dev' ]]; then
+          aks_sub_id='ceb9518c-528f-4c91-9b5a-c051d383e7a8'
+          echo 'VAULT_ADDR=https://vault.dev-elvia.io' >> "$GITHUB_ENV"
+        elif [[ '${{ inputs.environment }}' == 'test' ]]; then
+          aks_sub_id='ceb9518c-528f-4c91-9b5a-c051d383e7a8'
+          echo 'VAULT_ADDR=https://vault.test-elvia.io' >> "$GITHUB_ENV"
+        elif [[ '${{ inputs.environment }}' == 'prod' ]]; then
           aks_sub_id="9edbf217-b7c1-4f6a-ae76-d046cf932ff0"
-          echo "VAULT_ADDR=https://vault.elvia.io" >> "$GITHUB_ENV"
-        elif [[ "${{ inputs.environment }}" == "sandbox" ]]; then
-          aks_sub_id="ceb9518c-528f-4c91-9b5a-c051d383e7a8"
-          echo "VAULT_ADDR=https://vault.dev-elvia.io" >> "$GITHUB_ENV"
+          echo 'VAULT_ADDR=https://vault.elvia.io' >> "$GITHUB_ENV"
+        elif [[ '${{ inputs.environment }}' == 'sandbox' ]]; then
+          aks_sub_id='ceb9518c-528f-4c91-9b5a-c051d383e7a8'
+          echo 'VAULT_ADDR=https://vault.dev-elvia.io' >> "$GITHUB_ENV"
         else
-          echo "Unsupported environment: ${{ inputs.environment }}"
+          echo 'Unsupported environment: ${{ inputs.environment }}'
           exit 1
         fi
 
-        aks_rg="RUNTIMESERVICE-RG${{ inputs.environment }}"
-        aks_cluster_name="akscluster${{ inputs.environment }}"
-        gc_project_id="elvia-runtimeservice-${{ inputs.environment }}"
-        gc_cluster_name="runtimeservice-gke-${{ inputs.environment }}"
+        aks_rg='RUNTIMESERVICE-RG${{ inputs.environment }}'
+        aks_cluster_name='akscluster${{ inputs.environment }}'
+        gc_project_id='elvia-runtimeservice-${{ inputs.environment }}'
+        gc_cluster_name='runtimeservice-gke-${{ inputs.environment }}'
 
-        if [[ -z "${{ inputs.AKS_SUBSCRIPTION_ID }}" ]]; then
+        if [[ -z '${{ inputs.AKS_SUBSCRIPTION_ID }}' ]]; then
           echo "AKS_SUBSCRIPTION_ID=$aks_sub_id" >> "$GITHUB_ENV"
         else
-          echo "AKS_SUBSCRIPTION_ID=${{ inputs.AKS_SUBSCRIPTION_ID }}" >> "$GITHUB_ENV"
+          echo 'AKS_SUBSCRIPTION_ID=${{ inputs.AKS_SUBSCRIPTION_ID }}' >> "$GITHUB_ENV"
         fi
 
-        if [[ -z "${{ inputs.AKS_CLUSTER_NAME }}" ]]; then
+        if [[ -z '${{ inputs.AKS_CLUSTER_NAME }}' ]]; then
           echo "AKS_CLUSTER_NAME=$aks_cluster_name" >> "$GITHUB_ENV"
         else
-          echo "AKS_CLUSTER_NAME=${{ inputs.AKS_CLUSTER_NAME }}" >> "$GITHUB_ENV"
+          echo 'AKS_CLUSTER_NAME=${{ inputs.AKS_CLUSTER_NAME }}' >> "$GITHUB_ENV"
         fi
 
-        if [[ -z "${{ inputs.AKS_RESOURCE_GROUP }}" ]]; then
+        if [[ -z '${{ inputs.AKS_RESOURCE_GROUP }}' ]]; then
           echo "AKS_RESOURCE_GROUP=$aks_rg" >> "$GITHUB_ENV"
         else
-          echo "AKS_RESOURCE_GROUP=${{ inputs.AKS_RESOURCE_GROUP }}" >> "$GITHUB_ENV"
+          echo 'AKS_RESOURCE_GROUP=${{ inputs.AKS_RESOURCE_GROUP }}' >> "$GITHUB_ENV"
         fi
 
-        if [[ -z "${{ inputs.GC_PROJECT_ID }}" ]]; then
+        if [[ -z '${{ inputs.GC_PROJECT_ID }}' ]]; then
           echo "GC_PROJECT_ID=$gc_project_id" >> "$GITHUB_ENV"
         else
-          echo "GC_PROJECT_ID=${{ inputs.GC_PROJECT_ID }}" >> "$GITHUB_ENV"
+          echo 'GC_PROJECT_ID=${{ inputs.GC_PROJECT_ID }}' >> "$GITHUB_ENV"
         fi
 
-        if [[ -z "${{ inputs.GC_CLUSTER_NAME }}" ]]; then
+        if [[ -z '${{ inputs.GC_CLUSTER_NAME }}' ]]; then
           echo "GC_CLUSTER_NAME=$gc_cluster_name" >> "$GITHUB_ENV"
         else
-          echo "GC_CLUSTER_NAME=${{ inputs.GC_CLUSTER_NAME }}" >> "$GITHUB_ENV"
+          echo 'GC_CLUSTER_NAME=${{ inputs.GC_CLUSTER_NAME }}' >> "$GITHUB_ENV"
         fi
 
-        if [[ -z "${{ inputs.GC_CLUSTER_LOCATION }}" ]]; then
+        if [[ -z '${{ inputs.GC_CLUSTER_LOCATION }}' ]]; then
           echo "GC_CLUSTER_LOCATION=europe-west1" >> "$GITHUB_ENV"
         else
-          echo "GC_CLUSTER_LOCATION=${{ inputs.GC_CLUSTER_LOCATION }}" >> "$GITHUB_ENV"
+          echo 'GC_CLUSTER_LOCATION=${{ inputs.GC_CLUSTER_LOCATION }}' >> "$GITHUB_ENV"
         fi
 
         echo "REPO_SHORT_NAME=${GITHUB_REPOSITORY##*/}" >> "$GITHUB_ENV"
@@ -200,24 +205,24 @@ runs:
         # Helm deploy
         helm repo add elvia-charts https://raw.githubusercontent.com/3lvia/kubernetes-charts/master
         helm repo update
-        if [[ "${{ inputs.workload-type }}" == "deployment" ]]; then
+        if [[ '${{ inputs.workload-type }}' == 'deployment' ]]; then
           helm upgrade --debug --install \
-            -n ${{ inputs.namespace }} \
-            -f ${{ inputs.helm-values-path }} ${{ inputs.name }} elvia-charts/elvia-deployment \
-            --set="environment=${{ inputs.environment }}" \
-            --set="image.tag=${{ github.sha }}-${{ github.run_number }}" \
-            --set="labels.repositoryName=${{ env.REPO_SHORT_NAME }}" \
-            --set="labels.commitHash=${{ github.sha }}"
-        elif [[ "${{ inputs.workload-type }}" == "statefulset" ]]; then
+            -n '${{ inputs.namespace }}' \
+            -f '${{ inputs.helm-values-path }}' '${{ inputs.name }}' elvia-charts/elvia-deployment \
+            --set='environment=${{ inputs.environment }}' \
+            --set='image.tag=${{ github.sha }}-${{ github.run_number }}' \
+            --set='labels.repositoryName=${{ env.REPO_SHORT_NAME }}' \
+            --set='labels.commitHash=${{ github.sha }}'
+        elif [[ '${{ inputs.workload-type }}' == 'statefulset' ]]; then
           helm upgrade --debug --install \
-            -n ${{ inputs.namespace }} \
-            -f ${{ inputs.helm-values-path }} ${{ inputs.name }} elvia-charts/elvia-statefulset \
-            --set="environment=${{ inputs.environment }}" \
-            --set="image.tag=${{ github.sha }}-${{ github.run_number }}" \
-            --set="labels.repositoryName=${{ env.REPO_SHORT_NAME }}" \
-            --set="labels.commitHash=${{ github.sha }}"
+            -n '${{ inputs.namespace }}' \
+            -f '${{ inputs.helm-values-path }}' '${{ inputs.name }}' elvia-charts/elvia-statefulset \
+            --set='environment=${{ inputs.environment }}' \
+            --set='image.tag=${{ github.sha }}-${{ github.run_number }}' \
+            --set='labels.repositoryName=${{ env.REPO_SHORT_NAME }}' \
+            --set='labels.commitHash=${{ github.sha }}'
         else
-          echo "Unsupported inputs.workload-type: ${{ inputs.workload-type }}"
+          echo 'Unsupported inputs.workload-type: ${{ inputs.workload-type }}'
           exit 1
         fi
 
@@ -225,12 +230,12 @@ runs:
       shell: bash
       run: |
         # Show Kubernetes deployment rollout status
-        if [[ "${{ inputs.workload-type }}" == "deployment" ]]; then
-          kubectl -n ${{ inputs.namespace }} rollout status deployment ${{ inputs.name }}
-        elif [[ "${{ inputs.workload-type }}" == "statefulset" ]]; then
-          kubectl -n ${{ inputs.namespace }} rollout status statefulset ${{ inputs.name }}
+        if [[ '${{ inputs.workload-type }}' == 'deployment' ]]; then
+          kubectl -n '${{ inputs.namespace }}' rollout status deployment '${{ inputs.name }}'
+        elif [[ '${{ inputs.workload-type }}' == 'statefulset' ]]; then
+          kubectl -n '${{ inputs.namespace }}' rollout status statefulset '${{ inputs.name }}'
         else
-          echo "Unsupported inputs.workload-type: ${{ inputs.workload-type }}"
+          echo 'Unsupported inputs.workload-type: ${{ inputs.workload-type }}'
           exit 1
         fi
 
@@ -240,7 +245,7 @@ runs:
       continue-on-error: true
       run: |
         # Get Kubernetes events
-        kubectl -n ${{ inputs.namespace }} get events --sort-by='.lastTimestamp' | grep ${{ inputs.name }} || true
+        kubectl -n '${{ inputs.namespace }}' get events --sort-by='.lastTimestamp' | grep '${{ inputs.name }}' || true
 
     - name: Read secrets from Vault
       uses: hashicorp/vault-action@v3
