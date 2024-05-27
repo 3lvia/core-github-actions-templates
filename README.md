@@ -459,7 +459,7 @@ Run CodeQL analysis.
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------- |
 | `checkout`          | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`   |
 | `language`          | Languages to run CodeQL analyze on.                                                                                                  | no       | `csharp` |
-| `working-directory` | Will run CodeQL Analysis on projects under this working directory                                                                    | no       | `./`     |
+| `working-directory` | Will run CodeQL Analysis on projects under this working directory.                                                                   | no       | `./`     |
 
 ### Permissions
 
@@ -488,7 +488,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Default: 'csharp'
 
     working-directory:
-    # Will run CodeQL Analysis on projects under this working directory
+    # Will run CodeQL Analysis on projects under this working directory.
     #
     # Required: no
     # Default: './'
@@ -653,7 +653,7 @@ Run Playwright tests written in .NET.
 | `checkout`     | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`  |
 | `environment`  | Environment is used to find correct Vault instance.                                                                                  | yes      |         |
 | `system`       | System is used to log in to Vault using correct role.                                                                                | yes      |         |
-| `test-project` | Name of test project file to run                                                                                                     | yes      |         |
+| `test-project` | Name of test project file to run.                                                                                                    | yes      |         |
 
 ### Permissions
 
@@ -688,7 +688,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Required: yes
 
     test-project:
-    # Name of test project file to run
+    # Name of test project file to run.
     #
     # Required: yes
 ```
