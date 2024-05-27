@@ -2,7 +2,7 @@ name: 'Analyze'
 description: 'Run CodeQL analysis.'
 inputs:
   working-directory:
-    description: 'Will run CodeQL Analysis on projects under this working directory'
+    description: 'Will run CodeQL Analysis on projects under this working directory.'
     required: false
     default: './'
   checkout:
@@ -35,21 +35,19 @@ runs:
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
       with:
-        config-file: codeql-config.yml
+        config-file: 'codeql-config.yml'
         languages: ${{ inputs.language }}
 
     - name: Build projects
       if: ${{ inputs.language == 'csharp' }}
       shell: bash
       run: |
-        projects=`find . -iname "*csproj"`
+        projects=$(find . -iname "*csproj")
         for project in $projects;
         do
-          dotnet build $project
+          dotnet build "$project"
         done
       working-directory: ${{ inputs.working-directory }}
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
-      with:
-        config-file: codeql-config.yml

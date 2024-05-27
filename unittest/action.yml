@@ -32,9 +32,9 @@ runs:
         for testproject in $testprojects;
         do
           if [[ '${{ inputs.test-coverage }}' == 'true' ]]; then
-            dotnet test -l:trx --collect:"XPlat Code Coverage" $testproject
+            dotnet test -l:trx --collect:"XPlat Code Coverage" "$testproject"
           else
-            dotnet test -l:trx $testproject
+            dotnet test -l:trx "$testproject"
           fi
         done
       working-directory: ${{ inputs.working-directory }}

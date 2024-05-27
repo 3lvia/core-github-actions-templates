@@ -59,7 +59,7 @@ runs:
         testprojects=$(find . -iname '${{ inputs.test-projects }}')
         for testproject in $testprojects;
         do
-          dotnet test -l:trx $testproject
+          dotnet test -l:trx "$testproject"
         done
       working-directory: ${{ inputs.working-directory }}
 
