@@ -2,7 +2,7 @@ name: Playwright Test
 description: 'Run Playwright tests written in .NET.'
 inputs:
   test-project:
-    description: 'Name of test project file to run'
+    description: 'Name of test project file to run.'
     required: true
   environment:
     description: 'Environment is used to find correct Vault instance.'
@@ -49,7 +49,7 @@ runs:
 
     - name: Build .NET project
       shell: bash
-      run: dotnet build ${{ inputs.test-project }}
+      run: dotnet build '${{ inputs.test-project }}'
 
     - name: Install playwright
       shell: pwsh
@@ -60,7 +60,7 @@ runs:
 
     - name: Run .NET tests
       shell: bash
-      run: dotnet test -l:trx ${{ inputs.test-project }}
+      run: dotnet test -l:trx '${{ inputs.test-project }}'
 
     - name: Publish test results
       uses: EnricoMi/publish-unit-test-result-action@v2
