@@ -9,7 +9,7 @@ inputs:
     description: 'Will run unit tests on projects under this working directory.'
     required: false
     default: './'
-  test-projects-pattern:
+  test-projects:
     description: 'Pattern to use to find test projects.'
     required: false
     default: '*unit*test*csproj'
