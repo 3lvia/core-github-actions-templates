@@ -389,13 +389,13 @@ Run .NET integration tests.
 
 ### Inputs
 
-| Name                | Description                                                                                                                          | Required | Default                    |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------------------------- |
-| `checkout`          | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`                     |
-| `environment`       | Environment is used to find correct vault instance.                                                                                  | yes      | `dev`                      |
-| `system`            | System is used to log in to Vault using correct role.                                                                                | yes      |                            |
-| `test-projects`     | Pattern to use to find test projects.                                                                                                | no       | `*integration*test*csproj` |
-| `working-directory` | Will run integration tests on projects under this working directory.                                                                 | no       | `./`                       |
+| Name                | Description                                                                                                                          | Required | Default                   |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------------- |
+| `checkout`          | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`                    |
+| `environment`       | Environment is used to find correct vault instance.                                                                                  | yes      | `dev`                     |
+| `system`            | System is used to log in to Vault using correct role.                                                                                | yes      |                           |
+| `test-projects`     | Pattern to use to find test projects.                                                                                                | no       | `integration*test*csproj` |
+| `working-directory` | Will run integration tests on projects under this working directory.                                                                 | no       | `./`                      |
 
 ### Permissions
 
@@ -434,7 +434,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Pattern to use to find test projects.
     #
     # Required: no
-    # Default: '*integration*test*csproj'
+    # Default: 'integration*test*csproj'
 
     working-directory:
     # Will run integration tests on projects under this working directory.
