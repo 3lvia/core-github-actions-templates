@@ -22,6 +22,9 @@ runs:
       if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@v4
 
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+
     - name: Parse input and set environment variables
       shell: bash
       run: |
