@@ -9,7 +9,7 @@ inputs:
     description: 'Will run unit tests on projects under this working directory.'
     required: false
     default: './'
-  test-projects:
+  test-projects-pattern:
     description: 'Pattern to use to find test projects.'
     required: false
     default: '*unit*test*csproj'
@@ -28,7 +28,7 @@ runs:
     - name: Run unit tests
       shell: bash
       run: |
-        testprojects=$(find . -iname '${{ inputs.test-projects }}')        
+        testprojects=$(find . -ipath '${{ inputs.test-projects }}')
         if [[ -z $testprojects ]]; then
             echo "Unable to find any dotnet projects matching the pattern ${{ inputs.test-projects }}. Set the pattern using the parameter test-projects."
             exit 1
