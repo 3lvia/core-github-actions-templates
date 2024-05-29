@@ -330,12 +330,12 @@ Run .NET unit tests.
 
 ### Inputs
 
-| Name                | Description                                                                                                                          | Required | Default             |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------- |
-| `checkout`          | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`              |
-| `test-coverage`     | If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector.                   | no       | `false`             |
-| `test-projects`     | Pattern to use to find test projects.                                                                                                | no       | `*unit*test*csproj` |
-| `working-directory` | Will run unit tests on projects under this working directory.                                                                        | no       | `./`                |
+| Name                | Description                                                                                                                          | Required | Default            |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------ |
+| `checkout`          | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`             |
+| `test-coverage`     | If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector.                   | no       | `false`            |
+| `test-projects`     | Pattern to use to find test projects.                                                                                                | no       | `unit*test*csproj` |
+| `working-directory` | Will run unit tests on projects under this working directory.                                                                        | no       | `./`               |
 
 ### Permissions
 
@@ -368,7 +368,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Pattern to use to find test projects.
     #
     # Required: no
-    # Default: '*unit*test*csproj'
+    # Default: 'unit*test*csproj'
 
     working-directory:
     # Will run unit tests on projects under this working directory.
