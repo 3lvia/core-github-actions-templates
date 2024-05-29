@@ -15,7 +15,7 @@ inputs:
   test-projects:
     description: 'Pattern to use to find test projects.'
     required: false
-    default: '*integration*test*csproj'
+    default: 'integration*test*csproj'
   environment:
     description: 'Environment is used to find correct vault instance.'
     required: true
@@ -31,6 +31,7 @@ runs:
     - name: Parse input and set environment variables
       shell: bash
       run: |
+        # parse inputs
         if [[ '${{ inputs.environment }}' == 'dev' ]]; then
           echo 'VAULT_ADDR=https://vault.dev-elvia.io' >> "$GITHUB_ENV"
         elif [[ '${{ inputs.environment }}' == 'test' ]]; then
@@ -53,10 +54,23 @@ runs:
         path: 'jwt-github'
         exportToken: 'true'
 
+    - name: Validate Vault
+      if: failure()
+      shell: bash
+      run: |
+        echo "To access Vault, this repository must be added to https://github.com/3lvia/github-repositories-terraform/tree/trunk/systems"
+        exit 1
+
     - name: Run integration tests
       shell: bash
       run: |
-        testprojects=$(find . -iname '${{ inputs.test-projects }}')
+        testprojects=$(find . -ipath '*${{ inputs.test-projects }}')
+        if [[ -z $testprojects ]]; then
+            echo "Unable to find any dotnet projects matching the pattern ${{ inputs.test-projects }}. Set the pattern using the parameter test-projects."
+            exit 1
+        else
+            echo "Running dotnet test on test projects: $testprojects"
+        fi
         for testproject in $testprojects;
         do
           dotnet test -l:trx "$testproject"
