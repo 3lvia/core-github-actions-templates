@@ -11,7 +11,7 @@ env:
 jobs:
   unit-tests:
     name: Unit Tests
-    runs-on: elvia-runner
+    runs-on: elvia-runner-dev
     permissions:
       contents: read
       checks: write
@@ -27,7 +27,7 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    runs-on: elvia-runner
+    runs-on: elvia-runner-dev
     permissions:
       contents: read
       checks: write
@@ -45,7 +45,7 @@ jobs:
 
   analyze:
     name: Analyze
-    runs-on: elvia-runner
+    runs-on: elvia-runner-dev
     permissions:
       actions: read
       contents: read
@@ -60,7 +60,7 @@ jobs:
 
   build:
     name: Build
-    runs-on: elvia-runner
+    runs-on: elvia-runner-dev
     permissions:
       contents: read
       id-token: write
@@ -81,7 +81,7 @@ jobs:
   deploy-dev:
     name: Deploy Dev
     needs: [build]
-    runs-on: elvia-runner
+    runs-on: elvia-runner-dev
     permissions:
       contents: read
       id-token: write
@@ -102,7 +102,7 @@ jobs:
   deploy-dev-gke:
     name: Deploy Dev GKE
     needs: [build]
-    runs-on: elvia-runner
+    runs-on: elvia-runner-dev
     permissions:
       contents: read
       id-token: write
@@ -124,7 +124,7 @@ jobs:
 
   trivy-iac-scan:
     name: Trivy IaC Scan
-    runs-on: elvia-runner
+    runs-on: elvia-runner-dev
     permissions:
       actions: read
       contents: read
@@ -139,7 +139,7 @@ jobs:
 
   terraform-format-check:
     name: Terraform Format Check
-    runs-on: elvia-runner
+    runs-on: elvia-runner-dev
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
