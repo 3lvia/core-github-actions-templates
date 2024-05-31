@@ -1,59 +1,59 @@
-name: "Build"
-description: "Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure Container Registry. To use the `Build` and `Deploy` actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform."
+name: 'Build'
+description: 'Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure Container Registry. To use the `Build` and `Deploy` actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform.'
 inputs:
   name:
-    description: "Name of application. Do not include namespace."
+    description: 'Name of application. Do not include namespace.'
     required: true
   namespace:
-    description: "Namespace or system of the application."
+    description: 'Namespace or system of the application.'
     required: true
   csprojFile:
-    description: "Path to a csproj-file, e.g. `src/my-app/my-app.csproj`. Either this or Dockerfile must be given."
+    description: 'Path to a csproj-file, e.g. `src/my-app/my-app.csproj`. Either this or Dockerfile must be given.'
     required: false
-    default: ""
+    default: ''
   dockerfile:
-    description: "Path to Dockerfile, e.g. `src/Dockerfile`."
-    default: "Dockerfile"
+    description: 'Path to Dockerfile, e.g. `src/Dockerfile`.'
+    default: 'Dockerfile'
     required: false
   docker-build-context:
-    description: "Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile."
+    description: 'Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.'
     required: false
   severity:
-    description: "Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information."
+    description: 'Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.'
     required: false
-    default: "CRITICAL"
+    default: 'CRITICAL'
   trivy-cve-ignores:
-    description: "Comma-separated list of CVEs for Trivy to ignore. See https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore for syntax."
+    description: 'Comma-separated list of CVEs for Trivy to ignore. See https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore for syntax.'
     required: false
   trivy-enable-secret-scanner:
-    description: "Enable Trivy secret scanner."
+    description: 'Enable Trivy secret scanner.'
     required: false
-    default: "true"
+    default: 'true'
   trivy-skip-dirs:
-    description: "Directories/files skipped by Trivy. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information."
+    description: 'Directories/files skipped by Trivy. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.'
     required: false
   checkout:
-    description: "If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out."
+    description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
     required: false
-    default: "true"
+    default: 'true'
   AZURE_CLIENT_ID:
-    description: "ClientId of a service principal that can push to Container Registry."
+    description: 'ClientId of a service principal that can push to Container Registry.'
     required: true
   AZURE_TENANT_ID:
-    description: "TenantId of a service principal that can push to Azure Container Registry."
+    description: 'TenantId of a service principal that can push to Azure Container Registry.'
     required: false
-    default: "2186a6ec-c227-4291-9806-d95340bf439d"
+    default: '2186a6ec-c227-4291-9806-d95340bf439d'
   ACR_SUBSCRIPTION_ID:
-    description: "Subscription ID of the Azure Container Registry to push to."
+    description: 'Subscription ID of the Azure Container Registry to push to.'
     required: false
-    default: "9edbf217-b7c1-4f6a-ae76-d046cf932ff0"
+    default: '9edbf217-b7c1-4f6a-ae76-d046cf932ff0'
   ACR_NAME:
-    description: "Name of the Azure Container Registry to push to."
+    description: 'Name of the Azure Container Registry to push to.'
     required: false
-    default: "containerregistryelvia"
+    default: 'containerregistryelvia'
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Checkout repository
       if: ${{ inputs.checkout == 'true' }}
@@ -121,11 +121,11 @@ runs:
       with:
         context: ${{ env.DOCKER_DIR }}
         file: ${{ env.DOCKERFILE }}
-        push: "false"
-        load: "true"
-        tags: "${{ env.IMAGE_LONG_NAME }},${{ env.IMAGE_NAME }}:latest-cache"
-        cache-from: "type=registry,ref=${{ env.IMAGE_NAME }}:latest-cache"
-        cache-to: "type=inline"
+        push: 'false'
+        load: 'true'
+        tags: '${{ env.IMAGE_LONG_NAME }},${{ env.IMAGE_NAME }}:latest-cache'
+        cache-from: 'type=registry,ref=${{ env.IMAGE_NAME }}:latest-cache'
+        cache-to: 'type=inline'
 
     - name: Setup Trivy ignore file
       shell: bash
@@ -147,10 +147,10 @@ runs:
       uses: aquasecurity/trivy-action@0.20.0
       with:
         image-ref: ${{ env.IMAGE_LONG_NAME }}
-        exit-code: "1"
-        format: "table"
+        exit-code: '1'
+        format: 'table'
         severity: ${{ inputs.severity }}
-        trivyignores: ".trivyignore"
+        trivyignores: '.trivyignore'
         ignore-unfixed: true
         scanners: ${{ inputs.trivy-enable-secret-scanner == 'true' && 'vuln,misconfig,secret' || 'vuln,misconfig' }}
         skip-dirs: ${{ inputs.trivy-skip-dirs }}
@@ -160,10 +160,10 @@ runs:
       uses: aquasecurity/trivy-action@0.20.0
       with:
         image-ref: ${{ env.IMAGE_LONG_NAME }}
-        format: "sarif"
-        output: "trivy.sarif"
+        format: 'sarif'
+        output: 'trivy.sarif'
         severity: ${{ inputs.severity }}
-        trivyignores: ".trivyignore"
+        trivyignores: '.trivyignore'
         ignore-unfixed: true
         scanners: ${{ inputs.trivy-enable-secret-scanner == 'true' && 'vuln,misconfig,secret' || 'vuln,misconfig' }}
         skip-dirs: ${{ inputs.trivy-skip-dirs }}
@@ -173,7 +173,7 @@ runs:
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: trivy.sarif
-        category: "Trivy"
+        category: 'Trivy'
       if: github.event_name == 'push' && failure()
 
     - name: Push image
