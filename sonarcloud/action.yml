@@ -2,10 +2,10 @@ name: SonarCloud
 description: 'Run SonarCloud scanning on dotnet code.'
 inputs:
   github-token:
-    description: 'Should normally be `${{ secrets.GITHUB_TOKEN }}`.'
+    description: 'Should normally be `secrets.GITHUB_TOKEN`.'
     required: true
   sonarcloud-token:
-    description: 'Should normally be `${{ secrets.SONAR_TOKEN }}`.'
+    description: 'Should normally be `secrets.SONAR_TOKEN`.'
     required: true
   checkout:
     description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
