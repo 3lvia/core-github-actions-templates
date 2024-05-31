@@ -9,7 +9,7 @@ on:
 jobs:
   set-env:
     name: Set environment variables
-    runs-on: ubuntu-latest
+    runs-on: elvia-runner
     outputs:
       image_name: ${{ steps.set-output.outputs.image_name }}
       image_tag: ${{ steps.set-output.outputs.image_tag }}
@@ -26,7 +26,7 @@ jobs:
 
   build-docs-image:
     name: Build image for gh-actions-docs
-    runs-on: ubuntu-latest
+    runs-on: elvia-runner
     permissions:
       contents: read
       packages: write
@@ -56,7 +56,7 @@ jobs:
 
   generate-docs:
     name: Generate action documentation
-    runs-on: ubuntu-latest
+    runs-on: elvia-runner
     needs: [build-docs-image, set-env]
     outputs:
       readme: ${{ steps.set-output.outputs.readme }}
@@ -90,7 +90,7 @@ jobs:
 
   commit-docs:
     name: Commit action documentation on push
-    runs-on: ubuntu-latest
+    runs-on: elvia-runner
     needs: [generate-docs]
     permissions:
       contents: write
