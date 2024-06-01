@@ -96,8 +96,6 @@ runs:
             DOCKERFILE='${{ steps.generate_dockerfile.outputs.DOCKERFILE }}'
         fi
         echo "DOCKERFILE=$DOCKERFILE" >> "$GITHUB_ENV"
-      env:
-        DOCKERFILE: ${{ steps.generate_dockerfile.outputs.DOCKERFILE }}
 
     - name: Echo Dockerfile variable
       shell: bash
