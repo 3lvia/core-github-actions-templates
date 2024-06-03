@@ -118,18 +118,16 @@ runs:
           echo "$TRIVY_CVE" >> .trivyignore
         done
 
-    - name: Run Trivy vulnerability scanner (pull request)
-      if: ${{ github.event_name == 'pull_request' && !startsWith(runner.name, 'elvia-runner-prod') }} # TODO: deprecate using ubuntu-latest
-      uses: aquasecurity/trivy-action@0.20.0
-      with:
-        image-ref: ${{ env.IMAGE_LONG_NAME }}
-        exit-code: '1'
-        format: 'table'
-        severity: ${{ inputs.severity }}
-        trivyignores: '.trivyignore'
-        ignore-unfixed: true
-        scanners: ${{ inputs.trivy-enable-secret-scanner == 'true' && 'vuln,misconfig,secret' || 'vuln,misconfig' }}
-        skip-dirs: ${{ inputs.trivy-skip-dirs }}
+    - name: Install Trivy if not using Elvia runner
+      if: ${{ !startsWith(runner.name, 'elvia-runner-prod') }}
+      shell: bash
+      run: |
+        # Install Trivy, not using Elvia runner
+        sudo apt-get install wget apt-transport-https gnupg lsb-release
+        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+        echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+        sudo apt-get update
+        sudo apt-get install trivy
 
     - name: Run Trivy vulnerability scanner (pull request)
       if: ${{ github.event_name == 'pull_request' && startsWith(runner.name, 'elvia-runner-prod') }}
@@ -144,19 +142,6 @@ runs:
           --ignore-unfixed \
           --scanners '${{ inputs.trivy-enable-secret-scanner == 'true' && 'vuln,misconfig,secret' || 'vuln,misconfig' }}' \
           ${{ inputs.trivy-skip-dirs != '' && format('--skip-dirs {0}', inputs.trivy-skip-dirs) || '' }}
-
-    - name: Run Trivy vulnerability scanner (push)
-      if: ${{ github.event_name == 'push' && !startsWith(runner.name, 'elvia-runner-prod') }} # TODO: deprecate using ubuntu-latest
-      uses: aquasecurity/trivy-action@0.20.0
-      with:
-        image-ref: ${{ env.IMAGE_LONG_NAME }}
-        format: 'sarif'
-        output: 'trivy.sarif'
-        severity: ${{ inputs.severity }}
-        trivyignores: '.trivyignore'
-        ignore-unfixed: 'true'
-        scanners: ${{ inputs.trivy-enable-secret-scanner == 'true' && 'vuln,misconfig,secret' || 'vuln,misconfig' }}
-        skip-dirs: ${{ inputs.trivy-skip-dirs }}
 
     - name: Run Trivy vulnerability scanner (push)
       if: ${{ github.event_name == 'push' && startsWith(runner.name, 'elvia-runner-prod') }}
