@@ -42,7 +42,7 @@ jobs:
 
   analyze:
     name: Analyze
-    runs-on: elvia-runner
+    runs-on: elvia-runner-dev
     permissions:
       actions: read
       contents: read
