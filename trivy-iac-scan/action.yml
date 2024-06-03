@@ -46,21 +46,18 @@ runs:
         # Add default set of CVE's to ignore
         echo "AVD-DS-0026" >> '${{ inputs.trivyignore }}'
 
-    - name: Run Trivy vulnerability scanner in IaC mode
-      if: ${{ !startsWith(runner.name, 'elvia-runner-prod') }} # TODO: deprecate using ubuntu-latest
-      uses: aquasecurity/trivy-action@0.20.0
-      with:
-        scan-type: 'config'
-        format: 'sarif'
-        exit-code: '0'
-        output: ${{ env.TRIVY_SARIF }}
-        severity: ${{ inputs.severity }}
-        trivyignores: ${{ inputs.trivyignore }}
-        ignore-unfixed: 'true'
-        skip-dirs: ${{ inputs.skip-dirs }}
+    - name: Install Trivy if not using Elvia runner
+      if: ${{ !startsWith(runner.name, 'elvia-runner-prod') }}
+      shell: bash
+      run: |
+        # Install Trivy, not using Elvia runner
+        sudo apt-get install wget apt-transport-https gnupg lsb-release
+        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+        echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+        sudo apt-get update
+        sudo apt-get install trivy
 
     - name: Run Trivy vulnerability scanner in IaC mode
-      if: ${{ startsWith(runner.name, 'elvia-runner-prod') }}
       shell: bash
       run: |
         # Run Trivy
