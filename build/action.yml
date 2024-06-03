@@ -7,6 +7,10 @@ inputs:
   namespace:
     description: 'Namespace or system of the application.'
     required: true
+  csprojFile:
+    description: 'Path to a csproj-file, e.g. `src/my-app/my-app.csproj`. Either this or Dockerfile must be given. '
+    required: false
+    default: ''
   dockerfile:
     description: 'Path to Dockerfile, e.g. `src/Dockerfile`.'
     default: 'Dockerfile'
@@ -55,6 +59,14 @@ runs:
       if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@v4
 
+    - name: Generate Dockerfile
+      id: generate_dockerfile
+      if: ${{ inputs.csprojFile != '' }}
+      shell: bash
+      run: python '${{ github.action_path }}/create_dockerfile.py'
+      env:
+        CSPROJ_FILE: ${{ inputs.csprojFile }}
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
@@ -78,6 +90,19 @@ runs:
             exit 1
         fi
 
+        if [[ -z '${{ steps.generate_dockerfile.outputs.DOCKERFILE }}' ]]; then
+            DOCKERFILE='${{ inputs.dockerfile }}'
+        else
+            DOCKERFILE='${{ steps.generate_dockerfile.outputs.DOCKERFILE }}'
+        fi
+        echo "DOCKERFILE=$DOCKERFILE" >> "$GITHUB_ENV"
+
+    - name: Echo Dockerfile variable
+      shell: bash
+      run: |
+        echo "Dockerfile: ${{ env.DOCKERFILE }}"
+        cat ${{ env.DOCKERFILE }}
+
     - name: Authenticate with Azure
       uses: azure/login@v2
       with:
@@ -95,7 +120,7 @@ runs:
       uses: docker/build-push-action@v5
       with:
         context: ${{ env.DOCKER_DIR }}
-        file: ${{ inputs.dockerfile }}
+        file: ${{ env.DOCKERFILE }}
         push: 'false'
         load: 'true'
         tags: '${{ env.IMAGE_LONG_NAME }},${{ env.IMAGE_NAME }}:latest-cache'
