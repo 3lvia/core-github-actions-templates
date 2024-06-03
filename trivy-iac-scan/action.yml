@@ -37,6 +37,7 @@ runs:
     - name: Set env
       shell: bash
       run: |
+        # Set environment variables
         echo "TRIVY_SARIF=trivy.sarif" >> $GITHUB_ENV
 
     - name: Set .trivyignore
@@ -46,6 +47,7 @@ runs:
         echo "AVD-DS-0026" >> '${{ inputs.trivyignore }}'
 
     - name: Run Trivy vulnerability scanner in IaC mode
+      if: ${{ !startsWith(runner.name, 'elvia-runner-prod') }} # TODO: deprecate using ubuntu-latest
       uses: aquasecurity/trivy-action@0.20.0
       with:
         scan-type: 'config'
@@ -56,6 +58,19 @@ runs:
         trivyignores: ${{ inputs.trivyignore }}
         ignore-unfixed: 'true'
         skip-dirs: ${{ inputs.skip-dirs }}
+
+    - name: Run Trivy vulnerability scanner in IaC mode
+      if: ${{ startsWith(runner.name, 'elvia-runner-prod') }}
+      shell: bash
+      run: |
+        # Run Trivy
+        trivy config '${{ inputs.path }}' \
+          --format sarif \
+          --output '${{ env.TRIVY_SARIF }}' \
+          --exit-code 0 \
+          --severity '${{ inputs.severity }}' \
+          --ignorefile '${{ inputs.trivyignore }}' \
+          ${{ inputs.skip-dirs != '' && format('--skip-dirs {0}', inputs.skip-dirs) || '' }}
 
     - name: Upload Trivy report to GitHub Security tab
       if: ${{ inputs.upload-report == 'true' }}

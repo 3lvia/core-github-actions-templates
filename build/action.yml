@@ -112,7 +112,9 @@ runs:
 
     - name: Login to ACR
       shell: bash
-      run: az acr login --name '${{ inputs.ACR_NAME }}'
+      run: |
+        # Login to ACR
+        az acr login --name '${{ inputs.ACR_NAME }}'
 
     - name: Build image
       uses: docker/build-push-action@v5
@@ -131,17 +133,18 @@ runs:
         # Setup Trivy ignore file
         touch .trivyignore
 
-        if [ -z "${{ inputs.trivy-cve-ignores }}" ]; then
+        if [ -z '${{ inputs.trivy-cve-ignores }}' ]; then
           echo "No CVEs to ignore"
           exit 0
         fi
 
-        echo "Ignoring CVEs: ${{ inputs.trivy-cve-ignores }}"
+        echo 'Ignoring CVEs: ${{ inputs.trivy-cve-ignores }}'
         for TRIVY_CVE in "$(echo ${{ inputs.trivy-cve-ignores }} | sed 's/,/ /g')"; do
           echo "$TRIVY_CVE" >> .trivyignore
         done
 
-    - name: Run Trivy vulnerability scanner
+    - name: Run Trivy vulnerability scanner (pull request)
+      if: ${{ github.event_name == 'pull_request' && !startsWith(runner.name, 'elvia-runner-prod') }} # TODO: deprecate using ubuntu-latest
       uses: aquasecurity/trivy-action@0.20.0
       with:
         image-ref: ${{ env.IMAGE_LONG_NAME }}
@@ -152,9 +155,23 @@ runs:
         ignore-unfixed: true
         scanners: ${{ inputs.trivy-enable-secret-scanner == 'true' && 'vuln,misconfig,secret' || 'vuln,misconfig' }}
         skip-dirs: ${{ inputs.trivy-skip-dirs }}
-      if: github.event_name == 'pull_request'
 
-    - name: Run Trivy vulnerability scanner
+    - name: Run Trivy vulnerability scanner (pull request)
+      if: ${{ github.event_name == 'pull_request' && startsWith(runner.name, 'elvia-runner-prod') }}
+      shell: bash
+      run: |
+        # Run Trivy
+        trivy image '${{ env.IMAGE_LONG_NAME }}' \
+          --exit-code 1 \
+          --format table \
+          --severity '${{ inputs.severity }}' \
+          --ignorefile .trivyignore \
+          --ignore-unfixed \
+          --scanners '${{ inputs.trivy-enable-secret-scanner == 'true' && 'vuln,misconfig,secret' || 'vuln,misconfig' }}' \
+          ${{ inputs.trivy-skip-dirs != '' && format('--skip-dirs {0}', inputs.trivy-skip-dirs) || '' }}
+
+    - name: Run Trivy vulnerability scanner (push)
+      if: ${{ github.event_name == 'push' && !startsWith(runner.name, 'elvia-runner-prod') }} # TODO: deprecate using ubuntu-latest
       uses: aquasecurity/trivy-action@0.20.0
       with:
         image-ref: ${{ env.IMAGE_LONG_NAME }}
@@ -162,18 +179,34 @@ runs:
         output: 'trivy.sarif'
         severity: ${{ inputs.severity }}
         trivyignores: '.trivyignore'
-        ignore-unfixed: true
+        ignore-unfixed: 'true'
         scanners: ${{ inputs.trivy-enable-secret-scanner == 'true' && 'vuln,misconfig,secret' || 'vuln,misconfig' }}
         skip-dirs: ${{ inputs.trivy-skip-dirs }}
-      if: github.event_name == 'push'
+
+    - name: Run Trivy vulnerability scanner (push)
+      if: ${{ github.event_name == 'push' && startsWith(runner.name, 'elvia-runner-prod') }}
+      shell: bash
+      run: |
+        # Run Trivy
+        trivy image '${{ env.IMAGE_LONG_NAME }}' \
+          --exit-code 1 \
+          --format sarif \
+          --output trivy.sarif \
+          --severity '${{ inputs.severity }}' \
+          --ignorefile .trivyignore \
+          --ignore-unfixed \
+          --scanners '${{ inputs.trivy-enable-secret-scanner == 'true' && 'vuln,misconfig,secret' || 'vuln,misconfig' }}' \
+          ${{ inputs.trivy-skip-dirs != '' && format('--skip-dirs {0}', inputs.trivy-skip-dirs) || '' }}
 
     - name: Upload Trivy scan results to GitHub Security tab
+      if: ${{ github.event_name == 'push' && failure() }}
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: trivy.sarif
         category: 'Trivy'
-      if: github.event_name == 'push' && failure()
 
     - name: Push image
       shell: bash
-      run: docker push '${{ env.IMAGE_NAME }}' --all-tags
+      run: |
+        # Push image
+        docker push '${{ env.IMAGE_NAME }}' --all-tags

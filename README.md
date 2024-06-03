@@ -509,9 +509,9 @@ Run SonarCloud scanning on dotnet code.
 | Name                     | Description                                                                                                                          | Required | Default             |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------- |
 | `checkout`               | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`              |
-| `github-token`           | Should normally be `${{ secrets.GITHUB_TOKEN }}`.                                                                                    | yes      |                     |
+| `github-token`           | Should normally be `secrets.GITHUB_TOKEN`.                                                                                           | yes      |                     |
 | `sonarcloud-project-key` | The sonarcloud project key or id. Normally on the form `3lvia_repo-name`. The project must be manually created on sonarcloud.io.     | yes      |                     |
-| `sonarcloud-token`       | Should normally be `${{ secrets.SONAR_TOKEN }}`.                                                                                     | yes      |                     |
+| `sonarcloud-token`       | Should normally be `secrets.SONAR_TOKEN`.                                                                                            | yes      |                     |
 | `test-projects`          | Pattern to use to find test projects.                                                                                                | no       | `*unit*test*csproj` |
 | `working-directory`      | Will run SonarCloud on projects under this working directory.                                                                        | no       | `./`                |
 
@@ -538,7 +538,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Default: 'true'
 
     github-token:
-    # Should normally be `${{ secrets.GITHUB_TOKEN }}`.
+    # Should normally be `secrets.GITHUB_TOKEN`.
     #
     # Required: yes
 
@@ -548,7 +548,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Required: yes
 
     sonarcloud-token:
-    # Should normally be `${{ secrets.SONAR_TOKEN }}`.
+    # Should normally be `secrets.SONAR_TOKEN`.
     #
     # Required: yes
 
