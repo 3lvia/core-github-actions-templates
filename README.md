@@ -7,6 +7,7 @@ GitHub Actions templates for the Elvia organization.
 <!-- gh-actions-docs-toc-start -->
 
 - [Examples](#examples)
+- [Elvia runners](#elvia-runners)
 - [Actions](#actions)
   - [Build](#build)
     - [Description](#description)
@@ -515,7 +516,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
 ### Description
 
-Run SonarCloud scanning on dotnet code.
+Run SonarCloud scanning on .NET code.
 
 ### Inputs
 
