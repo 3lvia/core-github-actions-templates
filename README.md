@@ -67,6 +67,12 @@ You can also click on the **'Actions'** tab on your repository and click **'New 
 Some values in these templates are placeholders and need to be replaced with your own values; anything resembling `<your xxx here>` should be replaced.
 See the [GitHub docs](https://docs.github.com/en/actions/learn-github-actions/using-starter-workflows#choosing-and-using-a-starter-workflow) for more detailed information.
 
+# Elvia runners
+
+We **strongly recommend** using Elvia's self-hosted GitHub Actions runners for all actions.
+Several of our actions use optimizations only available on Elvia runners, and will run slower on GitHub-hosted runners.
+To use the Elvia runners, simply replace `runs-on: ubuntu-latest` with `runs-on: elvia-runner` in your workflow file.
+
 # Actions
 
 <!-- gh-actions-docs-start path=build/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->

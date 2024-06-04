@@ -1,5 +1,5 @@
 name: SonarCloud
-description: 'Run SonarCloud scanning on dotnet code.'
+description: 'Run SonarCloud scanning on .NET code.'
 inputs:
   github-token:
     description: 'Should normally be `secrets.GITHUB_TOKEN`.'
