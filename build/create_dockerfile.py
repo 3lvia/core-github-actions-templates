@@ -106,6 +106,7 @@ def main():
     if csproj_file is None:
         raise ValueError("Missing required Environment Variable CSPROJ_FILE")
     print("csproj_file: " + csproj_file)
+    csproj_file = csproj_file.strip("'\" ")
 
     directory = os.path.join("tmp", str(uuid.uuid4()))
     os.makedirs(directory)
