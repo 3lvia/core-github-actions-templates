@@ -79,7 +79,8 @@ runs:
         echo "IMAGE_NAME=$IMAGE_NAME" >> "$GITHUB_ENV"
         echo "IMAGE_LONG_NAME=$IMAGE_NAME:${{ github.sha }}-${{ github.run_number }}" >> "$GITHUB_ENV"
 
-        if [[ '${{ inputs.csproj-file }}' != '' && '${{ inputs.dockerfile }}' != '' ]]; then
+        # 'Dockerfile' is default for inputs.dockerfile
+        if [[ '${{ inputs.csproj-file }}' != '' && '${{ inputs.dockerfile }}' != 'Dockerfile' ]]; then
             echo "Both csproj-file and dockerfile are set. Only one of these can be set."
             exit 1
         fi
