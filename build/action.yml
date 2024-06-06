@@ -7,10 +7,9 @@ inputs:
   namespace:
     description: 'Namespace or system of the application.'
     required: true
-  csprojFile:
-    description: 'Path to a csproj-file, e.g. `src/my-app/my-app.csproj`. Either this or Dockerfile must be given. '
+  csproj-file:
+    description: 'Path to a csproj-file, e.g. `src/my-app/my-app.csproj`. Either this or Dockerfile must be given.'
     required: false
-    default: ''
   dockerfile:
     description: 'Path to Dockerfile, e.g. `src/Dockerfile`.'
     default: 'Dockerfile'
@@ -61,11 +60,11 @@ runs:
 
     - name: Generate Dockerfile
       id: generate_dockerfile
-      if: ${{ inputs.csprojFile != '' }}
+      if: ${{ inputs.csproj-file != '' }}
       shell: bash
       run: python '${{ github.action_path }}/create_dockerfile.py'
       env:
-        CSPROJ_FILE: ${{ inputs.csprojFile }}
+        CSPROJ_FILE: ${{ inputs.csproj-file }}
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -100,8 +99,8 @@ runs:
     - name: Echo Dockerfile variable
       shell: bash
       run: |
-        echo "Dockerfile: ${{ env.DOCKERFILE }}"
-        cat ${{ env.DOCKERFILE }}
+        echo 'Dockerfile: ${{ env.DOCKERFILE }}'
+        cat '${{ env.DOCKERFILE }}'
 
     - name: Authenticate with Azure
       uses: azure/login@v2
