@@ -13,13 +13,14 @@ def find_assembly_name(csproj_file):
     if len(root.findall("PropertyGroup/AssemblyName")) > 0:
         return root.findall("PropertyGroup/AssemblyName")[-1].text + ".dll"
     else:
-        return os.path.dirname(csproj_file) + ".dll"
+        return os.path.splitext(os.path.basename(csproj_file))[0] + ".dll"
 
 
 def find_docker_base_image_tag(csproj_file):
     root = ET.parse(csproj_file).getroot()
     if len(root.findall("PropertyGroup/TargetFramework")) > 0:
-        framework = root.findall("PropertyGroup/TargetFramework")[-1].text  # net8.0
+        # .NET 8.0
+        framework = root.findall("PropertyGroup/TargetFramework")[-1].text
         tag = framework[3:] + "-alpine"
         return tag
     else:
@@ -102,7 +103,7 @@ ENTRYPOINT ["dotnet", "{assembly_name}"]
 
 def main():
     csproj_file = os.environ.get("CSPROJ_FILE")
-    if csproj_file == None:
+    if csproj_file is None:
         raise ValueError("Missing required Environment Variable CSPROJ_FILE")
     print("csproj_file: " + csproj_file)
 
@@ -112,12 +113,11 @@ def main():
     print("filename: " + filename)
 
     assembly_name = find_assembly_name(csproj_file)
-    print(assembly_name)
+    print("assembly name: " + assembly_name)
     docker_base_image_tag = find_docker_base_image_tag(csproj_file)
-    print(docker_base_image_tag)
+    print("base image tag: " + docker_base_image_tag)
     docker_runtime_base_image = find_docker_runtime_base_image(csproj_file)
-    print(docker_runtime_base_image)
-    # raise ValueError("Q")
+    print("runtime base image: " + docker_runtime_base_image)
     write_dockerfile(
         csproj_file,
         assembly_name,
