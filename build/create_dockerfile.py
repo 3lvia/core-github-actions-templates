@@ -1,7 +1,7 @@
 # to run locally:
-# export CSPROJ_FILE=.github/test/src/core-demo-api.csproj 
+# export CSPROJ_FILE=.github/test/src/core-demo-api.csproj
 # export GITHUB_OUTPUT="./tmp/output.txt"
-# python3 build/create_dockerfile.py 
+# python3 build/create_dockerfile.py
 
 import os
 import uuid

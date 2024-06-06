@@ -8,10 +8,10 @@ inputs:
     description: 'Namespace or system of the application.'
     required: true
   csproj-file:
-    description: 'Path to a csproj-file, e.g. `src/my-app/my-app.csproj`. Either this or Dockerfile must be given.'
+    description: 'Path to a csproj-file, e.g. `src/my-app/my-app.csproj`. Either this or `dockerfile` must be given.'
     required: false
   dockerfile:
-    description: 'Path to Dockerfile, e.g. `src/Dockerfile`.'
+    description: 'Path to Dockerfile, e.g. `src/Dockerfile`. Either this or `csproj-file` must be given.'
     default: 'Dockerfile'
     required: false
   docker-build-context:
@@ -62,7 +62,9 @@ runs:
       id: generate_dockerfile
       if: ${{ inputs.csproj-file != '' }}
       shell: bash
-      run: python '${{ github.action_path }}/create_dockerfile.py'
+      run: |
+        # Generate Dockerfile
+        python '${{ github.action_path }}/create_dockerfile.py'
       env:
         CSPROJ_FILE: ${{ inputs.csproj-file }}
 
@@ -77,17 +79,22 @@ runs:
         echo "IMAGE_NAME=$IMAGE_NAME" >> "$GITHUB_ENV"
         echo "IMAGE_LONG_NAME=$IMAGE_NAME:${{ github.sha }}-${{ github.run_number }}" >> "$GITHUB_ENV"
 
+        if [[ '${{ inputs.csproj-file }}' && '${{ inputs.dockerfile }}' ]]; then
+            echo "Both csproj-file and dockerfile are set. Only one of these can be set."
+            exit 1
+        fi
+
+        if [[ -z '${{ inputs.AZURE_CLIENT_ID }}' ]]; then
+            echo "Missing required input AZURE_CLIENT_ID. Ensure that this is set and non-empty."
+            exit 1
+        fi
+
         if [[ -z '${{ inputs.docker-build-context }}' ]]; then
             DOCKER_DIR=$(dirname '${{ inputs.dockerfile }}') # default to the directory of the Dockerfile
         else
             DOCKER_DIR='${{ inputs.docker-build-context }}'
         fi
         echo "DOCKER_DIR=$DOCKER_DIR" >> "$GITHUB_ENV"
-
-        if [[ -z '${{ inputs.AZURE_CLIENT_ID }}' ]]; then
-            echo "Missing required input AZURE_CLIENT_ID. Ensure that this is set and non-empty."
-            exit 1
-        fi
 
         if [[ -z '${{ steps.generate_dockerfile.outputs.DOCKERFILE }}' ]]; then
             DOCKERFILE='${{ inputs.dockerfile }}'
@@ -96,9 +103,10 @@ runs:
         fi
         echo "DOCKERFILE=$DOCKERFILE" >> "$GITHUB_ENV"
 
-    - name: Echo Dockerfile variable
+    - name: Print Dockerfile variable
       shell: bash
       run: |
+        # Print Dockerfile variable
         echo 'Dockerfile: ${{ env.DOCKERFILE }}'
         cat '${{ env.DOCKERFILE }}'
 
@@ -146,7 +154,7 @@ runs:
       if: ${{ !startsWith(runner.name, 'elvia-runner-prod') }}
       shell: bash
       run: |
-        # Install Trivy, not using Elvia runner
+        # Install Trivy if not using Elvia runner
         sudo apt-get install wget apt-transport-https gnupg lsb-release
         wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
         echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
