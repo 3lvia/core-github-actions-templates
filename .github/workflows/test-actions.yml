@@ -63,7 +63,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner: [elvia-runner, ubuntu-latest]
+        runner: [elvia-runner, ubuntu-latest] # build action differs depending on the runner
+        build: [csproj-file, dockerfile]
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
@@ -78,7 +79,8 @@ jobs:
           checkout: 'false'
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAMESPACE }}
-          dockerfile: '.github/test/src/Dockerfile'
+          csproj-file: ${{ matrix.build == 'csproj-file' && '.github/test/src/core-demo-api.csproj' || '' }}
+          dockerfile: ${{ matrix.build == 'dockerfile' && '.github/test/src/Dockerfile' || '' }}
           severity: 'CRITICAL'
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
 
@@ -131,7 +133,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner: [elvia-runner, ubuntu-latest]
+        runner: [elvia-runner, ubuntu-latest] # trivy-iac-scan action differs depending on the runner
     runs-on: ${{ matrix.runner }}
     permissions:
       actions: read

@@ -10,6 +10,14 @@ env:
   APPLICATION_NAME: 'demo-api'
   SYSTEM_NAMESPACE: 'core'
   HELM_VALUES_PATH: '.github/test/deploy/values.yml'
+  # For the 'build-scan' job, you MUST specify either 'csproj-file' or 'dockerfile'.
+  #
+  # If you are deplying a .NET application, specify 'csproj-file'. This is preferred.
+  # If you are deploying a non-.NET application using a Dockerfile, specify 'dockerfile'.
+  #
+  # Remember to uncomment the 'dockerfile' argument in the 'build-scan' job,
+  # and comment out the 'csproj-file' line if using a Dockerfile.
+  CSPROJ_FILE: '.github/test/src/core-demo-api.csproj'
   DOCKERFILE: '.github/test/src/Dockerfile'
 
 jobs:
@@ -68,7 +76,9 @@ jobs:
         with:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAMESPACE }}
-          dockerfile: ${{ env.DOCKERFILE }}
+          csproj-file: ${{ env.CSPROJ_FILE }}
+          # Uncomment the following line if using a Dockerfile:
+          # dockerfile: ${{ env.DOCKERFILE }}
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
 
   deploy-dev:
