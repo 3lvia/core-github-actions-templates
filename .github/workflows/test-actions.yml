@@ -6,7 +6,7 @@ on:
 
 env:
   APPLICATION_NAME: 'demo-api'
-  SYSTEM_NAMESPACE: 'core'
+  SYSTEM_NAME: 'core'
 
 jobs:
   unit-tests:
@@ -41,7 +41,7 @@ jobs:
       - uses: ./integrationtest
         with:
           checkout: 'false'
-          system: ${{ env.SYSTEM_NAMESPACE }}
+          system: ${{ env.SYSTEM_NAME }}
 
   analyze:
     name: Analyze
@@ -78,7 +78,7 @@ jobs:
         with:
           checkout: 'false'
           name: ${{ env.APPLICATION_NAME }}
-          namespace: ${{ env.SYSTEM_NAMESPACE }}
+          namespace: ${{ env.SYSTEM_NAME }}
           csproj-file: ${{ matrix.build == 'csproj-file' && '.github/test/src/core-demo-api.csproj' || '' }}
           dockerfile: ${{ matrix.build == 'dockerfile' && '.github/test/src/Dockerfile' || '' }}
           severity: 'CRITICAL'
@@ -100,7 +100,7 @@ jobs:
         with:
           checkout: 'false'
           name: ${{ env.APPLICATION_NAME }}
-          namespace: ${{ env.SYSTEM_NAMESPACE }}
+          namespace: ${{ env.SYSTEM_NAME }}
           environment: 'dev'
           helm-values-path: '.github/test/deploy/values.yml'
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
@@ -121,7 +121,7 @@ jobs:
         with:
           checkout: 'false'
           name: ${{ env.APPLICATION_NAME }}
-          namespace: ${{ env.SYSTEM_NAMESPACE }}
+          namespace: ${{ env.SYSTEM_NAME }}
           environment: 'dev'
           helm-values-path: '.github/test/deploy/values.yml'
           runtime-cloud-provider: 'GKE'
