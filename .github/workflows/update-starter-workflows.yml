@@ -3,6 +3,10 @@ name: Update starter workflows
 on:
   push:
     branches: [trunk]
+    paths: ['.github/workflows/example-*.yml']
+  pull_request:
+    branches: [trunk]
+    paths: ['.github/workflows/example-*.yml']
 
 env:
   REPOSITORY: 'core-github-actions-templates'
@@ -65,19 +69,80 @@ jobs:
             fi
           done
 
+      - name: Get examples diff
+        if: github.event_name == 'pull_request'
+        id: get-diff
+        run: |
+          examples_files_changed=$(git diff --name-only workflow-templates | base64 -w0)
+          examples_diff=$(git diff workflow-templates | base64 -w0)
+
+          echo "examples-files-changed=$examples_files_changed" >> "$GITHUB_OUTPUT"
+          echo "examples-diff=$examples_diff" >> "$GITHUB_OUTPUT"
+        working-directory: 'dotgithub'
+
+      - name: Add comment with diff
+        if: github.event_name == 'pull_request' && steps.get-diff.outputs.examples-files-changed != ''
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const header = "## 📝 Starter Workflow Templates Update\n";
+            const examplesFilesChanged = atob('${{ steps.get-diff.outputs.examples-files-changed }}');
+            const examplesDiff = atob('${{ steps.get-diff.outputs.examples-diff }}');
+
+            const botComment = comments.find(
+              (comment) =>
+                comment.user.type === "Bot" &&
+                comment.body.includes(header)
+            );
+
+            const body = `${header}
+            The starter workflow templates have been updated. Please review the changes below.\n
+            **Files changed:**\n
+            ${examplesFilesChanged}
+
+            **<details><summary>Full diff:</summary>**
+
+            \`\`\`\n
+            ${examplesDiff}
+            \`\`\`
+
+            </details>
+            `;
+
+            if (botComment) {
+              github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body,
+              });
+            } else {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body,
+              });
+            }
+
       - name: Commit changes
         shell: bash
+        if: github.event_name == 'push'
         run: |
           if [[ -z "$(git status --porcelain)" ]]; then
             echo 'No changes to commit.'
             exit 0
           fi
 
-          gh_app_user_id="$(curl -gs https://api.github.com/users/$GH_APP_USERNAME | jq -r '.id')"
-          gh_app_user_email="$gh_app_user_id+$GH_APP_USERNAME@users.noreply.github.com"
-
-          git config user.email "$gh_app_user_email"
-          git config user.name "$GH_APP_USERNAME"
+          git config user.email '${{ vars.GH_APP_USER_EMAIL }}'
+          git config user.name '${{ vars.GH_APP_USERNAME }}'
 
           git add workflow-templates
           git commit -m 'Update starter workflows'
@@ -89,4 +154,3 @@ jobs:
         working-directory: 'dotgithub'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          GH_APP_USERNAME: '3lvia-core-admin[bot]'
