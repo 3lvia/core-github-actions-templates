@@ -8,7 +8,7 @@ on:
 
 env:
   APPLICATION_NAME: 'demo-api'
-  SYSTEM_NAMESPACE: 'core'
+  SYSTEM_NAME: 'core'
   HELM_VALUES_PATH: '.github/test/deploy/values.yml'
   # For the 'build-scan' job, you MUST specify either 'csproj-file' or 'dockerfile'.
   #
@@ -46,7 +46,7 @@ jobs:
     steps:
       - uses: 3lvia/core-github-actions-templates/integrationtest@trunk
         with:
-          system: ${{ env.SYSTEM_NAMESPACE }}
+          system: ${{ env.SYSTEM_NAME }}
 
   analyze:
     name: Analyze
@@ -69,7 +69,7 @@ jobs:
       - uses: 3lvia/core-github-actions-templates/build@trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
-          namespace: ${{ env.SYSTEM_NAMESPACE }}
+          namespace: ${{ env.SYSTEM_NAME }}
           csproj-file: ${{ env.CSPROJ_FILE }}
           # Uncomment the following line if using a Dockerfile:
           # dockerfile: ${{ env.DOCKERFILE }}
@@ -89,7 +89,7 @@ jobs:
       - uses: 3lvia/core-github-actions-templates/deploy@trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
-          namespace: ${{ env.SYSTEM_NAMESPACE }}
+          namespace: ${{ env.SYSTEM_NAME }}
           environment: 'dev'
           helm-values-path: ${{ env.HELM_VALUES_PATH }}
           runtime-cloud-provider: 'GKE'
@@ -110,7 +110,7 @@ jobs:
       - uses: 3lvia/core-github-actions-templates/deploy@trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
-          namespace: ${{ env.SYSTEM_NAMESPACE }}
+          namespace: ${{ env.SYSTEM_NAME }}
           environment: 'test'
           helm-values-path: ${{ env.HELM_VALUES_PATH }}
           runtime-cloud-provider: 'GKE'
@@ -131,7 +131,7 @@ jobs:
       - uses: 3lvia/core-github-actions-templates/deploy@trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
-          namespace: ${{ env.SYSTEM_NAMESPACE }}
+          namespace: ${{ env.SYSTEM_NAME }}
           environment: 'prod'
           helm-values-path: ${{ env.HELM_VALUES_PATH }}
           runtime-cloud-provider: 'GKE'
