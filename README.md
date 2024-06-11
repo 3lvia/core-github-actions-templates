@@ -74,6 +74,8 @@ We **strongly recommend** using Elvia's self-hosted GitHub Actions runners for a
 Several of our actions use optimizations only available on Elvia runners, and will run slower on GitHub-hosted runners.
 To use the Elvia runners, simply replace `runs-on: ubuntu-latest` with `runs-on: elvia-runner` in your workflow file.
 
+See [core-github-actions-runner](https://github.com/3lvia/core-github-actions-runner) for more information about the Elvia runners.
+
 # Actions
 
 <!-- gh-actions-docs-start path=build/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
