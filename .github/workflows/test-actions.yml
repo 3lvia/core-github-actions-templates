@@ -37,9 +37,9 @@ jobs:
 
   unit-tests:
     name: Unit Tests
-    needs: [setup-runner]
+    needs: [set-runner]
     strategy:
-      matrix: ${{ fromJson(needs.setup-runner.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.set-runner.outputs.matrix) }}
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
@@ -56,9 +56,9 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    needs: [setup-runner]
+    needs: [set-runner]
     strategy:
-      matrix: ${{ fromJson(needs.setup-runner.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.set-runner.outputs.matrix) }}
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
@@ -77,9 +77,9 @@ jobs:
 
   analyze:
     name: Analyze
-    needs: [setup-runner]
+    needs: [set-runner]
     strategy:
-      matrix: ${{ fromJson(needs.setup-runner.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.set-runner.outputs.matrix) }}
     runs-on: ${{ matrix.runner }}
     permissions:
       actions: read
@@ -95,10 +95,10 @@ jobs:
 
   build:
     name: Build
-    needs: [setup-runner]
+    needs: [set-runner]
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.setup-runner.outputs.matrix-build) }}
+      matrix: ${{ fromJson(needs.set-runner.outputs.matrix-build) }}
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
@@ -122,7 +122,7 @@ jobs:
     name: Deploy Dev
     needs: [build]
     strategy:
-      matrix: ${{ fromJson(needs.setup-runner.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.set-runner.outputs.matrix) }}
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
@@ -145,7 +145,7 @@ jobs:
     name: Deploy Dev GKE
     needs: [build]
     strategy:
-      matrix: ${{ fromJson(needs.setup-runner.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.set-runner.outputs.matrix) }}
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
@@ -168,10 +168,10 @@ jobs:
 
   trivy-iac-scan:
     name: Trivy IaC Scan
-    needs: [setup-runner]
+    needs: [set-runner]
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.setup-runner.outputs.matrix-trivy) }}
+      matrix: ${{ fromJson(needs.set-runner.outputs.matrix-trivy) }}
     runs-on: ${{ matrix.runner }}
     permissions:
       actions: read
@@ -187,9 +187,9 @@ jobs:
 
   terraform-format-check:
     name: Terraform Format Check
-    needs: [setup-runner]
+    needs: [set-runner]
     strategy:
-      matrix: ${{ fromJson(needs.setup-runner.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.set-runner.outputs.matrix) }}
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout repository
