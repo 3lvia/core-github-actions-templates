@@ -33,7 +33,7 @@ jobs:
           echo "matrix-trivy={\"runner\":[\"$RUNNER\",\"ubuntu-latest\"]}" >> "$GITHUB_OUTPUT"
           echo "matrix-build={\"runner\":[\"$RUNNER\",\"ubuntu-latest\"],\"build\":[\"csproj-file\",\"dockerfile\"]}" >> "$GITHUB_OUTPUT"
         env:
-          RUNNER: ${{ github.event.name == 'workflow_dispatch' && inputs.runner || 'elvia-runner' }}
+          RUNNER: ${{ github.event_name == 'workflow_dispatch' && inputs.runner || 'elvia-runner' }}
 
   unit-tests:
     name: Unit Tests
