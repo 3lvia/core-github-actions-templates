@@ -3,15 +3,44 @@ name: Test actions
 on:
   pull_request:
     branches: [trunk]
+  workflow_dispatch:
+    inputs:
+      runner:
+        description: 'Runner'
+        required: true
+        default: 'elvia-runner'
+        type: 'choice'
+        options:
+          - 'elvia-runner'
+          - 'elvia-runner-dev'
 
 env:
   APPLICATION_NAME: 'demo-api'
   SYSTEM_NAME: 'core'
 
 jobs:
+  set-runner:
+    name: Set Runner
+    runs-on: elvia-runner
+    outputs:
+      matrix: ${{ steps.set-runner.outputs.matrix }}
+      matrix-trivy: ${{ steps.set-runner.outputs.matrix-trivy }}
+      matrix-build: ${{ steps.set-runner.outputs.matrix-build }}
+    steps:
+      - id: set-runner
+        run: |
+          echo "matrix={\"runner\":[\"$RUNNER\"]}" >> "$GITHUB_OUTPUT"
+          echo "matrix-trivy={\"runner\":[\"$RUNNER\",\"ubuntu-latest\"]}" >> "$GITHUB_OUTPUT"
+          echo "matrix-build={\"runner\":[\"$RUNNER\",\"ubuntu-latest\"],\"build\":[\"csproj-file\",\"dockerfile\"]}" >> "$GITHUB_OUTPUT"
+        env:
+          RUNNER: ${{ github.event.name == 'workflow_dispatch' && inputs.runner || 'elvia-runner' }}
+
   unit-tests:
     name: Unit Tests
-    runs-on: elvia-runner
+    needs: [setup-runner]
+    strategy:
+      matrix: ${{ fromJson(needs.setup-runner.outputs.matrix) }}
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
       checks: write
@@ -27,7 +56,10 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    runs-on: elvia-runner
+    needs: [setup-runner]
+    strategy:
+      matrix: ${{ fromJson(needs.setup-runner.outputs.matrix) }}
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
       checks: write
@@ -45,7 +77,10 @@ jobs:
 
   analyze:
     name: Analyze
-    runs-on: elvia-runner
+    needs: [setup-runner]
+    strategy:
+      matrix: ${{ fromJson(needs.setup-runner.outputs.matrix) }}
+    runs-on: ${{ matrix.runner }}
     permissions:
       actions: read
       contents: read
@@ -60,11 +95,10 @@ jobs:
 
   build:
     name: Build
+    needs: [setup-runner]
     strategy:
       fail-fast: false
-      matrix:
-        runner: [elvia-runner, ubuntu-latest] # build action differs depending on the runner
-        build: [csproj-file, dockerfile]
+      matrix: ${{ fromJson(needs.setup-runner.outputs.matrix-build) }}
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
@@ -87,7 +121,9 @@ jobs:
   deploy-dev:
     name: Deploy Dev
     needs: [build]
-    runs-on: elvia-runner
+    strategy:
+      matrix: ${{ fromJson(needs.setup-runner.outputs.matrix) }}
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
       id-token: write
@@ -108,7 +144,9 @@ jobs:
   deploy-dev-gke:
     name: Deploy Dev GKE
     needs: [build]
-    runs-on: elvia-runner
+    strategy:
+      matrix: ${{ fromJson(needs.setup-runner.outputs.matrix) }}
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
       id-token: write
@@ -130,10 +168,10 @@ jobs:
 
   trivy-iac-scan:
     name: Trivy IaC Scan
+    needs: [setup-runner]
     strategy:
       fail-fast: false
-      matrix:
-        runner: [elvia-runner, ubuntu-latest] # trivy-iac-scan action differs depending on the runner
+      matrix: ${{ fromJson(needs.setup-runner.outputs.matrix-trivy) }}
     runs-on: ${{ matrix.runner }}
     permissions:
       actions: read
@@ -149,7 +187,10 @@ jobs:
 
   terraform-format-check:
     name: Terraform Format Check
-    runs-on: elvia-runner
+    needs: [setup-runner]
+    strategy:
+      matrix: ${{ fromJson(needs.setup-runner.outputs.matrix) }}
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
