@@ -92,11 +92,12 @@ Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure C
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------- |
 | `ACR_NAME`                    | Name of the Azure Container Registry to push to.                                                                                                                                                                                                                                                                                                              | no       | `containerregistryelvia`               |
 | `ACR_SUBSCRIPTION_ID`         | Subscription ID of the Azure Container Registry to push to.                                                                                                                                                                                                                                                                                                   | no       | `9edbf217-b7c1-4f6a-ae76-d046cf932ff0` |
-| `AZURE_CLIENT_ID`             | ClientId of a service principal that can push to Azure Container Registry.                                                                                                                                                                                                                                                                                    | yes      |                                        |
+| `AZURE_CLIENT_ID`             | ClientId of a service principal that can push to Azure Container Registry.                                                                                                                                                                                                                                                                                    | no       |                                        |
 | `AZURE_TENANT_ID`             | TenantId of a service principal that can push to Azure Container Registry.                                                                                                                                                                                                                                                                                    | no       | `2186a6ec-c227-4291-9806-d95340bf439d` |
 | `checkout`                    | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                                                                                                                                                                                                                          | no       | `true`                                 |
 | `csproj-file`                 | Path to a csproj-file, e.g. `src/my-app/my-app.csproj`. Either this or `dockerfile` must be given. This argument takes precedence over `dockerfile`.                                                                                                                                                                                                          | no       |                                        |
 | `docker-build-context`        | Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.                                                                                                                                                                                                                             | no       |                                        |
+| `docker-cache-tag`            | Tag used for getting build cache from registry. This tag is also pushed on every build, together with `github.sha-github.run_number`. This action will push a `latest` tag, but you can set this to `latest` if you want to have a separate tag for the latest build.                                                                                         | no       | `latest-cache`                         |
 | `dockerfile`                  | Path to Dockerfile, e.g. `src/Dockerfile`. Either this or `csproj-file` must be given.                                                                                                                                                                                                                                                                        | no       | `Dockerfile`                           |
 | `github-token`                | GitHub token for GitHub Container Registry. Required if `registry` is set to `ghcr`. Should normally be `secrets.GITHUB_TOKEN`.                                                                                                                                                                                                                               | no       |                                        |
 | `name`                        | Name of application. Do not include namespace.                                                                                                                                                                                                                                                                                                                | yes      |                                        |
@@ -135,7 +136,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     AZURE_CLIENT_ID:
     # ClientId of a service principal that can push to Azure Container Registry.
     #
-    # Required: yes
+    # Required: no
 
     AZURE_TENANT_ID:
     # TenantId of a service principal that can push to Azure Container Registry.
@@ -158,6 +159,11 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.
     #
     # Required: no
+
+    docker-cache-tag:
+    # Tag used for getting build cache from registry. This tag is also pushed on every build, together with `github.sha-github.run_number`. This action will push a `latest` tag, but you can set this to `latest` if you want to have a separate tag for the latest build.
+    #
+    # Default: 'latest-cache'
 
     dockerfile:
     # Path to Dockerfile, e.g. `src/Dockerfile`. Either this or `csproj-file` must be given.
