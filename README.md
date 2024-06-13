@@ -84,7 +84,7 @@ See [core-github-actions-runner](https://github.com/3lvia/core-github-actions-ru
 
 ### Description
 
-Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure Container Registry. To use the `Build` and `Deploy` actions, you must first add your GitHub repository to https://github.com/3lvia/github-repositories-terraform.
+Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure Container Registry or GitHub Container Registry. To use the `Build` and `Deploy` actions with Elvias container registry and runtime services, you must first add your GitHub repository to https://github.com/3lvia/github-repositories-terraform.
 
 ### Inputs
 
@@ -223,7 +223,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
 ### Description
 
-Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Build` and `Deploy` actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform.
+Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Build` and `Deploy` actions with Elvias container registry and runtime services, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform.
 
 ### Inputs
 
