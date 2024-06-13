@@ -14,6 +14,7 @@ see [here](#elvia-specific-actions) for more information.
 
 - [Examples](#examples)
 - [Elvia runners](#elvia-runners)
+- [Elvia-specific actions](#elvia-specific-actions)
 - [Actions](#actions)
   - [Build](#build)
     - [Description](#description)
@@ -621,7 +622,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
 ### Description
 
-Uses https://github.com/aquasecurity/trivy-action to scan IaC and report security issues. The action will report any vulnerabilities to GitHub Advanced Security, which will be visible in the Security tab on GitHub. If this action is ran on a pull request, GitHub Advanced Security will give a detailed report of any vulnerabilities introduced by new changes in the pull request.
+Uses https://github.com/aquasecurity/trivy to scan IaC and report security issues. The action will report any vulnerabilities to GitHub Advanced Security, which will be visible in the Security tab on GitHub. If this action is ran on a pull request, GitHub Advanced Security will give a detailed report of any vulnerabilities introduced by new changes in the pull request.
 
 ### Inputs
 
