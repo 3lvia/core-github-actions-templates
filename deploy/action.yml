@@ -1,5 +1,5 @@
 name: 'Deploy'
-description: 'Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Build` and `Deploy` actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform.'
+description: 'Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Build` and `Deploy` actions with Elvias container registry and runtime services, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform.'
 inputs:
   name:
     description: 'Name of application. Do not include namespace.'
