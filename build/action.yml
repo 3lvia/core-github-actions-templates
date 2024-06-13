@@ -90,7 +90,7 @@ runs:
           echo "IMAGE_NAME=$IMAGE_NAME" >> "$GITHUB_ENV"
           echo "IMAGE_LONG_NAME=$IMAGE_NAME:${{ github.sha }}-${{ github.run_number }}" >> "$GITHUB_ENV"
         elif [[ '${{ inputs.registry }}' == 'ghcr' ]]; then
-          IMAGE_NAME='ghcr.io/${{ github.repository }}/${{ inputs.name }}'
+          IMAGE_NAME=$(echo 'ghcr.io/${{ github.repository }}/${{ inputs.name }}' | tr '[:upper:]' '[:lower:]') # Docker tag must be lowercase
           echo "IMAGE_NAME=$IMAGE_NAME" >> "$GITHUB_ENV"
           echo "IMAGE_LONG_NAME=$IMAGE_NAME:${{ github.sha }}-${{ github.run_number }}" >> "$GITHUB_ENV"
         else
