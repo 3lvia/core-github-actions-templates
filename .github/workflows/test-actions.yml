@@ -19,6 +19,10 @@ env:
   APPLICATION_NAME: 'demo-api'
   SYSTEM_NAME: 'core'
 
+concurrency:
+  group: '${{ github.workflow }}-${{ github.event_name }}'
+  cancel-in-progress: true
+
 jobs:
   set-runner:
     name: Set Runner
@@ -32,7 +36,7 @@ jobs:
         run: |
           echo "matrix={\"runner\":[\"$RUNNER\"]}" >> "$GITHUB_OUTPUT"
           echo "matrix-trivy={\"runner\":[\"$RUNNER\",\"ubuntu-latest\"]}" >> "$GITHUB_OUTPUT"
-          echo "matrix-build={\"runner\":[\"$RUNNER\",\"ubuntu-latest\"],\"build\":[\"csproj-file\",\"dockerfile\"]}" >> "$GITHUB_OUTPUT"
+          echo "matrix-build={\"runner\":[\"$RUNNER\",\"ubuntu-latest\"],\"build\":[\"csproj-file\",\"dockerfile\"], \"registry\":[\"acr\",\"ghcr\"]}" >> "$GITHUB_OUTPUT"
         env:
           RUNNER: ${{ github.event_name == 'workflow_dispatch' && inputs.runner || 'elvia-runner' }}
 
@@ -104,6 +108,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      packages: write # Required for publishing to GitHub Container Registry
     environment: build
     steps:
       - name: Checkout repository
@@ -117,6 +122,8 @@ jobs:
           csproj-file: ${{ matrix.build == 'csproj-file' && '.github/test/src/core-demo-api.csproj' || '' }}
           dockerfile: ${{ matrix.build == 'dockerfile' && '.github/test/src/Dockerfile' || '' }}
           severity: 'CRITICAL'
+          registry: ${{ matrix.registry }}
+          github-token: ${{ matrix.registry == 'ghcr' && secrets.GITHUB_TOKEN || '' }}
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
 
   deploy-dev:

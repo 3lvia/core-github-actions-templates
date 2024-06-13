@@ -1,5 +1,5 @@
 name: 'Build'
-description: 'Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure Container Registry. To use the `Build` and `Deploy` actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform.'
+description: 'Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure Container Registry. To use the `Build` and `Deploy` actions, you must first add your GitHub repository to https://github.com/3lvia/github-repositories-terraform.'
 inputs:
   name:
     description: 'Name of application. Do not include namespace.'
@@ -35,8 +35,15 @@ inputs:
     description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
     required: false
     default: 'true'
+  registry:
+    description: 'What container registry to use, either `acr` or `ghcr`. If set to `acr`, credentials for Azure Container Registry will default to Elvia values. You can also set these explictly to point to your own ACR. If set to `ghcr`, the action will use the GitHub Container Registry. This requires `github-token` to be set, and the `packages: write` permission.'
+    required: false
+    default: 'false'
+  github-token:
+    description: 'GitHub token for GitHub Container Registry. Required if `registry` is set to `ghcr`. Should normally be `secrets.GITHUB_TOKEN`.'
+    required: false
   AZURE_CLIENT_ID:
-    description: 'ClientId of a service principal that can push to Container Registry.'
+    description: 'ClientId of a service principal that can push to Azure Container Registry.'
     required: true
   AZURE_TENANT_ID:
     description: 'TenantId of a service principal that can push to Azure Container Registry.'
@@ -75,17 +82,31 @@ runs:
       shell: bash
       run: |
         # Parse input and set environment variables
-        IMAGE_NAME='${{ inputs.ACR_NAME }}.azurecr.io/${{ inputs.namespace }}-${{ inputs.name }}'
-        echo "IMAGE_NAME=$IMAGE_NAME" >> "$GITHUB_ENV"
-        echo "IMAGE_LONG_NAME=$IMAGE_NAME:${{ github.sha }}-${{ github.run_number }}" >> "$GITHUB_ENV"
+        if [[ '${{ inputs.registry }}' == 'acr' ]]; then
+          IMAGE_NAME='${{ inputs.ACR_NAME }}.azurecr.io/${{ inputs.namespace }}-${{ inputs.name }}'
+          echo "IMAGE_NAME=$IMAGE_NAME" >> "$GITHUB_ENV"
+          echo "IMAGE_LONG_NAME=$IMAGE_NAME:${{ github.sha }}-${{ github.run_number }}" >> "$GITHUB_ENV"
+        elif [[ '${{ inputs.registry }}' == 'ghcr' ]]; then
+          IMAGE_NAME='ghcr.io/${{ github.repository }}/${{ inputs.name }}'
+          echo "IMAGE_NAME=$IMAGE_NAME" >> "$GITHUB_ENV"
+          echo "IMAGE_LONG_NAME=$IMAGE_NAME:${{ github.sha }}-${{ github.run_number }}" >> "$GITHUB_ENV"
+        else
+          echo 'Invalid registry. Must be either `acr` or `ghcr`.'
+          exit 1
+        fi
 
         if [[ '${{ inputs.csproj-file }}' == '' && '${{ inputs.dockerfile }}' == '' ]]; then
             echo 'Either csproj-file or dockerfile must be given.'
             exit 1
         fi
 
-        if [[ -z '${{ inputs.AZURE_CLIENT_ID }}' ]]; then
-            echo "Missing required input AZURE_CLIENT_ID. Ensure that this is set and non-empty."
+        if [[ '${{ inputs.AZURE_CLIENT_ID }}' == '' && '${{ inputs.registry }}' == 'acr' ]]; then
+            echo 'Missing required input AZURE_CLIENT_ID. Ensure that this is set and non-empty.'
+            exit 1
+        fi
+
+        if [[ '${{ inputs.github-token }}' == '' && '${{ inputs.registry }}' == 'ghcr' ]]; then
+            echo 'Missing required input github-token. Ensure that this is set and non-empty.'
             exit 1
         fi
 
@@ -111,6 +132,7 @@ runs:
         cat '${{ env.DOCKERFILE }}'
 
     - name: Authenticate with Azure
+      if: ${{ inputs.registry == 'acr' }}
       uses: azure/login@v2
       with:
         client-id: ${{ inputs.AZURE_CLIENT_ID }}
@@ -118,10 +140,19 @@ runs:
         subscription-id: ${{ inputs.ACR_SUBSCRIPTION_ID }}
 
     - name: Login to ACR
+      if: ${{ inputs.registry == 'acr' }}
       shell: bash
       run: |
         # Login to ACR
         az acr login --name '${{ inputs.ACR_NAME }}'
+
+    - name: Login to Github Container Registry
+      if: ${{ inputs.registry == 'ghcr' }}
+      uses: docker/login-action@v3
+      with:
+        registry: 'ghcr.io'
+        username: ${{ github.actor }}
+        password: ${{ inputs.github-token }}
 
     - name: Build image
       uses: docker/build-push-action@v5

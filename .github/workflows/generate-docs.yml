@@ -14,6 +14,10 @@ on:
       - '**/action.yml'
       - 'README.md'
 
+concurrency:
+  group: '${{ github.workflow }}-${{ github.event_name }}'
+  cancel-in-progress: true
+
 jobs:
   set-env:
     name: Set environment variables
