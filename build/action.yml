@@ -41,7 +41,7 @@ inputs:
   registry:
     description: 'What container registry to use, either `acr` or `ghcr`. If set to `acr`, credentials for Azure Container Registry will default to Elvia values. You can also set these explictly to point to your own ACR. If set to `ghcr`, the action will use the GitHub Container Registry. This requires `github-token` to be set, and the `packages: write` permission.'
     required: false
-    default: 'false'
+    default: 'acr'
   github-token:
     description: 'GitHub token for GitHub Container Registry. Required if `registry` is set to `ghcr`. Should normally be `secrets.GITHUB_TOKEN`.'
     required: false
