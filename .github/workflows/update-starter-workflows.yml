@@ -11,6 +11,10 @@ on:
 env:
   REPOSITORY: 'core-github-actions-templates'
 
+concurrency:
+  group: '${{ github.workflow }}-${{ github.event_name }}'
+  cancel-in-progress: true
+
 jobs:
   update-starter-workflows:
     name: Update starter workflows
