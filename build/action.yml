@@ -17,6 +17,9 @@ inputs:
   docker-build-context:
     description: 'Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.'
     required: false
+  docker-cache-tag:
+    description: 'Tag used for getting build cache from registry. This tag is also pushed on every build, together with `github.sha-github.run_number`. This action will push a `latest` tag, but you can set this to `latest` if you want to have a separate tag for the latest build.'
+    default: 'latest-cache'
   severity:
     description: 'Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.'
     required: false
@@ -44,7 +47,7 @@ inputs:
     required: false
   AZURE_CLIENT_ID:
     description: 'ClientId of a service principal that can push to Azure Container Registry.'
-    required: true
+    required: false
   AZURE_TENANT_ID:
     description: 'TenantId of a service principal that can push to Azure Container Registry.'
     required: false
@@ -161,8 +164,8 @@ runs:
         file: ${{ env.DOCKERFILE }}
         push: 'false'
         load: 'true'
-        tags: '${{ env.IMAGE_LONG_NAME }},${{ env.IMAGE_NAME }}:latest-cache'
-        cache-from: 'type=registry,ref=${{ env.IMAGE_NAME }}:latest-cache'
+        tags: '${{ env.IMAGE_LONG_NAME }},${{ env.IMAGE_NAME }}:${{ inputs.docker-cache-tag }}'
+        cache-from: 'type=registry,ref=${{ env.IMAGE_NAME }}:${{ inputs.docker-cache-tag }}'
         cache-to: 'type=inline'
 
     - name: Setup Trivy ignore file
