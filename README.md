@@ -1,6 +1,12 @@
 # core-github-actions-templates
 
-GitHub Actions templates for the Elvia organization.
+GitHub Actions composite actions for the Elvia organization.
+
+These actions are mainly intended for internal use at Elvia, but are open-source and can be used by anyone!
+They encapsulate common tasks that we perform using GitHub Actions, such as building and deploying applications, running tests, and scanning for vulnerabilities.
+
+Note that some actions are specifically tailored to our infrastructure and will not work outside our organization,
+see [here](#elvia-specific-actions) for more information.
 
 ## Table of Contents
 
@@ -75,6 +81,14 @@ Several of our actions use optimizations only available on Elvia runners, and wi
 To use the Elvia runners, simply replace `runs-on: ubuntu-latest` with `runs-on: elvia-runner` in your workflow file.
 
 See [core-github-actions-runner](https://github.com/3lvia/core-github-actions-runner) for more information about the Elvia runners.
+
+# Elvia-specific actions
+
+The below list of actions are specific to Elvia's infrastructure and will not work outside our organization:
+
+- [Deploy](#deploy)
+- [SonarCloud](#sonarcloud)
+- [PlayWright Test](#playwright-test)
 
 # Actions
 
