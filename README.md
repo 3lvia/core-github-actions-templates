@@ -84,26 +84,28 @@ See [core-github-actions-runner](https://github.com/3lvia/core-github-actions-ru
 
 ### Description
 
-Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure Container Registry. To use the `Build` and `Deploy` actions, you must first add your Github repository to https://github.com/3lvia/github-repositories-terraform.
+Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure Container Registry. To use the `Build` and `Deploy` actions, you must first add your GitHub repository to https://github.com/3lvia/github-repositories-terraform.
 
 ### Inputs
 
-| Name                          | Description                                                                                                                                            | Required | Default                                |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------------------------------------- |
-| `ACR_NAME`                    | Name of the Azure Container Registry to push to.                                                                                                       | no       | `containerregistryelvia`               |
-| `ACR_SUBSCRIPTION_ID`         | Subscription ID of the Azure Container Registry to push to.                                                                                            | no       | `9edbf217-b7c1-4f6a-ae76-d046cf932ff0` |
-| `AZURE_CLIENT_ID`             | ClientId of a service principal that can push to Container Registry.                                                                                   | yes      |                                        |
-| `AZURE_TENANT_ID`             | TenantId of a service principal that can push to Azure Container Registry.                                                                             | no       | `2186a6ec-c227-4291-9806-d95340bf439d` |
-| `checkout`                    | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                   | no       | `true`                                 |
-| `csproj-file`                 | Path to a csproj-file, e.g. `src/my-app/my-app.csproj`. Either this or `dockerfile` must be given. This argument takes precedence over `dockerfile`.   | no       |                                        |
-| `docker-build-context`        | Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.                      | no       |                                        |
-| `dockerfile`                  | Path to Dockerfile, e.g. `src/Dockerfile`. Either this or `csproj-file` must be given.                                                                 | no       | `Dockerfile`                           |
-| `name`                        | Name of application. Do not include namespace.                                                                                                         | yes      |                                        |
-| `namespace`                   | Namespace or system of the application.                                                                                                                | yes      |                                        |
-| `severity`                    | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                          | no       | `CRITICAL`                             |
-| `trivy-cve-ignores`           | Comma-separated list of CVEs for Trivy to ignore. See https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore for syntax. | no       |                                        |
-| `trivy-enable-secret-scanner` | Enable Trivy secret scanner.                                                                                                                           | no       | `true`                                 |
-| `trivy-skip-dirs`             | Directories/files skipped by Trivy. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                   | no       |                                        |
+| Name                          | Description                                                                                                                                                                                                                                                                                                                                                   | Required | Default                                |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------- |
+| `ACR_NAME`                    | Name of the Azure Container Registry to push to.                                                                                                                                                                                                                                                                                                              | no       | `containerregistryelvia`               |
+| `ACR_SUBSCRIPTION_ID`         | Subscription ID of the Azure Container Registry to push to.                                                                                                                                                                                                                                                                                                   | no       | `9edbf217-b7c1-4f6a-ae76-d046cf932ff0` |
+| `AZURE_CLIENT_ID`             | ClientId of a service principal that can push to Azure Container Registry.                                                                                                                                                                                                                                                                                    | yes      |                                        |
+| `AZURE_TENANT_ID`             | TenantId of a service principal that can push to Azure Container Registry.                                                                                                                                                                                                                                                                                    | no       | `2186a6ec-c227-4291-9806-d95340bf439d` |
+| `checkout`                    | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                                                                                                                                                                                                                          | no       | `true`                                 |
+| `csproj-file`                 | Path to a csproj-file, e.g. `src/my-app/my-app.csproj`. Either this or `dockerfile` must be given. This argument takes precedence over `dockerfile`.                                                                                                                                                                                                          | no       |                                        |
+| `docker-build-context`        | Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.                                                                                                                                                                                                                             | no       |                                        |
+| `dockerfile`                  | Path to Dockerfile, e.g. `src/Dockerfile`. Either this or `csproj-file` must be given.                                                                                                                                                                                                                                                                        | no       | `Dockerfile`                           |
+| `github-token`                | GitHub token for GitHub Container Registry. Required if `registry` is set to `ghcr`. Should normally be `secrets.GITHUB_TOKEN`.                                                                                                                                                                                                                               | no       |                                        |
+| `name`                        | Name of application. Do not include namespace.                                                                                                                                                                                                                                                                                                                | yes      |                                        |
+| `namespace`                   | Namespace or system of the application.                                                                                                                                                                                                                                                                                                                       | yes      |                                        |
+| `registry`                    | What container registry to use, either `acr` or `ghcr`. If set to `acr`, credentials for Azure Container Registry will default to Elvia values. You can also set these explictly to point to your own ACR. If set to `ghcr`, the action will use the GitHub Container Registry. This requires `github-token` to be set, and the `packages: write` permission. | no       | `false`                                |
+| `severity`                    | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                                                                                                                                                                                                                                 | no       | `CRITICAL`                             |
+| `trivy-cve-ignores`           | Comma-separated list of CVEs for Trivy to ignore. See https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore for syntax.                                                                                                                                                                                                        | no       |                                        |
+| `trivy-enable-secret-scanner` | Enable Trivy secret scanner.                                                                                                                                                                                                                                                                                                                                  | no       | `true`                                 |
+| `trivy-skip-dirs`             | Directories/files skipped by Trivy. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                                                                                                                                                                                                                          | no       |                                        |
 
 ### Permissions
 
@@ -131,7 +133,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Default: '9edbf217-b7c1-4f6a-ae76-d046cf932ff0'
 
     AZURE_CLIENT_ID:
-    # ClientId of a service principal that can push to Container Registry.
+    # ClientId of a service principal that can push to Azure Container Registry.
     #
     # Required: yes
 
@@ -163,6 +165,11 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Required: no
     # Default: 'Dockerfile'
 
+    github-token:
+    # GitHub token for GitHub Container Registry. Required if `registry` is set to `ghcr`. Should normally be `secrets.GITHUB_TOKEN`.
+    #
+    # Required: no
+
     name:
     # Name of application. Do not include namespace.
     #
@@ -172,6 +179,12 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Namespace or system of the application.
     #
     # Required: yes
+
+    registry:
+    # What container registry to use, either `acr` or `ghcr`. If set to `acr`, credentials for Azure Container Registry will default to Elvia values. You can also set these explictly to point to your own ACR. If set to `ghcr`, the action will use the GitHub Container Registry. This requires `github-token` to be set, and the `packages: write` permission.
+    #
+    # Required: no
+    # Default: 'false'
 
     severity:
     # Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.
