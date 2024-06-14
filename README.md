@@ -65,7 +65,7 @@ see [here](#elvia-specific-actions) for more information.
   - [Action documentation & table of contents](#action-documentation--table-of-contents)
   <!-- gh-actions-docs-toc-end -->
 
-# Examples
+## Examples
 
 The files beginning with `example-` in the folder [.github/workflows](.github/workflows) are working examples of how to use these actions.
 Both of these examples require you to have added your system/application to the list in the [github-repositories-terraform](http://github.com/3lvia/github-repositories-terraform) repository.
@@ -75,7 +75,7 @@ You can also click on the **'Actions'** tab on your repository and click **'New 
 Some values in these templates are placeholders and need to be replaced with your own values; anything resembling `<your xxx here>` should be replaced.
 See the [GitHub docs](https://docs.github.com/en/actions/learn-github-actions/using-starter-workflows#choosing-and-using-a-starter-workflow) for more detailed information.
 
-# Elvia runners
+## Elvia runners
 
 We **strongly recommend** using Elvia's self-hosted GitHub Actions runners for all actions.
 Several of our actions use optimizations only available on Elvia runners, and will run slower on GitHub-hosted runners.
@@ -83,15 +83,7 @@ To use the Elvia runners, simply replace `runs-on: ubuntu-latest` with `runs-on:
 
 See [core-github-actions-runner](https://github.com/3lvia/core-github-actions-runner) for more information about the Elvia runners.
 
-# Elvia-specific actions
-
-The below list of actions are specific to Elvia's infrastructure and will not work outside our organization:
-
-- [Deploy](#deploy)
-- [SonarCloud](#sonarcloud)
-- [PlayWright Test](#playwright-test)
-
-# Actions
+# Actions Documentation
 
 <!-- gh-actions-docs-start path=build/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
 
@@ -779,6 +771,15 @@ Uses the built-in formatter from the Terraform CLI to check the format of Terraf
 ```
 
 <!-- gh-actions-docs-end -->
+
+## Elvia-specific actions
+
+The below list of actions are specific to Elvia's infrastructure and will not work outside our organization:
+
+- [Deploy](#deploy)
+- [SonarCloud](#sonarcloud)
+- [PlayWright Test](#playwright-test)
+
 
 # Development
 
