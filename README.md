@@ -14,8 +14,7 @@ see [here](#elvia-specific-actions) for more information.
 
 - [Examples](#examples)
 - [Elvia runners](#elvia-runners)
-- [Elvia-specific actions](#elvia-specific-actions)
-- [Actions](#actions)
+- [Actions Documentation](#actions-documentation)
   - [Build](#build)
     - [Description](#description)
     - [Inputs](#inputs)
@@ -60,6 +59,7 @@ see [here](#elvia-specific-actions) for more information.
     - [Description](#description-8)
     - [Inputs](#inputs-8)
     - [Usage](#usage-8)
+  - [Elvia-specific actions](#elvia-specific-actions)
 - [Development](#development)
   - [Formatting](#formatting)
   - [Action documentation & table of contents](#action-documentation--table-of-contents)
@@ -779,7 +779,6 @@ The below list of actions are specific to Elvia's infrastructure and will not wo
 - [Deploy](#deploy)
 - [SonarCloud](#sonarcloud)
 - [PlayWright Test](#playwright-test)
-
 
 # Development
 
