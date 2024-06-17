@@ -797,7 +797,7 @@ prettier -w --single-quote --end-of-line crlf "**/*.yml" "**/*.md"
 
 ## Action documentation & table of contents
 
-Documentation in the README is auto-generated for any actions in the repository.
+Documentation in the README is auto-generated for any actions in the repository using [3lvia/gh-actions-docs](https://github.com/3lvia/gh-actions-docs).
 The table of contents is also auto-generated, using the headers in this README.
 To add documentation for a new action, add these two tags to the `README.md` file:
 
