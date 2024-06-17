@@ -1,4 +1,0 @@
-cradle:
-  cabal:
-    - path: 'app/Main.hs'
-      component: 'gh-actions-docs:exe:gh-actions-docs'
