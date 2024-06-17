@@ -1,5 +1,5 @@
 name: 'Build'
-description: 'Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure Container Registry or GitHub Container Registry. To use the `Build` and `Deploy` actions with Elvias container registry and runtime services, you must first add your GitHub repository to https://github.com/3lvia/github-repositories-terraform.'
+description: 'Builds Docker image, scans for vulnerabilities using Trivy and pushes to either Azure Container Registry or GitHub Container Registry. To use the `Build` and `Deploy` actions with Elvias container registry and runtime services, you must first add your GitHub repository to https://github.com/3lvia/github-repositories-terraform.'
 inputs:
   name:
     description: 'Name of application. This will be used as the image name. For Elvia applications, do not include the namespace.'
