@@ -107,8 +107,8 @@ Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure C
 | `docker-cache-tag`            | Tag used for getting build cache from registry. This tag is also pushed on every build, together with `github.sha-github.run_number`. This action will push a `latest` tag, but you can set this to `latest` if you want to have a separate tag for the latest build.                                                                                         | no       | `latest-cache`                         |
 | `dockerfile`                  | Path to Dockerfile, e.g. `src/Dockerfile`. Either this or `csproj-file` must be given.                                                                                                                                                                                                                                                                        | no       | `Dockerfile`                           |
 | `github-token`                | GitHub token for GitHub Container Registry. Required if `registry` is set to `ghcr`. Should normally be `secrets.GITHUB_TOKEN`.                                                                                                                                                                                                                               | no       |                                        |
-| `name`                        | Name of application. Do not include namespace.                                                                                                                                                                                                                                                                                                                | yes      |                                        |
-| `namespace`                   | Namespace or system of the application.                                                                                                                                                                                                                                                                                                                       | yes      |                                        |
+| `name`                        | Name of application. This will be used as the image name. For Elvia applications, do not include the namespace.                                                                                                                                                                                                                                               | yes      |                                        |
+| `namespace`                   | Namespace or system of the application. This is only relevant for Elvia applications.                                                                                                                                                                                                                                                                         | no       |                                        |
 | `registry`                    | What container registry to use, either `acr` or `ghcr`. If set to `acr`, credentials for Azure Container Registry will default to Elvia values. You can also set these explictly to point to your own ACR. If set to `ghcr`, the action will use the GitHub Container Registry. This requires `github-token` to be set, and the `packages: write` permission. | no       | `acr`                                  |
 | `severity`                    | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                                                                                                                                                                                                                                 | no       | `CRITICAL`                             |
 | `trivy-cve-ignores`           | Comma-separated list of CVEs for Trivy to ignore. See https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore for syntax.                                                                                                                                                                                                        | no       |                                        |
@@ -184,14 +184,14 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Required: no
 
     name:
-    # Name of application. Do not include namespace.
+    # Name of application. This will be used as the image name. For Elvia applications, do not include the namespace.
     #
     # Required: yes
 
     namespace:
-    # Namespace or system of the application.
+    # Namespace or system of the application. This is only relevant for Elvia applications.
     #
-    # Required: yes
+    # Required: no
 
     registry:
     # What container registry to use, either `acr` or `ghcr`. If set to `acr`, credentials for Azure Container Registry will default to Elvia values. You can also set these explictly to point to your own ACR. If set to `ghcr`, the action will use the GitHub Container Registry. This requires `github-token` to be set, and the `packages: write` permission.
