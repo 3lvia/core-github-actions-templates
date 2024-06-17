@@ -53,7 +53,7 @@ jobs:
 
             sed -i "s/  APPLICATION_NAME: 'demo-api'/  APPLICATION_NAME: '<your application name here>'/g" "$new_workflow_path"
             sed -i "s/  SYSTEM_NAME: 'core'/  SYSTEM_NAME: '<your system name here>'/g" "$new_workflow_path"
-            sed -i "s/  HELM_VALUES_PATH: '.github\/test\/deploy\/values.yml'/  HELM_VALUES_PATH: '<your Helm values path here>'/g" "$new_workflow_path"
+            sed -i "s/  HELM_VALUES_PATH: '.github\/test\/deploy\/values.yml'/  HELM_VALUES_PATH: '.github\/deploy\/values.yml'/g" "$new_workflow_path"
             sed -i "s/  CSPROJ_FILE: '.github\/test\/src\/core-demo-api.csproj'/  CSPROJ_FILE: '<your .csproj path here>'/g" "$new_workflow_path"
             sed -i "s/  DOCKERFILE: '.github\/test\/src\/Dockerfile'/  DOCKERFILE: '<your Dockerfile path here (or leave empty if Dockerfile in root dir)>'/g" "$new_workflow_path"
             sed -i 's/branches: \[trunk\]/branches: \[$default-branch\]/g' "$new_workflow_path"

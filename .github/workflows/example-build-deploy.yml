@@ -12,7 +12,7 @@ env:
   HELM_VALUES_PATH: '.github/test/deploy/values.yml'
   # For the 'build-scan' job, you MUST specify either 'csproj-file' or 'dockerfile'.
   #
-  # If you are deplying a .NET application, specify 'csproj-file'. This is preferred.
+  # If you are deploying a .NET application, specify 'csproj-file'. This is preferred.
   # If you are deploying a non-.NET application using a Dockerfile, specify 'dockerfile'.
   #
   # Remember to uncomment the 'dockerfile' argument in the 'build-scan' job,
@@ -55,14 +55,8 @@ jobs:
       actions: read
       contents: read
       security-events: write
-    strategy:
-      fail-fast: false
-      matrix:
-        language: ['javascript-typescript', 'csharp'] # https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/customizing-your-advanced-setup-for-code-scanning#changing-the-languages-that-are-analyzed
     steps:
       - uses: 3lvia/core-github-actions-templates/analyze@trunk
-        with:
-          language: ${{ matrix.language }}
 
   build-scan:
     name: Build and Scan
@@ -83,7 +77,13 @@ jobs:
 
   deploy-dev:
     name: Deploy Dev
-    needs: [build-scan, unit-tests, integration-tests, analyze]
+    # Required these jobs to be successful before running this job.
+    # Any of these can be commented out if you want to deploy anyway.
+    needs:
+      - unit-tests
+      - integration-tests
+      - build-scan
+      - analyze
     runs-on: elvia-runner
     permissions:
       contents: read
@@ -102,6 +102,7 @@ jobs:
 
   deploy-test:
     name: Deploy Test
+    # Only deploy to test after dev
     needs: [deploy-dev]
     runs-on: elvia-runner
     permissions:
@@ -121,6 +122,7 @@ jobs:
 
   deploy-prod:
     name: Deploy Prod
+    # Only deploy to prod after test
     needs: [deploy-test]
     runs-on: elvia-runner
     permissions:
