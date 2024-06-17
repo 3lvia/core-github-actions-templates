@@ -4,7 +4,7 @@ on:
   push:
     branches: [trunk]
     paths:
-      - '.github/gh-actions-docs/**'
+      - '.github/workflows/generate-docs.yml'
       - '**/action.yml'
       - 'README.md'
 
