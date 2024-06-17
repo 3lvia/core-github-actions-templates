@@ -31,7 +31,7 @@ jobs:
           owner: ${{ github.repository_owner }}
 
       - name: Generate docs
-        uses: 3lvia/gh-actions-docs@trunk
+        uses: 3lvia/gh-actions-docs@v1
         with:
           ignore-files: 'my-new-action/action.yml'
           ignore-headers: '# core-github-actions-templates,## Table of Contents'
