@@ -2,11 +2,11 @@ name: 'Build'
 description: 'Builds Docker image, scans for vulnerabilities using Trivy and pushes to Azure Container Registry or GitHub Container Registry. To use the `Build` and `Deploy` actions with Elvias container registry and runtime services, you must first add your GitHub repository to https://github.com/3lvia/github-repositories-terraform.'
 inputs:
   name:
-    description: 'Name of application. Do not include namespace.'
+    description: 'Name of application. This will be used as the image name. For Elvia applications, do not include the namespace.'
     required: true
   namespace:
-    description: 'Namespace or system of the application.'
-    required: true
+    description: 'Namespace or system of the application. This is only relevant for Elvia applications.'
+    required: false
   csproj-file:
     description: 'Path to a csproj-file, e.g. `src/my-app/my-app.csproj`. Either this or `dockerfile` must be given. This argument takes precedence over `dockerfile`.'
     required: false
@@ -86,11 +86,15 @@ runs:
       run: |
         # Parse input and set environment variables
         if [[ '${{ inputs.registry }}' == 'acr' ]]; then
+          if [[ -z '${{ inputs.namespace }}' ]]; then
+            echo 'Namespace must be given for Elvia applications.'
+            exit 1
+          fi
           IMAGE_NAME='${{ inputs.ACR_NAME }}.azurecr.io/${{ inputs.namespace }}-${{ inputs.name }}'
           echo "IMAGE_NAME=$IMAGE_NAME" >> "$GITHUB_ENV"
           echo "IMAGE_LONG_NAME=$IMAGE_NAME:${{ github.sha }}-${{ github.run_number }}" >> "$GITHUB_ENV"
         elif [[ '${{ inputs.registry }}' == 'ghcr' ]]; then
-          IMAGE_NAME=$(echo 'ghcr.io/${{ github.repository }}/${{ inputs.name }}' | tr '[:upper:]' '[:lower:]') # Docker tag must be lowercase
+          IMAGE_NAME=$(echo 'ghcr.io/${{ inputs.name }}' | tr '[:upper:]' '[:lower:]') # Docker tag must be lowercase
           echo "IMAGE_NAME=$IMAGE_NAME" >> "$GITHUB_ENV"
           echo "IMAGE_LONG_NAME=$IMAGE_NAME:${{ github.sha }}-${{ github.run_number }}" >> "$GITHUB_ENV"
         else
