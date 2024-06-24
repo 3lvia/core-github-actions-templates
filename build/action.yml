@@ -162,7 +162,7 @@ runs:
         password: ${{ inputs.github-token }}
 
     - name: Build image
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: ${{ env.DOCKER_DIR }}
         file: ${{ env.DOCKERFILE }}
@@ -189,7 +189,7 @@ runs:
         done
 
     - name: Install Trivy if not using Elvia runner
-      if: ${{ !startsWith(runner.name, 'elvia-runner-prod') }}
+      if: ${{ !startsWith(runner.name, 'elvia-runner-') }}
       shell: bash
       run: |
         # Install Trivy if not using Elvia runner
@@ -200,7 +200,7 @@ runs:
         sudo apt-get install trivy
 
     - name: Run Trivy vulnerability scanner (pull request)
-      if: ${{ github.event_name == 'pull_request' && startsWith(runner.name, 'elvia-runner-prod') }}
+      if: ${{ github.event_name == 'pull_request' && startsWith(runner.name, 'elvia-runner-') }}
       shell: bash
       run: |
         # Run Trivy
@@ -214,7 +214,7 @@ runs:
           ${{ inputs.trivy-skip-dirs != '' && format('--skip-dirs {0}', inputs.trivy-skip-dirs) || '' }}
 
     - name: Run Trivy vulnerability scanner (push)
-      if: ${{ github.event_name == 'push' && startsWith(runner.name, 'elvia-runner-prod') }}
+      if: ${{ github.event_name == 'push' && startsWith(runner.name, 'elvia-runner-') }}
       shell: bash
       run: |
         # Run Trivy
