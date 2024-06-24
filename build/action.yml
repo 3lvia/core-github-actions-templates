@@ -17,6 +17,10 @@ inputs:
   docker-build-context:
     description: 'Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.'
     required: false
+  docker-build-no-summary:
+    description: 'If `true`, the action will not display a step summary after the build.'
+    required: false
+    default: 'false'
   docker-cache-tag:
     description: 'Tag used for getting build cache from registry. This tag is also pushed on every build, together with `github.sha-github.run_number`. This action will push a `latest` tag, but you can set this to `latest` if you want to have a separate tag for the latest build.'
     default: 'latest-cache'
@@ -130,6 +134,10 @@ runs:
             DOCKERFILE='${{ steps.generate_dockerfile.outputs.DOCKERFILE }}'
         fi
         echo "DOCKERFILE=$DOCKERFILE" >> "$GITHUB_ENV"
+
+        if [[ '${{ inputs.docker-build-no-summary }}' == 'true' ]]; then
+            echo 'DOCKER_BUILD_NO_SUMMARY=true' >> "$GITHUB_ENV"
+        fi
 
     - name: Print Dockerfile variable
       shell: bash
