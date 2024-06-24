@@ -47,7 +47,7 @@ runs:
         echo "AVD-DS-0026" >> '${{ inputs.trivyignore }}'
 
     - name: Install Trivy if not using Elvia runner
-      if: ${{ !startsWith(runner.name, 'elvia-runner-prod') }}
+      if: ${{ !startsWith(runner.name, 'elvia-runner-') }}
       shell: bash
       run: |
         # Install Trivy, not using Elvia runner

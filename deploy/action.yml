@@ -185,14 +185,14 @@ runs:
         subscription: ${{ env.AKS_SUBSCRIPTION_ID }}
 
     - name: Authenticate with Google Cloud
-      uses: google-github-actions/auth@v2.1.2
+      uses: google-github-actions/auth@v2.1.3
       if: ${{ inputs.runtime-cloud-provider == 'GKE' }}
       with:
         workload_identity_provider: ${{ inputs.GC_WORKLOAD_IDENTITY_PROVIDER }}
         service_account: ${{ inputs.GC_SERVICE_ACCOUNT }}
 
     - name: Connect to GKE
-      uses: google-github-actions/get-gke-credentials@v2.1.0
+      uses: google-github-actions/get-gke-credentials@v2.2.0
       if: ${{ inputs.runtime-cloud-provider == 'GKE' }}
       with:
         cluster_name: ${{ env.GC_CLUSTER_NAME }}
