@@ -10,10 +10,7 @@ on:
         description: 'Runner'
         required: true
         default: 'elvia-runner'
-        type: 'choice'
-        options:
-          - 'elvia-runner'
-          - 'elvia-runner-dev'
+        type: 'string'
 
 env:
   APPLICATION_NAME: 'demo-api'
