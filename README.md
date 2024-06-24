@@ -104,6 +104,7 @@ Builds Docker image, scans for vulnerabilities using Trivy and pushes to either 
 | `checkout`                    | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                                                                                                                                                                                                                          | no       | `true`                                 |
 | `csproj-file`                 | Path to a csproj-file, e.g. `src/my-app/my-app.csproj`. Either this or `dockerfile` must be given. This argument takes precedence over `dockerfile`.                                                                                                                                                                                                          | no       |                                        |
 | `docker-build-context`        | Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.                                                                                                                                                                                                                             | no       |                                        |
+| `docker-build-no-summary`     | If `true`, the action will not display a step summary after the build.                                                                                                                                                                                                                                                                                        | no       | `false`                                |
 | `docker-cache-tag`            | Tag used for getting build cache from registry. This tag is also pushed on every build, together with `github.sha-github.run_number`. This action will push a `latest` tag, but you can set this to `latest` if you want to have a separate tag for the latest build.                                                                                         | no       | `latest-cache`                         |
 | `dockerfile`                  | Path to Dockerfile, e.g. `src/Dockerfile`. Either this or `csproj-file` must be given.                                                                                                                                                                                                                                                                        | no       | `Dockerfile`                           |
 | `github-token`                | GitHub token for GitHub Container Registry. Required if `registry` is set to `ghcr`. Should normally be `secrets.GITHUB_TOKEN`.                                                                                                                                                                                                                               | no       |                                        |
@@ -166,6 +167,12 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.
     #
     # Required: no
+
+    docker-build-no-summary:
+    # If `true`, the action will not display a step summary after the build.
+    #
+    # Required: no
+    # Default: 'false'
 
     docker-cache-tag:
     # Tag used for getting build cache from registry. This tag is also pushed on every build, together with `github.sha-github.run_number`. This action will push a `latest` tag, but you can set this to `latest` if you want to have a separate tag for the latest build.
