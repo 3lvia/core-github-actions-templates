@@ -55,9 +55,10 @@ see [here](#elvia-specific-actions) for more information.
     - [Inputs](#inputs-7)
     - [Permissions](#permissions-7)
     - [Usage](#usage-7)
-  - [Terraform format check](#terraform-format-check)
+  - [ValidateMetrics](#validatemetrics)
     - [Description](#description-8)
     - [Inputs](#inputs-8)
+    - [Permissions](#permissions-8)
     - [Usage](#usage-8)
   - [Elvia-specific actions](#elvia-specific-actions)
 - [Development](#development)
@@ -747,38 +748,50 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
 <!-- gh-actions-docs-start path=validate-metrics/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=checks:write,contents:read,id-token:write,issues:read,pull-requests:write -->
 
-<!-- gh-actions-docs-start path=terraform-format/action.yml owner=3lvia project=core-github-actions-templates version=trunk -->
-
-## Terraform format check
+## ValidateMetrics
 
 ### Description
 
-Uses the built-in formatter from the Terraform CLI to check the format of Terraform code.
+Runs a PromQL query on Grafana Cloud. Return success if the query has a result. Returns failure if the result is empty.
 
 ### Inputs
 
-| Name       | Description                                                                                                                          | Required | Default |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- |
-| `checkout` | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`  |
-| `path`     | Path to process.                                                                                                                     | no       | `.`     |
+| Name          | Description                                           | Required | Default |
+| ------------- | ----------------------------------------------------- | -------- | ------- |
+| `environment` | Environment is used to find correct vault instance.   | yes      |         |
+| `query`       | PromQL query string.                                  | yes      |         |
+| `system`      | System is used to log in to Vault using correct role. | yes      |         |
+
+### Permissions
+
+This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+
+- `checks: write`
+- `contents: read`
+- `id-token: write`
+- `issues: read`
+- `pull-requests: write`
 
 ### Usage
 
 ```yaml
-- name: Terraform format check
-  uses: 3lvia/core-github-actions-templates/terraform-format@trunk
+- name: ValidateMetrics
+  uses: 3lvia/core-github-actions-templates/validate-metrics@trunk
   with:
-    checkout:
-    # If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.
+    environment:
+    # Environment is used to find correct vault instance.
     #
-    # Required: no
-    # Default: 'true'
+    # Required: yes
 
-    path:
-    # Path to process.
+    query:
+    # PromQL query string.
     #
-    # Required: no
-    # Default: '.'
+    # Required: yes
+
+    system:
+    # System is used to log in to Vault using correct role.
+    #
+    # Required: yes
 ```
 
 <!-- gh-actions-docs-end -->
