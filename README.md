@@ -752,7 +752,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
 ### Description
 
-Runs a PromQL query on Grafana Cloud. Return success if the query has a result. Returns failure if the result is empty.
+Runs a PromQL query on Grafana Cloud. Returns success (return code 0) if the query has a result. Returns failure if the result is empty (return code 1).
 
 ### Inputs
 
