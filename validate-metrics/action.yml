@@ -57,4 +57,4 @@ runs:
       shell: bash
       run: |
         pip install -r '${{ github.action_path }}/requirements.txt'
-        python '${{ github.action_path }}/validate_metrics.py'
+        python '${{ github.action_path }}/validate_metrics.py' --query ${{ inputs.query }}
