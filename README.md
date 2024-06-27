@@ -746,7 +746,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
 <!-- gh-actions-docs-end -->
 
-<!-- gh-actions-docs-start path=validate-metrics/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=checks:write,contents:read,id-token:write,issues:read,pull-requests:write -->
+<!-- gh-actions-docs-start path=validate-metrics/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=id-token:write -->
 
 ## ValidateMetrics
 

@@ -8,6 +8,7 @@ on:
 
 concurrency:
   group: '${{ github.workflow }}-${{ github.event_name }}'
+  cancel-in-progress: true
 
 env:
   APPLICATION_NAME: 'demo-api'
