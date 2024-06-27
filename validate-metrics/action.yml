@@ -1,0 +1,60 @@
+name: ValidateMetrics
+description: 'Runs a PromQL query on Grafana Cloud. Return success if the query has a result. Returns failure if the result is empty.'
+inputs:
+  system:
+    description: 'System is used to log in to Vault using correct role.'
+    required: true
+  environment:
+    description: 'Environment is used to find correct vault instance.'
+    required: true
+  query:
+    description: 'PromQL query string.'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout repository
+      if: ${{ inputs.checkout == 'true' }}
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+
+    - name: Parse input and set environment variables
+      shell: bash
+      run: |
+        # parse inputs
+        if [[ '${{ inputs.environment }}' == 'dev' ]]; then
+          echo 'VAULT_ADDR=https://vault.dev-elvia.io' >> "$GITHUB_ENV"
+        elif [[ '${{ inputs.environment }}' == 'test' ]]; then
+          echo 'VAULT_ADDR=https://vault.test-elvia.io' >> "$GITHUB_ENV"
+        elif [[ '${{ inputs.environment }}' == 'prod' ]]; then
+          echo 'VAULT_ADDR=https://vault.elvia.io' >> "$GITHUB_ENV"
+        else
+          echo 'Unsupported environment: ${{ inputs.environment }}'
+          exit 1
+        fi
+
+        echo "REPO_SHORT_NAME=${GITHUB_REPOSITORY##*/}" >> "$GITHUB_ENV"
+
+    - name: Login Vault and export token
+      uses: hashicorp/vault-action@v3
+      with:
+        url: ${{ env.VAULT_ADDR }}
+        role: 'jwt-github-${{ inputs.system }}-${{ env.REPO_SHORT_NAME }}'
+        method: 'jwt'
+        path: 'jwt-github'
+        exportToken: 'true'
+
+    - name: Validate Vault
+      if: failure()
+      shell: bash
+      run: |
+        echo "To access Vault, this repository must be added to https://github.com/3lvia/github-repositories-terraform/tree/trunk/systems"
+        exit 1
+
+    - name: Run PromQL query
+      shell: bash
+      run: |
+        pip install -r '${{ github.action_path }}/requirements.txt'
+        python '${{ github.action_path }}/validate_metrics.py' --query '${{ inputs.query }}'
