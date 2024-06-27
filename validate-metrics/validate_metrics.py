@@ -63,12 +63,11 @@ def run_prometheus_query(promql: str, step: str) -> bool:
 
 
 def main(args):
-    print(f"Executing PromQL query to check for alerts. Args: {args}")
     promql = args.query
-    print("promql: ", promql)
+    print(f"Executing PromQL query: {args}")
     success = run_prometheus_query(promql, args.step)
     if success:
-        print("Query result exist.")
+        print("Query result exists.")
     else:
         error_message = f"Query result empty. Query: {promql}"
         print(error_message)
@@ -78,7 +77,7 @@ def main(args):
 def get_args_parser():
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument("--query", help="Promql query. Will raise error if the query returns emtpy result.")
-    parser.add_argument("--step", help="maximum time interval to look for the last alert state in the past")
+    parser.add_argument("--step", help="Maximum time to look for results. For instance 10m or 1h.")
     return parser
 
 
