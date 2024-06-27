@@ -1,5 +1,5 @@
 name: ValidateMetrics
-description: 'Runs a PromQL query on Grafana Cloud. Return success if the query has a result. Returns failure if the result is empty.'
+description: 'Runs a PromQL query on Grafana Cloud. Returns success (return code 0) if the query has a result. Returns failure if the result is empty (return code 1).'
 inputs:
   system:
     description: 'System is used to log in to Vault using correct role.'
