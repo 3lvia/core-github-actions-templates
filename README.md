@@ -766,11 +766,7 @@ Runs a PromQL query on Grafana Cloud. Returns success (return code 0) if the que
 
 This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
-- `checks: write`
-- `contents: read`
 - `id-token: write`
-- `issues: read`
-- `pull-requests: write`
 
 ### Usage
 
