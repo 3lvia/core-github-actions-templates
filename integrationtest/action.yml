@@ -95,4 +95,15 @@ runs:
       if: ${{ failure() && inputs.slack-channel != '' }}
       run: |
         slack_api_token=$(curl -H "X-Vault-Token: $VAULT_TOKEN" ${{ env.VAULT_ADDR }}/v1/shared/kv/data/tokens|jq -r '.data.data."slack-api-token"')
-        curl -v -d '{"channel": "${{ inputs.slack-channel }}", "text": ":warning: ${{ github.repository }} - ${{ github.ref_name }} feilet. Se https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }} for detaljer"}' -H "Content-type: application/json" -H "Authorization: Bearer $slack_api_token" "https://slack.com/api/chat.postMessage"
+        result=$(curl -d '{"channel": "${{ inputs.slack-channel }}", "text": ":warning: ${{ github.repository }} - ${{ github.ref_name }} feilet. Se https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }} for detaljer"}' -H "Content-type: application/json; charset=utf-8" -H "Authorization: Bearer $slack_api_token" "https://slack.com/api/chat.postMessage")
+        ok=$(echo $result|jq -r '.ok')
+        if [[ $ok == 'true' ]]; then
+          echo $result|jq '.'
+        else
+          error=$(echo $result|jq -r '.error')r
+          if [[ $error == 'not_in_channel' ]]; then
+            echo $'\x40Github Workflow Notifications does not have access to the channel ${{ inputs.slack-channel }}, please add it to the channel.'
+          else 
+            echo $result|jq '.'
+          fi
+        fi 
