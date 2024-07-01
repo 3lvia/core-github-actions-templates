@@ -98,9 +98,9 @@ runs:
         result=$(curl -d '{"channel": "${{ inputs.slack-channel }}", "text": ":warning: ${{ github.repository }} - ${{ github.ref_name }} feilet. Se https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }} for detaljer"}' -H "Content-type: application/json; charset=utf-8" -H "Authorization: Bearer $slack_api_token" "https://slack.com/api/chat.postMessage")
         ok=$(echo $result|jq -r '.ok')
         if [[ $ok == 'true' ]]; then
-          echo $result|jq '.'
+          echo "Sent message to slack channel ${{ inputs.slack-channel }}."
         else
-          error=$(echo $result|jq -r '.error')r
+          error=$(echo $result|jq -r '.error')
           if [[ $error == 'not_in_channel' ]]; then
             echo $'\x40Github Workflow Notifications does not have access to the channel ${{ inputs.slack-channel }}, please add it to the channel.'
           else 
