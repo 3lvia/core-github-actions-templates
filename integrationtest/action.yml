@@ -20,6 +20,13 @@ inputs:
     description: 'Environment is used to find correct vault instance.'
     required: true
     default: 'dev'
+  slack-channel:
+    description: 'Slack channel to notify on failure. Leave empty to disable notifications'
+    required: false
+    default: ''
+  slack-api-token:
+    description: 'Should normally be `secrets.SLACK_API_TOKEN`.'
+    required: false
 
 runs:
   using: 'composite'
@@ -85,3 +92,13 @@ runs:
           **/TestResults/*.trx
           .github/**/TestResults/*.trx
         check_name: 'Integration Test Results'
+
+    - name: Notify Slack on Failure
+      shell: bash
+      if: ${{ failure() && inputs.slack-channel != '' }} 
+      run: |
+        if [[ -z '${{ inputs.slack-api-token }}' ]]; then
+          echo 'To send notifications to slack, you must set input `sonar-api-token`.'
+          exit 1
+        fi
+        curl -v -d '{"channel": "${{ inputs.slack-channel }}", "text": ":warning: ${{ github.repository }} - ${{ github.ref_name }} feilet. Se https://github.com/${{ github.repository }}/actions for detaljer"}"}' -H "Content-type: application/json" -H "Authorization: Bearer ${{ inputs.slack-api-token }}" "https://slack.com/api/chat.postMessage"
