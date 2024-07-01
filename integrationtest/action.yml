@@ -24,9 +24,6 @@ inputs:
     description: 'Slack channel to notify on failure. Leave empty to disable notifications'
     required: false
     default: ''
-  slack-api-token:
-    description: 'Should normally be `secrets.SLACK_API_TOKEN`.'
-    required: false
 
 runs:
   using: 'composite'
@@ -101,4 +98,5 @@ runs:
           echo 'To send notifications to slack, you must set input `sonar-api-token`.'
           exit 1
         fi
-        curl -v -d '{"channel": "${{ inputs.slack-channel }}", "text": ":warning: ${{ github.repository }} - ${{ github.ref_name }} feilet. Se https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }} for detaljer"}' -H "Content-type: application/json" -H "Authorization: Bearer ${{ inputs.slack-api-token }}" "https://slack.com/api/chat.postMessage"
+        slack_api_token=$(curl -H "X-Vault-Token: $VAULT_TOKEN" ${{ env.VAULT_ADDR }}/v1/shared/kv/data/tokens|jq -r '.data.data."slack-api-token"')
+        curl -v -d '{"channel": "${{ inputs.slack-channel }}", "text": ":warning: ${{ github.repository }} - ${{ github.ref_name }} feilet. Se https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }} for detaljer"}' -H "Content-type: application/json" -H "Authorization: Bearer $slack_api_token" "https://slack.com/api/chat.postMessage"
