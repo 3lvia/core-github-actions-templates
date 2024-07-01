@@ -101,4 +101,4 @@ runs:
           echo 'To send notifications to slack, you must set input `sonar-api-token`.'
           exit 1
         fi
-        curl -v -d '{"channel": "${{ inputs.slack-channel }}", "text": ":warning: ${{ github.repository }} - ${{ github.ref_name }} feilet. Se https://github.com/${{ github.repository }}/actions for detaljer"}' -H "Content-type: application/json" -H "Authorization: Bearer ${{ inputs.slack-api-token }}" "https://slack.com/api/chat.postMessage"
+        curl -v -d '{"channel": "${{ inputs.slack-channel }}", "text": ":warning: ${{ github.repository }} - ${{ github.ref_name }} feilet. Se https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }} for detaljer"}' -H "Content-type: application/json" -H "Authorization: Bearer ${{ inputs.slack-api-token }}" "https://slack.com/api/chat.postMessage"
