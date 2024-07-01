@@ -95,7 +95,7 @@ runs:
 
     - name: Notify Slack on Failure
       shell: bash
-      if: ${{ failure() && inputs.slack-channel != '' }} 
+      if: ${{ failure() && inputs.slack-channel != '' }}
       run: |
         if [[ -z '${{ inputs.slack-api-token }}' ]]; then
           echo 'To send notifications to slack, you must set input `sonar-api-token`.'
