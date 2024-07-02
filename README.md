@@ -260,6 +260,7 @@ Deploys an application to Kubernetes using the Elvia Helm chart. To use the `Bui
 | `name`                          | Name of application. Do not include namespace.                                                                                       | yes      |                                        |
 | `namespace`                     | Namespace or system of the application.                                                                                              | yes      |                                        |
 | `runtime-cloud-provider`        | Kubernetes cloud provider to deploy to: `AKS` or `GKE`.                                                                              | no       | `AKS`                                  |
+| `slack-channel`                 | Slack channel to notify on failure. Leave empty to disable notifications                                                             | no       | ``                                     |
 | `workload-type`                 | The type of workload to deploy to kubernetes. Must be `deployment` or `statefulset`.                                                 | no       | `deployment`                           |
 
 ### Permissions
@@ -360,6 +361,12 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Required: no
     # Default: 'AKS'
 
+    slack-channel:
+    # Slack channel to notify on failure. Leave empty to disable notifications
+    #
+    # Required: no
+    # Default: ''
+
     workload-type:
     # The type of workload to deploy to kubernetes. Must be `deployment` or `statefulset`.
     #
@@ -442,6 +449,7 @@ Run .NET integration tests.
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------------- |
 | `checkout`          | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`                    |
 | `environment`       | Environment is used to find correct vault instance.                                                                                  | yes      | `dev`                     |
+| `slack-channel`     | Slack channel to notify on failure. Leave empty to disable notifications                                                             | no       | ``                        |
 | `system`            | System is used to log in to Vault using correct role.                                                                                | yes      |                           |
 | `test-projects`     | Pattern to use to find test projects.                                                                                                | no       | `integration*test*csproj` |
 | `working-directory` | Will run integration tests on projects under this working directory.                                                                 | no       | `./`                      |
@@ -473,6 +481,12 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     #
     # Required: yes
     # Default: 'dev'
+
+    slack-channel:
+    # Slack channel to notify on failure. Leave empty to disable notifications
+    #
+    # Required: no
+    # Default: ''
 
     system:
     # System is used to log in to Vault using correct role.
