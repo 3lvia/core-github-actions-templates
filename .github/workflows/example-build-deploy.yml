@@ -103,6 +103,7 @@ jobs:
           environment: 'dev'
           helm-values-path: ${{ env.HELM_VALUES_PATH }}
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
 
   deploy-test:
     name: Deploy Test
@@ -123,6 +124,7 @@ jobs:
           environment: 'test'
           helm-values-path: ${{ env.HELM_VALUES_PATH }}
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
 
   deploy-prod:
     name: Deploy Prod
@@ -143,3 +145,4 @@ jobs:
           environment: 'prod'
           helm-values-path: ${{ env.HELM_VALUES_PATH }}
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
