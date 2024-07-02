@@ -262,6 +262,7 @@ runs:
         secrets: |
           monitoring/kv/data/shared grafana_api_url        | GRAFANA_URL ;
           monitoring/kv/data/shared grafana_editor_api_key | GRAFANA_API_KEY
+        exportToken: 'true'
 
     - name: Add deploy annotation to Grafana Cloud
       shell: bash
