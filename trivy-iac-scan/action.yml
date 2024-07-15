@@ -1,5 +1,8 @@
 name: Trivy IaC scan
-description: 'Uses https://github.com/aquasecurity/trivy to scan IaC and report security issues. The action will report any vulnerabilities to GitHub Advanced Security, which will be visible in the Security tab on GitHub. If this action is ran on a pull request, GitHub Advanced Security will give a detailed report of any vulnerabilities introduced by new changes in the pull request.'
+description: |
+  Uses [Trivy](https://github.com/aquasecurity/trivy) to scan IaC and report security issues.
+  The action will report any vulnerabilities to GitHub Advanced Security, which will be visible in the Security tab on GitHub.
+  If this action is ran on a pull request, GitHub Advanced Security will give a detailed report of any vulnerabilities introduced by new changes in the pull request.
 inputs:
   path:
     description: 'Path to the directory containing the IaC files.'
@@ -21,7 +24,11 @@ inputs:
     required: false
     default: 'true'
   trivyignore:
-    description: "Path to the Trivy ignore file in the repository. This action will add a default set of CVE's that are ignored for all scans. If you wish to add more CVE's to ignore, add them to the .trivyignore, or create a new file and specify the path here. See https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids for more information."
+    description: |
+      Path to the Trivy ignore file (`.trivyignore`) in the repository.
+      This action will add a default set of CVE's that are ignored for all scans.
+      If you wish to add more CVE's to ignore, add them to `.trivyignore`, or create a new file and specify the path here.
+      See [Trivy documentation](https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids) for more information.
     required: false
     default: '.trivyignore'
 
