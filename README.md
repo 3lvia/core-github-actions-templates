@@ -55,7 +55,7 @@ see [here](#elvia-specific-actions) for more information.
     - [Inputs](#inputs-7)
     - [Permissions](#permissions-7)
     - [Usage](#usage-7)
-  - [ValidateMetrics](#validatemetrics)
+  - [Validate Metrics](#validate-metrics)
     - [Description](#description-8)
     - [Inputs](#inputs-8)
     - [Permissions](#permissions-8)
@@ -648,12 +648,12 @@ If this action is ran on a pull request, GitHub Advanced Security will give a de
 
 | Name            | Description                                                                                                                                                                                                                                                                                                                                                                                                 | Required | Default                            |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------- |
-| `checkout`      | If true, the action will check out the repository. If false, the action will assume the repository has already been checked out.                                                                                                                                                                                                                                                                            | no       | `true`                             |
+| `checkout`      | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                                                                                                                                                                                                                                                                        | no       | `true`                             |
 | `path`          | Path to the directory containing the IaC files.                                                                                                                                                                                                                                                                                                                                                             | no       | `.`                                |
-| `severity`      | Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.                                                                                                                                                                                                                                                                               | no       | `CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN` |
+| `severity`      | Severity levels to scan for. Can any combination of `CRITICAL`, `HIGH`, `MEDIUM`, `LOW`, and `UNKNOWN`. Multiple values must be comma-separated.                                                                                                                                                                                                                                                            | no       | `CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN` |
 | `skip-dirs`     | Comma-separated list of directories to skip.                                                                                                                                                                                                                                                                                                                                                                | no       |                                    |
 | `trivyignore`   | Path to the Trivy ignore file (`.trivyignore`) in the repository. This action will add a default set of CVE's that are ignored for all scans. If you wish to add more CVE's to ignore, add them to `.trivyignore`, or create a new file and specify the path here. See [Trivy documentation](https://aquasecurity.github.io/trivy/v0.50/docs/configuration/filtering/#by-finding-ids) for more information. | no       | `.trivyignore`                     |
-| `upload-report` | Upload Trivy report to GitHub Security tab. GitHub Advanced Security must be enabled for the repository to use this feature.                                                                                                                                                                                                                                                                                | no       | `true`                             |
+| `upload-report` | Whether or not to upload the report generated by Trivy to the GitHub _Security_ tab. GitHub Advanced Security must be enabled for the repository to use this feature.                                                                                                                                                                                                                                       | no       | `true`                             |
 
 ### Permissions
 
@@ -670,7 +670,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
   uses: 3lvia/core-github-actions-templates/trivy-iac-scan@trunk
   with:
     checkout:
-    # If true, the action will check out the repository. If false, the action will assume the repository has already been checked out.
+    # If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.
     #
     # Required: no
     # Default: 'true'
@@ -682,7 +682,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Default: '.'
 
     severity:
-    # Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.
+    # Severity levels to scan for. Can any combination of `CRITICAL`, `HIGH`, `MEDIUM`, `LOW`, and `UNKNOWN`. Multiple values must be comma-separated.
     #
     # Required: no
     # Default: 'CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN'
@@ -699,7 +699,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Default: '.trivyignore'
 
     upload-report:
-    # Upload Trivy report to GitHub Security tab. GitHub Advanced Security must be enabled for the repository to use this feature.
+    # Whether or not to upload the report generated by Trivy to the GitHub *Security* tab. GitHub Advanced Security must be enabled for the repository to use this feature.
     #
     # Required: no
     # Default: 'true'
@@ -768,7 +768,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
 <!-- gh-actions-docs-start path=validate-metrics/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=id-token:write -->
 
-## ValidateMetrics
+## Validate Metrics
 
 ### Description
 
@@ -778,11 +778,12 @@ Returns failure if the result is empty (return code 1).
 
 ### Inputs
 
-| Name          | Description                                           | Required | Default |
-| ------------- | ----------------------------------------------------- | -------- | ------- |
-| `environment` | Environment is used to find correct vault instance.   | yes      |         |
-| `query`       | PromQL query string.                                  | yes      |         |
-| `system`      | System is used to log in to Vault using correct role. | yes      |         |
+| Name          | Description                                                                                                                          | Required | Default |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- |
+| `checkout`    | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`  |
+| `environment` | Environment is used to find correct vault instance.                                                                                  | yes      |         |
+| `query`       | PromQL query string.                                                                                                                 | yes      |         |
+| `system`      | System is used to log in to Vault using correct role.                                                                                | yes      |         |
 
 ### Permissions
 
@@ -793,9 +794,15 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 ### Usage
 
 ```yaml
-- name: ValidateMetrics
+- name: Validate Metrics
   uses: 3lvia/core-github-actions-templates/validate-metrics@trunk
   with:
+    checkout:
+    # If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.
+    #
+    # Required: no
+    # Default: 'true'
+
     environment:
     # Environment is used to find correct vault instance.
     #
