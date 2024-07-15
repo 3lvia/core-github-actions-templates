@@ -7,6 +7,7 @@ on:
       - '.github/workflows/generate-docs.yml'
       - '**/action.yml'
       - 'README.md'
+  workflow_dispatch:
 
 concurrency:
   group: '${{ github.workflow }}-${{ github.event_name }}'
