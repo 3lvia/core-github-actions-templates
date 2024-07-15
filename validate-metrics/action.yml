@@ -1,4 +1,4 @@
-name: ValidateMetrics
+name: 'Validate Metrics'
 description: |
   Runs a PromQL query on Grafana Cloud.
   Returns success (return code 0) if the query has a result.
@@ -13,6 +13,10 @@ inputs:
   query:
     description: 'PromQL query string.'
     required: true
+  checkout:
+    description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
+    required: false
+    default: 'true'
 
 runs:
   using: 'composite'

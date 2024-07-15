@@ -1,5 +1,5 @@
 """
-This script checks if a promql query returns data. If the query returns no data, this script returns an error code. 
+This script checks if a promql query returns data. If the query returns no data, this script returns an error code.
 
 python3 ./validate_metrics.py --query 'kafka_consumergroup_lag_sum{origin_prometheus="runtimeaksclusterdev", consumergroup="private.dp.edna.examples-core.democonsumer-0"}==0'
 """
