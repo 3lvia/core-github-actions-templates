@@ -1,5 +1,8 @@
 name: 'Build'
-description: 'Builds Docker image, scans for vulnerabilities using Trivy and pushes to either Azure Container Registry or GitHub Container Registry. To use the `Build` and `Deploy` actions with Elvias container registry and runtime services, you must first add your GitHub repository to https://github.com/3lvia/github-repositories-terraform.'
+description: |
+  Builds Docker image, scans for vulnerabilities using Trivy and pushes to either Azure Container Registry or GitHub Container Registry.
+  To use the `Build` and `Deploy` actions with Elvias container registry and runtime services,
+  you must first add your GitHub repository to [github-repositories-terraform](https://github.com/3lvia/github-repositories-terraform).
 inputs:
   name:
     description: 'Name of application. This will be used as the image name. For Elvia applications, do not include the namespace.'
@@ -8,42 +11,61 @@ inputs:
     description: 'Namespace or system of the application. This is only relevant for Elvia applications.'
     required: false
   csproj-file:
-    description: 'Path to a csproj-file, e.g. `src/my-app/my-app.csproj`. Either this or `dockerfile` must be given. This argument takes precedence over `dockerfile`.'
+    description: |
+      Path to a csproj-file, e.g. `src/my-app/my-app.csproj`.
+      Either this or `dockerfile` must be given.
+      This argument takes precedence over `dockerfile`.'
     required: false
   dockerfile:
     description: 'Path to Dockerfile, e.g. `src/Dockerfile`. Either this or `csproj-file` must be given.'
     default: 'Dockerfile'
     required: false
   docker-build-context:
-    description: 'Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.'
+    description: |
+      Docker build context, which is the working directory needed to build the dockerfile.
+      Defaults to the directory of the Dockerfile.
     required: false
   docker-build-no-summary:
     description: 'If `true`, the action will not display a step summary after the build.'
     required: false
     default: 'false'
   docker-cache-tag:
-    description: 'Tag used for getting build cache from registry. This tag is also pushed on every build, together with `github.sha-github.run_number`. This action will push a `latest` tag, but you can set this to `latest` if you want to have a separate tag for the latest build.'
+    description: |
+      Tag used for getting build cache from registry.
+      This tag is also pushed on every build, together with `github.sha-github.run_number`.
+      This action will push a `latest` tag, but you can set this to `latest` if you want to have a separate tag for the latest build.
     default: 'latest-cache'
   severity:
-    description: 'Severity levels to scan for. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.'
+    description: |
+      Severity levels to scan for.
+      See [Trivy documentation](https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs) for more information.
     required: false
     default: 'CRITICAL'
   trivy-cve-ignores:
-    description: 'Comma-separated list of CVEs for Trivy to ignore. See https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore for syntax.'
+    description: |
+      Comma-separated list of CVEs for Trivy to ignore.
+      See [Trivy documentation](https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore) for syntax.
     required: false
   trivy-enable-secret-scanner:
     description: 'Enable Trivy secret scanner.'
     required: false
     default: 'true'
   trivy-skip-dirs:
-    description: 'Directories/files skipped by Trivy. See https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs for more information.'
+    description: |
+      Directories/files skipped by Trivy.
+      See [Trivy documentation](https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs) for more information.
     required: false
   checkout:
     description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
     required: false
     default: 'true'
   registry:
-    description: 'What container registry to use, either `acr` or `ghcr`. If set to `acr`, credentials for Azure Container Registry will default to Elvia values. You can also set these explictly to point to your own ACR. If set to `ghcr`, the action will use the GitHub Container Registry. This requires `github-token` to be set, and the `packages: write` permission.'
+    description: |
+      What container registry to use, either `acr` or `ghcr`.
+      If set to `acr`, credentials for Azure Container Registry will default to Elvia values.
+      You can also set these explictly to point to your own ACR.
+      If set to `ghcr`, the action will use the GitHub Container Registry.
+      This requires `github-token` to be set, and the `packages: write` permission.'
     required: false
     default: 'acr'
   github-token:
