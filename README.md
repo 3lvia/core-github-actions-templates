@@ -106,6 +106,7 @@ you must first add your GitHub repository to [github-repositories-terraform](htt
 | `AZURE_TENANT_ID`             | TenantId of a service principal that can push to Azure Container Registry.                                                                                                                                                                                                                                                                                     | no       | `2186a6ec-c227-4291-9806-d95340bf439d` |
 | `checkout`                    | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                                                                                                                                                                                                                           | no       | `true`                                 |
 | `csproj-file`                 | Path to a csproj-file, e.g. `src/my-app/my-app.csproj`. Either this or `dockerfile` must be given. This argument takes precedence over `dockerfile`.'                                                                                                                                                                                                          | no       |                                        |
+| `docker-additional-tags`      | Additional tags to add to the image.                                                                                                                                                                                                                                                                                                                           | no       |                                        |
 | `docker-build-context`        | Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.                                                                                                                                                                                                                              | no       |                                        |
 | `docker-build-no-summary`     | If `true`, the action will not display a step summary after the build.                                                                                                                                                                                                                                                                                         | no       | `false`                                |
 | `docker-cache-tag`            | Tag used for getting build cache from registry. This tag is also pushed on every build, together with `github.sha-github.run_number`. This action will push a `latest` tag, but you can set this to `latest` if you want to have a separate tag for the latest build.                                                                                          | no       | `latest-cache`                         |
@@ -163,6 +164,11 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
     csproj-file:
     # Path to a csproj-file, e.g. `src/my-app/my-app.csproj`. Either this or `dockerfile` must be given. This argument takes precedence over `dockerfile`.'
+    #
+    # Required: no
+
+    docker-additional-tags:
+    # Additional tags to add to the image.
     #
     # Required: no
 
