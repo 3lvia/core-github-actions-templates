@@ -12,7 +12,7 @@ inputs:
     description: 'Comma-separated list of directories to skip.'
     required: false
   severity:
-    description:
+    description: |
       Severity levels to scan for.
       Can any combination of `CRITICAL`, `HIGH`, `MEDIUM`, `LOW`, and `UNKNOWN`.
       Multiple values must be comma-separated.
