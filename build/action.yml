@@ -35,6 +35,9 @@ inputs:
       This tag is also pushed on every build, together with `github.sha-github.run_number`.
       This action will push a `latest` tag, but you can set this to `latest` if you want to have a separate tag for the latest build.
     default: 'latest-cache'
+  docker-additional-tags:
+    description: 'Additional tags to add to the image.'
+    required: false
   severity:
     description: |
       Severity levels to scan for.
@@ -128,6 +131,15 @@ runs:
           exit 1
         fi
 
+        if [[ '${{ inputs.docker-additional-tags }}' != '' ]]; then
+          additional_tags=()
+          for additional_tag in $(echo '${{ inputs.docker-additional-tags }}' | sed 's/,/ /g'); do
+            additional_tags+=("$IMAGE_NAME:$additional_tag")
+          done
+          printf -v additional_tags_str "%s," "${additional_tags[@]}"
+          echo "DOCKER_ADDITIONAL_TAGS=${additional_tags_str%?}" >> "$GITHUB_ENV"
+        fi
+
         if [[ '${{ inputs.csproj-file }}' == '' && '${{ inputs.dockerfile }}' == '' ]]; then
             echo 'Either csproj-file or dockerfile must be given.'
             exit 1
@@ -198,7 +210,10 @@ runs:
         file: ${{ env.DOCKERFILE }}
         push: 'false'
         load: 'true'
-        tags: '${{ env.IMAGE_LONG_NAME }},${{ env.IMAGE_NAME }}:${{ inputs.docker-cache-tag }}'
+        tags: |
+          ${{ env.IMAGE_LONG_NAME }}
+          ${{ env.IMAGE_NAME }}:${{ inputs.docker-cache-tag }}
+          ${{ env.DOCKER_ADDITIONAL_TAGS }}
         cache-from: 'type=registry,ref=${{ env.IMAGE_NAME }}:${{ inputs.docker-cache-tag }}'
         cache-to: 'type=inline'
 
