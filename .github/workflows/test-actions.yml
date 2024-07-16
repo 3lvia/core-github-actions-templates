@@ -118,6 +118,7 @@ jobs:
           namespace: ${{ env.SYSTEM_NAME }}
           csproj-file: ${{ matrix.build == 'csproj-file' && '.github/test/src/core-demo-api.csproj' || '' }}
           dockerfile: ${{ matrix.build == 'dockerfile' && '.github/test/src/Dockerfile' || '' }}
+          docker-additional-tags: 'v42,v1.2.3'
           severity: 'CRITICAL'
           registry: ${{ matrix.registry }}
           github-token: ${{ matrix.registry == 'ghcr' && secrets.GITHUB_TOKEN || '' }}
