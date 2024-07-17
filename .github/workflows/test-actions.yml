@@ -17,7 +17,7 @@ env:
   SYSTEM_NAME: 'core'
 
 concurrency:
-  group: '${{ github.workflow }}-${{ github.event_name }}'
+  group: '${{ github.workflow }}-${{ github.event_name }}-${{ inputs.runner }}'
   cancel-in-progress: true
 
 jobs:
