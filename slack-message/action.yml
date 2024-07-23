@@ -1,0 +1,76 @@
+name: 'Slack Message'
+description: |
+  Sends a message to a Slack channel.
+  Permission `id-token:write` is only required if you're not defining the `slack-api-token` input.
+inputs:
+  slack-channel:
+    description: 'Slack channel to send message to.'
+    required: true
+  message:
+    description: 'Message to send to the Slack channel.'
+    required: true
+  slack-api-token:
+    description: |
+      Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`.
+
+      If no input is provided, the action will attempt to read the token from Elvia's Vault instance.
+      Reading the token from Vault is only possible if the repository you are running this action from has been added to [github-repositories-terraform](https://github.com/3lvia/github-repositories-terraform),
+      and you are running inside the GitHub Actions environments `dev`, `test` or `prod`.
+    required: false
+  environment:
+    description: 'Environment is used to find the correct Vault instance. Not required if you use `slack-api-token`.'
+    required: false
+  namespace:
+    description: 'Namespace is used to find the correct Vault role. Not required if you use `slack-api-token`.'
+    required: false
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set environment variables
+      if: ${{ inputs.slack-api-token == '' }}
+      shell: bash
+      run: |
+        if [[ '${{ inputs.environment }}' == 'dev' ]]; then
+          echo 'VAULT_ADDR=https://vault.dev-elvia.io' >> "$GITHUB_ENV"
+        elif [[ '${{ inputs.environment }}' == 'test' ]]; then
+          echo 'VAULT_ADDR=https://vault.test-elvia.io' >> "$GITHUB_ENV"
+        elif [[ '${{ inputs.environment }}' == 'prod' ]]; then
+          echo 'VAULT_ADDR=https://vault.elvia.io' >> "$GITHUB_ENV"
+        elif [[ '${{ inputs.environment }}' == 'sandbox' ]]; then
+          echo 'VAULT_ADDR=https://vault.dev-elvia.io' >> "$GITHUB_ENV"
+        else
+          echo 'Unsupported environment: ${{ inputs.environment }}'
+          exit 1
+        fi
+
+        echo "REPO_SHORT_NAME=${GITHUB_REPOSITORY##*/}" >> "$GITHUB_ENV"
+
+    - name: Read secrets from Vault
+      uses: hashicorp/vault-action@v3
+      if: ${{ inputs.slack-api-token == '' }}
+      with:
+        url: ${{ env.VAULT_ADDR }}
+        role: 'jwt-github-${{ inputs.namespace }}-${{ env.REPO_SHORT_NAME }}'
+        method: 'jwt'
+        path: 'jwt-github'
+        secrets: |
+          shared/kv/data/tokens slack-api-token | SLACK_API_TOKEN
+
+    - name: Notify Slack
+      shell: bash
+      run: |
+        result=$(curl --silent -d '{"channel": "${{ inputs.slack-channel }}", "text": "${{ inputs.message }}"}' -H "Content-type: application/json; charset=utf-8" -H "Authorization: Bearer $SLACK_API_TOKEN" "https://slack.com/api/chat.postMessage")
+        ok=$(echo "$result" | jq -r '.ok')
+        if [[ "$ok" == 'true' ]]; then
+          echo "Sent message to slack channel ${{ inputs.slack-channel }}."
+        else
+          error=$(echo "$result" | jq -r '.error')
+          if [[ $"error" == 'not_in_channel' ]]; then
+            echo $'::error::\x40Github Workflow Notifications does not have access to the channel ${{ inputs.slack-channel }}, please add it to the channel.'
+          else
+            echo "$result" | jq '.'
+          fi
+        fi
+      env:
+        SLACK_API_TOKEN: ${{ inputs.slack-api-token == '' && env.SLACK_API_TOKEN || inputs.slack-api-token }}

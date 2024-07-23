@@ -17,7 +17,7 @@ inputs:
     required: false
     default: 'integration*test*csproj'
   environment:
-    description: 'Environment is used to find correct vault instance.'
+    description: 'Environment is used to find correct Vault instance.'
     required: true
     default: 'dev'
   slack-channel:
