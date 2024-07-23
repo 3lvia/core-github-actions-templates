@@ -60,6 +60,11 @@ see [here](#elvia-specific-actions) for more information.
     - [Inputs](#inputs-8)
     - [Permissions](#permissions-8)
     - [Usage](#usage-8)
+  - [Slack Message](#slack-message)
+    - [Description](#description-9)
+    - [Inputs](#inputs-9)
+    - [Permissions](#permissions-9)
+    - [Usage](#usage-9)
   - [Elvia-specific actions](#elvia-specific-actions)
 - [Development](#development)
   - [Formatting](#formatting)
@@ -458,7 +463,7 @@ Run .NET integration tests.
 | Name                | Description                                                                                                                          | Required | Default                   |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------------- |
 | `checkout`          | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`                    |
-| `environment`       | Environment is used to find correct vault instance.                                                                                  | yes      | `dev`                     |
+| `environment`       | Environment is used to find correct Vault instance.                                                                                  | yes      | `dev`                     |
 | `slack-channel`     | Slack channel to notify on failure. Leave empty to disable notifications                                                             | no       | ``                        |
 | `system`            | System is used to log in to Vault using correct role.                                                                                | yes      |                           |
 | `test-projects`     | Pattern to use to find test projects.                                                                                                | no       | `integration*test*csproj` |
@@ -487,7 +492,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Default: 'true'
 
     environment:
-    # Environment is used to find correct vault instance.
+    # Environment is used to find correct Vault instance.
     #
     # Required: yes
     # Default: 'dev'
@@ -826,6 +831,63 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 <!-- gh-actions-docs-end -->
 
 <!-- gh-actions-docs-start path=slack-message/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contens:read,id-token:write -->
+
+## Slack Message
+
+### Description
+
+Sends a message to a Slack channel.
+Permission `id-token:write` is only required if you're not defining the `slack-api-token` input.
+
+### Inputs
+
+| Name              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Required | Default |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------- |
+| `environment`     | Environment is used to find the correct Vault instance. Not required if you use `slack-api-token`.                                                                                                                                                                                                                                                                                                                                                                                                        | no       |         |
+| `message`         | Message to send to the Slack channel.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | yes      |         |
+| `namespace`       | Namespace is used to find the correct Vault role. Not required if you use `slack-api-token`.                                                                                                                                                                                                                                                                                                                                                                                                              | no       |         |
+| `slack-api-token` | Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`. If no input is provided, the action will attempt to read the token from Elvia's Vault instance. Reading the token from Vault is only possible if the repository you are running this action from has been added to [github-repositories-terraform](https://github.com/3lvia/github-repositories-terraform), and you are running inside the GitHub Actions environments `dev`, `test` or `prod`. | no       |         |
+| `slack-channel`   | Slack channel to send message to.                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | yes      |         |
+
+### Permissions
+
+This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+
+- `contens: read`
+- `id-token: write`
+
+### Usage
+
+```yaml
+- name: Slack Message
+  uses: 3lvia/core-github-actions-templates/slack-message@trunk
+  with:
+    environment:
+    # Environment is used to find the correct Vault instance. Not required if you use `slack-api-token`.
+    #
+    # Required: no
+
+    message:
+    # Message to send to the Slack channel.
+    #
+    # Required: yes
+
+    namespace:
+    # Namespace is used to find the correct Vault role. Not required if you use `slack-api-token`.
+    #
+    # Required: no
+
+    slack-api-token:
+    # Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`.  If no input is provided, the action will attempt to read the token from Elvia's Vault instance. Reading the token from Vault is only possible if the repository you are running this action from has been added to [github-repositories-terraform](https://github.com/3lvia/github-repositories-terraform), and you are running inside the GitHub Actions environments `dev`, `test` or `prod`.
+    #
+    # Required: no
+
+    slack-channel:
+    # Slack channel to send message to.
+    #
+    # Required: yes
+```
+
 <!-- gh-actions-docs-end -->
 
 ## Elvia-specific actions
