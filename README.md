@@ -770,8 +770,6 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
 <!-- gh-actions-docs-end -->
 
-<!-- gh-actions-docs-end -->
-
 <!-- gh-actions-docs-start path=validate-metrics/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=id-token:write -->
 
 ## Validate Metrics
@@ -825,6 +823,9 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Required: yes
 ```
 
+<!-- gh-actions-docs-end -->
+
+<!-- gh-actions-docs-start path=slack-message/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contens:read,id-token:write -->
 <!-- gh-actions-docs-end -->
 
 ## Elvia-specific actions
