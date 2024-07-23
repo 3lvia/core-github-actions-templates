@@ -245,7 +245,7 @@ runs:
         sudo apt-get install trivy
 
     - name: Run Trivy vulnerability scanner (pull request)
-      if: ${{ github.event_name == 'pull_request' && startsWith(runner.name, 'elvia-runner-') }}
+      if: ${{ github.event_name == 'pull_request' }}
       shell: bash
       run: |
         # Run Trivy
@@ -259,7 +259,7 @@ runs:
           ${{ inputs.trivy-skip-dirs != '' && format('--skip-dirs {0}', inputs.trivy-skip-dirs) || '' }}
 
     - name: Run Trivy vulnerability scanner (push)
-      if: ${{ github.event_name == 'push' && startsWith(runner.name, 'elvia-runner-') }}
+      if: ${{ github.event_name == 'push' }}
       shell: bash
       run: |
         # Run Trivy
