@@ -1,0 +1,68 @@
+name: 'Lint'
+description: |
+  Linting for Go and TypeScript projects.
+  This action uses golangci-lint for Go projects and ESLint for TypeScript projects.
+inputs:
+  language:
+    description: 'The language of the project. Can be `go` or `typescript`.'
+    required: true
+  working-directory:
+    description: 'Working directory'
+    required: false
+    default: '.'
+  checkout:
+    description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout repository
+      if: ${{ inputs.checkout == 'true' }}
+      uses: actions/checkout@v4
+
+    # Go
+    - name: Setup Go
+      if: ${{ inputs.language == 'go' }}
+      uses: actions/setup-go@v5
+      with:
+        cache-dependency-path: '${{ inputs.working-directory }}/go.sum'
+        go-version-file: '${{ inputs.working-directory }}/go.mod'
+
+    - name: Run golangci-lint
+      if: ${{ inputs.language == 'go' }}
+      uses: golint/golangci-lint-action@v6
+      with:
+        working-directory: ${{ inputs.working-directory }}
+        args: '--timeout=5m'
+
+    # TypeScript
+    - name: Setup Node.js
+      if: ${{ inputs.language == 'typescript' }}
+      uses: actions/setup-node@v4
+
+    - name: Get package manager
+      if: ${{ inputs.language == 'typescript' }}
+      shell: bash
+      run: |
+        if [[ -f yarn.lock ]]; then
+          echo "NODE_PACKAGE_MANAGER=yarn" >> $GITHUB_ENV
+        elif [[ -f package-lock.json ]]; then
+          echo "NODE_PACKAGE_MANAGER=npm" >> $GITHUB_ENV
+        else [[ -f pnpm-lock.yaml ]]; then
+          echo "NODE_PACKAGE_MANAGER=pnpm" >> $GITHUB_ENV
+        else
+          echo "No dependency lock file found."
+          exit 1
+        fi
+
+    - name: Install dependencies
+      if: ${{ inputs.language == 'typescript' }}
+      shell: bash
+      run: ${{ env.NODE_PACKAGE_MANAGER }} install
+
+    - name: Run ESLint
+      if: ${{ inputs.language == 'typescript' }}
+      shell: bash
+      run: ${{ env.NODE_PACKAGE_MANAGER }} run lint
