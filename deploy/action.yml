@@ -166,6 +166,7 @@ runs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
+        cache-dependency-path: '${{ github.action_path }}/requirements.txt'
 
     - name: Authenticate with Azure
       uses: azure/login@v2
@@ -281,7 +282,7 @@ runs:
           --grafana_url "$GRAFANA_URL" \
           --grafana_api_key "$GRAFANA_API_KEY"
 
-    - name: Notify Slack on Failure
+    - name: Notify Slack on failure
       if: ${{ failure() && inputs.slack-channel != '' }}
       uses: ./slack-message
       with:
