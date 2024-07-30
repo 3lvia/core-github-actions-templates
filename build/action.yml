@@ -38,6 +38,10 @@ inputs:
   docker-additional-tags:
     description: 'Additional tags to add to the image.'
     required: false
+  ghcr-omit-repository-name:
+    description: 'If `true`, the action will not include the repository name in the image name.'
+    required: false
+    default: 'false'
   severity:
     description: |
       Severity levels to scan for.
@@ -123,7 +127,11 @@ runs:
           echo "IMAGE_NAME=$IMAGE_NAME" >> "$GITHUB_ENV"
           echo "IMAGE_LONG_NAME=$IMAGE_NAME:${{ github.sha }}-${{ github.run_number }}" >> "$GITHUB_ENV"
         elif [[ '${{ inputs.registry }}' == 'ghcr' ]]; then
-          IMAGE_NAME=$(echo 'ghcr.io/${{ github.repository_owner }}/${{ inputs.name }}' | tr '[:upper:]' '[:lower:]') # Docker tag must be lowercase
+          if [[ '${{ inputs.ghcr-omit-repository-name }}' == 'true' ]]; then
+            IMAGE_NAME=$(echo 'ghcr.io/${{ github.repository_owner }}/${{ inputs.name }}' | tr '[:upper:]' '[:lower:]') # Docker tag must be lowercase
+          else
+            IMAGE_NAME=$(echo 'ghcr.io/${{ github.repository }}/${{ inputs.name }}' | tr '[:upper:]' '[:lower:]') # Docker tag must be lowercase
+          fi
           echo "IMAGE_NAME=$IMAGE_NAME" >> "$GITHUB_ENV"
           echo "IMAGE_LONG_NAME=$IMAGE_NAME:${{ github.sha }}-${{ github.run_number }}" >> "$GITHUB_ENV"
         else
