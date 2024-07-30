@@ -116,6 +116,7 @@ you must first add your GitHub repository to [github-repositories-terraform](htt
 | `docker-build-no-summary`     | If `true`, the action will not display a step summary after the build.                                                                                                                                                                                                                                                                                         | no       | `false`                                |
 | `docker-cache-tag`            | Tag used for getting build cache from registry. This tag is also pushed on every build, together with `github.sha-github.run_number`. This action will push a `latest` tag, but you can set this to `latest` if you want to have a separate tag for the latest build.                                                                                          | no       | `latest-cache`                         |
 | `dockerfile`                  | Path to Dockerfile, e.g. `src/Dockerfile`. Either this or `csproj-file` must be given.                                                                                                                                                                                                                                                                         | no       | `Dockerfile`                           |
+| `ghcr-omit-repository-name`   | If `true`, the action will not include the repository name in the image name.                                                                                                                                                                                                                                                                                  | no       | `false`                                |
 | `github-token`                | GitHub token for GitHub Container Registry. Required if `registry` is set to `ghcr`. Should normally be `secrets.GITHUB_TOKEN`.                                                                                                                                                                                                                                | no       |                                        |
 | `name`                        | Name of application. This will be used as the image name. For Elvia applications, do not include the namespace.                                                                                                                                                                                                                                                | yes      |                                        |
 | `namespace`                   | Namespace or system of the application. This is only relevant for Elvia applications.                                                                                                                                                                                                                                                                          | no       |                                        |
@@ -198,6 +199,12 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     #
     # Required: no
     # Default: 'Dockerfile'
+
+    ghcr-omit-repository-name:
+    # If `true`, the action will not include the repository name in the image name.
+    #
+    # Required: no
+    # Default: 'false'
 
     github-token:
     # GitHub token for GitHub Container Registry. Required if `registry` is set to `ghcr`. Should normally be `secrets.GITHUB_TOKEN`.
