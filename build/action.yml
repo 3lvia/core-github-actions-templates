@@ -288,6 +288,17 @@ runs:
         sarif_file: trivy.sarif
         category: 'Trivy'
 
+    - name: Generate SBOM
+      # if: ${{ github.event_name == 'push' }}
+      uses: advanced-security/generate-sbom-action@v1
+      id: generate-sbom
+
+    - uses: actions/upload-artifact@v4
+      # if: ${{ github.event_name == 'push' }}
+      with:
+        name: 'sbom'
+        path: ${{ steps.generate-sbom.outputs.fileName }}
+
     - name: Push image
       shell: bash
       run: |
