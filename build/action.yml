@@ -33,10 +33,10 @@ inputs:
     description: |
       Tag used for getting build cache from registry.
       This tag is also pushed on every build, together with `github.sha-github.run_number`.
-      This action will push a `latest` tag, but you can set this to `latest` if you want to have a separate tag for the latest build.
+      This action will not push a `latest` tag; if you want a `latest` tag, you can use this input or `docker-additional-tags`.
     default: 'latest-cache'
   docker-additional-tags:
-    description: 'Additional tags to add to the image.'
+    description: 'Comma-separated list of additional tags to add to the image.'
     required: false
   ghcr-omit-repository-name:
     description: 'If `true`, the action will not include the repository name in the image name.'
@@ -180,13 +180,6 @@ runs:
         if [[ '${{ inputs.docker-build-no-summary }}' == 'true' ]]; then
             echo 'DOCKER_BUILD_NO_SUMMARY=true' >> "$GITHUB_ENV"
         fi
-
-    - name: Print Dockerfile variable
-      shell: bash
-      run: |
-        # Print Dockerfile variable
-        echo 'Dockerfile: ${{ env.DOCKERFILE }}'
-        cat '${{ env.DOCKERFILE }}'
 
     - name: Authenticate with Azure
       if: ${{ inputs.registry == 'acr' }}
