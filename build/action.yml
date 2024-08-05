@@ -144,7 +144,7 @@ runs:
           for additional_tag in $(echo '${{ inputs.docker-additional-tags }}' | sed 's/,/ /g'); do
             additional_tags+=("$IMAGE_NAME:$additional_tag")
           done
-          printf -v additional_tags_str "%s," "${additional_tags[@]}"
+          printf -v additional_tags_str "%s\n" "${additional_tags[@]}"
           echo "DOCKER_ADDITIONAL_TAGS=${additional_tags_str%?}" >> "$GITHUB_ENV"
         fi
 
