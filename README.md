@@ -16,52 +16,42 @@ see [here](#elvia-specific-actions) for more information.
 - [Elvia runners](#elvia-runners)
 - [Actions Documentation](#actions-documentation)
   - [Build](#build)
-    - [Description](#description)
     - [Inputs](#inputs)
     - [Permissions](#permissions)
     - [Usage](#usage)
   - [Deploy](#deploy)
-    - [Description](#description-1)
     - [Inputs](#inputs-1)
     - [Permissions](#permissions-1)
     - [Usage](#usage-1)
   - [Unit Test](#unit-test)
-    - [Description](#description-2)
     - [Inputs](#inputs-2)
     - [Permissions](#permissions-2)
     - [Usage](#usage-2)
   - [Integration Test](#integration-test)
-    - [Description](#description-3)
     - [Inputs](#inputs-3)
     - [Permissions](#permissions-3)
     - [Usage](#usage-3)
   - [Analyze](#analyze)
-    - [Description](#description-4)
     - [Inputs](#inputs-4)
     - [Permissions](#permissions-4)
     - [Usage](#usage-4)
   - [SonarCloud](#sonarcloud)
-    - [Description](#description-5)
     - [Inputs](#inputs-5)
     - [Permissions](#permissions-5)
     - [Usage](#usage-5)
   - [Trivy IaC scan](#trivy-iac-scan)
-    - [Description](#description-6)
     - [Inputs](#inputs-6)
     - [Permissions](#permissions-6)
     - [Usage](#usage-6)
   - [Playwright Test](#playwright-test)
-    - [Description](#description-7)
     - [Inputs](#inputs-7)
     - [Permissions](#permissions-7)
     - [Usage](#usage-7)
   - [Validate Metrics](#validate-metrics)
-    - [Description](#description-8)
     - [Inputs](#inputs-8)
     - [Permissions](#permissions-8)
     - [Usage](#usage-8)
   - [Slack Message](#slack-message)
-    - [Description](#description-9)
     - [Inputs](#inputs-9)
     - [Permissions](#permissions-9)
     - [Usage](#usage-9)
@@ -94,8 +84,6 @@ See [core-github-actions-runner](https://github.com/3lvia/core-github-actions-ru
 <!-- gh-actions-docs-start path=build/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
 
 ## Build
-
-### Description
 
 Builds Docker image, scans for vulnerabilities using Trivy and pushes to either Azure Container Registry or GitHub Container Registry.
 To use the `Build` and `Deploy` actions with Elvias container registry and runtime services,
@@ -256,8 +244,6 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
 ## Deploy
 
-### Description
-
 Deploys an application to Kubernetes using the Elvia Helm chart.
 To use the `Build` and `Deploy` actions with Elvias container registry and runtime services,
 you must first add your Github repository to [github-repositories-terraform](https://github.com/3lvia/github-repositories-terraform).
@@ -402,8 +388,6 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
 ## Unit Test
 
-### Description
-
 Run .NET unit tests.
 
 ### Inputs
@@ -460,8 +444,6 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 <!-- gh-actions-docs-start path=integrationtest/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=checks:write,contents:read,id-token:write,issues:read,pull-requests:write -->
 
 ## Integration Test
-
-### Description
 
 Run .NET integration tests.
 
@@ -534,8 +516,6 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
 ## Analyze
 
-### Description
-
 Run CodeQL analysis.
 
 ### Inputs
@@ -584,8 +564,6 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 <!-- gh-actions-docs-start path=sonarcloud/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=checks:write,contents:read,id-token:write,issues:read,pull-requests:write -->
 
 ## SonarCloud
-
-### Description
 
 Run SonarCloud scanning on .NET code.
 
@@ -655,8 +633,6 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 <!-- gh-actions-docs-start path=trivy-iac-scan/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=actions:read,contents:read,security-events:write -->
 
 ## Trivy IaC scan
-
-### Description
 
 Uses [Trivy](https://github.com/aquasecurity/trivy) to scan IaC and report security issues.
 The action will report any vulnerabilities to GitHub Advanced Security, which will be visible in the Security tab on GitHub.
@@ -729,8 +705,6 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
 ## Playwright Test
 
-### Description
-
 Run Playwright tests written in .NET.
 
 ### Inputs
@@ -786,8 +760,6 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
 ## Validate Metrics
 
-### Description
-
 Runs a PromQL query on Grafana Cloud.
 Returns success (return code 0) if the query has a result.
 Returns failure if the result is empty (return code 1).
@@ -840,8 +812,6 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 <!-- gh-actions-docs-start path=slack-message/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contens:read,id-token:write -->
 
 ## Slack Message
-
-### Description
 
 Sends a message to a Slack channel.
 Permission `id-token:write` is only required if you're not defining the `slack-api-token` input.
