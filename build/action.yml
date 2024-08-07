@@ -149,7 +149,11 @@ runs:
             additional_tags+=("$IMAGE_NAME:$additional_tag")
           done
           printf -v additional_tags_str "%s\n" "${additional_tags[@]}"
-          echo "DOCKER_ADDITIONAL_TAGS=${additional_tags_str%?}" >> "$GITHUB_ENV"
+          {
+            echo 'DOCKER_ADDITIONAL_TAGS<<EOF'
+            echo "$additional_tags_str"
+            echo 'EOF'
+          } >> "$GITHUB_ENV"
         fi
 
         if [[ '${{ inputs.csproj-file }}' == '' && '${{ inputs.dockerfile }}' == '' ]]; then
