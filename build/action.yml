@@ -78,6 +78,10 @@ inputs:
   github-token:
     description: 'GitHub token for GitHub Container Registry. Required if `registry` is set to `ghcr`. Should normally be `secrets.GITHUB_TOKEN`.'
     required: false
+  disable-trivy-report:
+    description: 'If `true`, the action will not upload Trivy scan results to GitHub Security tab.'
+    required: false
+    default: 'false'
   AZURE_CLIENT_ID:
     description: 'ClientId of a service principal that can push to Azure Container Registry.'
     required: false
@@ -275,7 +279,7 @@ runs:
           ${{ inputs.trivy-skip-dirs != '' && format('--skip-dirs {0}', inputs.trivy-skip-dirs) || '' }}
 
     - name: Upload Trivy scan results to GitHub Security tab
-      if: ${{ github.event_name == 'push' && failure() }}
+      if: ${{ github.event_name == 'push' && failure() && inputs.disable-trivy-report == 'false' }}
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: trivy.sarif
