@@ -78,8 +78,8 @@ inputs:
   github-token:
     description: 'GitHub token for GitHub Container Registry. Required if `registry` is set to `ghcr`. Should normally be `secrets.GITHUB_TOKEN`.'
     required: false
-  disable-trivy-report:
-    description: 'If `true`, the action will not upload Trivy scan results to GitHub Security tab.'
+  disable-trivy:
+    description: 'If `true`, the action will not run Trivy. **THIS IS NOT RECOMMENDED.**'
     required: false
     default: 'false'
   AZURE_CLIENT_ID:
@@ -223,6 +223,7 @@ runs:
         cache-to: 'type=inline'
 
     - name: Setup Trivy ignore file
+      if: ${{ inputs.disable-trivy == 'false' }}
       shell: bash
       run: |
         # Setup Trivy ignore file
@@ -239,7 +240,7 @@ runs:
         done
 
     - name: Install Trivy if not using Elvia runner
-      if: ${{ !startsWith(runner.name, 'elvia-runner-') }}
+      if: ${{ !startsWith(runner.name, 'elvia-runner-') && inputs.disable-trivy == 'false' }}
       shell: bash
       run: |
         # Install Trivy if not using Elvia runner
@@ -250,7 +251,7 @@ runs:
         sudo apt-get install trivy
 
     - name: Run Trivy vulnerability scanner (pull request)
-      if: ${{ github.event_name == 'pull_request' }}
+      if: ${{ github.event_name == 'pull_request' && inputs.disable-trivy == 'false' }}
       shell: bash
       run: |
         # Run Trivy
@@ -264,7 +265,7 @@ runs:
           ${{ inputs.trivy-skip-dirs != '' && format('--skip-dirs {0}', inputs.trivy-skip-dirs) || '' }}
 
     - name: Run Trivy vulnerability scanner (push)
-      if: ${{ github.event_name == 'push' }}
+      if: ${{ github.event_name == 'push' && inputs.disable-trivy == 'false' }}
       shell: bash
       run: |
         # Run Trivy
@@ -279,7 +280,7 @@ runs:
           ${{ inputs.trivy-skip-dirs != '' && format('--skip-dirs {0}', inputs.trivy-skip-dirs) || '' }}
 
     - name: Upload Trivy scan results to GitHub Security tab
-      if: ${{ github.event_name == 'push' && failure() && inputs.disable-trivy-report == 'false' }}
+      if: ${{ github.event_name == 'push' && failure() && inputs.disable-trivy == 'false' }}
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: trivy.sarif
