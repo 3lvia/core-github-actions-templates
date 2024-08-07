@@ -193,7 +193,7 @@ runs:
         subscription: ${{ env.AKS_SUBSCRIPTION_ID }}
 
     - name: Authenticate with Google Cloud
-      uses: google-github-actions/auth@v2.1.3
+      uses: google-github-actions/auth@v2.1.4
       if: ${{ inputs.runtime-cloud-provider == 'GKE' }}
       with:
         workload_identity_provider: ${{ inputs.GC_WORKLOAD_IDENTITY_PROVIDER }}
