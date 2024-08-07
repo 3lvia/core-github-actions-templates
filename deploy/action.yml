@@ -200,7 +200,7 @@ runs:
         service_account: ${{ inputs.GC_SERVICE_ACCOUNT }}
 
     - name: Connect to GKE
-      uses: google-github-actions/get-gke-credentials@v2.2.0
+      uses: google-github-actions/get-gke-credentials@v2.2.1
       if: ${{ inputs.runtime-cloud-provider == 'GKE' }}
       with:
         cluster_name: ${{ env.GC_CLUSTER_NAME }}
