@@ -32,12 +32,13 @@ def find_docker_runtime_base_image(csproj_file):
     if "Sdk" not in root.attrib:
         raise ValueError("Unable to find Sdk in csproj-file")
     sdk = root.attrib["Sdk"]
-    if sdk in ["Microsoft.NET.Sdk", "Microsoft.NET.Sdk.Worker"]:
+    if sdk in ["Microsoft.NET.Sdk"]:
         return "mcr.microsoft.com/dotnet/runtime"
     if sdk in [
         "Microsoft.NET.Sdk.Web",
         "Microsoft.NET.Sdk.BlazorWebAssembly",
         "Microsoft.NET.Sdk.Razor",
+        "Microsoft.NET.Sdk.Worker",
     ]:
         return "mcr.microsoft.com/dotnet/aspnet"
     raise ValueError("Unsupported Sdk in csproj-file. Sdk: " + sdk)
