@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-	  <TargetFramework>net8.0</TargetFramework>
+	<TargetFramework>net8.0</TargetFramework>
     <RootNamespace>core_demo_api</RootNamespace>
     <ProjectGuid>312A4021-03E7-4523-99F7-373F0A741F11</ProjectGuid>
-	  <ImplicitUsings>enable</ImplicitUsings>
-	  <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

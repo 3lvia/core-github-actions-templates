@@ -1,0 +1,117 @@
+name: Build and Deploy Go to Kubernetes on Google Cloud
+
+on:
+  push:
+    branches: [trunk]
+# pull_request:
+#   branches: [trunk]
+
+concurrency:
+  group: '${{ github.workflow }}-${{ github.event_name }}'
+  cancel-in-progress: true
+
+env:
+  APPLICATION_NAME: 'demo-api-go'
+  SYSTEM_NAME: 'core'
+  HELM_VALUES_PATH: '.github/test-go/deploy/values.yml'
+  PROJECT_FILE: '.github/test-go/go.mod'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: elvia-runner
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - uses: 3lvia/core-github-actions-templates/analyze@trunk
+
+  build-scan:
+    name: Build and Scan
+    runs-on: elvia-runner
+    permissions:
+      contents: read
+      id-token: write
+    environment: build
+    steps:
+      - uses: 3lvia/core-github-actions-templates/build@trunk
+        with:
+          name: ${{ env.APPLICATION_NAME }}
+          namespace: ${{ env.SYSTEM_NAME }}
+          project-file: ${{ env.PROJECT_FILE }}
+          AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
+
+  deploy-dev:
+    name: Deploy Dev
+    # Required these jobs to be successful before running this job.
+    # Any of these can be commented out if you want to deploy anyway.
+    needs:
+      - unit-tests
+      - integration-tests
+      - build-scan
+      - analyze
+    runs-on: elvia-runner
+    permissions:
+      contents: read
+      id-token: write
+    environment: dev
+    # Only on push to trunk
+    if: github.ref == 'refs/heads/trunk'
+    steps:
+      - uses: 3lvia/core-github-actions-templates/deploy@trunk
+        with:
+          name: ${{ env.APPLICATION_NAME }}
+          namespace: ${{ env.SYSTEM_NAME }}
+          environment: 'dev'
+          helm-values-path: ${{ env.HELM_VALUES_PATH }}
+          runtime-cloud-provider: 'GKE'
+          slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
+          GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
+          GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
+
+  deploy-test:
+    name: Deploy Test
+    # Only deploy to test after dev
+    needs: [deploy-dev]
+    runs-on: elvia-runner
+    permissions:
+      contents: read
+      id-token: write
+    environment: test
+    # Only on push to trunk
+    if: github.ref == 'refs/heads/trunk'
+    steps:
+      - uses: 3lvia/core-github-actions-templates/deploy@trunk
+        with:
+          name: ${{ env.APPLICATION_NAME }}
+          namespace: ${{ env.SYSTEM_NAME }}
+          environment: 'test'
+          helm-values-path: ${{ env.HELM_VALUES_PATH }}
+          runtime-cloud-provider: 'GKE'
+          slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
+          GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
+          GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
+
+  deploy-prod:
+    name: Deploy Prod
+    # Only deploy to prod after test
+    needs: [deploy-test]
+    runs-on: elvia-runner
+    permissions:
+      contents: read
+      id-token: write
+    environment: prod
+    # Only on push to trunk
+    if: github.ref == 'refs/heads/trunk'
+    steps:
+      - uses: 3lvia/core-github-actions-templates/deploy@trunk
+        with:
+          name: ${{ env.APPLICATION_NAME }}
+          namespace: ${{ env.SYSTEM_NAME }}
+          environment: 'prod'
+          helm-values-path: ${{ env.HELM_VALUES_PATH }}
+          runtime-cloud-provider: 'GKE'
+          slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
+          GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
+          GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
