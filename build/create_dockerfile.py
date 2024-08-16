@@ -73,7 +73,9 @@ RUN addgroup application-group --gid 1001 \\
         --ingroup application-group \\
         --disabled-password
 
-RUN apk upgrade --no-cache
+RUN apk update && \
+    apk upgrade --no-cache && \
+    apk add --no-cache icu-libs
 
 WORKDIR /app
 COPY --from=build /app/out .
