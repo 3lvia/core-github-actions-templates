@@ -3,10 +3,14 @@ name: Update starter workflows
 on:
   push:
     branches: [trunk]
-    paths: ['.github/workflows/example-*.yml']
+    paths:
+      - '.github/workflows/example-*.yml'
+      - '.github/workflows/update-starter-workflows.yml'
   pull_request:
     branches: [trunk]
-    paths: ['.github/workflows/example-*.yml']
+    paths:
+      - '.github/workflows/example-*.yml'
+      - '.github/workflows/update-starter-workflows.yml'
 
 env:
   REPOSITORY: 'core-github-actions-templates'
@@ -43,6 +47,7 @@ jobs:
       - name: Update workflows-templates
         shell: bash
         run: |
+          rm -rf dotgithub/workflow-templates
           mkdir -p dotgithub/workflow-templates
           for workflow_path in ${{ env.REPOSITORY }}/.github/workflows/example-*.yml; do
             echo "Processing $workflow_path"
@@ -56,10 +61,10 @@ jobs:
             new_workflow_path="dotgithub/workflow-templates/$file_name_no_prefix"
             cp "$workflow_path" "$new_workflow_path"
 
-            sed -i "s/  APPLICATION_NAME: 'demo-api'/  APPLICATION_NAME: '<your application name here>'/g" "$new_workflow_path"
+            sed -i "s/  APPLICATION_NAME: '.*'/  APPLICATION_NAME: '<your application name here>'/g" "$new_workflow_path"
             sed -i "s/  SYSTEM_NAME: 'core'/  SYSTEM_NAME: '<your system name here>'/g" "$new_workflow_path"
-            sed -i "s/  HELM_VALUES_PATH: '\.github\/test\/deploy\/values\.yml'/  HELM_VALUES_PATH: '.github\/deploy\/values.yml'/g" "$new_workflow_path"
-            sed -i "s/  PROJECT_FILE: '\.github\/test.*'/  PROJECT_FILE: '<your project file path here>'/g" "$new_workflow_path"
+            sed -i "s/  HELM_VALUES_PATH: '.*'/  HELM_VALUES_PATH: '.github\/deploy\/values.yml'/g" "$new_workflow_path"
+            sed -i "s/  PROJECT_FILE: '.*'/  PROJECT_FILE: '<your project file path here>'/g" "$new_workflow_path"
             sed -i "s/# pull_request:/pull_request:/g" "$new_workflow_path"
             sed -i "s/#   branches: \[trunk\]/    branches: \[trunk\]/g" "$new_workflow_path"
             sed -i 's/branches: \[trunk\]/branches: \[$default-branch\]/g' "$new_workflow_path"
