@@ -47,8 +47,6 @@ jobs:
     # Required these jobs to be successful before running this job.
     # Any of these can be commented out if you want to deploy anyway.
     needs:
-      - unit-tests
-      - integration-tests
       - build-scan
       - analyze
     runs-on: elvia-runner
