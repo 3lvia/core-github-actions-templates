@@ -84,7 +84,7 @@ jobs:
       id-token: write
     environment: dev
     # Only on push to $default-branch
-    if: github.ref == 'refs/heads/trunk'
+    if: github.ref_name == "trunk"
     steps:
       - uses: 3lvia/core-github-actions-templates/deploy@trunk
         with:
@@ -105,7 +105,7 @@ jobs:
       id-token: write
     environment: test
     # Only on push to $default-branch
-    if: github.ref == 'refs/heads/trunk'
+    if: github.ref_name == "trunk"
     steps:
       - uses: 3lvia/core-github-actions-templates/deploy@trunk
         with:
@@ -126,7 +126,7 @@ jobs:
       id-token: write
     environment: prod
     # Only on push to $default-branch
-    if: github.ref == 'refs/heads/trunk'
+    if: github.ref_name == "trunk"
     steps:
       - uses: 3lvia/core-github-actions-templates/deploy@trunk
         with:
