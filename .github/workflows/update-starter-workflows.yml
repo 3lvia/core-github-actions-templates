@@ -65,7 +65,7 @@ jobs:
             sed -i "s/  SYSTEM_NAME: 'core'/  SYSTEM_NAME: '<your system name here>'/g" "$new_workflow_path"
             sed -i "s/  HELM_VALUES_PATH: '.*'/  HELM_VALUES_PATH: '.github\/deploy\/values.yml'/g" "$new_workflow_path"
             sed -i "s/  PROJECT_FILE: '.*'/  PROJECT_FILE: '<your project file path here>'/g" "$new_workflow_path"
-            sed -i "s/refs\/heads\/trunk/$default-branch/g" "$new_workflow_path"
+            sed -i 's/refs\/heads\/trunk/$default-branch/g' "$new_workflow_path"
             sed -i "s/# pull_request:/  pull_request:/g" "$new_workflow_path"
             sed -i "s/#   branches: \[trunk\]/    branches: \[trunk\]/g" "$new_workflow_path"
             sed -i 's/branches: \[trunk\]/branches: \[$default-branch\]/g' "$new_workflow_path"
