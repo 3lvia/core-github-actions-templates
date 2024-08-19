@@ -85,7 +85,7 @@ See [core-github-actions-runner](https://github.com/3lvia/core-github-actions-ru
 
 ## Build
 
-Builds Docker image, scans for vulnerabilities using Trivy and pushes to either Azure Container Registry or GitHub Container Registry.
+Builds a Docker image, scans for vulnerabilities using Trivy and pushes to either Azure Container Registry or GitHub Container Registry.
 To use the `Build` and `Deploy` actions with Elvias container registry and runtime services,
 you must first add your GitHub repository to [github-repositories-terraform](https://github.com/3lvia/github-repositories-terraform).
 
@@ -98,22 +98,24 @@ you must first add your GitHub repository to [github-repositories-terraform](htt
 | `AZURE_CLIENT_ID`             | ClientId of a service principal that can push to Azure Container Registry.                                                                                                                                                                                                                                                                                     | no       |                                        |
 | `AZURE_TENANT_ID`             | TenantId of a service principal that can push to Azure Container Registry.                                                                                                                                                                                                                                                                                     | no       | `2186a6ec-c227-4291-9806-d95340bf439d` |
 | `checkout`                    | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                                                                                                                                                                                                                           | no       | `true`                                 |
-| `csproj-file`                 | Path to a csproj-file, e.g. `src/my-app/my-app.csproj`. Either this or `dockerfile` must be given. This argument takes precedence over `dockerfile`.'                                                                                                                                                                                                          | no       |                                        |
-| `disable-trivy`               | If `true`, the action will not run Trivy. **THIS IS NOT RECOMMENDED.**                                                                                                                                                                                                                                                                                         | no       | `false`                                |
+| `csproj-file`                 | :warning: **DEPRECATED**: _This input is deprecated and has been superseded; please use `project-file` instead. `csproj-file` will be removed in the future. _ :warning:<br>Path to a csproj-file, e.g. `src/my-app/my-app.csproj`.                                                                                                                            | no       |                                        |
+| `disable-trivy`               | :warning: **DEPRECATED**: _This input is deprecated and will be removed in the future._ :warning:<br>If `true`, the action will not run Trivy. **THIS IS NOT RECOMMENDED.**                                                                                                                                                                                    | no       | `false`                                |
 | `docker-additional-tags`      | Comma-separated list of additional tags to add to the image.                                                                                                                                                                                                                                                                                                   | no       |                                        |
-| `docker-build-context`        | Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.                                                                                                                                                                                                                              | no       |                                        |
-| `docker-build-no-summary`     | If `true`, the action will not display a step summary after the build.                                                                                                                                                                                                                                                                                         | no       | `false`                                |
+| `docker-build-context`        | Docker build context, which is the working directory needed to build the Docker image. This is relative to the root of the repository. Defaults to the directory of `project-file`.                                                                                                                                                                            | no       |                                        |
 | `docker-cache-tag`            | Tag used for getting build cache from registry. This tag is also pushed on every build, together with `github.sha-github.run_number`. This action will not push a `latest` tag; if you want a `latest` tag, you can use this input or `docker-additional-tags`.                                                                                                | no       | `latest-cache`                         |
-| `dockerfile`                  | Path to Dockerfile, e.g. `src/Dockerfile`. Either this or `csproj-file` must be given.                                                                                                                                                                                                                                                                         | no       | `Dockerfile`                           |
-| `ghcr-omit-repository-name`   | If `true`, the action will not include the repository name in the image name.                                                                                                                                                                                                                                                                                  | no       | `false`                                |
-| `github-token`                | GitHub token for GitHub Container Registry. Required if `registry` is set to `ghcr`. Should normally be `secrets.GITHUB_TOKEN`.                                                                                                                                                                                                                                | no       |                                        |
+| `docker-include-dirs`         | Comma-separated list of directories to copy into the Docker image.                                                                                                                                                                                                                                                                                             | no       |                                        |
+| `docker-include-files`        | Comma-separated list of files to copy into the Docker image.                                                                                                                                                                                                                                                                                                   | no       |                                        |
+| `dockerfile`                  | :warning: **DEPRECATED**: _This input is deprecated and has been superseded; please use `project-file` instead. `dockerfile` will be removed in the future. _ :warning:<br>Path to a Dockerfile, e.g. `src/Dockerfile`.                                                                                                                                        | no       |                                        |
+| `ghcr-omit-repository-name`   | If `true`, the action will not include the repository name in the image name. **This is only supported when using `ghcr` as `registry`.**                                                                                                                                                                                                                      | no       | `false`                                |
+| `github-token`                | GitHub token for GitHub Container Registry. **Required if `registry` is set to `ghcr`**. Should normally be `secrets.GITHUB_TOKEN`.                                                                                                                                                                                                                            | no       |                                        |
 | `name`                        | Name of application. This will be used as the image name. For Elvia applications, do not include the namespace.                                                                                                                                                                                                                                                | yes      |                                        |
 | `namespace`                   | Namespace or system of the application. This is only relevant for Elvia applications.                                                                                                                                                                                                                                                                          | no       |                                        |
+| `project-file`                | Path to a `.csproj`-file for .NET, a `go.mod` file for Go or a Dockerfile for any other project. E.g. `applications/my-app/my-app.csproj`, `pkg/my-app/go.mod` or `src/Dockerfile`. If you require files outside the directory of the `project-file` to build your application, you will need to set `docker-build-context`.                                   | no       |                                        |
 | `registry`                    | What container registry to use, either `acr` or `ghcr`. If set to `acr`, credentials for Azure Container Registry will default to Elvia values. You can also set these explictly to point to your own ACR. If set to `ghcr`, the action will use the GitHub Container Registry. This requires `github-token` to be set, and the `packages: write` permission.' | no       | `acr`                                  |
 | `severity`                    | Severity levels to scan for. See [Trivy documentation](https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs) for more information.                                                                                                                                                                                                           | no       | `CRITICAL`                             |
 | `trivy-cve-ignores`           | Comma-separated list of CVEs for Trivy to ignore. See [Trivy documentation](https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore) for syntax.                                                                                                                                                                                  | no       |                                        |
 | `trivy-enable-secret-scanner` | Enable Trivy secret scanner.                                                                                                                                                                                                                                                                                                                                   | no       | `true`                                 |
-| `trivy-skip-dirs`             | Directories/files skipped by Trivy. See [Trivy documentation](https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs) for more information.                                                                                                                                                                                                    | no       |                                        |
+| `trivy-skip-dirs`             | Directories/files skipped by Trivy.                                                                                                                                                                                                                                                                                                                            | no       |                                        |
 
 ### Permissions
 
@@ -157,52 +159,39 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Required: no
     # Default: 'true'
 
-    csproj-file:
-    # Path to a csproj-file, e.g. `src/my-app/my-app.csproj`. Either this or `dockerfile` must be given. This argument takes precedence over `dockerfile`.'
-    #
-    # Required: no
-
-    disable-trivy:
-    # If `true`, the action will not run Trivy. **THIS IS NOT RECOMMENDED.**
-    #
-    # Required: no
-    # Default: 'false'
-
     docker-additional-tags:
     # Comma-separated list of additional tags to add to the image.
     #
     # Required: no
 
     docker-build-context:
-    # Docker build context, which is the working directory needed to build the dockerfile. Defaults to the directory of the Dockerfile.
+    # Docker build context, which is the working directory needed to build the Docker image. This is relative to the root of the repository. Defaults to the directory of `project-file`.
     #
     # Required: no
-
-    docker-build-no-summary:
-    # If `true`, the action will not display a step summary after the build.
-    #
-    # Required: no
-    # Default: 'false'
 
     docker-cache-tag:
     # Tag used for getting build cache from registry. This tag is also pushed on every build, together with `github.sha-github.run_number`. This action will not push a `latest` tag; if you want a `latest` tag, you can use this input or `docker-additional-tags`.
     #
     # Default: 'latest-cache'
 
-    dockerfile:
-    # Path to Dockerfile, e.g. `src/Dockerfile`. Either this or `csproj-file` must be given.
+    docker-include-dirs:
+    # Comma-separated list of directories to copy into the Docker image.
     #
     # Required: no
-    # Default: 'Dockerfile'
+
+    docker-include-files:
+    # Comma-separated list of files to copy into the Docker image.
+    #
+    # Required: no
 
     ghcr-omit-repository-name:
-    # If `true`, the action will not include the repository name in the image name.
+    # If `true`, the action will not include the repository name in the image name. **This is only supported when using `ghcr` as `registry`.**
     #
     # Required: no
     # Default: 'false'
 
     github-token:
-    # GitHub token for GitHub Container Registry. Required if `registry` is set to `ghcr`. Should normally be `secrets.GITHUB_TOKEN`.
+    # GitHub token for GitHub Container Registry. **Required if `registry` is set to `ghcr`**. Should normally be `secrets.GITHUB_TOKEN`.
     #
     # Required: no
 
@@ -213,6 +202,11 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
     namespace:
     # Namespace or system of the application. This is only relevant for Elvia applications.
+    #
+    # Required: no
+
+    project-file:
+    # Path to a `.csproj`-file for .NET, a `go.mod` file for Go or a Dockerfile for any other project. E.g. `applications/my-app/my-app.csproj`, `pkg/my-app/go.mod` or `src/Dockerfile`. If you require files outside the directory of the `project-file` to build your application, you will need to set `docker-build-context`.
     #
     # Required: no
 
@@ -240,7 +234,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Default: 'true'
 
     trivy-skip-dirs:
-    # Directories/files skipped by Trivy. See [Trivy documentation](https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs) for more information.
+    # Directories/files skipped by Trivy.
     #
     # Required: no
 ```
