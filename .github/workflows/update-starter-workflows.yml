@@ -65,10 +65,8 @@ jobs:
             sed -i "s/  SYSTEM_NAME: 'core'/  SYSTEM_NAME: '<your system name here>'/g" "$new_workflow_path"
             sed -i "s/  HELM_VALUES_PATH: '.*'/  HELM_VALUES_PATH: '.github\/deploy\/values.yml'/g" "$new_workflow_path"
             sed -i "s/  PROJECT_FILE: '.*'/  PROJECT_FILE: '<your project file path here>'/g" "$new_workflow_path"
-            sed -i 's/github.ref_name == "trunk"/github.ref_name == $default-branch/g' "$new_workflow_path"
             sed -i "s/# pull_request:/  pull_request:/g" "$new_workflow_path"
-            sed -i "s/#   branches: \[trunk\]/    branches: \[trunk\]/g" "$new_workflow_path"
-            sed -i 's/branches: \[trunk\]/branches: \[$default-branch\]/g' "$new_workflow_path"
+            sed -i 's/#   branches: \[trunk\]/    branches: \[$default-branch\]/g' "$new_workflow_path"
 
             new_workflow_properties_file="dotgithub/workflow-templates/${file_name_no_prefix%.yml}.properties.json"
             if [ ! -f "$new_workflow_properties_file" ]; then
