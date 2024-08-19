@@ -228,10 +228,10 @@ runs:
         else
             DOCKERFILE='${{ steps.generate-dockerfile.outputs.DOCKERFILE }}'
             DOCKER_BUILD_CONTEXT='${{ steps.generate-dockerfile.outputs.DOCKER_BUILD_CONTEXT }}'
-            echo "### Generated dockerfile" >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
-            cat "$DOCKERFILE" >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            # echo "### Generated dockerfile" >> "$GITHUB_STEP_SUMMARY"
+            # echo '```' >> "$GITHUB_STEP_SUMMARY"
+            # cat "$DOCKERFILE" >> "$GITHUB_STEP_SUMMARY"
+            # echo '```' >> "$GITHUB_STEP_SUMMARY"
         fi
 
         echo "DOCKERFILE=$DOCKERFILE" >> "$GITHUB_ENV"
