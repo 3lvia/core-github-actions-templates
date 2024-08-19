@@ -13,35 +13,89 @@ on:
         type: 'string'
 
 env:
-  APPLICATION_NAME: 'demo-api'
+  APPLICATION_BASE_NAME: 'demo-api'
   SYSTEM_NAME: 'core'
 
-concurrency:
-  group: '${{ github.workflow }}-${{ github.event_name }}-${{ inputs.runner }}'
-  cancel-in-progress: true
-
 jobs:
-  set-runner:
-    name: Set Runner
+  set-matrices:
+    name: Set matrices
     runs-on: elvia-runner
     outputs:
-      matrix: ${{ steps.set-runner.outputs.matrix }}
-      matrix-trivy: ${{ steps.set-runner.outputs.matrix-trivy }}
-      matrix-build: ${{ steps.set-runner.outputs.matrix-build }}
+      matrix: ${{ steps.set-matrices.outputs.matrix }}
+      matrix-trivy: ${{ steps.set-matrices.outputs.matrix-trivy }}
+      matrix-build: ${{ steps.set-matrices.outputs.matrix-build }}
+      matrix-deploy: ${{ steps.set-matrices.outputs.matrix-deploy }}
     steps:
-      - id: set-runner
+      - name: Set matrices
+        id: set-matrices
         run: |
+          # Runner matrix
           echo "matrix={\"runner\":[\"$RUNNER\"]}" >> "$GITHUB_OUTPUT"
-          echo "matrix-trivy={\"runner\":[\"$RUNNER\",\"ubuntu-latest\"]}" >> "$GITHUB_OUTPUT"
-          echo "matrix-build={\"runner\":[\"$RUNNER\",\"ubuntu-latest\"],\"build\":[\"csproj-file\",\"dockerfile\"], \"registry\":[\"acr\",\"ghcr\"]}" >> "$GITHUB_OUTPUT"
+
+          # Trivy matrix
+          {
+            echo 'matrix-trivy<<EOF'
+            cat << EOF
+          {
+            "runner": ["$RUNNER","ubuntu-latest"]
+          }
+          EOF
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+          # Build matrix
+          {
+            echo 'matrix-build<<EOF'
+            cat << EOF
+          {
+            "runner": ["$RUNNER","ubuntu-latest"],
+            "project-file": [".github/test/src/core-demo-api.csproj",".github/test-go/go.mod",".github/test-go/Dockerfile"],
+            "registry": ["acr","ghcr"],
+            "include": [
+              {
+                "application-name": "${{ env.APPLICATION_BASE_NAME }}-go",
+              },
+              {
+                "project-file": ".github/test/src/core-demo-api.csproj",
+                "application-name": "${{ env.APPLICATION_BASE_NAME }}",
+              }
+            ]
+          }
+          EOF
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+          # Deploy matrix
+          {
+            echo 'matrix-deploy<<EOF'
+            cat << EOF
+          {
+            "runner": ["$RUNNER"],
+            "application-name": ["${{ env.APPLICATION_BASE_NAME }}", "${{ env.APPLICATION_BASE_NAME }}-go"],
+            "include": [
+              {
+                "helm-values-path": ".github/test/deploy/values.yml"
+              },
+              {
+                "application-name": "${{ env.APPLICATION_BASE_NAME }}-go",
+                "helm-values-path": ".github/test-go/deploy/values.yml"
+              }
+            ]
+          }
+          EOF
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
         env:
           RUNNER: ${{ github.event_name == 'workflow_dispatch' && inputs.runner || 'elvia-runner' }}
 
   unit-tests:
     name: Unit Tests
-    needs: [set-runner]
+    needs: [set-matrices]
     strategy:
-      matrix: ${{ fromJson(needs.set-runner.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix) }}
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-unit-tests'
+      cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
@@ -58,9 +112,12 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    needs: [set-runner]
+    needs: [set-matrices]
     strategy:
-      matrix: ${{ fromJson(needs.set-runner.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix) }}
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-integration-tests'
+      cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
@@ -79,9 +136,12 @@ jobs:
 
   analyze:
     name: Analyze
-    needs: [set-runner]
+    needs: [set-matrices]
     strategy:
-      matrix: ${{ fromJson(needs.set-runner.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix) }}
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-analyze'
+      cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
     permissions:
       actions: read
@@ -97,10 +157,14 @@ jobs:
 
   build:
     name: Build
-    needs: [set-runner]
+    needs: [set-matrices]
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.set-runner.outputs.matrix-build) }}
+      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix-build) }}
+    concurrency:
+      group: |
+        ${{ github.workflow }}-${{ github.event_name }}-${{ github.job }}-${{ matrix.runner }}-${{ matrix.application-name }}-${{ matrix.project-file }}-${{ matrix.docker-include-files }}-${{ matrix.registry }}
+      cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
@@ -114,11 +178,11 @@ jobs:
       - uses: ./build
         with:
           checkout: 'false'
-          name: ${{ env.APPLICATION_NAME }}
+          name: ${{ matrix.application-name }}
           namespace: ${{ env.SYSTEM_NAME }}
-          csproj-file: ${{ matrix.build == 'csproj-file' && '.github/test/src/core-demo-api.csproj' || '' }}
-          dockerfile: ${{ matrix.build == 'dockerfile' && '.github/test/src/Dockerfile' || '' }}
+          project-file: ${{ matrix.project-file }}
           docker-additional-tags: 'v42,v1.2.3'
+          docker-include-files: ${{ matrix.docker-include-files }}
           severity: 'CRITICAL'
           registry: ${{ matrix.registry }}
           github-token: ${{ matrix.registry == 'ghcr' && secrets.GITHUB_TOKEN || '' }}
@@ -126,9 +190,13 @@ jobs:
 
   deploy-dev:
     name: Deploy Dev
-    needs: [set-runner, build]
+    needs: [set-matrices, build]
     strategy:
-      matrix: ${{ fromJson(needs.set-runner.outputs.matrix) }}
+      fail-fast: false
+      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix-deploy) }}
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.application-name }}-deploy-dev'
+      cancel-in-progress: false
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
@@ -141,18 +209,22 @@ jobs:
       - uses: ./deploy
         with:
           checkout: 'false'
-          name: ${{ env.APPLICATION_NAME }}
+          name: ${{ matrix.application-name }}
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'dev'
-          helm-values-path: '.github/test/deploy/values.yml'
+          helm-values-path: ${{ matrix.helm-values-path }}
           slack-channel: '#team-core-alerts-muted'
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
 
   deploy-dev-gke:
     name: Deploy Dev GKE
-    needs: [set-runner, build]
+    needs: [set-matrices, build]
     strategy:
-      matrix: ${{ fromJson(needs.set-runner.outputs.matrix) }}
+      fail-fast: false
+      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix-deploy) }}
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.application-name }}-deploy-dev-gke'
+      cancel-in-progress: false
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
@@ -165,20 +237,23 @@ jobs:
       - uses: ./deploy
         with:
           checkout: 'false'
-          name: ${{ env.APPLICATION_NAME }}
+          name: ${{ matrix.application-name }}
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'dev'
-          helm-values-path: '.github/test/deploy/values.yml'
+          helm-values-path: ${{ matrix.helm-values-path }}
           runtime-cloud-provider: 'GKE'
           GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
           GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
 
   trivy-iac-scan:
     name: Trivy IaC Scan
-    needs: [set-runner]
+    needs: [set-matrices]
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.set-runner.outputs.matrix-trivy) }}
+      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix-trivy) }}
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-trivy-iac-scan'
+      cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
     permissions:
       actions: read
@@ -194,9 +269,12 @@ jobs:
 
   terraform-format-check:
     name: Terraform Format Check
-    needs: [set-runner]
+    needs: [set-matrices]
     strategy:
-      matrix: ${{ fromJson(needs.set-runner.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix) }}
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-terraform-format-check'
+      cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout repository
@@ -208,9 +286,12 @@ jobs:
 
   slack-message-vault:
     name: Slack Message using Vault
-    needs: [set-runner]
+    needs: [set-matrices]
     strategy:
-      matrix: ${{ fromJson(needs.set-runner.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix) }}
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-slack-message-vault'
+      cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
@@ -228,9 +309,12 @@ jobs:
 
   slack-message-token:
     name: Slack Message using token
-    needs: [set-runner]
+    needs: [set-matrices]
     strategy:
-      matrix: ${{ fromJson(needs.set-runner.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix) }}
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-slack-message-token'
+      cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout repository

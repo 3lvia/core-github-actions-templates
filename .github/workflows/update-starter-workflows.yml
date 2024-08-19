@@ -45,17 +45,23 @@ jobs:
         run: |
           mkdir -p dotgithub/workflow-templates
           for workflow_path in ${{ env.REPOSITORY }}/.github/workflows/example-*.yml; do
+            echo "Processing $workflow_path"
+
             file_name=$(basename "$workflow_path")
             file_name_no_prefix="${file_name#example-}"
+
+            printf "file_name: %s\n" "$file_name"
+            printf "file_name_no_prefix: %s\n" "$file_name_no_prefix"
 
             new_workflow_path="dotgithub/workflow-templates/$file_name_no_prefix"
             cp "$workflow_path" "$new_workflow_path"
 
             sed -i "s/  APPLICATION_NAME: 'demo-api'/  APPLICATION_NAME: '<your application name here>'/g" "$new_workflow_path"
             sed -i "s/  SYSTEM_NAME: 'core'/  SYSTEM_NAME: '<your system name here>'/g" "$new_workflow_path"
-            sed -i "s/  HELM_VALUES_PATH: '.github\/test\/deploy\/values.yml'/  HELM_VALUES_PATH: '.github\/deploy\/values.yml'/g" "$new_workflow_path"
-            sed -i "s/  CSPROJ_FILE: '.github\/test\/src\/core-demo-api.csproj'/  CSPROJ_FILE: '<your .csproj path here>'/g" "$new_workflow_path"
-            sed -i "s/  DOCKERFILE: '.github\/test\/src\/Dockerfile'/  DOCKERFILE: '<your Dockerfile path here (or leave empty if Dockerfile in root dir)>'/g" "$new_workflow_path"
+            sed -i "s/  HELM_VALUES_PATH: '\.github\/test\/deploy\/values\.yml'/  HELM_VALUES_PATH: '.github\/deploy\/values.yml'/g" "$new_workflow_path"
+            sed -i "s/  PROJECT_FILE: '\.github\/test.*'/  PROJECT_FILE: '<your project file path here>'/g" "$new_workflow_path"
+            sed -i "s/# pull_request:/pull_request:/g" "$new_workflow_path"
+            sed -i "s/#   branches: \[trunk\]/    branches: \[trunk\]/g" "$new_workflow_path"
             sed -i 's/branches: \[trunk\]/branches: \[$default-branch\]/g' "$new_workflow_path"
 
             new_workflow_properties_file="dotgithub/workflow-templates/${file_name_no_prefix%.yml}.properties.json"
@@ -77,8 +83,9 @@ jobs:
         if: github.event_name == 'pull_request'
         id: get-diff
         run: |
-          examples_files_changed=$(git diff --name-only workflow-templates | base64 -w0)
-          examples_diff=$(git diff workflow-templates | base64 -w0)
+          git add workflow-templates
+          examples_files_changed=$(git diff --name-only --staged workflow-templates | base64 -w0)
+          examples_diff=$(git diff --staged workflow-templates | base64 -w0)
 
           echo "examples-files-changed=$examples_files_changed" >> "$GITHUB_OUTPUT"
           echo "examples-diff=$examples_diff" >> "$GITHUB_OUTPUT"

@@ -1,10 +1,10 @@
-name: Build and Deploy to Kubernetes on Google Cloud
+name: Build and Deploy .NET to Kubernetes on Google Cloud
 
 on:
   push:
     branches: [trunk]
-  pull_request:
-    branches: [trunk]
+# pull_request:
+#   branches: [trunk]
 
 concurrency:
   group: '${{ github.workflow }}-${{ github.event_name }}'
@@ -14,15 +14,7 @@ env:
   APPLICATION_NAME: 'demo-api'
   SYSTEM_NAME: 'core'
   HELM_VALUES_PATH: '.github/test/deploy/values.yml'
-  # For the 'build-scan' job, you MUST specify either 'csproj-file' or 'dockerfile'.
-  #
-  # If you are deploying a .NET application, specify 'csproj-file'. This is preferred.
-  # If you are deploying a non-.NET application using a Dockerfile, specify 'dockerfile'.
-  #
-  # Remember to uncomment the 'dockerfile' argument in the 'build-scan' job,
-  # and comment out the 'csproj-file' line if using a Dockerfile.
-  CSPROJ_FILE: '.github/test/src/core-demo-api.csproj'
-  DOCKERFILE: '.github/test/src/Dockerfile'
+  PROJECT_FILE: '.github/test/src/core-demo-api.csproj'
 
 jobs:
   unit-tests:
@@ -75,8 +67,6 @@ jobs:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
           csproj-file: ${{ env.CSPROJ_FILE }}
-          # Uncomment the following line if using a Dockerfile:
-          # dockerfile: ${{ env.DOCKERFILE }}
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
 
   deploy-dev:
@@ -103,6 +93,7 @@ jobs:
           environment: 'dev'
           helm-values-path: ${{ env.HELM_VALUES_PATH }}
           runtime-cloud-provider: 'GKE'
+          slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
           GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
           GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
 
@@ -125,6 +116,7 @@ jobs:
           environment: 'test'
           helm-values-path: ${{ env.HELM_VALUES_PATH }}
           runtime-cloud-provider: 'GKE'
+          slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
           GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
           GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
 
@@ -147,5 +139,6 @@ jobs:
           environment: 'prod'
           helm-values-path: ${{ env.HELM_VALUES_PATH }}
           runtime-cloud-provider: 'GKE'
+          slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
           GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
           GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}

@@ -1,0 +1,37 @@
+FROM mcr.microsoft.com/dotnet/sdk:{{ .BaseImageTag }} AS build
+LABEL maintainer="elvia@elvia.no"
+
+WORKDIR /app
+COPY . .
+
+RUN dotnet restore {{ .CsprojFile }} && \
+    dotnet publish \
+      {{ .CsprojFile }} \
+      --configuration Release \
+      --output ./out
+
+
+FROM {{ .RuntimeBaseImage }}:{{ .BaseImageTag }} AS runtime
+LABEL maintainer="elvia@elvia.no"
+
+RUN addgroup application-group --gid 1001 && \
+    adduser application-user --uid 1001 \
+        --ingroup application-group \
+        --disabled-password
+
+RUN apk update && \
+    apk upgrade --no-cache && \
+    apk add --no-cache \
+        icu-libs
+
+WORKDIR /app
+
+COPY --from=build /app/out .{{ if .IncludeFiles }}
+COPY {{ range .IncludeFiles }}{{ $.ModuleDirectory }}/{{ . }} {{ end }} ./{{ end }}{{ range .IncludeDirectories }}COPY {{ $.ModuleDirectory }}{{ . }} ./{{ end }}
+
+RUN chown --recursive application-user .
+USER application-user
+
+EXPOSE 8080
+
+ENTRYPOINT ["dotnet", "{{ .AssemblyName }}"]

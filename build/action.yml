@@ -1,6 +1,6 @@
 name: 'Build'
 description: |
-  Builds Docker image, scans for vulnerabilities using Trivy and pushes to either Azure Container Registry or GitHub Container Registry.
+  Builds a Docker image, scans for vulnerabilities using Trivy and pushes to either Azure Container Registry or GitHub Container Registry.
   To use the `Build` and `Deploy` actions with Elvias container registry and runtime services,
   you must first add your GitHub repository to [github-repositories-terraform](https://github.com/3lvia/github-repositories-terraform).
 inputs:
@@ -11,24 +11,27 @@ inputs:
     description: 'Namespace or system of the application. This is only relevant for Elvia applications.'
     required: false
   csproj-file:
-    description: |
-      Path to a csproj-file, e.g. `src/my-app/my-app.csproj`.
-      Either this or `dockerfile` must be given.
-      This argument takes precedence over `dockerfile`.'
+    description: 'Path to a csproj-file, e.g. `src/my-app/my-app.csproj`.'
     required: false
+    deprecationMessage: |
+      This input is deprecated and has been superseded; please use `project-file` instead. `csproj-file` will be removed in the future.
   dockerfile:
-    description: 'Path to Dockerfile, e.g. `src/Dockerfile`. Either this or `csproj-file` must be given.'
-    default: 'Dockerfile'
+    description: 'Path to a Dockerfile, e.g. `src/Dockerfile`.'
+    required: false
+    deprecationMessage: |
+      This input is deprecated and has been superseded; please use `project-file` instead. `dockerfile` will be removed in the future.
+  project-file:
+    description: |
+      Path to a `.csproj`-file for .NET, a `go.mod` file for Go or a Dockerfile for any other project.
+      E.g. `applications/my-app/my-app.csproj`, `pkg/my-app/go.mod` or `src/Dockerfile`.
+      If you require files outside the directory of the `project-file` to build your application, you will need to set `docker-build-context`.
     required: false
   docker-build-context:
     description: |
-      Docker build context, which is the working directory needed to build the dockerfile.
-      Defaults to the directory of the Dockerfile.
+      Docker build context, which is the working directory needed to build the Docker image.
+      This is relative to the root of the repository.
+      Defaults to the directory of `project-file`.
     required: false
-  docker-build-no-summary:
-    description: 'If `true`, the action will not display a step summary after the build.'
-    required: false
-    default: 'false'
   docker-cache-tag:
     description: |
       Tag used for getting build cache from registry.
@@ -38,8 +41,16 @@ inputs:
   docker-additional-tags:
     description: 'Comma-separated list of additional tags to add to the image.'
     required: false
+  docker-include-files:
+    description: 'Comma-separated list of files to copy into the Docker image.'
+    required: false
+  docker-include-dirs:
+    description: 'Comma-separated list of directories to copy into the Docker image.'
+    required: false
   ghcr-omit-repository-name:
-    description: 'If `true`, the action will not include the repository name in the image name.'
+    description: |
+      If `true`, the action will not include the repository name in the image name.
+      **This is only supported when using `ghcr` as `registry`.**
     required: false
     default: 'false'
   severity:
@@ -58,10 +69,13 @@ inputs:
     required: false
     default: 'true'
   trivy-skip-dirs:
-    description: |
-      Directories/files skipped by Trivy.
-      See [Trivy documentation](https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs) for more information.
+    description: 'Directories/files skipped by Trivy.'
     required: false
+  disable-trivy:
+    description: 'If `true`, the action will not run Trivy. **THIS IS NOT RECOMMENDED.**'
+    required: false
+    default: 'false'
+    deprecationMessage: 'This input is deprecated and will be removed in the future.'
   checkout:
     description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
     required: false
@@ -76,12 +90,8 @@ inputs:
     required: false
     default: 'acr'
   github-token:
-    description: 'GitHub token for GitHub Container Registry. Required if `registry` is set to `ghcr`. Should normally be `secrets.GITHUB_TOKEN`.'
+    description: 'GitHub token for GitHub Container Registry. **Required if `registry` is set to `ghcr`**. Should normally be `secrets.GITHUB_TOKEN`.'
     required: false
-  disable-trivy:
-    description: 'If `true`, the action will not run Trivy. **THIS IS NOT RECOMMENDED.**'
-    required: false
-    default: 'false'
   AZURE_CLIENT_ID:
     description: 'ClientId of a service principal that can push to Azure Container Registry.'
     required: false
@@ -105,18 +115,42 @@ runs:
       if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@v4
 
+    - name: Setup Go
+      uses: actions/setup-go@v5
+
     - name: Generate Dockerfile
-      id: generate_dockerfile
-      if: ${{ inputs.csproj-file != '' }}
+      id: generate-dockerfile
       shell: bash
       run: |
         # Generate Dockerfile
-        python '${{ github.action_path }}/create_dockerfile.py'
-      env:
-        CSPROJ_FILE: ${{ inputs.csproj-file }}
+        export DOCKER_BUILD_CONTEXT='${{ inputs.docker-build-context }}'
+        export INCLUDE_FILES='${{ inputs.docker-include-files }}'
+        export INCLUDE_DIRS='${{ inputs.docker-include-dirs }}'
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+        if [[ '${{ inputs.project-file }}' == *csproj || '${{ inputs.csproj-file }}' != '' ]]; then
+          # for backwards compatibility with deprecated input
+          if [[ '${{ inputs.csproj-file }}' != '' ]]; then
+            export CSPROJ_FILE='${{ inputs.csproj-file }}'
+          else
+            export CSPROJ_FILE='${{ inputs.project-file }}'
+          fi
+
+          go run $(ls "$GITHUB_ACTION_PATH"/*.go | grep -v _test.go)
+        elif [[ '${{ inputs.project-file }}' == *go.mod ]]; then
+          export GO_MOD_FILE='${{ inputs.project-file }}'
+          go run $(ls "$GITHUB_ACTION_PATH"/*.go | grep -v _test.go)
+        elif [[ '${{ inputs.project-file }}' == *Dockerfile ]]; then
+          echo 'Dockerfile already exists at ${{ inputs.project-file }}.'
+        # for backwards compatibility with deprecated input
+        elif [[ '${{ inputs.dockerfile }}' != '' ]]; then
+          echo 'Dockerfile already exists at ${{ inputs.dockerfile }}.'
+        else
+          error_message='Invalid project-file. Must be either a .csproj file, a go.mod file or a Dockerfile.'
+          echo "$error_message"
+          echo "### :x:" >> "$GITHUB_STEP_SUMMARY"
+          echo "$error_message" >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+        fi
 
     - name: Parse input and set environment variables
       shell: bash
@@ -124,9 +158,13 @@ runs:
         # Parse input and set environment variables
         if [[ '${{ inputs.registry }}' == 'acr' ]]; then
           if [[ -z '${{ inputs.namespace }}' ]]; then
-            echo 'Namespace must be given for Elvia applications.'
+            error_message='The input `namespace` must be set for Elvia applications.'
+            echo "$error_message"
+            echo "### :x:" >> "$GITHUB_STEP_SUMMARY"
+            echo "$error_message" >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
+
           IMAGE_NAME='${{ inputs.ACR_NAME }}.azurecr.io/${{ inputs.namespace }}-${{ inputs.name }}'
           echo "IMAGE_NAME=$IMAGE_NAME" >> "$GITHUB_ENV"
           echo "IMAGE_LONG_NAME=$IMAGE_NAME:${{ github.sha }}-${{ github.run_number }}" >> "$GITHUB_ENV"
@@ -136,10 +174,14 @@ runs:
           else
             IMAGE_NAME=$(echo 'ghcr.io/${{ github.repository }}/${{ inputs.name }}' | tr '[:upper:]' '[:lower:]') # Docker tag must be lowercase
           fi
+
           echo "IMAGE_NAME=$IMAGE_NAME" >> "$GITHUB_ENV"
           echo "IMAGE_LONG_NAME=$IMAGE_NAME:${{ github.sha }}-${{ github.run_number }}" >> "$GITHUB_ENV"
         else
-          echo 'Invalid registry. Must be either `acr` or `ghcr`.'
+          error_message='Invalid registry. Must be either `acr` or `ghcr`.'
+          echo "$error_message"
+          echo "### :x:" >> "$GITHUB_STEP_SUMMARY"
+          echo "$error_message" >> "$GITHUB_STEP_SUMMARY"
           exit 1
         fi
 
@@ -156,38 +198,44 @@ runs:
           } >> "$GITHUB_ENV"
         fi
 
-        if [[ '${{ inputs.csproj-file }}' == '' && '${{ inputs.dockerfile }}' == '' ]]; then
-            echo 'Either csproj-file or dockerfile must be given.'
-            exit 1
-        fi
-
         if [[ '${{ inputs.AZURE_CLIENT_ID }}' == '' && '${{ inputs.registry }}' == 'acr' ]]; then
-            echo 'Missing required input AZURE_CLIENT_ID. Ensure that this is set and non-empty.'
+            error_message='Missing required input `AZURE_CLIENT_ID`. Ensure that this is set and non-empty.'
+            echo "$error_message"
+            echo "### :x:" >> "$GITHUB_STEP_SUMMARY"
+            echo "$error_message" >> "$GITHUB_STEP_SUMMARY"
             exit 1
         fi
 
         if [[ '${{ inputs.github-token }}' == '' && '${{ inputs.registry }}' == 'ghcr' ]]; then
-            echo 'Missing required input github-token. Ensure that this is set and non-empty.'
+            error_message='Missing required input `github-token`. Ensure that this is set and non-empty.'
+            echo "$error_message"
+            echo "### :x:" >> "$GITHUB_STEP_SUMMARY"
+            echo "$error_message" >> "$GITHUB_STEP_SUMMARY"
             exit 1
         fi
 
-        if [[ -z '${{ inputs.docker-build-context }}' ]]; then
-            DOCKER_DIR=$(dirname '${{ inputs.dockerfile }}') # default to the directory of the Dockerfile
-        else
-            DOCKER_DIR='${{ inputs.docker-build-context }}'
-        fi
-        echo "DOCKER_DIR=$DOCKER_DIR" >> "$GITHUB_ENV"
-
-        if [[ -z '${{ steps.generate_dockerfile.outputs.DOCKERFILE }}' ]]; then
+        if [[ '${{ steps.generate-dockerfile.outputs.DOCKERFILE }}' == '' ]]; then
+          # for backwards compatibility with deprecated input
+          if [[ '${{ inputs.dockerfile }}' != '' ]]; then
             DOCKERFILE='${{ inputs.dockerfile }}'
-        else
-            DOCKERFILE='${{ steps.generate_dockerfile.outputs.DOCKERFILE }}'
-        fi
-        echo "DOCKERFILE=$DOCKERFILE" >> "$GITHUB_ENV"
+          else
+            DOCKERFILE='${{ inputs.project-file }}'
+          fi
 
-        if [[ '${{ inputs.docker-build-no-summary }}' == 'true' ]]; then
-            echo 'DOCKER_BUILD_NO_SUMMARY=true' >> "$GITHUB_ENV"
+          if [[ -z '${{ inputs.docker-build-context }}' ]]; then
+            DOCKER_BUILD_CONTEXT=$(dirname "$DOCKERFILE")
+          fi
+        else
+            DOCKERFILE='${{ steps.generate-dockerfile.outputs.DOCKERFILE }}'
+            DOCKER_BUILD_CONTEXT='${{ steps.generate-dockerfile.outputs.DOCKER_BUILD_CONTEXT }}'
+            echo "### Generated dockerfile" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            cat "$DOCKERFILE" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
         fi
+
+        echo "DOCKERFILE=$DOCKERFILE" >> "$GITHUB_ENV"
+        echo "DOCKER_BUILD_CONTEXT=$DOCKER_BUILD_CONTEXT" >> "$GITHUB_ENV"
 
     - name: Authenticate with Azure
       if: ${{ inputs.registry == 'acr' }}
@@ -212,10 +260,13 @@ runs:
         username: ${{ github.actor }}
         password: ${{ inputs.github-token }}
 
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
     - name: Build image
       uses: docker/build-push-action@v6
       with:
-        context: ${{ env.DOCKER_DIR }}
+        context: ${{ env.DOCKER_BUILD_CONTEXT }}
         file: ${{ env.DOCKERFILE }}
         push: 'false'
         load: 'true'
@@ -234,7 +285,7 @@ runs:
         touch .trivyignore
 
         if [ -z '${{ inputs.trivy-cve-ignores }}' ]; then
-          echo "No CVEs to ignore"
+          echo "No CVEs to ignore."
           exit 0
         fi
 
