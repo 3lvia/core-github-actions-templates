@@ -222,7 +222,17 @@ runs:
             DOCKERFILE='${{ inputs.project-file }}'
           fi
 
-          if [[ -z '${{ inputs.docker-build-context }}' ]]; then
+          if [[ -z "$DOCKERFILE" ]]; then
+            error_message='The input `project-file` must be set.'
+            echo "$error_message"
+            echo "### :x:" >> "$GITHUB_STEP_SUMMARY"
+            echo "$error_message" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+          if [[ '${{ inputs.docker-build-context }}' != '' ]]; then
+            DOCKER_BUILD_CONTEXT='${{ inputs.docker-build-context }}'
+          else
             DOCKER_BUILD_CONTEXT=$(dirname "$DOCKERFILE")
           fi
         else
