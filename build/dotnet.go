@@ -59,7 +59,7 @@ func findAssemblyName(csprojFileRelativePath string, csprojFileName string, test
 		return withoutExtension + ".dll", nil
 	}
 
-	return assemblyName, nil
+	return assemblyName + ".dll", nil
 }
 
 func findBaseImageTag(csprojFileRelativePath string) (string, error) {
