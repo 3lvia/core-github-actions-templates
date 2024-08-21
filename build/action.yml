@@ -115,9 +115,6 @@ runs:
       if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@v4
 
-    - name: Setup Go
-      uses: actions/setup-go@v5
-
     - name: Generate Dockerfile
       id: generate-dockerfile
       shell: bash
