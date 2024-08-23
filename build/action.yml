@@ -14,12 +14,12 @@ inputs:
     description: 'Path to a csproj-file, e.g. `src/my-app/my-app.csproj`.'
     required: false
     deprecationMessage: |
-      This input is deprecated and has been superseded; please use `project-file` instead. `csproj-file` will be removed in the future.
+      Please use `project-file` instead, which is a drop-in replacement. `csproj-file` will be removed in the future.
   dockerfile:
     description: 'Path to a Dockerfile, e.g. `src/Dockerfile`.'
     required: false
     deprecationMessage: |
-      This input is deprecated and has been superseded; please use `project-file` instead. `dockerfile` will be removed in the future.
+      Please use `project-file` instead, which is a drop-in replacement. `dockerfile` will be removed in the future.
   project-file:
     description: |
       Path to a `.csproj`-file for .NET, a `go.mod` file for Go or a Dockerfile for any other project.
