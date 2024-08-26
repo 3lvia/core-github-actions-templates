@@ -29,7 +29,7 @@ inputs:
   go-main-package-dir:
     description: |
       Where the main package directory for Go projects is located, e.g. `cmd/my-app`.
-      Defaults to the root of the repository.
+      Defaults to `cmd/inputs.name`.
     required: false
   docker-build-context:
     description: |
@@ -139,8 +139,12 @@ runs:
 
           go run $(ls "$GITHUB_ACTION_PATH"/*.go | grep -v _test.go)
         elif [[ '${{ inputs.project-file }}' == *go.mod ]]; then
+          if [[ '${{ inputs.go-main-package-dir }}' == '' ]]; then
+            export MAIN_PACKAGE_DIR='cmd/${{ inputs.name }}'
+          else
+            export MAIN_PACKAGE_DIR='${{ inputs.go-main-package-dir }}'
+          fi
           export GO_MOD_FILE='${{ inputs.project-file }}'
-          export MAIN_PACKAGE_DIR='${{ inputs.go-main-package-dir }}'
           go run $(ls "$GITHUB_ACTION_PATH"/*.go | grep -v _test.go)
         elif [[ '${{ inputs.project-file }}' == *Dockerfile ]]; then
           echo 'Dockerfile already exists at ${{ inputs.project-file }}.'
