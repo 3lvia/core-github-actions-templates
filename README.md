@@ -108,6 +108,7 @@ you must first add your GitHub repository to [github-repositories-terraform](htt
 | `dockerfile`                  | :warning: **DEPRECATED**: _Please use `project-file` instead, which is a drop-in replacement. `dockerfile` will be removed in the future._ :warning:<br><br>Path to a Dockerfile, e.g. `src/Dockerfile`.                                                                                                                                                       | no       |                                        |
 | `ghcr-omit-repository-name`   | If `true`, the action will not include the repository name in the image name. **This is only supported when using `ghcr` as `registry`.**                                                                                                                                                                                                                      | no       | `false`                                |
 | `github-token`                | GitHub token for GitHub Container Registry. **Required if `registry` is set to `ghcr`**. Should normally be `secrets.GITHUB_TOKEN`.                                                                                                                                                                                                                            | no       |                                        |
+| `go-main-package-dir`         | Where the main package directory for Go projects is located, e.g. `cmd/my-app`. Defaults to the root of the repository.                                                                                                                                                                                                                                        | no       |                                        |
 | `name`                        | Name of application. This will be used as the image name. For Elvia applications, do not include the namespace.                                                                                                                                                                                                                                                | yes      |                                        |
 | `namespace`                   | Namespace or system of the application. This is only relevant for Elvia applications.                                                                                                                                                                                                                                                                          | no       |                                        |
 | `project-file`                | Path to a `.csproj`-file for .NET, a `go.mod` file for Go or a Dockerfile for any other project. E.g. `applications/my-app/my-app.csproj`, `pkg/my-app/go.mod` or `src/Dockerfile`. If you require files outside the directory of the `project-file` to build your application, you will need to set `docker-build-context`.                                   | no       |                                        |
@@ -192,6 +193,11 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
     github-token:
     # GitHub token for GitHub Container Registry. **Required if `registry` is set to `ghcr`**. Should normally be `secrets.GITHUB_TOKEN`.
+    #
+    # Required: no
+
+    go-main-package-dir:
+    # Where the main package directory for Go projects is located, e.g. `cmd/my-app`. Defaults to the root of the repository.
     #
     # Required: no
 
