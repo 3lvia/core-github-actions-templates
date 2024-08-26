@@ -9,7 +9,7 @@ COPY {{ .ModuleDirectory }}/go.mod {{ .ModuleDirectory }}/go.sum ./
 RUN go mod download
 
 COPY . .
-RUN go build -o ./out/executable .
+RUN go build -o ./out/executable {{ .MainPackageDirectory }}
 
 
 FROM alpine:3.20

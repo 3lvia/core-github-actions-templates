@@ -66,8 +66,7 @@ func main() {
 			buildContextRelativePath,
 		)
 
-		fmt.Println("moduleDirectory: ", moduleDirectory)
-		fmt.Println("buildContext: ", buildContext)
+		mainPackageDirectory := dotIfEmpty(os.Getenv("MAIN_PACKAGE_DIR"))
 
 		err = writeToGitHubOutput("DOCKER_BUILD_CONTEXT=" + buildContext)
 		if err != nil {
@@ -75,10 +74,11 @@ func main() {
 		}
 
 		dockerfileVariables := GoDockerfileVariables{
-			ModuleDirectory:    moduleDirectory,
-			BuildContext:       buildContext,
-			IncludeFiles:       includeFiles,
-			IncludeDirectories: includeDirectories,
+			ModuleDirectory:      moduleDirectory,
+			MainPackageDirectory: mainPackageDirectory,
+			BuildContext:         buildContext,
+			IncludeFiles:         includeFiles,
+			IncludeDirectories:   includeDirectories,
 		}
 		if err := writeDockerfileGo(actionPath, dockerfileVariables); err != nil {
 			log.Fatal(err)

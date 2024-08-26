@@ -3,10 +3,11 @@ package main
 import "strings"
 
 type GoDockerfileVariables struct {
-	ModuleDirectory    string // required
-	BuildContext       string // required
-	IncludeFiles       []string
-	IncludeDirectories []string
+	ModuleDirectory      string // required
+	MainPackageDirectory string // required
+	BuildContext         string // required
+	IncludeFiles         []string
+	IncludeDirectories   []string
 }
 
 func writeDockerfileGo(

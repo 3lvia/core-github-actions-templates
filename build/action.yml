@@ -26,6 +26,11 @@ inputs:
       E.g. `applications/my-app/my-app.csproj`, `pkg/my-app/go.mod` or `src/Dockerfile`.
       If you require files outside the directory of the `project-file` to build your application, you will need to set `docker-build-context`.
     required: false
+  go-main-package-dir:
+    description: |
+      Where the main package directory for Go projects is located, e.g. `cmd/my-app`.
+      Defaults to the root of the repository.
+    required: false
   docker-build-context:
     description: |
       Docker build context, which is the working directory needed to build the Docker image.
@@ -135,6 +140,7 @@ runs:
           go run $(ls "$GITHUB_ACTION_PATH"/*.go | grep -v _test.go)
         elif [[ '${{ inputs.project-file }}' == *go.mod ]]; then
           export GO_MOD_FILE='${{ inputs.project-file }}'
+          export MAIN_PACKAGE_DIR='${{ inputs.go-main-package-dir }}'
           go run $(ls "$GITHUB_ACTION_PATH"/*.go | grep -v _test.go)
         elif [[ '${{ inputs.project-file }}' == *Dockerfile ]]; then
           echo 'Dockerfile already exists at ${{ inputs.project-file }}.'
