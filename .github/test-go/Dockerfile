@@ -8,8 +8,8 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY *.go ./
-RUN go build -o ./out/executable .
+COPY . .
+RUN go build -o ./out/executable ./cmd/demo-api-go
 
 
 FROM alpine:3.20
