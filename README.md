@@ -831,7 +831,7 @@ Permission `id-token:write` is only required if you're not defining the `slack-a
 | `message`         | Message to send to the Slack channel.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | yes      |         |
 | `namespace`       | Namespace is used to find the correct Vault role. Not required if you use `slack-api-token`.                                                                                                                                                                                                                                                                                                                                                                                                              | no       |         |
 | `slack-api-token` | Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`. If no input is provided, the action will attempt to read the token from Elvia's Vault instance. Reading the token from Vault is only possible if the repository you are running this action from has been added to [github-repositories-terraform](https://github.com/3lvia/github-repositories-terraform), and you are running inside the GitHub Actions environments `dev`, `test` or `prod`. | no       |         |
-| `slack-channel`   | Slack channel to send message to.                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | yes      |         |
+| `slack-channel`   | Slack channel to send message to. The app "Github Workflow Notifications" must be added to the channel.                                                                                                                                                                                                                                                                                                                                                                                                   | yes      |         |
 
 ### Permissions
 
@@ -867,7 +867,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Required: no
 
     slack-channel:
-    # Slack channel to send message to.
+    # Slack channel to send message to. The app "Github Workflow Notifications" must be added to the channel.
     #
     # Required: yes
 ```
