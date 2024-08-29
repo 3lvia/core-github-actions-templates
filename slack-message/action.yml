@@ -4,7 +4,7 @@ description: |
   Permission `id-token:write` is only required if you're not defining the `slack-api-token` input.
 inputs:
   slack-channel:
-    description: 'Slack channel to send message to.'
+    description: 'Slack channel to send message to. The app "Github Workflow Notifications" must be added to the channel.'
     required: true
   message:
     description: 'Message to send to the Slack channel.'
