@@ -69,13 +69,6 @@ inputs:
       Comma-separated list of CVEs for Trivy to ignore.
       See [Trivy documentation](https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore) for syntax.
     required: false
-  trivy-enable-secret-scanner:
-    description: 'Enable Trivy secret scanner.'
-    required: false
-    default: 'true'
-  trivy-skip-dirs:
-    description: 'Directories/files skipped by Trivy.'
-    required: false
   disable-trivy:
     description: 'If `true`, the action will not run Trivy. **THIS IS NOT RECOMMENDED.**'
     required: false
@@ -120,140 +113,6 @@ runs:
       if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@v4
 
-    - name: Generate Dockerfile
-      id: generate-dockerfile
-      shell: bash
-      run: |
-        # Generate Dockerfile
-        export DOCKER_BUILD_CONTEXT='${{ inputs.docker-build-context }}'
-        export INCLUDE_FILES='${{ inputs.docker-include-files }}'
-        export INCLUDE_DIRS='${{ inputs.docker-include-dirs }}'
-
-        if [[ '${{ inputs.project-file }}' == *csproj || '${{ inputs.csproj-file }}' != '' ]]; then
-          # for backwards compatibility with deprecated input
-          if [[ '${{ inputs.csproj-file }}' != '' ]]; then
-            export CSPROJ_FILE='${{ inputs.csproj-file }}'
-          else
-            export CSPROJ_FILE='${{ inputs.project-file }}'
-          fi
-
-          go run $(ls "$GITHUB_ACTION_PATH"/*.go | grep -v _test.go)
-        elif [[ '${{ inputs.project-file }}' == *go.mod ]]; then
-          if [[ '${{ inputs.go-main-package-dir }}' == '' ]]; then
-            export MAIN_PACKAGE_DIR='./cmd/${{ inputs.name }}'
-          else
-            export MAIN_PACKAGE_DIR='${{ inputs.go-main-package-dir }}'
-          fi
-          export GO_MOD_FILE='${{ inputs.project-file }}'
-          go run $(ls "$GITHUB_ACTION_PATH"/*.go | grep -v _test.go)
-        elif [[ '${{ inputs.project-file }}' == *Dockerfile ]]; then
-          echo 'Dockerfile already exists at ${{ inputs.project-file }}.'
-        # for backwards compatibility with deprecated input
-        elif [[ '${{ inputs.dockerfile }}' != '' ]]; then
-          echo 'Dockerfile already exists at ${{ inputs.dockerfile }}.'
-        else
-          error_message='Invalid project-file. Must be either a .csproj file, a go.mod file or a Dockerfile.'
-          echo "$error_message"
-          echo "### :x:" >> "$GITHUB_STEP_SUMMARY"
-          echo "$error_message" >> "$GITHUB_STEP_SUMMARY"
-          exit 1
-        fi
-
-    - name: Parse input and set environment variables
-      shell: bash
-      run: |
-        # Parse input and set environment variables
-        if [[ '${{ inputs.registry }}' == 'acr' ]]; then
-          if [[ -z '${{ inputs.namespace }}' ]]; then
-            error_message='The input `namespace` must be set for Elvia applications.'
-            echo "$error_message"
-            echo "### :x:" >> "$GITHUB_STEP_SUMMARY"
-            echo "$error_message" >> "$GITHUB_STEP_SUMMARY"
-            exit 1
-          fi
-
-          IMAGE_NAME='${{ inputs.ACR_NAME }}.azurecr.io/${{ inputs.namespace }}-${{ inputs.name }}'
-          echo "IMAGE_NAME=$IMAGE_NAME" >> "$GITHUB_ENV"
-          echo "IMAGE_LONG_NAME=$IMAGE_NAME:${{ github.sha }}-${{ github.run_number }}" >> "$GITHUB_ENV"
-        elif [[ '${{ inputs.registry }}' == 'ghcr' ]]; then
-          if [[ '${{ inputs.ghcr-omit-repository-name }}' == 'true' ]]; then
-            IMAGE_NAME=$(echo 'ghcr.io/${{ github.repository_owner }}/${{ inputs.name }}' | tr '[:upper:]' '[:lower:]') # Docker tag must be lowercase
-          else
-            IMAGE_NAME=$(echo 'ghcr.io/${{ github.repository }}/${{ inputs.name }}' | tr '[:upper:]' '[:lower:]') # Docker tag must be lowercase
-          fi
-
-          echo "IMAGE_NAME=$IMAGE_NAME" >> "$GITHUB_ENV"
-          echo "IMAGE_LONG_NAME=$IMAGE_NAME:${{ github.sha }}-${{ github.run_number }}" >> "$GITHUB_ENV"
-        else
-          error_message='Invalid registry. Must be either `acr` or `ghcr`.'
-          echo "$error_message"
-          echo "### :x:" >> "$GITHUB_STEP_SUMMARY"
-          echo "$error_message" >> "$GITHUB_STEP_SUMMARY"
-          exit 1
-        fi
-
-        if [[ '${{ inputs.docker-additional-tags }}' != '' ]]; then
-          additional_tags=()
-          for additional_tag in $(echo '${{ inputs.docker-additional-tags }}' | sed 's/,/ /g'); do
-            additional_tags+=("$IMAGE_NAME:$additional_tag")
-          done
-          printf -v additional_tags_str "%s\n" "${additional_tags[@]}"
-          {
-            echo 'DOCKER_ADDITIONAL_TAGS<<EOF'
-            echo "$additional_tags_str"
-            echo 'EOF'
-          } >> "$GITHUB_ENV"
-        fi
-
-        if [[ '${{ inputs.AZURE_CLIENT_ID }}' == '' && '${{ inputs.registry }}' == 'acr' ]]; then
-            error_message='Missing required input `AZURE_CLIENT_ID`. Ensure that this is set and non-empty.'
-            echo "$error_message"
-            echo "### :x:" >> "$GITHUB_STEP_SUMMARY"
-            echo "$error_message" >> "$GITHUB_STEP_SUMMARY"
-            exit 1
-        fi
-
-        if [[ '${{ inputs.github-token }}' == '' && '${{ inputs.registry }}' == 'ghcr' ]]; then
-            error_message='Missing required input `github-token`. Ensure that this is set and non-empty.'
-            echo "$error_message"
-            echo "### :x:" >> "$GITHUB_STEP_SUMMARY"
-            echo "$error_message" >> "$GITHUB_STEP_SUMMARY"
-            exit 1
-        fi
-
-        if [[ '${{ steps.generate-dockerfile.outputs.DOCKERFILE }}' == '' ]]; then
-          # for backwards compatibility with deprecated input
-          if [[ '${{ inputs.dockerfile }}' != '' ]]; then
-            DOCKERFILE='${{ inputs.dockerfile }}'
-          else
-            DOCKERFILE='${{ inputs.project-file }}'
-          fi
-
-          if [[ -z "$DOCKERFILE" ]]; then
-            error_message='The input `project-file` must be set.'
-            echo "$error_message"
-            echo "### :x:" >> "$GITHUB_STEP_SUMMARY"
-            echo "$error_message" >> "$GITHUB_STEP_SUMMARY"
-            exit 1
-          fi
-
-          if [[ '${{ inputs.docker-build-context }}' != '' ]]; then
-            DOCKER_BUILD_CONTEXT='${{ inputs.docker-build-context }}'
-          else
-            DOCKER_BUILD_CONTEXT=$(dirname "$DOCKERFILE")
-          fi
-        else
-            DOCKERFILE='${{ steps.generate-dockerfile.outputs.DOCKERFILE }}'
-            DOCKER_BUILD_CONTEXT='${{ steps.generate-dockerfile.outputs.DOCKER_BUILD_CONTEXT }}'
-            # echo "### Generated dockerfile" >> "$GITHUB_STEP_SUMMARY"
-            # echo '```' >> "$GITHUB_STEP_SUMMARY"
-            # cat "$DOCKERFILE" >> "$GITHUB_STEP_SUMMARY"
-            # echo '```' >> "$GITHUB_STEP_SUMMARY"
-        fi
-
-        echo "DOCKERFILE=$DOCKERFILE" >> "$GITHUB_ENV"
-        echo "DOCKER_BUILD_CONTEXT=$DOCKER_BUILD_CONTEXT" >> "$GITHUB_ENV"
-
     - name: Authenticate with Azure
       if: ${{ inputs.registry == 'acr' }}
       uses: azure/login@v2
@@ -276,25 +135,6 @@ runs:
         registry: 'ghcr.io'
         username: ${{ github.actor }}
         password: ${{ inputs.github-token }}
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-      with:
-        cleanup: 'false'
-
-    - name: Build image
-      uses: docker/build-push-action@v6
-      with:
-        context: ${{ env.DOCKER_BUILD_CONTEXT }}
-        file: ${{ env.DOCKERFILE }}
-        push: 'false'
-        load: 'true'
-        tags: |
-          ${{ env.IMAGE_LONG_NAME }}
-          ${{ env.IMAGE_NAME }}:${{ inputs.docker-cache-tag }}
-          ${{ env.DOCKER_ADDITIONAL_TAGS }}
-        cache-from: 'type=registry,ref=${{ env.IMAGE_NAME }}:${{ inputs.docker-cache-tag }}'
-        cache-to: 'type=inline'
 
     - name: Setup Trivy ignore file
       if: ${{ inputs.disable-trivy == 'false' }}
@@ -324,44 +164,40 @@ runs:
         sudo apt-get update
         sudo apt-get install trivy
 
-    - name: Run Trivy vulnerability scanner (pull request)
-      if: ${{ github.event_name == 'pull_request' && inputs.disable-trivy == 'false' }}
+    - name: Install 3lv CLI
+      uses: 3lvia/cli/setup@trunk
+
+    - name: Handle deprecated inputs
       shell: bash
       run: |
-        # Run Trivy
-        trivy image '${{ env.IMAGE_LONG_NAME }}' \
-          --exit-code 1 \
-          --format table \
-          --severity '${{ inputs.severity }}' \
-          --ignorefile .trivyignore \
-          --ignore-unfixed \
-          --scanners '${{ inputs.trivy-enable-secret-scanner == 'true' && 'vuln,misconfig,secret' || 'vuln,misconfig' }}' \
-          ${{ inputs.trivy-skip-dirs != '' && format('--skip-dirs {0}', inputs.trivy-skip-dirs) || '' }}
+        if [[ '${{ inputs.project-file }}' == '' ]]; then
+          if [[ '${{ inputs.csproj-file }}' != '' ]]; then
+            echo "Input 'csproj-file' is deprecated. Please use 'project-file' instead."
+            echo 'PROJECT_FILE=${{ inputs.csproj-file }}' >> "$GITHUB_ENV"
+          fi
+          if [[ '${{ inputs.dockerfile }}' != '' ]]; then
+            echo "Input 'dockerfile' is deprecated. Please use 'project-file' instead."
+            echo 'PROJECT_FILE=${{ inputs.dockerfile }}' >> "$GITHUB_ENV"
+          fi
+        else
+          echo 'PROJECT_FILE=${{ inputs.project-file }}' >> "$GITHUB_ENV"
+        fi
 
-    - name: Run Trivy vulnerability scanner (push)
-      if: ${{ github.event_name == 'push' && inputs.disable-trivy == 'false' }}
+    - name: Build with 3lv
       shell: bash
       run: |
-        # Run Trivy
-        trivy image '${{ env.IMAGE_LONG_NAME }}' \
-          --exit-code 1 \
-          --format sarif \
-          --output trivy.sarif \
-          --severity '${{ inputs.severity }}' \
-          --ignorefile .trivyignore \
-          --ignore-unfixed \
-          --scanners '${{ inputs.trivy-enable-secret-scanner == 'true' && 'vuln,misconfig,secret' || 'vuln,misconfig' }}' \
-          ${{ inputs.trivy-skip-dirs != '' && format('--skip-dirs {0}', inputs.trivy-skip-dirs) || '' }}
-
-    - name: Upload Trivy scan results to GitHub Security tab
-      if: ${{ github.event_name == 'push' && failure() && inputs.disable-trivy == 'false' }}
-      uses: github/codeql-action/upload-sarif@v3
-      with:
-        sarif_file: trivy.sarif
-        category: 'Trivy'
-
-    - name: Push image
-      shell: bash
-      run: |
-        # Push image
-        docker push '${{ env.IMAGE_NAME }}' --all-tags
+        3lv build \
+          --project-file "$PROJECT_FILE" \
+          --system-name '${{ inputs.namespace }}' \
+          --push \
+          '${{ inputs.name }}'
+      env:
+        # Pass optional inputs as environment variables, since they can be empty.
+        # The CLI does not accept empty strings passed to the flags, e.g. `--go-main-package-dir ''` will cause an error.
+        3LV_REGISTRY: ${{ inputs.registry }}
+        3LV_GO_MAIN_PACKAGE_DIR: ${{ inputs.go-main-package-dir }}
+        3LV_CACHE_TAG: ${{ inputs.docker-cache-tag }}
+        3LV_ADDITIONAL_TAGS: '${{ github.sha }}-${{ github.run_number }},${{ inputs.docker-additional-tags }}'
+        3LV_INCLUDE_FILES: ${{ inputs.docker-include-files }}
+        3LV_INCLUDE_DIRS: ${{ inputs.docker-include-dirs }}
+        3LV_SEVERITY: ${{ inputs.severity }}
