@@ -194,6 +194,7 @@ runs:
       env:
         # Pass optional inputs as environment variables, since they can be empty.
         # The CLI does not accept empty strings passed to the flags, e.g. `--go-main-package-dir ''` will cause an error.
+        3LV_BUILD_CONTEXT: ${{ inputs.docker-build-context }}
         3LV_REGISTRY: ${{ inputs.registry }}
         3LV_GO_MAIN_PACKAGE_DIR: ${{ inputs.go-main-package-dir }}
         3LV_CACHE_TAG: ${{ inputs.docker-cache-tag }}
