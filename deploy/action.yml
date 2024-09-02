@@ -286,7 +286,6 @@ runs:
       if: ${{ failure() && inputs.slack-channel != '' }}
       uses: ./slack-message
       with:
-        namespace: ${{ inputs.namespace }}
         environment: ${{ inputs.environment }}
         slack-channel: ${{ inputs.slack-channel }}
         message: |
