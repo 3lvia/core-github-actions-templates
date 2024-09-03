@@ -86,6 +86,7 @@ See [core-github-actions-runner](https://github.com/3lvia/core-github-actions-ru
 ## Build
 
 Builds a Docker image, scans for vulnerabilities using Trivy and pushes to either Azure Container Registry or GitHub Container Registry.
+This action is a wrapper around the [3lv CLI](https://github.com/3lvia/cli) build command (`3lv build`).
 To use the `Build` and `Deploy` actions with Elvias container registry and runtime services,
 you must first add your GitHub repository to [github-repositories-terraform](https://github.com/3lvia/github-repositories-terraform).
 
