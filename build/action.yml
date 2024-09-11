@@ -64,6 +64,16 @@ inputs:
       Comma-separated list of CVEs for Trivy to ignore.
       See [Trivy documentation](https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore) for syntax.
     required: false
+  trivy-disable-error:
+    description: 'Disables Trivy from failing the build if vulnerabilities are found. **THIS IS NOT RECOMMENDED.**'
+    required: false
+    default: 'false'
+  trivy-upload-report:
+    description: |
+      If `true`, the action will upload Trivy scan results to GitHub Advanced Security.
+      This requires GitHub Advanced Security to be enabled for the repository.
+    required: false
+    default: 'true'
   checkout:
     description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
     required: false
@@ -156,7 +166,7 @@ runs:
     - name: Install 3lv CLI
       uses: 3lvia/cli/setup@trunk
       with:
-        version: '0.7.3' # TODO: remove this (which will get latest version) when 3lv CLI is stable
+        version: '0.8.0' # TODO: remove this (which will get latest version) when 3lv CLI is stable
 
     - name: Handle deprecated inputs
       shell: bash
@@ -195,6 +205,7 @@ runs:
           --project-file "$PROJECT_FILE" \
           --system-name "$SYSTEM_NAME" \
           --push \
+          --scan-format sarif \
           --registry "$REGISTRY" \
           '${{ inputs.name }}'
       env:
@@ -208,3 +219,11 @@ runs:
         3LV_INCLUDE_FILES: ${{ inputs.docker-include-files }}
         3LV_INCLUDE_DIRS: ${{ inputs.docker-include-dirs }}
         3LV_SEVERITY: ${{ inputs.severity }}
+        3LV_SCAN_DISABLE_ERROR: ${{ inputs.trivy-disable-error }}
+
+    - name: Upload Trivy scan results to GitHub Advanced Security
+      if: ${{ inputs.trivy-upload-report == 'true' }}
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy.sarif'
+        category: 'Trivy'
