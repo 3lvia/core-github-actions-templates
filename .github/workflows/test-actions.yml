@@ -19,7 +19,7 @@ env:
 jobs:
   set-matrices:
     name: Set matrices
-    runs-on: elvia-runner
+    runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrices.outputs.matrix }}
       matrix-trivy: ${{ steps.set-matrices.outputs.matrix-trivy }}
