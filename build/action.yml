@@ -167,6 +167,8 @@ runs:
 
     - name: Install 3lv CLI
       uses: 3lvia/cli/setup@trunk
+      with:
+        version: '0.6.1' # TODO: remove when 3lv CLI is stable (which will use latest)
 
     - name: Handle deprecated inputs
       shell: bash
