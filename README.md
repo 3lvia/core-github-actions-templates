@@ -123,6 +123,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 
 - `contents: read`
 - `id-token: write`
+- `security-events: write`
 
 ### Usage
 
