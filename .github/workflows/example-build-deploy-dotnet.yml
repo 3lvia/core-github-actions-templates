@@ -58,6 +58,7 @@ jobs:
     name: Build and Scan
     runs-on: elvia-runner
     permissions:
+      actions: read
       contents: read
       id-token: write
       security-events: write
