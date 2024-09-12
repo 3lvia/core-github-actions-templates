@@ -204,18 +204,20 @@ runs:
         3lv build \
           --project-file "$PROJECT_FILE" \
           --system-name "$SYSTEM_NAME" \
-          --push \
-          --scan-format sarif \
           --registry "$REGISTRY" \
+          --scan-format "$SCAN_FORMAT" \
+          --additional-tags "$ADDITIONAL_TAGS" \
+          --push \
           '${{ inputs.name }}'
       env:
         REGISTRY: ${{ inputs.registry == 'ghcr' && format('ghcr.io/{0}', github.repository_owner) || format('{0}.azurecr.io', inputs.ACR_NAME) }}
+        SCAN_FORMAT: ${{ inputs.trivy-upload-report == 'true' && 'sarif' || 'table' }}
+        ADDITIONAL_TAGS: "${{ github.sha }}-${{ github.run_number }}${{ inputs.docker-additional-tags == '' && '' || ',' }}${{ inputs.docker-additional-tags }}"
         # Pass optional inputs as environment variables, since they can be empty.
         # The CLI does not accept empty strings passed to the flags, e.g. `--go-main-package-dir ''` will cause an error.
         3LV_BUILD_CONTEXT: ${{ inputs.docker-build-context }}
         3LV_GO_MAIN_PACKAGE_DIR: ${{ inputs.go-main-package-dir }}
         3LV_CACHE_TAG: ${{ inputs.docker-cache-tag }}
-        3LV_ADDITIONAL_TAGS: '${{ github.sha }}-${{ github.run_number }},${{ inputs.docker-additional-tags }}'
         3LV_INCLUDE_FILES: ${{ inputs.docker-include-files }}
         3LV_INCLUDE_DIRS: ${{ inputs.docker-include-dirs }}
         3LV_SEVERITY: ${{ inputs.severity }}
