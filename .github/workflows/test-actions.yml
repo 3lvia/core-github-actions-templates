@@ -170,6 +170,7 @@ jobs:
       contents: read
       id-token: write
       packages: write # Required for publishing to GitHub Container Registry
+      security-events: write
     environment: build
     steps:
       - name: Checkout repository
