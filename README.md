@@ -115,7 +115,7 @@ you must first add your GitHub repository to [github-repositories-terraform](htt
 | `severity`               | Severity levels to scan for. See [Trivy documentation](https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs) for more information.                                                                                                                                                                                                           | no       | `CRITICAL`                             |
 | `trivy-cve-ignores`      | Comma-separated list of CVEs for Trivy to ignore. See [Trivy documentation](https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore) for syntax.                                                                                                                                                                                  | no       |                                        |
 | `trivy-disable-error`    | Disables Trivy from failing the build if vulnerabilities are found. **THIS IS NOT RECOMMENDED.**                                                                                                                                                                                                                                                               | no       | `false`                                |
-| `trivy-upload-report`    | If `true`, the action will upload Trivy scan results to GitHub Advanced Security. This requires GitHub Advanced Security to be enabled for the repository.                                                                                                                                                                                                     | no       | `true`                                 |
+| `trivy-upload-report`    | If `true`, the action will upload Trivy scan results to GitHub Advanced Security. This requires GitHub Advanced Security to be enabled for the repository.                                                                                                                                                                                                     | no       | `false`                                |
 
 ### Permissions
 
@@ -237,7 +237,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # If `true`, the action will upload Trivy scan results to GitHub Advanced Security. This requires GitHub Advanced Security to be enabled for the repository.
     #
     # Required: no
-    # Default: 'true'
+    # Default: 'false'
 ```
 
 <!-- gh-actions-docs-end -->
