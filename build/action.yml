@@ -73,7 +73,7 @@ inputs:
       If `true`, the action will upload Trivy scan results to GitHub Advanced Security.
       This requires GitHub Advanced Security to be enabled for the repository.
     required: false
-    default: 'true'
+    default: 'false'
   checkout:
     description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
     required: false
@@ -223,9 +223,9 @@ runs:
         3LV_SEVERITY: ${{ inputs.severity }}
         3LV_SCAN_DISABLE_ERROR: ${{ inputs.trivy-disable-error }}
 
-#   - name: Upload Trivy scan results to GitHub Advanced Security
-#     if: ${{ inputs.trivy-upload-report == 'true' && failure() }}
-#     uses: github/codeql-action/upload-sarif@v3
-#     with:
-#       sarif_file: 'trivy.sarif'
-#       category: 'Trivy'
+    - name: Upload Trivy scan results to GitHub Advanced Security
+      if: ${{ inputs.trivy-upload-report == 'true' && failure() }}
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy.sarif'
+        category: 'Trivy'

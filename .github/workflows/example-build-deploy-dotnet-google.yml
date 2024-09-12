@@ -68,6 +68,7 @@ jobs:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
           project-file: ${{ env.PROJECT_FILE }}
+          trivy-upload-report: 'true'
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
 
   deploy-dev:
