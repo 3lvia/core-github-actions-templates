@@ -115,8 +115,8 @@ you must first add your GitHub repository to [github-repositories-terraform](htt
 | `severity`               | Severity levels to scan for. See [Trivy documentation](https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs) for more information.                                                                                                                                                                                                           | no       | `CRITICAL`                             |
 | `trivy-cve-ignores`      | Comma-separated list of CVEs for Trivy to ignore. See [Trivy documentation](https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore) for syntax.                                                                                                                                                                                  | no       |                                        |
 | `trivy-disable-error`    | Disables Trivy from failing the build if vulnerabilities are found. **THIS IS NOT RECOMMENDED.**                                                                                                                                                                                                                                                               | no       | `false`                                |
-| `trivy-post-comment`     | If `true`, the action will post a comment to the PR with the Trivy scan results. This requires the action to run on a pull request, the input `github-token` to be set, and the permission `contents: write` to be set for the job.                                                                                                                            | no       | `false`                                |
-| `trivy-upload-report`    | If `true`, the action will upload Trivy scan results to GitHub Advanced Security. This requires GitHub Advanced Security to be enabled for the repository, and the permissions `security-events: write` and `actions: read` to be set for the job.                                                                                                             | no       | `false`                                |
+| `trivy-post-comment`     | If `true`, the action will post a comment to the PR with the Trivy scan results. This requires the action to run on a pull request and the permissions `pull-requests: write` to be set for the job.                                                                                                                                                           | no       | `false`                                |
+| `trivy-upload-report`    | If `true`, the action will upload Trivy scan results to GitHub Advanced Security. This requires GitHub Advanced Security to be enabled for the repository, and the permissions `actions: write` and `security-events: write` to be set for the job.                                                                                                            | no       | `false`                                |
 
 ### Permissions
 
@@ -235,13 +235,13 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Default: 'false'
 
     trivy-post-comment:
-    # If `true`, the action will post a comment to the PR with the Trivy scan results. This requires the action to run on a pull request, the input `github-token` to be set, and the permission `contents: write` to be set for the job.
+    # If `true`, the action will post a comment to the PR with the Trivy scan results. This requires the action to run on a pull request and the permissions `pull-requests: write` to be set for the job.
     #
     # Required: no
     # Default: 'false'
 
     trivy-upload-report:
-    # If `true`, the action will upload Trivy scan results to GitHub Advanced Security. This requires GitHub Advanced Security to be enabled for the repository, and the permissions `security-events: write` and `actions: read` to be set for the job.
+    # If `true`, the action will upload Trivy scan results to GitHub Advanced Security. This requires GitHub Advanced Security to be enabled for the repository, and the permissions `actions: write` and `security-events: write` to be set for the job.
     #
     # Required: no
     # Default: 'false'
