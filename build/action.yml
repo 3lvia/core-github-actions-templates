@@ -71,7 +71,13 @@ inputs:
   trivy-upload-report:
     description: |
       If `true`, the action will upload Trivy scan results to GitHub Advanced Security.
-      This requires GitHub Advanced Security to be enabled for the repository.
+      This requires GitHub Advanced Security to be enabled for the repository, and the permissions `security-events: write` and `actions: read` to be set for the job.
+    required: false
+    default: 'false'
+  trivy-post-comment:
+    description: |
+      If `true`, the action will post a comment to the PR with the Trivy scan results.
+      This requires the action to run on a pull request, the input `github-token` to be set, and the permission `contents: write` to be set for the job.
     required: false
     default: 'false'
   checkout:
@@ -166,7 +172,7 @@ runs:
     - name: Install 3lv CLI
       uses: 3lvia/cli/setup@trunk
       with:
-        version: '0.8.0' # TODO: remove this (which will get latest version) when 3lv CLI is stable
+        version: '0.9.1' # TODO: remove this (which will get latest version) when 3lv CLI is stable
 
     - name: Handle deprecated inputs
       shell: bash
@@ -205,13 +211,12 @@ runs:
           --project-file "$PROJECT_FILE" \
           --system-name "$SYSTEM_NAME" \
           --registry "$REGISTRY" \
-          --scan-format "$SCAN_FORMAT" \
+          --scan-formats table,sarif,markdown \
           --additional-tags "$ADDITIONAL_TAGS" \
           --push \
           '${{ inputs.name }}'
       env:
         REGISTRY: ${{ inputs.registry == 'ghcr' && format('ghcr.io/{0}', github.repository_owner) || format('{0}.azurecr.io', inputs.ACR_NAME) }}
-        SCAN_FORMAT: ${{ inputs.trivy-upload-report == 'true' && 'sarif' || 'table' }}
         ADDITIONAL_TAGS: "${{ github.sha }}-${{ github.run_number }}${{ inputs.docker-additional-tags == '' && '' || ',' }}${{ inputs.docker-additional-tags }}"
         # Pass optional inputs as environment variables, since they can be empty.
         # The CLI does not accept empty strings passed to the flags, e.g. `--go-main-package-dir ''` will cause an error.
@@ -222,6 +227,21 @@ runs:
         3LV_INCLUDE_DIRS: ${{ inputs.docker-include-dirs }}
         3LV_SEVERITY: ${{ inputs.severity }}
         3LV_SCAN_DISABLE_ERROR: ${{ inputs.trivy-disable-error }}
+
+    - name: Add comment for Trivy scan results to PR
+      if: ${{ github.event_name == 'pull_request' && inputs.trivy-post-comment && failure() }}
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const body = fs.readFileSync('trivy.md', 'utf8');
+
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body,
+          });
 
     - name: Upload Trivy scan results to GitHub Advanced Security
       if: ${{ inputs.trivy-upload-report == 'true' && always() }}
