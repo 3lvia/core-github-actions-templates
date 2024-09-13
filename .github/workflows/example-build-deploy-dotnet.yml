@@ -58,10 +58,11 @@ jobs:
     name: Build and Scan
     runs-on: elvia-runner
     permissions:
-      actions: read
-      contents: write
+      contents: read
+      checks: write
+      issues: read
+      pull-requests: write
       id-token: write
-      security-events: write
     environment: build
     steps:
       - uses: 3lvia/core-github-actions-templates/build@trunk

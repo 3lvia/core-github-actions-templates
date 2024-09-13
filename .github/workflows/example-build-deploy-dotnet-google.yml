@@ -58,9 +58,10 @@ jobs:
     name: Build and Scan
     runs-on: elvia-runner
     permissions:
-      actions: read
-      contents: write
+      actions: write
+      contents: read
       id-token: write
+      pull-requests: write
       security-events: write
     environment: build
     steps:

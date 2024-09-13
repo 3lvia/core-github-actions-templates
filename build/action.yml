@@ -71,13 +71,13 @@ inputs:
   trivy-upload-report:
     description: |
       If `true`, the action will upload Trivy scan results to GitHub Advanced Security.
-      This requires GitHub Advanced Security to be enabled for the repository, and the permissions `security-events: write` and `actions: read` to be set for the job.
+      This requires GitHub Advanced Security to be enabled for the repository, and the permissions `actions: write` and `security-events: write` to be set for the job.
     required: false
     default: 'false'
   trivy-post-comment:
     description: |
       If `true`, the action will post a comment to the PR with the Trivy scan results.
-      This requires the action to run on a pull request, the input `github-token` to be set, and the permission `contents: write` to be set for the job.
+      This requires the action to run on a pull request and the permissions `pull-requests: write` to be set for the job.
     required: false
     default: 'false'
   checkout:
