@@ -121,7 +121,10 @@ runs:
 
     - name: Authenticate with Azure
       if: ${{ inputs.registry == 'acr' }}
-      uses: azure/login@v2
+      uses: azure/login@v2.2.0
+      env:
+        AZURE_CORE_OUTPUT: 'none'
+        AZURE_LOGIN_POST_CLEANUP: 'false' # we destroy VMs after use
       with:
         client-id: ${{ inputs.AZURE_CLIENT_ID }}
         tenant-id: ${{ inputs.AZURE_TENANT_ID }}
