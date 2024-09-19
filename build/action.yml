@@ -89,13 +89,10 @@ inputs:
       What container registry to use, either `acr` or `ghcr`.
       If set to `acr`, credentials for Azure Container Registry will default to Elvia values.
       You can also set these explictly to point to your own ACR.
-      If set to `ghcr`, the action will use the GitHub Container Registry.
-      This requires `github-token` to be set, and the `packages: write` permission.'
+      If set to `ghcr`, the action will use the GitHub Container Registry,
+      which requires the `packages: write` permission to be set for the job.
     required: false
     default: 'acr'
-  github-token:
-    description: 'GitHub token for GitHub Container Registry. **Required if `registry` is set to `ghcr`**. Should normally be `secrets.GITHUB_TOKEN`.'
-    required: false
   AZURE_CLIENT_ID:
     description: 'ClientId of a service principal that can push to Azure Container Registry.'
     required: false
@@ -143,7 +140,7 @@ runs:
       with:
         registry: 'ghcr.io'
         username: ${{ github.actor }}
-        password: ${{ inputs.github-token }}
+        password: ${{ github.token }}
 
     - name: Setup Trivy ignore file
       shell: bash
@@ -175,7 +172,7 @@ runs:
     - name: Install 3lv CLI
       uses: 3lvia/cli/setup@trunk
       with:
-        version: '0.9.2' # TODO: remove this (which will get latest version) when 3lv CLI is stable
+        version: '0.11.0' # TODO: remove this (which will get latest version) when 3lv CLI is stable
 
     - name: Handle deprecated inputs
       shell: bash
@@ -215,6 +212,7 @@ runs:
           --system-name "$SYSTEM_NAME" \
           --registry "$REGISTRY" \
           --scan-formats table,sarif,markdown \
+          --scan-skip-db-update \
           --additional-tags "$ADDITIONAL_TAGS" \
           --push \
           '${{ inputs.name }}'
