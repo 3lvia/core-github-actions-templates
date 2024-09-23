@@ -90,12 +90,9 @@ inputs:
       If set to `acr`, credentials for Azure Container Registry will default to Elvia values.
       You can also set these explictly to point to your own ACR.
       If set to `ghcr`, the action will use the GitHub Container Registry.
-      This requires `github-token` to be set, and the `packages: write` permission.'
+      This requires the `packages: write` permission.'
     required: false
     default: 'acr'
-  github-token:
-    description: 'GitHub token for GitHub Container Registry. **Required if `registry` is set to `ghcr`**. Should normally be `secrets.GITHUB_TOKEN`.'
-    required: false
   AZURE_CLIENT_ID:
     description: 'ClientId of a service principal that can push to Azure Container Registry.'
     required: false
@@ -137,13 +134,14 @@ runs:
         # Login to ACR
         az acr login --name '${{ inputs.ACR_NAME }}'
 
+    # Also used for increasing Trivy GHCR quota, might not have effect?
+    # https://github.com/aquasecurity/trivy-action/issues/389
     - name: Login to Github Container Registry
-      if: ${{ inputs.registry == 'ghcr' }}
       uses: docker/login-action@v3
       with:
         registry: 'ghcr.io'
         username: ${{ github.actor }}
-        password: ${{ inputs.github-token }}
+        password: ${{ github.token }}
 
     - name: Setup Trivy ignore file
       shell: bash
