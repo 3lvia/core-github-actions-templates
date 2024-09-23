@@ -1,0 +1,61 @@
+name: Push Trivy Database Mirrors
+
+on:
+  push:
+    branches: [trunk]
+    paths: ['.github/workflows/push-trivy-db-mirrors.yml']
+  pull_request:
+    branches: [trunk]
+    paths: ['.github/workflows/push-trivy-db-mirrors.yml']
+  schedule:
+    # Run every 6 hours, which is when Trivy updates their database
+    - cron: '45 */6 * * *'
+
+jobs:
+  push-trivy-db-mirror:
+    name: Push Trivy Database Mirror
+    runs-on: elvia-runner
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Login to GHCR
+        run: |
+          echo "$GITHUB_TOKEN" | oras login ghcr.io -u "$GITHUB_USERNAME" --password-stdin
+        env:
+          GITHUB_USERNAME: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Pull Trivy Database
+        run: oras pull ghcr.io/aquasecurity/trivy-db:2
+
+      - name: Push Trivy Database Mirror
+        run: |
+          oras push \
+            --artifact-type application/vnd.aquasec.trivy.config.v1+json \
+            'ghcr.io/${{ github.repository_owner }}/trivy-db:2' \
+            db.tar.gz:application/vnd.aquasec.trivy.db.layer.v1.tar+gzip
+
+  push-trivy-java-db-mirror:
+    name: Push Trivy Java Database Mirror
+    runs-on: elvia-runner
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Login to GHCR
+        run: |
+          echo "$GITHUB_TOKEN" | oras login ghcr.io -u "$GITHUB_USERNAME" --password-stdin
+        env:
+          GITHUB_USERNAME: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Pull Trivy Java Database
+        run: oras pull ghcr.io/aquasecurity/trivy-java-db:1
+
+      - name: Push Trivy Database Mirror
+        run: |
+          oras push \
+            --artifact-type application/vnd.aquasec.trivy.config.v1+json \
+            'ghcr.io/${{ github.repository_owner }}/trivy-java-db:1' \
+            javadb.tar.gz:application/vnd.aquasec.trivy.javadb.layer.v1.tar+gzip
