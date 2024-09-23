@@ -227,11 +227,7 @@ runs:
         3LV_INCLUDE_FILES: ${{ inputs.docker-include-files }}
         3LV_INCLUDE_DIRS: ${{ inputs.docker-include-dirs }}
         3LV_SEVERITY: ${{ inputs.severity }}
-        #       3LV_SCAN_DISABLE_ERROR: ${{ inputs.trivy-disable-error }}
-        #
-        #       https://github.com/aquasecurity/trivy-action/issues/389
-        #       TODO: reenable when the issue is fixed
-        3LV_SCAN_DISABLE_ERROR: 'true'
+        3LV_SCAN_DISABLE_ERROR: ${{ inputs.trivy-disable-error }}
 
     - name: Add comment for Trivy scan results to PR
       if: ${{ github.event_name == 'pull_request' && inputs.trivy-post-comment && failure() }}
