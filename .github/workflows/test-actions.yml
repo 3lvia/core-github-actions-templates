@@ -4,8 +4,7 @@ on:
   pull_request:
     branches: [trunk]
     paths:
-      # TODO: uncomment
-      # - '.github/workflows/test-actions.yml'
+      - '.github/workflows/test-actions.yml'
       - '.github/test/**'
       - '.github/test-go/**'
       - '**/action.yml'
