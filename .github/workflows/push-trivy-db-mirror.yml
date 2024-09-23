@@ -7,6 +7,9 @@ on:
   pull_request:
     branches: [trunk]
     paths: ['.github/workflows/push-trivy-db-mirror.yml']
+  schedule:
+    # Run every 6 hours, which is when Trivy updates their database
+    - cron: '45 */6 * * *'
 
 jobs:
   push-trivy-db-mirror:
@@ -27,4 +30,4 @@ jobs:
         run: oras pull ghcr.io/aquasecurity/trivy-db:2
 
       - name: Push Trivy Database Mirror
-        run: oras push 'ghcr.io/${{ github.repository_owner }}/trivy-db:2'
+        run: oras push 'ghcr.io/${{ github.repository_owner }}/trivy-db:2' db.tar.gz
