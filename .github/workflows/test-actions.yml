@@ -195,7 +195,6 @@ jobs:
           registry: ${{ matrix.registry }}
           trivy-upload-report: 'true'
           trivy-post-comment: 'true'
-          github-token: ${{ matrix.registry == 'ghcr' && secrets.GITHUB_TOKEN || '' }}
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
 
   deploy-dev:
