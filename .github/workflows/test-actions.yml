@@ -3,7 +3,15 @@ name: Test actions
 on:
   pull_request:
     branches: [trunk]
-    paths-ignore: ['README.md']
+    paths:
+      # TODO: uncomment
+      # - '.github/workflows/test-actions.yml'
+      - '.github/test/**'
+      - '.github/test-go/**'
+      - '**/action.yml'
+      - '**/requirements.txt'
+      - '**/*.py'
+      - '!README.md'
   workflow_dispatch:
     inputs:
       runner:
