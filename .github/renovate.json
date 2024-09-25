@@ -3,5 +3,8 @@
   "extends": ["config:base"],
   "stabilityDays": 3,
   "prCreation": "not-pending",
-  "ignorePaths": [".github/test/**"]
+  "ignorePaths": [".github/test/**"],
+  "nuget": {
+    "ignorePaths": [".github/test/**"]
+  }
 }
