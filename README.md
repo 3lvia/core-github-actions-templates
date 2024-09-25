@@ -248,6 +248,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 ## Deploy
 
 Deploys an application to Kubernetes using the Elvia Helm chart.
+This action is a wrapper around the [3lv CLI](https://github.com/3lvia/cli) deploy command (`3lv deploy`).
 To use the `Build` and `Deploy` actions with Elvias container registry and runtime services,
 you must first add your Github repository to [github-repositories-terraform](https://github.com/3lvia/github-repositories-terraform).
 
@@ -255,8 +256,6 @@ you must first add your Github repository to [github-repositories-terraform](htt
 
 | Name                            | Description                                                                                                                          | Required | Default                                |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------------------------------------- |
-| `AKS_CLUSTER_NAME`              | Name of the AKS cluster to deploy to. Defaults to Elvias normal clusters.                                                            | no       |                                        |
-| `AKS_RESOURCE_GROUP`            | Resource group of the AKS cluster to deploy to. Defaults to Elvias normal clusters.                                                  | no       |                                        |
 | `AKS_SUBSCRIPTION_ID`           | Subscription ID of AKS to deploy to. Defaults to Elvias normal clusters.                                                             | no       |                                        |
 | `AZURE_CLIENT_ID`               | Client ID of a service principal that has access to AKS. Only required for deploying to AKS.                                         | no       |                                        |
 | `AZURE_TENANT_ID`               | Tenant ID of a service principal that has access to AKS.                                                                             | no       | `2186a6ec-c227-4291-9806-d95340bf439d` |
@@ -267,7 +266,7 @@ you must first add your Github repository to [github-repositories-terraform](htt
 | `GC_WORKLOAD_IDENTITY_PROVIDER` | Workload identity provider to use for deploying to GKE. Only required for deploying to GKE.                                          | no       |                                        |
 | `checkout`                      | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`                                 |
 | `environment`                   | Environment to deploy to.                                                                                                            | yes      |                                        |
-| `helm-values-path`              | Path to Helm values file, relative to the root of the repository.                                                                    | no       | `.github/deploy/values.yaml`           |
+| `helm-values-path`              | Path to Helm values file, relative to the root of the repository.                                                                    | no       | `.github/deploy/values.yml`            |
 | `name`                          | Name of application. Do not include namespace.                                                                                       | yes      |                                        |
 | `namespace`                     | Namespace or system of the application.                                                                                              | yes      |                                        |
 | `runtime-cloud-provider`        | Kubernetes cloud provider to deploy to: `AKS` or `GKE`.                                                                              | no       | `AKS`                                  |
@@ -287,16 +286,6 @@ This action requires the following [permissions](https://docs.github.com/en/acti
 - name: Deploy
   uses: 3lvia/core-github-actions-templates/deploy@trunk
   with:
-    AKS_CLUSTER_NAME:
-    # Name of the AKS cluster to deploy to. Defaults to Elvias normal clusters.
-    #
-    # Required: no
-
-    AKS_RESOURCE_GROUP:
-    # Resource group of the AKS cluster to deploy to. Defaults to Elvias normal clusters.
-    #
-    # Required: no
-
     AKS_SUBSCRIPTION_ID:
     # Subscription ID of AKS to deploy to. Defaults to Elvias normal clusters.
     #
@@ -354,7 +343,7 @@ This action requires the following [permissions](https://docs.github.com/en/acti
     # Path to Helm values file, relative to the root of the repository.
     #
     # Required: no
-    # Default: '.github/deploy/values.yaml'
+    # Default: '.github/deploy/values.yml'
 
     name:
     # Name of application. Do not include namespace.
