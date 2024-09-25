@@ -113,12 +113,26 @@ runs:
         tenant-id: ${{ inputs.AZURE_TENANT_ID }}
         subscription-id: ${{ env.AKS_SUBSCRIPTION_ID }}
 
+    - name: Setup kubelogin if not on Elvia runner
+      uses: azure/use-kubelogin@v1
+      if: ${{ inputs.runtime-cloud-provider == 'AKS' && !startsWith(runner.name, 'elvia-runner-') }}
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        kubelogin-version: 'latest'
+
     - name: Authenticate with Google Cloud
       uses: google-github-actions/auth@v2.1.4
       if: ${{ inputs.runtime-cloud-provider == 'GKE' }}
       with:
         workload_identity_provider: ${{ inputs.GC_WORKLOAD_IDENTITY_PROVIDER }}
         service_account: ${{ inputs.GC_SERVICE_ACCOUNT }}
+
+    - name: Setup Google Cloud CLI with GKE auth plugin if not on Elvia runner
+      uses: google-github-actions/setup-gcloud@v2.1.1
+      if: ${{ inputs.runtime-cloud-provider == 'GKE' && !startsWith(runner.name, 'elvia-runner-') }}
+      with:
+        install_components: 'gke-cloud-auth-plugin'
 
     - name: Install 3lv CLI
       uses: 3lvia/cli/setup@trunk

@@ -77,7 +77,7 @@ jobs:
             echo 'matrix-deploy<<EOF'
             cat << EOF
           {
-            "runner": ["$RUNNER"],
+            "runner": ["$RUNNER","ubuntu-latest"],
             "application-name": ["${{ env.APPLICATION_BASE_NAME }}", "${{ env.APPLICATION_BASE_NAME }}-go"],
             "include": [
               {
