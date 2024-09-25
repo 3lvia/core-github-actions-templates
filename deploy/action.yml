@@ -132,7 +132,7 @@ runs:
       uses: google-github-actions/setup-gcloud@v2.1.1
       if: ${{ inputs.runtime-cloud-provider == 'GKE' && !startsWith(runner.name, 'elvia-runner-') }}
       with:
-        install_components: 'gke-cloud-auth-plugin'
+        install_components: 'gke-gcloud-auth-plugin'
 
     - name: Install 3lv CLI
       uses: 3lvia/cli/setup@trunk
