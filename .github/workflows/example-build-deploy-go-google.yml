@@ -45,7 +45,6 @@ jobs:
           project-file: ${{ env.PROJECT_FILE }}
           trivy-upload-report: 'true'
           trivy-post-comment: 'true'
-          github-token: ${{ secrets.GITHUB_TOKEN }} # Required for posting comments
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
 
   deploy-dev:
