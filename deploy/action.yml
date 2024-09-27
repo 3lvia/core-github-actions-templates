@@ -44,19 +44,25 @@ inputs:
   AKS_SUBSCRIPTION_ID:
     description: 'Subscription ID of AKS to deploy to. Defaults to Elvias normal clusters.'
     required: false
+  AKS_CLUSTER_NAME:
+    description: 'Name of the AKS cluster to deploy to. Defaults to Elvias normal clusters.'
+    required: false
+  AKS_RESOURCE_GROUP:
+    description: 'Resource group of the AKS cluster to deploy to. Defaults to Elvias normal clusters.'
+    required: false
   GC_SERVICE_ACCOUNT:
     description: 'Service account to use for deploying to GKE. Only required for deploying to GKE.'
     required: false
   GC_WORKLOAD_IDENTITY_PROVIDER:
     description: 'Workload identity provider to use for deploying to GKE. Only required for deploying to GKE.'
     required: false
-  GC_PROJECT_ID:
+  GKE_PROJECT_ID:
     description: 'Project ID of GKE to deploy to. Defaults to Elvias normal clusters.'
     required: false
-  GC_CLUSTER_NAME:
+  GKE_CLUSTER_NAME:
     description: 'Name of the GKE cluster to deploy to. Defaults to Elvias normal clusters.'
     required: false
-  GC_CLUSTER_LOCATION:
+  GKE_CLUSTER_LOCATION:
     description: 'Location of the GKE cluster to deploy to.'
     required: false
     default: 'europe-west1'
@@ -137,7 +143,7 @@ runs:
     - name: Install 3lv CLI
       uses: 3lvia/cli/setup@trunk
       with:
-        version: '0.11.14' # TODO: remove this (which will get latest version) when 3lv CLI is stable
+        version: '0.11.15' # TODO: remove this (which will get latest version) when 3lv CLI is stable
 
     - name: Deploy
       shell: bash
@@ -153,6 +159,14 @@ runs:
           --commit-hash '${{ github.sha }}' \
           --skip-authentication \
           '${{ inputs.name }}'
+      env:
+        3LV_AKS_TENANT_ID: ${{ inputs.AZURE_TENANT_ID }}
+        3LV_AKS_SUBSCRIPTION_ID: ${{ env.AKS_SUBSCRIPTION_ID }}
+        3LV_AKS_RESOURCE_GROUP: ${{ inputs.AKS_RESOURCE_GROUP }}
+        3LV_AKS_CLUSTER_NAME: ${{ inputs.AKS_CLUSTER_NAME }}
+        3LV_GKE_PROJECT_ID: ${{ inputs.GKE_PROJECT_ID }}
+        3LV_GKE_CLUSTER_NAME: ${{ inputs.GKE_CLUSTER_NAME }}
+        3LV_GKE_CLUSTER_LOCATION: ${{ inputs.GKE_CLUSTER_LOCATION }}
 
     - name: Read secrets from Vault
       uses: hashicorp/vault-action@v3
