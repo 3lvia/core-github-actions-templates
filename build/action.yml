@@ -64,10 +64,6 @@ inputs:
       Comma-separated list of CVEs for Trivy to ignore.
       See [Trivy documentation](https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore) for syntax.
     required: false
-  trivy-disable-error:
-    description: 'Disables Trivy from failing the build if vulnerabilities are found. **THIS IS NOT RECOMMENDED.**'
-    required: false
-    default: 'false'
   trivy-upload-report:
     description: |
       If `true`, the action will upload Trivy scan results to GitHub Advanced Security.
@@ -224,7 +220,13 @@ runs:
         3LV_INCLUDE_FILES: ${{ inputs.docker-include-files }}
         3LV_INCLUDE_DIRS: ${{ inputs.docker-include-dirs }}
         3LV_SEVERITY: ${{ inputs.severity }}
-        3LV_SCAN_DISABLE_ERROR: ${{ inputs.trivy-disable-error }}
+
+    - name: Upload Trivy scan results to GitHub Advanced Security
+      if: ${{ inputs.trivy-upload-report == 'true' && !cancelled() }}
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy.sarif'
+        category: 'Trivy'
 
     - name: Add comment for Trivy scan results to PR
       if: ${{ github.event_name == 'pull_request' && inputs.trivy-post-comment && failure() }}
@@ -232,19 +234,44 @@ runs:
       with:
         script: |
           const fs = require('fs');
-
           const body = fs.readFileSync('trivy.md', 'utf8');
 
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
+          const { data: comments } = await github.rest.issues.listComments({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body,
+            issue_number: context.issue.number,
           });
 
-    - name: Upload Trivy scan results to GitHub Advanced Security
-      if: ${{ inputs.trivy-upload-report == 'true' && always() }}
-      uses: github/codeql-action/upload-sarif@v3
-      with:
-        sarif_file: 'trivy.sarif'
-        category: 'Trivy'
+          const existingComment = comments.find(
+            (comment) =>
+              comment.user.type === "Bot" &&
+              comment.body.includes("# :warning: Vulnerabilities detected in"),
+          );
+
+          if (existingComment && body) {
+            await github.rest.issues.updateComment({
+              comment_id: existingComment.id,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            });
+            return;
+          }
+
+          if (existingComment && !body) {
+            await github.rest.issues.deleteComment({
+              comment_id: existingComment.id,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            return;
+          }
+
+          if (body) {
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            });
+          }
