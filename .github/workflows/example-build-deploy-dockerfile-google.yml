@@ -1,4 +1,4 @@
-name: Build and Deploy .NET to Kubernetes
+name: Build and Deploy to Kubernetes on Google Cloud
 
 on:
   push:
@@ -24,49 +24,12 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  APPLICATION_NAME: 'demo-api'
+  APPLICATION_NAME: 'demo-api-go'
   SYSTEM_NAME: 'core'
-  HELM_VALUES_PATH: '.github/test/deploy/values.yml'
-  PROJECT_FILE: '.github/test/src/core-demo-api.csproj'
+  HELM_VALUES_PATH: '.github/test-go/deploy/values.yml'
+  PROJECT_FILE: '.github/test-go/Dockerfile'
 
 jobs:
-  unit-tests:
-    name: Unit Tests
-    runs-on: elvia-runner
-    permissions:
-      contents: read
-      checks: write
-      issues: read
-      pull-requests: write
-    steps:
-      - uses: 3lvia/core-github-actions-templates/unittest@trunk
-        with:
-          test-coverage: 'true'
-
-  integration-tests:
-    name: Integration Tests
-    runs-on: elvia-runner
-    permissions:
-      contents: read
-      checks: write
-      issues: read
-      pull-requests: write
-      id-token: write
-    steps:
-      - uses: 3lvia/core-github-actions-templates/integrationtest@trunk
-        with:
-          system: ${{ env.SYSTEM_NAME }}
-
-  analyze:
-    name: Analyze
-    runs-on: elvia-runner
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    steps:
-      - uses: 3lvia/core-github-actions-templates/analyze@trunk
-
   build-scan:
     name: Build and Scan
     runs-on: elvia-runner
@@ -92,14 +55,14 @@ jobs:
     # Require all jobs below to be successful before running this job.
     # Any of these can be commented out or removed if you want to deploy anyway.
     needs:
-      - unit-tests
-      - integration-tests
       - build-scan
       - analyze
     runs-on: elvia-runner
     permissions:
       contents: read
       id-token: write
+    concurrency:
+      group: 'dev-google--this-block-is-removed-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'
     environment: dev
     # Only on push to trunk
     if: github.ref == 'refs/heads/trunk'
@@ -110,10 +73,12 @@ jobs:
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'dev'
           helm-values-path: ${{ env.HELM_VALUES_PATH }}
+          runtime-cloud-provider: 'GKE'
           # Will post to the Slack channel of your system if the deployment fails.
           # Can be commented out if you don't want this.
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
-          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
+          GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
 
   deploy-test:
     name: Deploy Test
@@ -123,6 +88,8 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    concurrency:
+      group: 'test-google--this-block-is-removed-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'
     environment: test
     # Only on push to trunk
     if: github.ref == 'refs/heads/trunk'
@@ -133,10 +100,12 @@ jobs:
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'test'
           helm-values-path: ${{ env.HELM_VALUES_PATH }}
+          runtime-cloud-provider: 'GKE'
           # Will post to the Slack channel of your system if the deployment fails.
           # Can be commented out if you don't want this.
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
-          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
+          GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
 
   deploy-prod:
     name: Deploy Prod
@@ -146,6 +115,8 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    concurrency:
+      group: 'prod-google--this-block-is-removed-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'
     environment: prod
     # Only on push to trunk
     if: github.ref == 'refs/heads/trunk'
@@ -156,7 +127,9 @@ jobs:
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'prod'
           helm-values-path: ${{ env.HELM_VALUES_PATH }}
+          runtime-cloud-provider: 'GKE'
           # Will post to the Slack channel of your system if the deployment fails.
           # Can be commented out if you don't want this.
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
-          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
+          GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}

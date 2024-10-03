@@ -3,11 +3,24 @@ name: Build and Deploy Go to Kubernetes
 on:
   push:
     branches: [trunk]
-# pull_request:
-#   branches: [trunk]
+##  Adding a path filter will only trigger the workflow if the files in the path are modified.
+##  This is very useful if you have a monorepo structure.
+##  See https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#onpushpull_requestpull_request_targetpathspaths-ignore for more information.
+##
+#    paths:
+#     - 'applications/my-app/**'
+##
+#  pull_request:
+#    branches: [trunk]
 
+## This will limit the number of concurrent workflows to 1 per branch.
+##
+## The parameter `cancel-in-progress` will cancel the previous workflow if a new one is triggered.
+## Commenting out `cancel-in-progress` will make the new workflow wait for the previous one to finish.
+##
+## See https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#concurrency for more information.
 concurrency:
-  group: '${{ github.workflow }}-${{ github.event_name }}'
+  group: '${{ github.workflow }}-${{ github.ref }}'
   cancel-in-progress: true
 
 env:
@@ -58,6 +71,8 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    concurrency:
+      group: 'dev-azure--this-block-is-removed-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'
     environment: dev
     # Only on push to trunk
     if: github.ref == 'refs/heads/trunk'
@@ -68,6 +83,8 @@ jobs:
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'dev'
           helm-values-path: ${{ env.HELM_VALUES_PATH }}
+          # Will post to the Slack channel of your system if the deployment fails.
+          # Can be commented out if you don't want this.
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
 
@@ -79,6 +96,8 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    concurrency:
+      group: 'test-azure--this-block-is-removed-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'
     environment: test
     # Only on push to trunk
     if: github.ref == 'refs/heads/trunk'
@@ -89,6 +108,8 @@ jobs:
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'test'
           helm-values-path: ${{ env.HELM_VALUES_PATH }}
+          # Will post to the Slack channel of your system if the deployment fails.
+          # Can be commented out if you don't want this.
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
 
@@ -100,6 +121,8 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    concurrency:
+      group: 'prod-azure--this-block-is-removed-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'
     environment: prod
     # Only on push to trunk
     if: github.ref == 'refs/heads/trunk'
@@ -110,5 +133,7 @@ jobs:
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'prod'
           helm-values-path: ${{ env.HELM_VALUES_PATH }}
+          # Will post to the Slack channel of your system if the deployment fails.
+          # Can be commented out if you don't want this.
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}

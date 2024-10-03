@@ -16,7 +16,7 @@ env:
   REPOSITORY: 'core-github-actions-templates'
 
 concurrency:
-  group: '${{ github.workflow }}-${{ github.event_name }}'
+  group: '${{ github.workflow }}-${{ github.ref }}'
   cancel-in-progress: true
 
 jobs:
@@ -47,7 +47,6 @@ jobs:
       - name: Update workflows-templates
         shell: bash
         run: |
-          rm -rf dotgithub/workflow-templates
           mkdir -p dotgithub/workflow-templates
           for workflow_path in ${{ env.REPOSITORY }}/.github/workflows/example-*.yml; do
             echo "Processing $workflow_path"
@@ -65,13 +64,16 @@ jobs:
             sed -i "s/  SYSTEM_NAME: 'core'/  SYSTEM_NAME: '<your system name here>'/g" "$new_workflow_path"
             sed -i "s/  HELM_VALUES_PATH: '.*'/  HELM_VALUES_PATH: '.github\/deploy\/values.yml'/g" "$new_workflow_path"
             sed -i "s/  PROJECT_FILE: '.*'/  PROJECT_FILE: '<your project file path here>'/g" "$new_workflow_path"
-            sed -i "s/# pull_request:/  pull_request:/g" "$new_workflow_path"
-            sed -i 's/#   branches:/    branches:/g' "$new_workflow_path"
+            sed -i "s/#  pull_request:/  pull_request:/g" "$new_workflow_path"
+            sed -i 's/#    branches:/    branches:/g' "$new_workflow_path"
             sed -i 's/branches: \[trunk\]/branches: \[$default-branch\]/g' "$new_workflow_path"
+
+            # Special case for removing concurrency groups for demo-api-go, since it is deployed twice (go.mod and Dockerfile)
+            sed -i "s/    concurrency:\n      group: '.*-.*--this-block-is-removed-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples//g" "$new_workflow_path"
 
             new_workflow_properties_file="dotgithub/workflow-templates/${file_name_no_prefix%.yml}.properties.json"
             if [ ! -f "$new_workflow_properties_file" ]; then
-              echo "Creating properties.json file for $new_workflow_path."
+              echo "Did not find properties file $new_workflow_properties_file, creating new properties file for workflow $new_workflow_path."
               new_workflow_name=$(yq -r '.name' "$new_workflow_path")
               cat << EOF > "$new_workflow_properties_file"
             {
@@ -80,7 +82,7 @@ jobs:
             }
           EOF
             else
-              echo "Properties file already exists for $new_workflow_path, will not overwrite."
+              echo "Properties file $new_workflow_properties_file already exists for $new_workflow_path, will not overwrite."
             fi
           done
 
