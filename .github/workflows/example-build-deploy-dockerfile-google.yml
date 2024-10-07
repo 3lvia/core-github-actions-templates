@@ -1,4 +1,4 @@
-name: Build and Deploy to Kubernetes on Google Cloud
+name: Build and Deploy to Kubernetes with Dockerfile on Google Cloud
 
 on:
   push:

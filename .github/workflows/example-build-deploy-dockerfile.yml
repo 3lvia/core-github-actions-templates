@@ -1,4 +1,4 @@
-name: Build and Deploy to Kubernetes
+name: Build and Deploy to Kubernetes with Dockerfile
 
 on:
   push:
@@ -24,9 +24,9 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  APPLICATION_NAME: 'demo-docker'
+  APPLICATION_NAME: 'demo-api-go'
   SYSTEM_NAME: 'core'
-  HELM_VALUES_PATH: '.github/test-docker/deploy/values.yml'
+  HELM_VALUES_PATH: '.github/test-go/deploy/values.yml'
   PROJECT_FILE: '.github/test-go/Dockerfile'
 
 jobs:
