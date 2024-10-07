@@ -67,13 +67,14 @@ inputs:
   trivy-upload-report:
     description: |
       If `true`, the action will upload Trivy scan results to GitHub Advanced Security.
-      This requires GitHub Advanced Security to be enabled for the repository, and the permissions `actions: write` and `security-events: write` to be set for the job.
+      This actions requires GitHub Advanced Security to be enabled for the repository, and the permissions `actions: read` and `security-events: write` to be set for the job.
     required: false
     default: 'false'
   trivy-post-comment:
     description: |
       If `true`, the action will post a comment to the PR with the Trivy scan results.
-      This requires the action to run on a pull request and the permissions `pull-requests: write` to be set for the job.
+      The comment will only be posted if the action is ran on a pull request.
+      This action requires the permission `pull-requests: write` to be set for the job.
     required: false
     default: 'false'
   checkout:
@@ -85,8 +86,10 @@ inputs:
       What container registry to use, either `acr` or `ghcr`.
       If set to `acr`, credentials for Azure Container Registry will default to Elvia values.
       You can also set these explictly to point to your own ACR.
+      Using ACR requires the permissions `id-token: write` to access the registry using OIDC.
+
       If set to `ghcr`, the action will use the GitHub Container Registry.
-      This requires the `packages: write` permission.'
+      Using GHCR requires the `packages: write` permission to push to the registry.
     required: false
     default: 'acr'
   AZURE_CLIENT_ID:
