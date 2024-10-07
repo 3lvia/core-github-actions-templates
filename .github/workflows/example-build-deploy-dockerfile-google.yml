@@ -56,7 +56,6 @@ jobs:
     # Any of these can be commented out or removed if you want to deploy anyway.
     needs:
       - build-scan
-      - analyze
     runs-on: elvia-runner
     permissions:
       contents: read
