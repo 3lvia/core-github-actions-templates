@@ -1,4 +1,4 @@
-name: Build and Deploy .NET to Kubernetes
+name: Build and Deploy to Kubernetes
 
 on:
   push:
@@ -24,49 +24,12 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  APPLICATION_NAME: 'demo-api'
+  APPLICATION_NAME: 'demo-docker'
   SYSTEM_NAME: 'core'
-  HELM_VALUES_PATH: '.github/test/deploy/values.yml'
-  PROJECT_FILE: '.github/test/src/core-demo-api.csproj'
+  HELM_VALUES_PATH: '.github/test-docker/deploy/values.yml'
+  PROJECT_FILE: '.github/test-docker/Dockerfile'
 
 jobs:
-  unit-tests:
-    name: Unit Tests
-    runs-on: elvia-runner
-    permissions:
-      contents: read
-      checks: write
-      issues: read
-      pull-requests: write
-    steps:
-      - uses: 3lvia/core-github-actions-templates/unittest@trunk
-        with:
-          test-coverage: 'true'
-
-  integration-tests:
-    name: Integration Tests
-    runs-on: elvia-runner
-    permissions:
-      contents: read
-      checks: write
-      issues: read
-      pull-requests: write
-      id-token: write
-    steps:
-      - uses: 3lvia/core-github-actions-templates/integrationtest@trunk
-        with:
-          system: ${{ env.SYSTEM_NAME }}
-
-  analyze:
-    name: Analyze
-    runs-on: elvia-runner
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    steps:
-      - uses: 3lvia/core-github-actions-templates/analyze@trunk
-
   build-scan:
     name: Build and Scan
     runs-on: elvia-runner
@@ -92,8 +55,6 @@ jobs:
     # Require all jobs below to be successful before running this job.
     # Any of these can be commented out or removed if you want to deploy anyway.
     needs:
-      - unit-tests
-      - integration-tests
       - build-scan
       - analyze
     runs-on: elvia-runner
