@@ -69,7 +69,9 @@ jobs:
             sed -i 's/branches: \[trunk\]/branches: \[$default-branch\]/g' "$new_workflow_path"
 
             # Special case for removing concurrency groups for demo-api-go, since it is deployed twice (go.mod and Dockerfile)
-            sed -i "s/    concurrency:\n      group: '.*-.*--this-block-is-removed-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples//g" "$new_workflow_path"
+            perl \
+              -0777pe "s/    concurrency:\n      group: '(dev|test|prod)-(azure|google)--this-block-is-removed-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'\n//g" \
+              -i "$new_workflow_path"
 
             new_workflow_properties_file="dotgithub/workflow-templates/${file_name_no_prefix%.yml}.properties.json"
             if [ ! -f "$new_workflow_properties_file" ]; then
