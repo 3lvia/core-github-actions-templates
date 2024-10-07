@@ -229,7 +229,7 @@ runs:
         category: 'Trivy'
 
     - name: Add comment for Trivy scan results to PR
-      if: ${{ github.event_name == 'pull_request' && inputs.trivy-post-comment && failure() }}
+      if: ${{ github.event_name == 'pull_request' && inputs.trivy-post-comment == 'true' && failure() }}
       uses: actions/github-script@v7
       with:
         script: |
