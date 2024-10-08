@@ -118,10 +118,12 @@ you must first add your GitHub repository to [github-repositories-terraform](htt
 
 ### Permissions
 
-This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+This action requires the following base [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
 - `contents: read`
 - `id-token: write`
+
+More permissions might be required depending on the inputs set, see the actions documentation for more information.
 
 ### Usage
 
@@ -269,10 +271,12 @@ you must first add your Github repository to [github-repositories-terraform](htt
 
 ### Permissions
 
-This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+This action requires the following base [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
 - `contents: read`
 - `id-token: write`
+
+More permissions might be required depending on the inputs set, see the actions documentation for more information.
 
 ### Usage
 
@@ -397,12 +401,14 @@ Run .NET unit tests.
 
 ### Permissions
 
-This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+This action requires the following base [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
 - `checks: write`
 - `contents: read`
 - `issues: read`
 - `pull-requests: write`
+
+More permissions might be required depending on the inputs set, see the actions documentation for more information.
 
 ### Usage
 
@@ -456,13 +462,15 @@ Run .NET integration tests.
 
 ### Permissions
 
-This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+This action requires the following base [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
 - `checks: write`
 - `contents: read`
 - `id-token: write`
 - `issues: read`
 - `pull-requests: write`
+
+More permissions might be required depending on the inputs set, see the actions documentation for more information.
 
 ### Usage
 
@@ -524,11 +532,13 @@ Run CodeQL analysis.
 
 ### Permissions
 
-This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+This action requires the following base [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
 - `actions: read`
 - `contents: read`
 - `security-events: write`
+
+More permissions might be required depending on the inputs set, see the actions documentation for more information.
 
 ### Usage
 
@@ -576,13 +586,15 @@ Run SonarCloud scanning on .NET code.
 
 ### Permissions
 
-This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+This action requires the following base [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
 - `checks: write`
 - `contents: read`
 - `id-token: write`
 - `issues: read`
 - `pull-requests: write`
+
+More permissions might be required depending on the inputs set, see the actions documentation for more information.
 
 ### Usage
 
@@ -647,11 +659,13 @@ If this action is ran on a pull request, GitHub Advanced Security will give a de
 
 ### Permissions
 
-This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+This action requires the following base [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
 - `actions: read`
 - `contents: read`
 - `security-events: write`
+
+More permissions might be required depending on the inputs set, see the actions documentation for more information.
 
 ### Usage
 
@@ -714,13 +728,15 @@ Run Playwright tests written in .NET.
 
 ### Permissions
 
-This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+This action requires the following base [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
 - `checks: write`
 - `contents: read`
 - `id-token: write`
 - `issues: read`
 - `pull-requests: write`
+
+More permissions might be required depending on the inputs set, see the actions documentation for more information.
 
 ### Usage
 
@@ -771,9 +787,11 @@ Returns failure if the result is empty (return code 1).
 
 ### Permissions
 
-This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+This action requires the following base [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
 - `id-token: write`
+
+More permissions might be required depending on the inputs set, see the actions documentation for more information.
 
 ### Usage
 
@@ -824,10 +842,12 @@ Permission `id-token:write` is only required if you're not defining the `slack-a
 
 ### Permissions
 
-This action requires the following [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+This action requires the following base [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
 - `contens: read`
 - `id-token: write`
+
+More permissions might be required depending on the inputs set, see the actions documentation for more information.
 
 ### Usage
 
