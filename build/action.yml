@@ -232,12 +232,23 @@ runs:
         category: 'Trivy'
 
     - name: Add comment for Trivy scan results to PR
-      if: ${{ github.event_name == 'pull_request' && inputs.trivy-post-comment == 'true' && failure() }}
+      if: ${{ github.event_name == 'pull_request' && inputs.trivy-post-comment == 'true' && !cancelled() }}
       uses: actions/github-script@v7
       with:
         script: |
           const fs = require('fs');
-          const body = fs.readFileSync('trivy.md', 'utf8');
+
+          const body = (() => {
+              const fileContents = fs.readFileSync('trivy.md', 'utf8');
+              const footer = '\n\n\n (comment too long, see action output)...';
+              const MAX_COMMENT_LENGTH = 65536;
+
+              if (fileContents.length > MAX_COMMENT_LENGTH) {
+                 return fileContents.slice(0, MAX_COMMENT_LENGTH - footer.length) + footer;
+              }
+
+              return fileContents;
+          })();
 
           const { data: comments } = await github.rest.issues.listComments({
             owner: context.repo.owner,
