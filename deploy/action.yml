@@ -143,7 +143,7 @@ runs:
     - name: Install 3lv CLI
       uses: 3lvia/cli/setup@trunk
       with:
-        version: '0.11.16' # TODO: remove this (which will get latest version) when 3lv CLI is stable
+        version: '0.11.18' # TODO: remove this (which will get latest version) when 3lv CLI is stable
 
     - name: Deploy
       shell: bash
