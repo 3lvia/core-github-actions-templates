@@ -234,6 +234,8 @@ runs:
     - name: Add comment for Trivy scan results to PR
       if: ${{ github.event_name == 'pull_request' && inputs.trivy-post-comment == 'true' && !cancelled() }}
       uses: actions/github-script@v7
+      env:
+        APPLICATION_NAME: ${{ inputs.name }}
       with:
         script: |
           const fs = require('fs');
@@ -250,6 +252,8 @@ runs:
               return fileContents;
           })();
 
+          const identifyingHeader = `<!-- ${process.env.APPLICATION_NAME} -->\n`;
+
           const { data: comments } = await github.rest.issues.listComments({
             owner: context.repo.owner,
             repo: context.repo.repo,
@@ -259,7 +263,7 @@ runs:
           const existingComment = comments.find(
             (comment) =>
               comment.user.type === "Bot" &&
-              comment.body.includes("# :warning: Vulnerabilities detected in"),
+              comment.body.includes(identifyingHeader)
           );
 
           if (existingComment && body) {
@@ -267,7 +271,7 @@ runs:
               comment_id: existingComment.id,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body,
+              body: identifyingHeader + body,
             });
             return;
           }
@@ -286,6 +290,6 @@ runs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body,
+              body: identifyingHeader + body,
             });
           }
