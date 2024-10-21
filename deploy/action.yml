@@ -74,12 +74,6 @@ runs:
       if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@v4
 
-    - name: Setup Python for Grafana script
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        cache-dependency-path: '${{ github.action_path }}/requirements.txt'
-
     - name: Resolve subscription ID, Vault address and short repository name
       shell: bash
       run: |
@@ -140,10 +134,22 @@ runs:
       with:
         install_components: 'gke-gcloud-auth-plugin'
 
+    - name: Read Grafana secrets from Vault
+      uses: hashicorp/vault-action@v3
+      with:
+        url: ${{ env.VAULT_ADDR }}
+        role: 'jwt-github-${{ inputs.namespace }}-${{ env.REPO_SHORT_NAME }}'
+        method: 'jwt'
+        path: 'jwt-github'
+        secrets: |
+          monitoring/kv/data/shared grafana_api_url        | GRAFANA_URL ;
+          monitoring/kv/data/shared grafana_editor_api_key | GRAFANA_API_KEY
+        exportToken: 'true'
+
     - name: Install 3lv CLI
       uses: 3lvia/cli/setup@trunk
       with:
-        version: '0.11.21' # TODO: remove this (which will get latest version) when 3lv CLI is stable
+        version: '0.12.3' # TODO: remove this (which will get latest version) when 3lv CLI is stable
 
     - name: Deploy
       shell: bash
@@ -155,9 +161,11 @@ runs:
           --workload-type '${{ inputs.workload-type }}' \
           --runtime-cloud-provider '${{ inputs.runtime-cloud-provider }}' \
           --image-tag '${{ github.sha }}-${{ github.run_number }}' \
-          --repository-name "$REPO_SHORT_NAME" \
-          --commit-hash '${{ github.sha }}' \
           --skip-authentication \
+          --add-deployment-annotation \
+          --grafana-url "$GRAFANA_URL" \
+          --grafana-api-key "$GRAFANA_API_KEY" \
+          --run-id '${{ github.run_id }}' \
           '${{ inputs.name }}'
       env:
         3LV_AKS_TENANT_ID: ${{ inputs.AZURE_TENANT_ID }}
@@ -167,33 +175,6 @@ runs:
         3LV_GKE_PROJECT_ID: ${{ inputs.GKE_PROJECT_ID }}
         3LV_GKE_CLUSTER_NAME: ${{ inputs.GKE_CLUSTER_NAME }}
         3LV_GKE_CLUSTER_LOCATION: ${{ inputs.GKE_CLUSTER_LOCATION }}
-
-    - name: Read secrets from Vault
-      uses: hashicorp/vault-action@v3
-      if: always()
-      with:
-        url: ${{ env.VAULT_ADDR }}
-        role: 'jwt-github-${{ inputs.namespace }}-${{ env.REPO_SHORT_NAME }}'
-        method: 'jwt'
-        path: 'jwt-github'
-        secrets: |
-          monitoring/kv/data/shared grafana_api_url        | GRAFANA_URL ;
-          monitoring/kv/data/shared grafana_editor_api_key | GRAFANA_API_KEY
-        exportToken: 'true'
-
-    - name: Add deploy annotation to Grafana Cloud
-      shell: bash
-      if: always()
-      run: |
-        # Add deploy annotiation to Grafana Cloud
-        git_message="$(git log -1 --no-merges --pretty=%B)"
-        pip install -r '${{ github.action_path }}/requirements.txt'
-        python '${{ github.action_path }}/post-grafana-annotations.py' \
-          --what 'Deploy ${{ job.status }} - ' \
-          --data "$GITHUB_RUN_ID $git_message <a href="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID">Link</a>" \
-          --tags '{app: ${{ inputs.name }}, system: ${{ inputs.namespace }}, env: ${{ inputs.environment }}, event: deploy}' \
-          --grafana_url "$GRAFANA_URL" \
-          --grafana_api_key "$GRAFANA_API_KEY"
 
     - name: Notify Slack on failure
       if: ${{ failure() && inputs.slack-channel != '' }}
