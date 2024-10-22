@@ -32,13 +32,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters.ValidateIssuer = false;
         options.MapInboundClaims = false;
     });
-var instrumentationKey = builder.Configuration.EnsureHasValue("core:kv:appinsights:core:instrumentation-key");
-builder.Services.AddStandardElviaTelemetryLogging(instrumentationKey, retainTelemetryWhere: telemetryItem =>
-    telemetryItem switch
-    {
-        DependencyTelemetry d => false,
-        _ => true,
-    });
+var connectionString = builder.Configuration.EnsureHasValue("core:kv:appinsights:core:connection_string");
+builder.Services.AddStandardElviaTelemetryLogging(new AppInsightsConnectionString(connectionString), writeToConsole: false);
 
 builder.Services.AddSwaggerGen();
 // builder.Services.AddHttpLogging(logging => { logging.LoggingFields = HttpLoggingFields.RequestHeaders; });
