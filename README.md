@@ -262,6 +262,7 @@ you must first add your Github repository to [github-repositories-terraform](htt
 | `name`                          | Name of application. Do not include namespace.                                                                                       | yes      |                             |
 | `namespace`                     | Namespace or system of the application.                                                                                              | yes      |                             |
 | `runtime-cloud-provider`        | Kubernetes cloud provider to deploy to: `AKS` or `GKE`.                                                                              | no       | `AKS`                       |
+| `skip-authentication`           | If `true`, the action will skip authentication with the cloud provider.                                                              | no       | `false`                     |
 | `slack-channel`                 | Slack channel to notify on failure. Leave empty to disable notifications.                                                            | no       | ``                          |
 | `workload-type`                 | The type of workload to deploy to kubernetes. Must be `deployment` or `statefulset`.                                                 | no       | `deployment`                |
 
@@ -363,6 +364,12 @@ More permissions might be required depending on the inputs set, see the actions 
     #
     # Required: no
     # Default: 'AKS'
+
+    skip-authentication:
+    # If `true`, the action will skip authentication with the cloud provider.
+    #
+    # Required: no
+    # Default: 'false'
 
     slack-channel:
     # Slack channel to notify on failure. Leave empty to disable notifications.
