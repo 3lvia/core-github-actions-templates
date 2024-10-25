@@ -9,7 +9,7 @@ inputs:
     description: 'Name of application. This will be used as the image name. For Elvia applications, do not include the namespace.'
     required: true
   namespace:
-    description: 'Namespace or system of the application. This is only relevant for Elvia applications.'
+    description: 'Namespace or system of the application. Required for Elvia applications.'
     required: false
   csproj-file:
     description: 'Path to a csproj-file, e.g. `src/my-app/my-app.csproj`.'
@@ -83,30 +83,32 @@ inputs:
     default: 'true'
   registry:
     description: |
-      What container registry to use, either `acr` or `ghcr`.
-      If set to `acr`, credentials for Azure Container Registry will default to Elvia values.
+      What container registry to use, we support Azure Container Registry (ACR), Google Container Registry (GCR) and GitHub Container Registry (GHCR).
+      You should set this to the URL of the registry you want to use, e.g. `ghcr.io/3lvia` or `myregistry.azurecr.io`.
+      The action will authenticate with the registry depending on the value of the URL, i.e. if the URL contains `azurecr.io`, `gcr.io` or `ghcr.io`.
+
+      If set to an ACR registry, Elvia's private Azure Container Registry will be used by default.
       You can also set these explictly to point to your own ACR.
       Using ACR requires the permissions `id-token: write` to access the registry using OIDC.
 
-      If set to `ghcr`, the action will use the GitHub Container Registry.
+      If set to a GCR registry, the action will use the Google Container Registry of the Google Cloud project.
+      Using GCR requires the permissions `id-token: write` to access the registry using OIDC.
+
+      If set to a GHCR registry, the action will push to the GitHub Container Registry of the repository.
       Using GHCR requires the `packages: write` permission to push to the registry.
     required: false
-    default: 'acr'
-  AZURE_CLIENT_ID:
-    description: 'ClientId of a service principal that can push to Azure Container Registry.'
-    required: false
   AZURE_TENANT_ID:
-    description: 'TenantId of a service principal that can push to Azure Container Registry.'
+    description: 'Tenant ID of the Azure Container Registry to push to. Only required if using your own ACR.'
     required: false
-    default: '2186a6ec-c227-4291-9806-d95340bf439d'
-  ACR_SUBSCRIPTION_ID:
-    description: 'Subscription ID of the Azure Container Registry to push to.'
+  AZURE_CLIENT_ID:
+    description: 'Client ID of a service principal that can push to Azure Container Registry.'
     required: false
-    default: '9edbf217-b7c1-4f6a-ae76-d046cf932ff0'
   ACR_NAME:
-    description: 'Name of the Azure Container Registry to push to.'
+    description: 'Name of the Azure Container Registry to push to. Only required if using your own ACR.'
     required: false
-    default: 'containerregistryelvia'
+  GC_PROJECT_ID:
+    description: 'Project ID of the Google Cloud project to push to. Only required if using GCR.'
+    required: false
 
 runs:
   using: 'composite'
@@ -115,27 +117,18 @@ runs:
       if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@v4
 
-    - name: Authenticate with Azure
-      if: ${{ inputs.registry == 'acr' }}
-      uses: azure/login@v2.2.0
-      env:
-        AZURE_CORE_OUTPUT: 'none'
-        AZURE_LOGIN_POST_CLEANUP: 'false' # we destroy VMs after use
-      with:
-        client-id: ${{ inputs.AZURE_CLIENT_ID }}
-        tenant-id: ${{ inputs.AZURE_TENANT_ID }}
-        subscription-id: ${{ inputs.ACR_SUBSCRIPTION_ID }}
-
-    - name: Login to ACR
-      if: ${{ inputs.registry == 'acr' }}
+    - name: Get federated token for Azure
       shell: bash
+      id: get-federated-token
+      if: ${{ contains(inputs.registry, 'azurecr.io') || inputs.registry == '' }}
       run: |
-        # Login to ACR
-        az acr login --name '${{ inputs.ACR_NAME }}'
+        # Get federated token for Azure
+        token=$(curl -s -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://AzureADTokenExchange" | jq -r '.value')
+        echo "::add-mask::$token"
+        echo "token=$token" >> "$GITHUB_OUTPUT"
 
-    # Also used for increasing Trivy GHCR quota, might not have effect?
-    # https://github.com/aquasecurity/trivy-action/issues/389
-    - name: Login to Github Container Registry
+    - name: Login to GHCR
+      if: ${{ contains(inputs.registry, 'ghcr.io') }}
       uses: docker/login-action@v3
       with:
         registry: 'ghcr.io'
@@ -172,7 +165,7 @@ runs:
     - name: Install 3lv CLI
       uses: 3lvia/cli/setup@trunk
       with:
-        version: '0.12.3' # TODO: remove this (which will get latest version) when 3lv CLI is stable
+        version: '0.13.1' # TODO: remove this (which will get latest version) when 3lv CLI is stable
 
     - name: Handle deprecated inputs
       shell: bash
@@ -193,36 +186,27 @@ runs:
     - name: Build with 3lv
       shell: bash
       run: |
-        # Regrettably, we have to do some bash here since we cannot get the name
-        # of a repository (without owner) using just GitHub Actions syntax.
-        #
-        # We should try to encapsulate as much business logic
-        # as possible in the `env`-block below, or in the 3lv CLI.
-        if [[ '${{ inputs.namespace }}' == '' ]]; then
-          SYSTEM_NAME="${GITHUB_REPOSITORY##*/}"
-        else
-          SYSTEM_NAME='${{ inputs.namespace }}'
-        fi
-
         3lv build \
           --project-file "$PROJECT_FILE" \
-          --system-name "$SYSTEM_NAME" \
-          --registry "$REGISTRY" \
           --scan-formats table,sarif,markdown \
           --additional-tags "$ADDITIONAL_TAGS" \
           --push \
           '${{ inputs.name }}'
       env:
-        REGISTRY: ${{ inputs.registry == 'ghcr' && format('ghcr.io/{0}', github.repository_owner) || format('{0}.azurecr.io', inputs.ACR_NAME) }}
         ADDITIONAL_TAGS: "${{ github.sha }}-${{ github.run_number }}${{ inputs.docker-additional-tags == '' && '' || ',' }}${{ inputs.docker-additional-tags }}"
         # Pass optional inputs as environment variables, since they can be empty.
         # The CLI does not accept empty strings passed to the flags, e.g. `--go-main-package-dir ''` will cause an error.
+        3LV_SYSTEM_NAME: ${{ inputs.namespace }}
+        3LV_REGISTRY: ${{ inputs.registry }}
         3LV_BUILD_CONTEXT: ${{ inputs.docker-build-context }}
         3LV_GO_MAIN_PACKAGE_DIR: ${{ inputs.go-main-package-dir }}
         3LV_CACHE_TAG: ${{ inputs.docker-cache-tag }}
         3LV_INCLUDE_FILES: ${{ inputs.docker-include-files }}
         3LV_INCLUDE_DIRS: ${{ inputs.docker-include-dirs }}
         3LV_SEVERITY: ${{ inputs.severity }}
+        3LV_AZURE_TENANT_ID: ${{ inputs.AZURE_TENANT_ID }}
+        3LV_AZURE_CLIENT_ID: ${{ inputs.AZURE_CLIENT_ID }}
+        3LV_AZURE_FEDERATED_TOKEN: ${{ steps.get-federated-token.outputs.token }}
 
     - name: Upload Trivy scan results to GitHub Advanced Security
       if: ${{ inputs.trivy-upload-report == 'true' && !cancelled() }}

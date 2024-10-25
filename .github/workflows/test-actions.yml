@@ -57,7 +57,7 @@ jobs:
           {
             "runner": ["$RUNNER","ubuntu-latest"],
             "project-file": [".github/test/src/core-demo-api.csproj",".github/test-go/go.mod",".github/test-go/Dockerfile"],
-            "registry": ["acr","ghcr"],
+            "registry": ["","ghcr.io/3lvia"],
             "include": [
               {
                 "application-name": "${{ env.APPLICATION_BASE_NAME }}-go",

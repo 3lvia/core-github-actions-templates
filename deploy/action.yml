@@ -38,9 +38,8 @@ inputs:
     description: 'Client ID of a service principal that has access to AKS. Only required for deploying to AKS.'
     required: false
   AZURE_TENANT_ID:
-    description: 'Tenant ID of a service principal that has access to AKS.'
+    description: 'Tenant ID of AKS to deploy to. Defaults to Elvias normal clusters.'
     required: false
-    default: '2186a6ec-c227-4291-9806-d95340bf439d'
   AKS_SUBSCRIPTION_ID:
     description: 'Subscription ID of AKS to deploy to. Defaults to Elvias normal clusters.'
     required: false
@@ -74,44 +73,31 @@ runs:
       if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@v4
 
-    - name: Resolve subscription ID, Vault address and short repository name
+    - name: Resolve Vault address and short repository name
       shell: bash
       run: |
-        if [[ '${{ inputs.environment }}' == 'dev' ]]; then
-          AKS_SUBSCRIPTION_ID='ceb9518c-528f-4c91-9b5a-c051d383e7a8'
+        if [[ '${{ inputs.environment }}' == 'dev' || '${{ inputs.environment }}' == 'sandbox' ]]; then
           echo 'VAULT_ADDR=https://vault.dev-elvia.io' >> "$GITHUB_ENV"
         elif [[ '${{ inputs.environment }}' == 'test' ]]; then
-          AKS_SUBSCRIPTION_ID='ceb9518c-528f-4c91-9b5a-c051d383e7a8'
           echo 'VAULT_ADDR=https://vault.test-elvia.io' >> "$GITHUB_ENV"
         elif [[ '${{ inputs.environment }}' == 'prod' ]]; then
-          AKS_SUBSCRIPTION_ID="9edbf217-b7c1-4f6a-ae76-d046cf932ff0"
           echo 'VAULT_ADDR=https://vault.elvia.io' >> "$GITHUB_ENV"
-        elif [[ '${{ inputs.environment }}' == 'sandbox' ]]; then
-          AKS_SUBSCRIPTION_ID='ceb9518c-528f-4c91-9b5a-c051d383e7a8'
-          echo 'VAULT_ADDR=https://vault.dev-elvia.io' >> "$GITHUB_ENV"
         else
           echo 'Unsupported environment: ${{ inputs.environment }}'
           exit 1
         fi
 
-        if [[ '${{ inputs.AKS_SUBSCRIPTION_ID }}' == '' ]]; then
-          echo "AKS_SUBSCRIPTION_ID=$AKS_SUBSCRIPTION_ID" >> "$GITHUB_ENV"
-        else
-          echo "AKS_SUBSCRIPTION_ID=${{ inputs.AKS_SUBSCRIPTION_ID }}" >> "$GITHUB_ENV"
-        fi
-
         echo "REPO_SHORT_NAME=${GITHUB_REPOSITORY##*/}" >> "$GITHUB_ENV"
 
-    - name: Authenticate with Azure
-      uses: azure/login@v2.2.0
+    - name: Get federated token for Azure
+      shell: bash
+      id: get-federated-token
       if: ${{ inputs.runtime-cloud-provider == 'AKS' }}
-      env:
-        AZURE_CORE_OUTPUT: 'none'
-        AZURE_LOGIN_POST_CLEANUP: 'false' # we destroy VMs after use
-      with:
-        client-id: ${{ inputs.AZURE_CLIENT_ID }}
-        tenant-id: ${{ inputs.AZURE_TENANT_ID }}
-        subscription-id: ${{ env.AKS_SUBSCRIPTION_ID }}
+      run: |
+        # Get federated token for Azure
+        token=$(curl -s -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://AzureADTokenExchange" | jq -r '.value')
+        echo "::add-mask::$token"
+        echo "token=$token" >> "$GITHUB_OUTPUT"
 
     - name: Setup kubelogin if not on Elvia runner
       uses: azure/use-kubelogin@v1
@@ -149,7 +135,7 @@ runs:
     - name: Install 3lv CLI
       uses: 3lvia/cli/setup@trunk
       with:
-        version: '0.12.3' # TODO: remove this (which will get latest version) when 3lv CLI is stable
+        version: '0.13.1' # TODO: remove this (which will get latest version) when 3lv CLI is stable
 
     - name: Deploy
       shell: bash
@@ -161,15 +147,16 @@ runs:
           --workload-type '${{ inputs.workload-type }}' \
           --runtime-cloud-provider '${{ inputs.runtime-cloud-provider }}' \
           --image-tag '${{ github.sha }}-${{ github.run_number }}' \
-          --skip-authentication \
           --add-deployment-annotation \
           --grafana-url "$GRAFANA_URL" \
           --grafana-api-key "$GRAFANA_API_KEY" \
           --run-id '${{ github.run_id }}' \
           '${{ inputs.name }}'
       env:
-        3LV_AKS_TENANT_ID: ${{ inputs.AZURE_TENANT_ID }}
-        3LV_AKS_SUBSCRIPTION_ID: ${{ env.AKS_SUBSCRIPTION_ID }}
+        3LV_AZURE_TENANT_ID: ${{ inputs.AZURE_TENANT_ID }}
+        3LV_AZURE_CLIENT_ID: ${{ inputs.AZURE_CLIENT_ID }}
+        3LV_AZURE_FEDERATED_TOKEN: ${{ steps.get-federated-token.outputs.token }}
+        3LV_AKS_SUBSCRIPTION_ID: ${{ inputs.AKS_SUBSCRIPTION_ID }}
         3LV_AKS_RESOURCE_GROUP: ${{ inputs.AKS_RESOURCE_GROUP }}
         3LV_AKS_CLUSTER_NAME: ${{ inputs.AKS_CLUSTER_NAME }}
         3LV_GKE_PROJECT_ID: ${{ inputs.GKE_PROJECT_ID }}
