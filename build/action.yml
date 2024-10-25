@@ -110,6 +110,11 @@ inputs:
     description: 'Project ID of the Google Cloud project to push to. Only required if using GCR.'
     required: false
 
+outputs:
+  image-name:
+    value: steps.get-outputs.outputs.image-name
+    description: 'Name of the Docker image that was built, without tag, without tags.'
+
 runs:
   using: 'composite'
   steps:
@@ -165,7 +170,7 @@ runs:
     - name: Install 3lv CLI
       uses: 3lvia/cli/setup@trunk
       with:
-        version: '0.13.1' # TODO: remove this (which will get latest version) when 3lv CLI is stable
+        version: '0.14.0' # TODO: remove this (which will get latest version) when 3lv CLI is stable
 
     - name: Handle deprecated inputs
       shell: bash
@@ -207,6 +212,12 @@ runs:
         3LV_AZURE_TENANT_ID: ${{ inputs.AZURE_TENANT_ID }}
         3LV_AZURE_CLIENT_ID: ${{ inputs.AZURE_CLIENT_ID }}
         3LV_AZURE_FEDERATED_TOKEN: ${{ steps.get-federated-token.outputs.token }}
+
+    - name: Get outputs
+      shell: bash
+      id: get-outputs
+      run: |
+        echo "image-name=$3LV_OUTPUT_IMAGE_NAME" >> "$GITHUB_OUTPUT"
 
     - name: Upload Trivy scan results to GitHub Advanced Security
       if: ${{ inputs.trivy-upload-report == 'true' && !cancelled() }}
