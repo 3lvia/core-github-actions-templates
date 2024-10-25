@@ -34,6 +34,10 @@ inputs:
     description: 'Slack channel to notify on failure. Leave empty to disable notifications.'
     required: false
     default: ''
+  skip-authentication:
+    description: 'If `true`, the action will skip authentication with the cloud provider.'
+    required: false
+    default: 'false'
   AZURE_CLIENT_ID:
     description: 'Client ID of a service principal that has access to AKS. Only required for deploying to AKS.'
     required: false
@@ -92,7 +96,7 @@ runs:
     - name: Get federated token for Azure
       shell: bash
       id: get-federated-token
-      if: ${{ inputs.runtime-cloud-provider == 'AKS' }}
+      if: ${{ inputs.runtime-cloud-provider == 'AKS' && inputs.skip-authentication == 'false' }}
       run: |
         # Get federated token for Azure
         token=$(curl -s -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://AzureADTokenExchange" | jq -r '.value')
@@ -109,7 +113,7 @@ runs:
 
     - name: Authenticate with Google Cloud
       uses: google-github-actions/auth@v2.1.6
-      if: ${{ inputs.runtime-cloud-provider == 'GKE' }}
+      if: ${{ inputs.runtime-cloud-provider == 'GKE' && inputs.skip-authentication == 'false' }}
       with:
         workload_identity_provider: ${{ inputs.GC_WORKLOAD_IDENTITY_PROVIDER }}
         service_account: ${{ inputs.GC_SERVICE_ACCOUNT }}
