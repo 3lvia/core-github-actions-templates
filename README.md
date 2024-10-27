@@ -17,6 +17,7 @@ see [here](#elvia-specific-actions) for more information.
 - [Actions Documentation](#actions-documentation)
   - [Build](#build)
     - [Inputs](#inputs)
+    - [Outputs](#outputs)
     - [Permissions](#permissions)
     - [Usage](#usage)
   - [Deploy](#deploy)
@@ -115,6 +116,12 @@ you must first add your GitHub repository to [github-repositories-terraform](htt
 | `trivy-cve-ignores`      | Comma-separated list of CVEs for Trivy to ignore. See [Trivy documentation](https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore) for syntax.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | no       |                |
 | `trivy-post-comment`     | If `true`, the action will post a comment to the PR with the Trivy scan results. The comment will only be posted if the action is ran on a pull request. This action requires the permission `pull-requests: write` to be set for the job.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | no       | `false`        |
 | `trivy-upload-report`    | If `true`, the action will upload Trivy scan results to GitHub Advanced Security. This actions requires GitHub Advanced Security to be enabled for the repository, and the permissions `actions: read` and `security-events: write` to be set for the job.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | no       | `false`        |
+
+### Outputs
+
+| Name         | Description                                                         |
+| ------------ | ------------------------------------------------------------------- |
+| `image-name` | Name of the Docker image that was built, without tag, without tags. |
 
 ### Permissions
 
