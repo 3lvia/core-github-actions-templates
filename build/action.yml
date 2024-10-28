@@ -199,7 +199,6 @@ runs:
           --project-file "$PROJECT_FILE" \
           --scan-formats table,sarif,markdown \
           --additional-tags "$ADDITIONAL_TAGS" \
-          --push \
           '${{ inputs.name }}'
       env:
         ADDITIONAL_TAGS: "${{ github.sha }}-${{ github.run_number }}${{ inputs.docker-additional-tags == '' && '' || ',' }}${{ inputs.docker-additional-tags }}"
