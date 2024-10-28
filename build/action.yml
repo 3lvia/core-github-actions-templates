@@ -97,6 +97,10 @@ inputs:
       If set to a GHCR registry, the action will push to the GitHub Container Registry of the repository.
       Using GHCR requires the `packages: write` permission to push to the registry.
     required: false
+  push:
+    description: 'If `true`, the action will push the Docker image to the registry.'
+    required: false
+    default: 'true'
   AZURE_TENANT_ID:
     description: 'Tenant ID of the Azure Container Registry to push to. Only required if using your own ACR.'
     required: false
@@ -202,6 +206,7 @@ runs:
         # Pass optional inputs as environment variables, since they can be empty.
         # The CLI does not accept empty strings passed to the flags, e.g. `--go-main-package-dir ''` will cause an error.
         3LV_SYSTEM_NAME: ${{ inputs.namespace }}
+        3LV_PUSH: ${{ inputs.push }}
         3LV_REGISTRY: ${{ inputs.registry }}
         3LV_BUILD_CONTEXT: ${{ inputs.docker-build-context }}
         3LV_GO_MAIN_PACKAGE_DIR: ${{ inputs.go-main-package-dir }}

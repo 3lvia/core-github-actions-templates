@@ -69,6 +69,10 @@ inputs:
     description: 'Location of the GKE cluster to deploy to.'
     required: false
     default: 'europe-west1'
+  GK_USE_INTERNAL_IP:
+    description: 'If `true`, the action will set the `--internal-ip` flag when getting credentials for GKE.'
+    required: false
+    default: 'false'
 
 runs:
   using: 'composite'
@@ -166,6 +170,7 @@ runs:
         3LV_GKE_PROJECT_ID: ${{ inputs.GKE_PROJECT_ID }}
         3LV_GKE_CLUSTER_NAME: ${{ inputs.GKE_CLUSTER_NAME }}
         3LV_GKE_CLUSTER_LOCATION: ${{ inputs.GKE_CLUSTER_LOCATION }}
+        3LV_GKE_USE_INTERNAL_IP: '${{ inputs.GKE_USE_INTERNAL_IP }}'
 
     - name: Notify Slack on failure
       if: ${{ failure() && inputs.slack-channel != '' }}
