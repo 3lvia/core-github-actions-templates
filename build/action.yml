@@ -174,7 +174,7 @@ runs:
     - name: Install 3lv CLI
       uses: 3lvia/cli/setup@trunk
       with:
-        version: '0.14.2' # TODO: remove this (which will get latest version) when 3lv CLI is stable
+        version: '0.14.3' # TODO: remove this (which will get latest version) when 3lv CLI is stable
 
     - name: Handle deprecated inputs
       shell: bash
@@ -221,7 +221,7 @@ runs:
       shell: bash
       id: get-outputs
       run: |
-        echo "image-name=$3LV_OUTPUT_IMAGE_NAME" >> "$GITHUB_OUTPUT"
+        echo "image-name=$(cat /tmp/3lv-cli-output/image-name)" >> "$GITHUB_OUTPUT"
 
     - name: Upload Trivy scan results to GitHub Advanced Security
       if: ${{ inputs.trivy-upload-report == 'true' && !cancelled() }}
