@@ -116,8 +116,8 @@ inputs:
 
 outputs:
   image-name:
-    value: steps.get-outputs.outputs.image-name
-    description: 'Name of the Docker image that was built, without tag, without tags.'
+    description: 'Name of the Docker image that was built, without tags.'
+    value: ${{ steps.get-outputs.outputs.image-name }}
 
 runs:
   using: 'composite'
