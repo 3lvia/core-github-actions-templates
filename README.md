@@ -120,9 +120,9 @@ you must first add your GitHub repository to [github-repositories-terraform](htt
 
 ### Outputs
 
-| Name         | Description                                                         |
-| ------------ | ------------------------------------------------------------------- |
-| `image-name` | Name of the Docker image that was built, without tag, without tags. |
+| Name         | Description                                            |
+| ------------ | ------------------------------------------------------ |
+| `image-name` | Name of the Docker image that was built, without tags. |
 
 ### Permissions
 
