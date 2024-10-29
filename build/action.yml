@@ -146,6 +146,13 @@ runs:
         workload_identity_provider: ${{ inputs.GC_WORKLOAD_IDENTITY_PROVIDER }}
         service_account: ${{ inputs.GC_SERVICE_ACCOUNT }}
 
+    - name: Login to GCR
+      shell: bash
+      if: ${{ contains(inputs.registry, 'gcr.io') }}
+      run: |
+        # Login to GCR
+        gcloud auth configure-docker gcr.io
+
     - name: Login to GHCR
       if: ${{ contains(inputs.registry, 'ghcr.io') }}
       uses: docker/login-action@v3
