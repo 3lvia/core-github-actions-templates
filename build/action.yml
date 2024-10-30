@@ -119,7 +119,7 @@ inputs:
 
 outputs:
   image-name:
-    description: 'Name of the Docker image that was built, without tags.'
+    description: 'Name of the Docker image that was built, with tag.'
     value: ${{ steps.get-outputs.outputs.image-name }}
 
 runs:
