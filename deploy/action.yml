@@ -184,7 +184,7 @@ runs:
 
     - name: Notify Slack on failure
       if: ${{ failure() && inputs.slack-channel != '' }}
-      uses: ./slack-message
+      uses: 3lvia/core-github-actions-templates/slack-message@trunk
       with:
         namespace: ${{ inputs.namespace }}
         environment: ${{ inputs.environment }}
