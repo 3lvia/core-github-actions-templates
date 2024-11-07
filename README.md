@@ -276,16 +276,12 @@ you must first add your Github repository to [github-repositories-terraform](htt
 | `GKE_CLUSTER_LOCATION`          | Location of the GKE cluster to deploy to.                                                                                            | no       | `europe-west1`              |
 | `GKE_CLUSTER_NAME`              | Name of the GKE cluster to deploy to. Defaults to Elvias normal clusters.                                                            | no       |                             |
 | `GKE_PROJECT_ID`                | Project ID of GKE to deploy to. Defaults to Elvias normal clusters.                                                                  | no       |                             |
-| `GKE_USE_INTERNAL_IP`           | If `true`, the action will set the `--internal-ip` flag when getting credentials for GKE.                                            | no       | `false`                     |
 | `checkout`                      | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`                      |
 | `environment`                   | Environment to deploy to.                                                                                                            | yes      |                             |
 | `helm-values-path`              | Path to Helm values file, relative to the root of the repository.                                                                    | no       | `.github/deploy/values.yml` |
 | `name`                          | Name of application. Do not include namespace.                                                                                       | yes      |                             |
 | `namespace`                     | Namespace or system of the application.                                                                                              | yes      |                             |
-| `runtime-cloud-provider`        | Kubernetes cloud provider to deploy to: `AKS` or `GKE`.                                                                              | no       | `AKS`                       |
-| `skip-authentication`           | If `true`, the action will skip authentication with the cloud provider.                                                              | no       | `false`                     |
-| `skip-getting-credentials`      | If `true`, the action will skip getting credentials from the cloud provider for the Kubernetes cluster.                              | no       | `false`                     |
-| `skip-setup-gke-auth-plugin`    | If `true`, the action will skip setting up the Google Cloud SDK and GKE auth plugin.                                                 | no       | `false`                     |
+| `runtime-cloud-provider`        | Kubernetes cloud provider to deploy to: `AKS`, `GKE` or ISS (Elvia only).                                                            | no       | `AKS`                       |
 | `slack-channel`                 | Slack channel to notify on failure. Leave empty to disable notifications.                                                            | no       | ``                          |
 | `workload-type`                 | The type of workload to deploy to kubernetes. Must be `deployment` or `statefulset`.                                                 | no       | `deployment`                |
 
@@ -355,12 +351,6 @@ More permissions might be required depending on the inputs set, see the actions 
     #
     # Required: no
 
-    GKE_USE_INTERNAL_IP:
-    # If `true`, the action will set the `--internal-ip` flag when getting credentials for GKE.
-    #
-    # Required: no
-    # Default: 'false'
-
     checkout:
     # If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.
     #
@@ -389,28 +379,10 @@ More permissions might be required depending on the inputs set, see the actions 
     # Required: yes
 
     runtime-cloud-provider:
-    # Kubernetes cloud provider to deploy to: `AKS` or `GKE`.
+    # Kubernetes cloud provider to deploy to: `AKS`, `GKE` or ISS (Elvia only).
     #
     # Required: no
     # Default: 'AKS'
-
-    skip-authentication:
-    # If `true`, the action will skip authentication with the cloud provider.
-    #
-    # Required: no
-    # Default: 'false'
-
-    skip-getting-credentials:
-    # If `true`, the action will skip getting credentials from the cloud provider for the Kubernetes cluster.
-    #
-    # Required: no
-    # Default: 'false'
-
-    skip-setup-gke-auth-plugin:
-    # If `true`, the action will skip setting up the Google Cloud SDK and GKE auth plugin.
-    #
-    # Required: no
-    # Default: 'false'
 
     slack-channel:
     # Slack channel to notify on failure. Leave empty to disable notifications.
