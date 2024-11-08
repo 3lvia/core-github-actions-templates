@@ -898,8 +898,6 @@ More permissions might be required depending on the inputs set, see the actions 
 
 <!-- gh-actions-docs-end -->
 
-<!-- gh-actions-docs-start path=slack-message/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contens:read,id-token:write -->
-
 <!-- gh-actions-docs-start path=iss-tag-push-image/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contens:read,packages:read -->
 <!-- gh-actions-docs-end -->
 
