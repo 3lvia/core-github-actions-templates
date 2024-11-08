@@ -56,6 +56,10 @@ see [here](#elvia-specific-actions) for more information.
     - [Inputs](#inputs-9)
     - [Permissions](#permissions-9)
     - [Usage](#usage-9)
+  - [ISS Tag & Push Image](#iss-tag--push-image)
+    - [Inputs](#inputs-10)
+    - [Permissions](#permissions-10)
+    - [Usage](#usage-10)
   - [Elvia-specific Actions](#elvia-specific-actions)
 - [Development](#development)
   - [Formatting](#formatting)
@@ -899,6 +903,46 @@ More permissions might be required depending on the inputs set, see the actions 
 <!-- gh-actions-docs-end -->
 
 <!-- gh-actions-docs-start path=iss-tag-push-image/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contens:read,packages:read -->
+
+## ISS Tag & Push Image
+
+Pulls image from GHCR, re-tags it and pushes it to GCR.
+
+_Only useful for ISS deployments._
+
+### Inputs
+
+| Name                      | Description                                                    | Required | Default |
+| ------------------------- | -------------------------------------------------------------- | -------- | ------- |
+| `new-image-name`          | Name of the Docker image to push to GCR, without the tag.      | yes      |         |
+| `old-image-name-with-tag` | Name of the Docker image to pull from GHCR, including the tag. | yes      |         |
+
+### Permissions
+
+This action requires the following base [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+
+- `contens: read`
+- `packages: read`
+
+More permissions might be required depending on the inputs set, see the actions documentation for more information.
+
+### Usage
+
+```yaml
+- name: ISS Tag & Push Image
+  uses: 3lvia/core-github-actions-templates/iss-tag-push-image@trunk
+  with:
+    new-image-name:
+    # Name of the Docker image to push to GCR, without the tag.
+    #
+    # Required: yes
+
+    old-image-name-with-tag:
+    # Name of the Docker image to pull from GHCR, including the tag.
+    #
+    # Required: yes
+```
+
 <!-- gh-actions-docs-end -->
 
 ## Elvia-specific Actions
