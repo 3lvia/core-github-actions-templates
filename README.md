@@ -56,7 +56,7 @@ see [here](#elvia-specific-actions) for more information.
     - [Inputs](#inputs-9)
     - [Permissions](#permissions-9)
     - [Usage](#usage-9)
-  - [Elvia-specific actions](#elvia-specific-actions)
+  - [Elvia-specific Actions](#elvia-specific-actions)
 - [Development](#development)
   - [Formatting](#formatting)
   - [Action documentation & table of contents](#action-documentation--table-of-contents)
