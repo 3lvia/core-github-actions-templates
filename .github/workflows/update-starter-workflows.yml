@@ -61,12 +61,15 @@ jobs:
             cp "$workflow_path" "$new_workflow_path"
 
             sed -i "s/  APPLICATION_NAME: '.*'/  APPLICATION_NAME: '<your application name here>'/g" "$new_workflow_path"
-            sed -i "s/  SYSTEM_NAME: 'core'/  SYSTEM_NAME: '<your system name here>'/g" "$new_workflow_path"
+            sed -i "s/  SYSTEM_NAME: '.*'/  SYSTEM_NAME: '<your system name here>'/g" "$new_workflow_path"
             sed -i "s/  HELM_VALUES_PATH: '.*'/  HELM_VALUES_PATH: '.github\/deploy\/values.yml'/g" "$new_workflow_path"
             sed -i "s/  PROJECT_FILE: '.*'/  PROJECT_FILE: '<your project file path here>'/g" "$new_workflow_path"
             sed -i "s/#  pull_request:/  pull_request:/g" "$new_workflow_path"
             sed -i 's/#    branches:/    branches:/g' "$new_workflow_path"
             sed -i 's/branches: \[trunk\]/branches: \[$default-branch\]/g' "$new_workflow_path"
+
+            # Special case for ISS example
+            sed -i 's/branches: \[too-complicated-to-setup-tests-for-this-so-we-dont\]/branches: \[$default-branch\]/g' "$new_workflow_path"
 
             # Special case for removing concurrency groups for demo-api-go, since it is deployed twice (go.mod and Dockerfile)
             perl \

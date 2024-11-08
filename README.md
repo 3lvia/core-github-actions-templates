@@ -898,7 +898,12 @@ More permissions might be required depending on the inputs set, see the actions 
 
 <!-- gh-actions-docs-end -->
 
-## Elvia-specific actions
+<!-- gh-actions-docs-start path=slack-message/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contens:read,id-token:write -->
+
+<!-- gh-actions-docs-start path=iss-tag-push-image/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contens:read,packages:read -->
+<!-- gh-actions-docs-end -->
+
+## Elvia-specific Actions
 
 The below list of actions are specific to Elvia's infrastructure and will not work outside our organization:
 
@@ -906,6 +911,7 @@ The below list of actions are specific to Elvia's infrastructure and will not wo
 - [SonarCloud](#sonarcloud)
 - [PlayWright Test](#playwright-test)
 - [Validate Metrics](#validate-metrics)
+- [ISS Tag & Push Image](#iss-tag-push-image)
 
 # Development
 
