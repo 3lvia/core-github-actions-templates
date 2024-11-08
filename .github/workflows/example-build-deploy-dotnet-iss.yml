@@ -1,0 +1,187 @@
+name: Build and Deploy .NET to ISS
+
+on:
+  push:
+    branches: [too-complicated-to-setup-tests-for-this-so-we-dont]
+##  Adding a path filter will only trigger the workflow if the files in the path are modified.
+##  This is very useful if you have a monorepo structure.
+##  See https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#onpushpull_requestpull_request_targetpathspaths-ignore for more information.
+##
+#    paths:
+#     - 'applications/my-app/**'
+##
+#  pull_request:
+#    branches: [trunk]
+
+## This will limit the number of concurrent workflows to 1 per branch.
+##
+## The parameter `cancel-in-progress` will cancel the previous workflow if a new one is triggered.
+## Commenting out `cancel-in-progress` will make the new workflow wait for the previous one to finish.
+##
+## See https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#concurrency for more information.
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: true
+
+env:
+  APPLICATION_NAME: 'demo-api'
+  SYSTEM_NAME: 'iss'
+  HELM_VALUES_PATH: '.github/test/deploy/values.yml'
+  PROJECT_FILE: '.github/test/src/core-demo-api.csproj'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: elvia-runner
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - uses: 3lvia/core-github-actions-templates/analyze@trunk
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: elvia-runner
+    permissions:
+      contents: read
+      checks: write
+      issues: read
+      pull-requests: write
+    steps:
+      - uses: 3lvia/core-github-actions-templates/unittest@trunk
+        with:
+          test-coverage: 'true'
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: elvia-runner
+    permissions:
+      contents: read
+      checks: write
+      issues: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: 3lvia/core-github-actions-templates/integrationtest@trunk
+        with:
+          system: ${{ env.SYSTEM_NAME }}
+
+  build-scan:
+    name: Build and Scan
+    runs-on: elvia-runner
+    permissions:
+      actions: read
+      contents: write
+      packages: write
+      pull-requests: write
+      security-events: write
+    environment: build
+    outputs:
+      image: ${{ steps.build.outputs.image-name }}
+    steps:
+      - uses: 3lvia/core-github-actions-templates/build@trunk
+        id: build
+        with:
+          name: ${{ env.APPLICATION_NAME }}
+          namespace: ${{ env.SYSTEM_NAME }}
+          project-file: ${{ env.PROJECT_FILE }}
+          trivy-upload-report: 'true'
+          trivy-post-comment: 'true'
+          registry: 'ghcr.io/3lvia'
+
+  push-images:
+    name: Push images to GCR
+    needs: [build-scan]
+    runs-on: 'iss-agent-vm-${{ matrix.environment }}-runner'
+    permissions:
+      contents: read
+      packages: read
+    strategy:
+      matrix:
+        environment:
+          - dev
+          - test
+          - prod
+    environment: ${{ matrix.environment }}
+    steps:
+      - name: Tag image and push to GCR
+        # On pull requests, only push to dev GCR
+        if: ${{ github.ref == 'refs/heads/trunk' || (github.event_name == 'pull_request' && matrix.environment == 'dev') }}
+        uses: 3lvia/core-github-actions-templates/iss-tag-push-image@feat/iss-tag
+        with:
+          old-image-name-with-tag: ${{ needs.build-scan.outputs.image }}
+          new-image-name: 'gcr.io/${{ vars.GC_ISS_PROJECT_ID  }}/${{ env.SYSTEM_NAME }}-${{ env.APPLICATION_NAME }}'
+
+  deploy-dev:
+    name: Deploy Dev
+    # Require all jobs below to be successful before running this job.
+    # Any of these (except `push-images`) can be commented out or removed if you want to deploy anyway.
+    needs:
+      - analyze
+      - unit-tests
+      - integration-tests
+      - push-images # Never remove this, as it is required for the deployment to work.
+    runs-on: iss-agent-vm-dev-runner
+    permissions:
+      contents: read
+      id-token: write
+      packages: read
+    environment: dev
+    steps:
+      - uses: 3lvia/core-github-actions-templates/deploy@trunk
+        with:
+          name: ${{ env.APPLICATION_NAME }}
+          namespace: ${{ env.SYSTEM_NAME }}
+          environment: 'dev'
+          helm-values-path: ${{ env.HELM_VALUES_PATH }}
+          runtime-cloud-provider: 'ISS'
+          # Will post to the Slack channel of your system if the deployment fails.
+          # Can be commented out if you don't want this.
+          slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
+
+  deploy-test:
+    name: Deploy Test
+    # Only deploy to test after dev
+    needs: [deploy-dev]
+    runs-on: iss-agent-vm-test-runner
+    permissions:
+      contents: read
+      id-token: write
+    environment: test
+    # Only on push to trunk
+    if: github.ref == 'refs/heads/trunk'
+    steps:
+      - uses: 3lvia/core-github-actions-templates/deploy@trunk
+        with:
+          name: ${{ env.APPLICATION_NAME }}
+          namespace: ${{ env.SYSTEM_NAME }}
+          environment: 'test'
+          helm-values-path: ${{ env.HELM_VALUES_PATH }}
+          runtime-cloud-provider: 'ISS'
+          # Will post to the Slack channel of your system if the deployment fails.
+          # Can be commented out if you don't want this.
+          slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
+
+  deploy-prod:
+    name: Deploy Prod
+    # Only deploy to prod after test
+    needs: [deploy-test]
+    runs-on: iss-agent-vm-prod-runner
+    permissions:
+      contents: read
+      id-token: write
+    environment: prod
+    # Only on push to trunk
+    if: github.ref == 'refs/heads/trunk'
+    steps:
+      - uses: 3lvia/core-github-actions-templates/deploy@trunk
+        with:
+          name: ${{ env.APPLICATION_NAME }}
+          namespace: ${{ env.SYSTEM_NAME }}
+          environment: 'prod'
+          helm-values-path: ${{ env.HELM_VALUES_PATH }}
+          runtime-cloud-provider: 'ISS'
+          # Will post to the Slack channel of your system if the deployment fails.
+          # Can be commented out if you don't want this.
+          slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
