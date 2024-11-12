@@ -85,7 +85,7 @@ runs:
       shell: bash
       run: |
         # Run jq to modify the Trivy report
-        cat ${{ env.TRIVY_SARIF }} |jq '.runs[0].results[]|select(.locations[].physicalLocation.artifactLocation.uri=="").locations[].physicalLocation.artifactLocation.uri="."'>trivy2.sarif
+        cat ${{ env.TRIVY_SARIF }} |jq '.runs[0].results[] |= (select(.locations[].physicalLocation.artifactLocation.uri=="").locations[].physicalLocation.artifactLocation.uri=".")'>trivy2.sarif
 
     - name: Upload Trivy report to GitHub Security tab
       if: ${{ inputs.upload-report == 'true' }}
