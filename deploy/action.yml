@@ -146,7 +146,7 @@ runs:
           --environment '${{ inputs.environment }}' \
           --workload-type '${{ inputs.workload-type }}' \
           --runtime-cloud-provider '${{ inputs.runtime-cloud-provider }}' \
-          --image-tag '${{ github.sha }}-${{ github.run_number }}' \
+          --image-tag '${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}' \
           --add-deployment-annotation \
           --grafana-url "$GRAFANA_URL" \
           --grafana-api-key "$GRAFANA_API_KEY" \

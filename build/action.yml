@@ -41,7 +41,7 @@ inputs:
   docker-cache-tag:
     description: |
       Tag used for getting build cache from registry.
-      This tag is also pushed on every build, together with `github.sha-github.run_number`.
+      This tag is also pushed on every build, together with `{{github.sha}}-{{github.run_id}}-{{github.run_attempt}}`.
       This action will not push a `latest` tag; if you want a `latest` tag, you can use this input or `docker-additional-tags`.
     default: 'latest-cache'
   docker-additional-tags:
@@ -218,7 +218,7 @@ runs:
           --additional-tags "$ADDITIONAL_TAGS" \
           '${{ inputs.name }}'
       env:
-        ADDITIONAL_TAGS: "${{ github.sha }}-${{ github.run_number }}${{ inputs.docker-additional-tags == '' && '' || ',' }}${{ inputs.docker-additional-tags }}"
+        ADDITIONAL_TAGS: "${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}${{ inputs.docker-additional-tags == '' && '' || ',' }}${{ inputs.docker-additional-tags }}"
         # Pass optional inputs as environment variables, since they can be empty.
         # The CLI does not accept empty strings passed to the flags, e.g. `--go-main-package-dir ''` will cause an error.
         3LV_SYSTEM_NAME: ${{ inputs.namespace }}
