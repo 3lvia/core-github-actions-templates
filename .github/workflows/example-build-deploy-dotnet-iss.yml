@@ -26,7 +26,7 @@ concurrency:
 env:
   APPLICATION_NAME: 'demo-api'
   SYSTEM_NAME: 'iss'
-  HELM_VALUES_PATH: '.github/test/deploy/values.yml'
+  HELM_VALUES_FILE: '.github/test/deploy/values.yml'
   PROJECT_FILE: '.github/test/src/core-demo-api.csproj'
 
 jobs:
@@ -134,7 +134,7 @@ jobs:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'dev'
-          helm-values-path: ${{ env.HELM_VALUES_PATH }}
+          helm-values-file: ${{ env.HELM_VALUES_FILE }}
           runtime-cloud-provider: 'ISS'
           # Will post to the Slack channel of your system if the deployment fails.
           # Can be commented out if you don't want this.
@@ -157,7 +157,7 @@ jobs:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'test'
-          helm-values-path: ${{ env.HELM_VALUES_PATH }}
+          helm-values-file: ${{ env.HELM_VALUES_FILE }}
           runtime-cloud-provider: 'ISS'
           # Will post to the Slack channel of your system if the deployment fails.
           # Can be commented out if you don't want this.
@@ -180,7 +180,7 @@ jobs:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'prod'
-          helm-values-path: ${{ env.HELM_VALUES_PATH }}
+          helm-values-file: ${{ env.HELM_VALUES_FILE }}
           runtime-cloud-provider: 'ISS'
           # Will post to the Slack channel of your system if the deployment fails.
           # Can be commented out if you don't want this.

@@ -17,6 +17,11 @@ inputs:
   helm-values-path:
     description: 'Path to Helm values file, relative to the root of the repository.'
     required: false
+    deprecationMessage: |
+      Please use `helm-values-file` instead, which is a drop-in replacement. `helm-values-path` will be removed in the future.
+  helm-values-file:
+    description: 'Path to Helm values file, relative to the root of the repository.'
+    required: false
     default: '.github/deploy/values.yml'
   workload-type:
     description: 'The type of workload to deploy to kubernetes. Must be `deployment` or `statefulset`.'
@@ -135,14 +140,14 @@ runs:
     - name: Install 3lv CLI
       uses: 3lvia/cli/setup@trunk
       with:
-        version: '0.16.0' # TODO: remove this (which will get latest version) when 3lv CLI is stable
+        version: '0.17.2' # TODO: remove this (which will get latest version) when 3lv CLI is stable
 
     - name: Deploy
       shell: bash
       run: |
         3lv deploy \
           --system-name '${{ inputs.namespace }}' \
-          --helm-values-file '${{ inputs.helm-values-path }}' \
+          --helm-values-file "$HELM_VALUES_FILE" \
           --environment '${{ inputs.environment }}' \
           --workload-type '${{ inputs.workload-type }}' \
           --runtime-cloud-provider '${{ inputs.runtime-cloud-provider }}' \
@@ -153,6 +158,9 @@ runs:
           --run-id '${{ github.run_id }}' \
           '${{ inputs.name }}'
       env:
+        HELM_VALUES_FILE: ${{ inputs.helm-values-path == '' && inputs.helm-values-file || inputs.helm-values-path }}
+        # Pass optional inputs as environment variables, since they can be empty.
+        # The CLI does not accept empty strings passed to the flags, e.g. `--gke-project-id ''` will cause an error.
         3LV_AZURE_TENANT_ID: ${{ inputs.AZURE_TENANT_ID }}
         3LV_AZURE_CLIENT_ID: ${{ inputs.AZURE_CLIENT_ID }}
         3LV_AZURE_FEDERATED_TOKEN: ${{ steps.get-federated-token.outputs.token }}
