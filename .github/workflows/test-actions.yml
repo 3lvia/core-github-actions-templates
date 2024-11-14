@@ -7,9 +7,8 @@ on:
       - '.github/workflows/test-actions.yml'
       - '.github/test/**'
       - '.github/test-go/**'
+      - '.github/test-docker/**'
       - '**/action.yml'
-      - '**/requirements.txt'
-      - '**/*.py'
       - '!README.md'
   workflow_dispatch:
     inputs:
@@ -81,11 +80,11 @@ jobs:
             "application-name": ["${{ env.APPLICATION_BASE_NAME }}", "${{ env.APPLICATION_BASE_NAME }}-go"],
             "include": [
               {
-                "helm-values-path": ".github/test/deploy/values.yml"
+                "helm-values-file": ".github/test/deploy/values.yml"
               },
               {
                 "application-name": "${{ env.APPLICATION_BASE_NAME }}-go",
-                "helm-values-path": ".github/test-go/deploy/values.yml"
+                "helm-values-file": ".github/test-go/deploy/values.yml"
               }
             ]
           }
@@ -221,7 +220,7 @@ jobs:
           name: ${{ matrix.application-name }}
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'dev'
-          helm-values-path: ${{ matrix.helm-values-path }}
+          helm-values-file: ${{ matrix.helm-values-file }}
           slack-channel: '#team-core-alerts-muted'
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
 
@@ -249,7 +248,7 @@ jobs:
           name: ${{ matrix.application-name }}
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'dev'
-          helm-values-path: ${{ matrix.helm-values-path }}
+          helm-values-file: ${{ matrix.helm-values-file }}
           runtime-cloud-provider: 'GKE'
           GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
           GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}

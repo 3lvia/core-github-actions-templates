@@ -26,7 +26,7 @@ concurrency:
 env:
   APPLICATION_NAME: 'demo-api-go'
   SYSTEM_NAME: 'core'
-  HELM_VALUES_PATH: '.github/test-go/deploy/values.yml'
+  HELM_VALUES_FILE: '.github/test-go/deploy/values.yml'
   PROJECT_FILE: '.github/test-go/go.mod'
 
 jobs:
@@ -82,7 +82,7 @@ jobs:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'dev'
-          helm-values-path: ${{ env.HELM_VALUES_PATH }}
+          helm-values-file: ${{ env.HELM_VALUES_FILE }}
           runtime-cloud-provider: 'GKE'
           # Will post to the Slack channel of your system if the deployment fails.
           # Can be commented out if you don't want this.
@@ -109,7 +109,7 @@ jobs:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'test'
-          helm-values-path: ${{ env.HELM_VALUES_PATH }}
+          helm-values-file: ${{ env.HELM_VALUES_FILE }}
           runtime-cloud-provider: 'GKE'
           # Will post to the Slack channel of your system if the deployment fails.
           # Can be commented out if you don't want this.
@@ -136,7 +136,7 @@ jobs:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'prod'
-          helm-values-path: ${{ env.HELM_VALUES_PATH }}
+          helm-values-file: ${{ env.HELM_VALUES_FILE }}
           runtime-cloud-provider: 'GKE'
           # Will post to the Slack channel of your system if the deployment fails.
           # Can be commented out if you don't want this.
