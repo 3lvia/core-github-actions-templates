@@ -268,26 +268,27 @@ you must first add your Github repository to [github-repositories-terraform](htt
 
 ### Inputs
 
-| Name                            | Description                                                                                                                          | Required | Default                     |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | --------------------------- |
-| `AKS_CLUSTER_NAME`              | Name of the AKS cluster to deploy to. Defaults to Elvias normal clusters.                                                            | no       |                             |
-| `AKS_RESOURCE_GROUP`            | Resource group of the AKS cluster to deploy to. Defaults to Elvias normal clusters.                                                  | no       |                             |
-| `AKS_SUBSCRIPTION_ID`           | Subscription ID of AKS to deploy to. Defaults to Elvias normal clusters.                                                             | no       |                             |
-| `AZURE_CLIENT_ID`               | Client ID of a service principal that has access to AKS. Only required for deploying to AKS.                                         | no       |                             |
-| `AZURE_TENANT_ID`               | Tenant ID of AKS to deploy to. Defaults to Elvias normal clusters.                                                                   | no       |                             |
-| `GC_SERVICE_ACCOUNT`            | Service account to use for deploying to GKE. Only required for deploying to GKE.                                                     | no       |                             |
-| `GC_WORKLOAD_IDENTITY_PROVIDER` | Workload identity provider to use for deploying to GKE. Only required for deploying to GKE.                                          | no       |                             |
-| `GKE_CLUSTER_LOCATION`          | Location of the GKE cluster to deploy to.                                                                                            | no       | `europe-west1`              |
-| `GKE_CLUSTER_NAME`              | Name of the GKE cluster to deploy to. Defaults to Elvias normal clusters.                                                            | no       |                             |
-| `GKE_PROJECT_ID`                | Project ID of GKE to deploy to. Defaults to Elvias normal clusters.                                                                  | no       |                             |
-| `checkout`                      | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`                      |
-| `environment`                   | Environment to deploy to.                                                                                                            | yes      |                             |
-| `helm-values-path`              | Path to Helm values file, relative to the root of the repository.                                                                    | no       | `.github/deploy/values.yml` |
-| `name`                          | Name of application. Do not include namespace.                                                                                       | yes      |                             |
-| `namespace`                     | Namespace or system of the application.                                                                                              | yes      |                             |
-| `runtime-cloud-provider`        | Kubernetes cloud provider to deploy to: `AKS`, `GKE` or ISS (Elvia only).                                                            | no       | `AKS`                       |
-| `slack-channel`                 | Slack channel to notify on failure. Leave empty to disable notifications.                                                            | no       | ``                          |
-| `workload-type`                 | The type of workload to deploy to kubernetes. Must be `deployment` or `statefulset`.                                                 | no       | `deployment`                |
+| Name                            | Description                                                                                                                                                                                                                             | Required | Default                     |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | --------------------------- |
+| `AKS_CLUSTER_NAME`              | Name of the AKS cluster to deploy to. Defaults to Elvias normal clusters.                                                                                                                                                               | no       |                             |
+| `AKS_RESOURCE_GROUP`            | Resource group of the AKS cluster to deploy to. Defaults to Elvias normal clusters.                                                                                                                                                     | no       |                             |
+| `AKS_SUBSCRIPTION_ID`           | Subscription ID of AKS to deploy to. Defaults to Elvias normal clusters.                                                                                                                                                                | no       |                             |
+| `AZURE_CLIENT_ID`               | Client ID of a service principal that has access to AKS. Only required for deploying to AKS.                                                                                                                                            | no       |                             |
+| `AZURE_TENANT_ID`               | Tenant ID of AKS to deploy to. Defaults to Elvias normal clusters.                                                                                                                                                                      | no       |                             |
+| `GC_SERVICE_ACCOUNT`            | Service account to use for deploying to GKE. Only required for deploying to GKE.                                                                                                                                                        | no       |                             |
+| `GC_WORKLOAD_IDENTITY_PROVIDER` | Workload identity provider to use for deploying to GKE. Only required for deploying to GKE.                                                                                                                                             | no       |                             |
+| `GKE_CLUSTER_LOCATION`          | Location of the GKE cluster to deploy to.                                                                                                                                                                                               | no       | `europe-west1`              |
+| `GKE_CLUSTER_NAME`              | Name of the GKE cluster to deploy to. Defaults to Elvias normal clusters.                                                                                                                                                               | no       |                             |
+| `GKE_PROJECT_ID`                | Project ID of GKE to deploy to. Defaults to Elvias normal clusters.                                                                                                                                                                     | no       |                             |
+| `checkout`                      | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                                                                                                    | no       | `true`                      |
+| `environment`                   | Environment to deploy to.                                                                                                                                                                                                               | yes      |                             |
+| `helm-values-file`              | Path to Helm values file, relative to the root of the repository.                                                                                                                                                                       | no       | `.github/deploy/values.yml` |
+| `helm-values-path`              | :warning: **DEPRECATED**: _Please use `helm-values-file` instead, which is a drop-in replacement. `helm-values-path` will be removed in the future._ :warning:<br><br>Path to Helm values file, relative to the root of the repository. | no       |                             |
+| `name`                          | Name of application. Do not include namespace.                                                                                                                                                                                          | yes      |                             |
+| `namespace`                     | Namespace or system of the application.                                                                                                                                                                                                 | yes      |                             |
+| `runtime-cloud-provider`        | Kubernetes cloud provider to deploy to: `AKS`, `GKE` or ISS (Elvia only).                                                                                                                                                               | no       | `AKS`                       |
+| `slack-channel`                 | Slack channel to notify on failure. Leave empty to disable notifications.                                                                                                                                                               | no       | ``                          |
+| `workload-type`                 | The type of workload to deploy to kubernetes. Must be `deployment` or `statefulset`.                                                                                                                                                    | no       | `deployment`                |
 
 ### Permissions
 
@@ -366,7 +367,7 @@ More permissions might be required depending on the inputs set, see the actions 
     #
     # Required: yes
 
-    helm-values-path:
+    helm-values-file:
     # Path to Helm values file, relative to the root of the repository.
     #
     # Required: no
