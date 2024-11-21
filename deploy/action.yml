@@ -23,6 +23,10 @@ inputs:
     description: 'Path to Helm values file, relative to the root of the repository.'
     required: false
     default: '.github/deploy/values.yml'
+  helm-chart-repository-url:
+    description: 'Location of Elvias Helm chart repository, should only be changed if testing a new version of the chart.'
+    required: false
+    default: ''
   workload-type:
     description: 'The type of workload to deploy to kubernetes. Must be `deployment` or `statefulset`.'
     required: false
@@ -151,6 +155,7 @@ runs:
           --environment '${{ inputs.environment }}' \
           --workload-type '${{ inputs.workload-type }}' \
           --runtime-cloud-provider '${{ inputs.runtime-cloud-provider }}' \
+          --helm-chart-repository-url '${{ inputs.helm-chart-repository-url }}' \
           --image-tag '${{ github.sha }}-${{ github.run_number }}' \
           --add-deployment-annotation \
           --grafana-url "$GRAFANA_URL" \
