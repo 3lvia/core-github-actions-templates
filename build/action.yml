@@ -229,7 +229,7 @@ runs:
         3LV_CACHE_TAG: ${{ inputs.docker-cache-tag }}
         3LV_INCLUDE_FILES: ${{ inputs.docker-include-files }}
         3LV_INCLUDE_DIRS: ${{ inputs.docker-include-dirs }}
-        3LV_SEVERITY: ${{ inputs.severity }}
+        3LV_SCAN_SEVERITY: ${{ inputs.severity }}
         3LV_AZURE_TENANT_ID: ${{ inputs.AZURE_TENANT_ID }}
         3LV_AZURE_CLIENT_ID: ${{ inputs.AZURE_CLIENT_ID }}
         3LV_AZURE_FEDERATED_TOKEN: ${{ steps.get-federated-token.outputs.token }}
