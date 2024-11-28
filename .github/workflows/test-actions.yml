@@ -173,9 +173,11 @@ jobs:
       cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
     permissions:
-      contents: read
+      actions: read
+      contents: write
       id-token: write
       packages: write # Required for publishing to GitHub Container Registry
+      pull-requests: write
       security-events: write
     environment: build
     steps:
@@ -195,6 +197,59 @@ jobs:
           trivy-upload-report: 'true'
           trivy-post-comment: 'true'
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
+
+  build-vulnerable-service:
+    name: Build Vulnerable Service
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.event_name }}-build-vulnerable-service'
+      cancel-in-progress: true
+    runs-on: elvia-runner
+    permissions:
+      actions: read
+      contents: write
+      pull-requests: write
+      security-events: write
+    environment: build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create Dockerfile with vulnerabilities
+        run: |
+          cat << EOF > Dockerfile
+          FROM debian:10
+
+          ENTRYPOINT ["echo", "I am vulnerable"]
+          EOF
+
+      - uses: ./build
+        with:
+          checkout: 'false'
+          name: 'vulnerable-service'
+          namespace: ${{ env.SYSTEM_NAME }}
+          project-file: 'Dockerfile'
+          severity: 'CRITICAL,HIGH'
+          registry: 'ghcr.io/3lvia'
+          trivy-upload-report: 'true'
+          trivy-post-comment: 'true'
+          push: 'false'
+        continue-on-error: true
+
+      - name: Check that pull request comment was created
+        run: |
+          result=$(gh pr view \
+                    -R '${{ github.repository }}' \
+                    '${{ github.event.pull_request.number }}' \
+                    --json comments \
+                    -q '.comments | .[] | select(.author.login == "github-actions") | .body | contains("<!-- vulnerable-service -->\n# :warning: Vulnerabilities detected in")')
+          if [[ "$result" == 'true' ]]; then
+            echo "Pull request comment was created successfully!"
+          else
+            echo "Pull request comment was not created."
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
 
   deploy-dev:
     name: Deploy Dev
