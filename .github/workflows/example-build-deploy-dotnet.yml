@@ -35,7 +35,7 @@ jobs:
       - uses: 3lvia/core-github-actions-templates/analyze@trunk
         with:
           # This can be set to a more specific path if you want to analyze only a part of the repository.
-          working-diretory: '.'
+          working-directory: '.'
 
   unit-tests:
     name: Unit Tests
