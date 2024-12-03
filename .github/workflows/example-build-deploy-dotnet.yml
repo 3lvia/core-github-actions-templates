@@ -13,16 +13,6 @@ on:
 #  pull_request:
 #    branches: [trunk]
 
-## This will limit the number of concurrent workflows to 1 per branch.
-##
-## The parameter `cancel-in-progress` will cancel the previous workflow if a new one is triggered.
-## Commenting out `cancel-in-progress` will make the new workflow wait for the previous one to finish.
-##
-## See https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#concurrency for more information.
-concurrency:
-  group: '${{ github.workflow }}-${{ github.ref }}'
-  cancel-in-progress: true
-
 env:
   APPLICATION_NAME: 'demo-api'
   SYSTEM_NAME: 'core'
@@ -30,6 +20,23 @@ env:
   PROJECT_FILE: '.github/test/src/core-demo-api.csproj'
 
 jobs:
+  analyze:
+    name: Analyze
+    runs-on: elvia-runner
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    # Limits the number of concurrent runs of this job to one, and cancels any in progress.
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.ref }}-analyze'
+      cancel-in-progress: true
+    steps:
+      - uses: 3lvia/core-github-actions-templates/analyze@trunk
+        with:
+          # This can be set to a more specific path if you want to analyze only a part of the repository.
+          working-diretory: '.'
+
   unit-tests:
     name: Unit Tests
     runs-on: elvia-runner
@@ -38,6 +45,10 @@ jobs:
       checks: write
       issues: read
       pull-requests: write
+    # Limits the number of concurrent runs of this job to one, and cancels any in progress.
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.ref }}-unit-tests'
+      cancel-in-progress: true
     steps:
       - uses: 3lvia/core-github-actions-templates/unittest@trunk
         with:
@@ -52,20 +63,14 @@ jobs:
       issues: read
       pull-requests: write
       id-token: write
+    # Limits the number of concurrent runs of this job to one, and cancels any in progress.
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.ref }}-integration-tests'
+      cancel-in-progress: true
     steps:
       - uses: 3lvia/core-github-actions-templates/integrationtest@trunk
         with:
           system: ${{ env.SYSTEM_NAME }}
-
-  analyze:
-    name: Analyze
-    runs-on: elvia-runner
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    steps:
-      - uses: 3lvia/core-github-actions-templates/analyze@trunk
 
   build-scan:
     name: Build and Scan
@@ -76,6 +81,10 @@ jobs:
       id-token: write
       pull-requests: write
       security-events: write
+    # Limits the number of concurrent runs of this job to one, and cancels any in progress.
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.ref }}-build-scan'
+      cancel-in-progress: true
     environment: build
     steps:
       - uses: 3lvia/core-github-actions-templates/build@trunk
@@ -100,6 +109,9 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    # Limits the number of concurrent runs of this job to one, but DOES NOT cancel any in progress.
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.ref }}-deploy-dev'
     environment: dev
     # Only on push to trunk
     if: github.ref == 'refs/heads/trunk'
@@ -123,6 +135,9 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    # Limits the number of concurrent runs of this job to one, but DOES NOT cancel any in progress.
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.ref }}-deploy-test'
     environment: test
     # Only on push to trunk
     if: github.ref == 'refs/heads/trunk'
@@ -146,6 +161,9 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    # Limits the number of concurrent runs of this job to one, but DOES NOT cancel any in progress.
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.ref }}-deploy-prod'
     environment: prod
     # Only on push to trunk
     if: github.ref == 'refs/heads/trunk'
