@@ -72,7 +72,7 @@ jobs:
         with:
           system: ${{ env.SYSTEM_NAME }}
           # This can be set to a more specific path if you want to search for tests in only a part of the repository.
-          working-diretory: '.'
+          working-directory: '.'
 
   build-scan:
     name: Build and Scan
