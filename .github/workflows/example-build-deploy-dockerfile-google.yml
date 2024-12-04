@@ -58,8 +58,6 @@ jobs:
     concurrency:
       group: 'dev-google--this-block-is-removed-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'
     environment: dev
-    # Only on push to trunk
-    if: github.ref == 'refs/heads/trunk'
     steps:
       - uses: 3lvia/core-github-actions-templates/deploy@trunk
         with:
