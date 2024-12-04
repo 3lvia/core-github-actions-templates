@@ -71,6 +71,8 @@ jobs:
       - uses: 3lvia/core-github-actions-templates/integrationtest@trunk
         with:
           system: ${{ env.SYSTEM_NAME }}
+          # This can be set to a more specific path if you want to search for tests in only a part of the repository.
+          working-diretory: '.'
 
   build-scan:
     name: Build and Scan
