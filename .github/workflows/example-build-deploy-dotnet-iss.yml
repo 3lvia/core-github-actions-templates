@@ -53,6 +53,8 @@ jobs:
       - uses: 3lvia/core-github-actions-templates/unittest@trunk
         with:
           test-coverage: 'true'
+          # This can be set to a more specific path if you want to search for tests in only a part of the repository.
+          working-directory: '.'
 
   integration-tests:
     name: Integration Tests
