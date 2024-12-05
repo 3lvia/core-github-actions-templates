@@ -210,6 +210,8 @@ jobs:
       pull-requests: write
       security-events: write
     environment: build
+    # We are testing if a PR comment is created, so ony run on PR.
+    if: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
