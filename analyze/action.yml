@@ -1,14 +1,20 @@
 name: 'Analyze'
 description: 'Run CodeQL analysis.'
 inputs:
-  working-directory:
-    description: 'Will run CodeQL Analysis on projects under this working directory.'
-    required: false
-    default: './'
   checkout:
     description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
     required: false
     default: 'true'
+  working-directory:
+    description: Will run CodeQL Analysis on projects under this working directory.
+    required: false
+    default: './'
+  dotnet-tool-manifest:
+    description: |
+      Path to the .NET tool manifest file, relative to the root of the repository.
+      Only needed if you require .NET tools that are outside of `working-directory` for the build.
+    required: false
+    default: './.config/dotnet-tools.json'
   language:
     description: 'Languages to run CodeQL analyze on.'
     required: false
@@ -37,6 +43,11 @@ runs:
       with:
         config-file: 'codeql-config.yml'
         languages: ${{ inputs.language }}
+
+    - name: Restore .NET tools
+      if: ${{ inputs.language == 'csharp' }}
+      shell: bash
+      run: dotnet tool restore --tool-manifest '${{ inputs.dotnet-tool-manifest }}'
 
     - name: Build projects
       if: ${{ inputs.language == 'csharp' }}

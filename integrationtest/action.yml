@@ -1,17 +1,23 @@
 name: Integration Test
 description: 'Run .NET integration tests.'
 inputs:
-  system:
-    description: 'System is used to log in to Vault using correct role.'
-    required: true
   checkout:
     description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
     required: false
     default: 'true'
+  system:
+    description: 'System is used to log in to Vault using correct role.'
+    required: true
   working-directory:
     description: 'Will run integration tests on projects under this working directory.'
     required: false
     default: './'
+  dotnet-tool-manifest:
+    description: |
+      Path to the .NET tool manifest file, relative to the root of the repository.
+      Only needed if you require .NET tools that are outside of `working-directory` for the build.
+    required: false
+    default: './.config/dotnet-tools.json'
   test-projects:
     description: 'Pattern to use to find test projects.'
     required: false
@@ -64,6 +70,10 @@ runs:
       run: |
         echo "To access Vault, this repository must be added to https://github.com/3lvia/github-repositories-terraform/tree/trunk/systems"
         exit 1
+
+    - name: Restore .NET tools
+      shell: bash
+      run: dotnet tool restore --tool-manifest '${{ inputs.dotnet-tool-manifest }}'
 
     - name: Run integration tests
       shell: bash
