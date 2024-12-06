@@ -25,6 +25,10 @@ runs:
       if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@v4
 
+    - name: Restore tools
+      shell: bash
+      run: dotnet tool restore
+
     - name: Run unit tests
       shell: bash
       run: |

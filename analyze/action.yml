@@ -38,6 +38,11 @@ runs:
         config-file: 'codeql-config.yml'
         languages: ${{ inputs.language }}
 
+    - name: Restore tools
+      if: ${{ inputs.language == 'csharp' }}
+      shell: bash
+      run: dotnet tool restore
+
     - name: Build projects
       if: ${{ inputs.language == 'csharp' }}
       shell: bash

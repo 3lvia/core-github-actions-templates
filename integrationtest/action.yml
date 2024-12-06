@@ -65,6 +65,10 @@ runs:
         echo "To access Vault, this repository must be added to https://github.com/3lvia/github-repositories-terraform/tree/trunk/systems"
         exit 1
 
+    - name: Restore tools
+      shell: bash
+      run: dotnet tool restore
+
     - name: Run integration tests
       shell: bash
       run: |
