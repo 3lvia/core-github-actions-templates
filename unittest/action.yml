@@ -9,6 +9,12 @@ inputs:
     description: 'Will run unit tests on projects under this working directory.'
     required: false
     default: './'
+  dotnet-tool-manifest:
+    description: |
+      Path to the .NET tool manifest file, relative to the root of the repository.
+      Only needed if you require .NET tools that are outside of `working-directory` for the build.
+    required: false
+    default: './.config/dotnet-tools.json'
   test-projects:
     description: 'Pattern to use to find test projects.'
     required: false
@@ -25,9 +31,9 @@ runs:
       if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@v4
 
-    - name: Restore tools
+    - name: Restore .NET tools
       shell: bash
-      run: dotnet tool restore
+      run: dotnet tool restore --tool-manifest '${{ inputs.dotnet-tool-manifest }}'
 
     - name: Run unit tests
       shell: bash
