@@ -46,12 +46,6 @@ inputs:
   docker-additional-tags:
     description: 'Comma-separated list of additional tags to add to the image.'
     required: false
-  docker-include-files:
-    description: 'Comma-separated list of files to copy into the Docker image.'
-    required: false
-  docker-include-dirs:
-    description: 'Comma-separated list of directories to copy into the Docker image.'
-    required: false
   severity:
     description: |
       Severity levels to scan for.
@@ -203,8 +197,6 @@ runs:
         3LV_BUILD_CONTEXT: ${{ inputs.docker-build-context }}
         3LV_GO_MAIN_PACKAGE_DIR: ${{ inputs.go-main-package-dir }}
         3LV_CACHE_TAG: ${{ inputs.docker-cache-tag }}
-        3LV_INCLUDE_FILES: ${{ inputs.docker-include-files }}
-        3LV_INCLUDE_DIRS: ${{ inputs.docker-include-dirs }}
         3LV_SCAN_SEVERITY: ${{ inputs.severity }}
         3LV_AZURE_TENANT_ID: ${{ inputs.AZURE_TENANT_ID }}
         3LV_AZURE_CLIENT_ID: ${{ inputs.AZURE_CLIENT_ID }}
