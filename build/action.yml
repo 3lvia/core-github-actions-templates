@@ -35,8 +35,7 @@ inputs:
   docker-build-context:
     description: |
       Docker build context, which is the working directory needed to build the Docker image.
-      This is relative to the root of the repository.
-      Defaults to the directory of `project-file`.
+      This is relative to the root of the repository. Defaults to the directory of `project-file`.
     required: false
   docker-cache-tag:
     description: |
@@ -83,16 +82,13 @@ inputs:
     default: 'true'
   registry:
     description: |
-      What container registry to use, we support Azure Container Registry (ACR), Google Container Registry (GCR) and GitHub Container Registry (GHCR).
+      What container registry to use, we support Azure Container Registry (ACR) and GitHub Container Registry (GHCR).
       You should set this to the URL of the registry you want to use, e.g. `ghcr.io/3lvia` or `myregistry.azurecr.io`.
-      The action will authenticate with the registry depending on the value of the URL, i.e. if the URL contains `azurecr.io`, `gcr.io` or `ghcr.io`.
+      The action will authenticate with the registry depending on the value of the URL, i.e. if the URL contains `azurecr.io`jor `ghcr.io`.
 
       If set to an ACR registry, Elvia's private Azure Container Registry will be used by default.
       You can also set these explictly to point to your own ACR.
       Using ACR requires the permissions `id-token: write` to access the registry using OIDC.
-
-      If set to a GCR registry, the action will use the Google Container Registry of the Google Cloud project.
-      Using GCR requires the permissions `id-token: write` to access the registry using OIDC.
 
       If set to a GHCR registry, the action will push to the GitHub Container Registry of the repository.
       Using GHCR requires the `packages: write` permission to push to the registry.
@@ -109,12 +105,6 @@ inputs:
     required: false
   ACR_NAME:
     description: 'Name of the Azure Container Registry to push to. Only required if using your own ACR.'
-    required: false
-  GC_SERVICE_ACCOUNT:
-    description: 'Service account to use for pushing to Google Container Registry. Only required if using GCR.'
-    required: false
-  GC_WORKLOAD_IDENTITY_PROVIDER:
-    description: 'Workload identity provider to use for pushing to Google Container Registry. Only required if using GCR.'
     required: false
 
 outputs:
@@ -138,20 +128,6 @@ runs:
         token=$(curl -s -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://AzureADTokenExchange" | jq -r '.value')
         echo "::add-mask::$token"
         echo "token=$token" >> "$GITHUB_OUTPUT"
-
-    - name: Authenticate with Google Cloud
-      uses: google-github-actions/auth@v2.1.7
-      if: ${{ contains(inputs.registry, 'gcr.io') }}
-      with:
-        workload_identity_provider: ${{ inputs.GC_WORKLOAD_IDENTITY_PROVIDER }}
-        service_account: ${{ inputs.GC_SERVICE_ACCOUNT }}
-
-    - name: Login to GCR
-      shell: bash
-      if: ${{ contains(inputs.registry, 'gcr.io') }}
-      run: |
-        # Login to GCR
-        gcloud auth configure-docker gcr.io
 
     - name: Login to GHCR
       if: ${{ contains(inputs.registry, 'ghcr.io') }}
