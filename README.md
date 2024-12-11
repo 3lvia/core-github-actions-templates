@@ -541,12 +541,13 @@ Run CodeQL analysis.
 
 ### Inputs
 
-| Name                   | Description                                                                                                                                                               | Required | Default                       |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------- |
-| `checkout`             | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                                      | no       | `true`                        |
-| `dotnet-tool-manifest` | Path to the .NET tool manifest file, relative to the root of the repository. Only needed if you require .NET tools that are outside of `working-directory` for the build. | no       | `./.config/dotnet-tools.json` |
-| `language`             | Languages to run CodeQL analyze on.                                                                                                                                       | no       | `csharp`                      |
-| `working-directory`    | Will run CodeQL Analysis on projects under this working directory.                                                                                                        | no       | `./`                          |
+| Name                   | Description                                                                                                                                                                                                        | Required | Default                       |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ----------------------------- |
+| `checkout`             | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                                                                               | no       | `true`                        |
+| `dotnet-tool-manifest` | Path to the .NET tool manifest file, relative to the root of the repository. Only needed if you require .NET tools that are outside of `working-directory` for the build.                                          | no       | `./.config/dotnet-tools.json` |
+| `language`             | :warning: **DEPRECATED**: _Please use `languages` instead, which is a drop-in replacement. `language` will be removed in the future._ :warning:<br><br>Comma-separated list of languages to run CodeQL analyze on. | no       | `csharp`                      |
+| `languages`            | Comma-separated list of languages to run CodeQL analyze on.                                                                                                                                                        | no       | `csharp`                      |
+| `working-directory`    | Will run CodeQL Analysis on projects under this working directory.                                                                                                                                                 | no       | `./`                          |
 
 ### Permissions
 
@@ -576,8 +577,8 @@ More permissions might be required depending on the inputs set, see the actions 
     # Required: no
     # Default: './.config/dotnet-tools.json'
 
-    language:
-    # Languages to run CodeQL analyze on.
+    languages:
+    # Comma-separated list of languages to run CodeQL analyze on.
     #
     # Required: no
     # Default: 'csharp'
