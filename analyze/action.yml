@@ -15,10 +15,16 @@ inputs:
       Only needed if you require .NET tools that are outside of `working-directory` for the build.
     required: false
     default: './.config/dotnet-tools.json'
-  language:
-    description: 'Languages to run CodeQL analyze on.'
+  languages:
+    description: 'Comma-separated list of languages to run CodeQL analyze on.'
     required: false
     default: 'csharp'
+  language:
+    description: 'Comma-separated list of languages to run CodeQL analyze on.'
+    required: false
+    default: 'csharp'
+    deprecationMessage: |
+      Please use `languages` instead, which is a drop-in replacement. `language` will be removed in the future.
 
 runs:
   using: 'composite'
@@ -42,15 +48,15 @@ runs:
       uses: github/codeql-action/init@v3
       with:
         config-file: 'codeql-config.yml'
-        languages: ${{ inputs.language }}
+        languages: ${{ inputs.languages }}
 
     - name: Restore .NET tools
-      if: ${{ inputs.language == 'csharp' }}
+      if: ${{ contains(inputs.languages, 'csharp') }}
       shell: bash
       run: dotnet tool restore --tool-manifest '${{ inputs.dotnet-tool-manifest }}'
 
     - name: Build projects
-      if: ${{ inputs.language == 'csharp' }}
+      if: ${{ contains(inputs.languages, 'csharp') }}
       shell: bash
       run: |
         projects=$(find . -iname "*csproj")
