@@ -5,9 +5,6 @@ on:
     branches: [trunk]
     paths:
       - '.github/workflows/test-actions.yml'
-      - '.github/test/**'
-      - '.github/test-go/**'
-      - '.github/test-docker/**'
       - '**/action.yml'
       - '!README.md'
   workflow_dispatch:
@@ -28,22 +25,24 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrices.outputs.matrix }}
-      matrix-trivy: ${{ steps.set-matrices.outputs.matrix-trivy }}
+      matrix-analyze: ${{ steps.set-matrices.outputs.matrix-analyze }}
       matrix-build: ${{ steps.set-matrices.outputs.matrix-build }}
       matrix-deploy: ${{ steps.set-matrices.outputs.matrix-deploy }}
+      matrix-trivy: ${{ steps.set-matrices.outputs.matrix-trivy }}
     steps:
       - name: Set matrices
         id: set-matrices
         run: |
-          # Runner matrix
+          # Default matrix
           echo "matrix={\"runner\":[\"$RUNNER\"]}" >> "$GITHUB_OUTPUT"
 
-          # Trivy matrix
+          # Analyze matrix
           {
-            echo 'matrix-trivy<<EOF'
+            echo 'matrix-analyze<<EOF'
             cat << EOF
           {
-            "runner": ["$RUNNER","ubuntu-latest"]
+            "runner": ["$RUNNER"],
+            "language": ["csharp","go"]
           }
           EOF
             echo EOF
@@ -55,15 +54,19 @@ jobs:
             cat << EOF
           {
             "runner": ["$RUNNER","ubuntu-latest"],
-            "project-file": [".github/test/src/core-demo-api.csproj",".github/test-go/go.mod",".github/test-go/Dockerfile"],
+            "project-file": [
+              "applications/demo-api/demo-api/core-demo-api.csproj",
+              "applications/demo-api-go/go.mod",
+              "applications/demo-api-go/Dockerfile"
+            ],
             "registry": ["","ghcr.io/3lvia"],
             "include": [
               {
-                "application-name": "${{ env.APPLICATION_BASE_NAME }}-go",
+                "application-name": "${{ env.APPLICATION_BASE_NAME }}-go"
               },
               {
-                "project-file": ".github/test/src/core-demo-api.csproj",
                 "application-name": "${{ env.APPLICATION_BASE_NAME }}",
+                "project-file": "applications/demo-api/demo-api/core-demo-api.csproj"
               }
             ]
           }
@@ -77,22 +80,76 @@ jobs:
             cat << EOF
           {
             "runner": ["$RUNNER","ubuntu-latest"],
-            "application-name": ["${{ env.APPLICATION_BASE_NAME }}", "${{ env.APPLICATION_BASE_NAME }}-go"],
+            "application-name": [
+              "${{ env.APPLICATION_BASE_NAME }}",
+              "${{ env.APPLICATION_BASE_NAME }}-go"
+            ],
+            "runtime-cloud-provider": ["AKS","GKE"],
             "include": [
               {
-                "helm-values-file": ".github/test/deploy/values.yml"
+                "helm-values-file": ".github/deploy/values-demo-api.yml"
               },
               {
                 "application-name": "${{ env.APPLICATION_BASE_NAME }}-go",
-                "helm-values-file": ".github/test-go/deploy/values.yml"
+                "helm-values-file": ".github/deploy/values-demo-api-go.yml"
               }
             ]
           }
           EOF
             echo EOF
           } >> "$GITHUB_OUTPUT"
+
+          # Trivy matrix
+          {
+            echo 'matrix-trivy<<EOF'
+            cat << EOF
+          {
+            "runner": ["$RUNNER","ubuntu-latest"]
+          }
+          EOF
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
         env:
           RUNNER: ${{ github.event_name == 'workflow_dispatch' && inputs.runner || 'elvia-runner' }}
+
+  analyze:
+    name: Analyze
+    needs: [set-matrices]
+    strategy:
+      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix-analyze) }}
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-${{ matrix.language }}-analyze'
+      cancel-in-progress: true
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+
+      - name: Get GitHub App token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Checkout core repository
+        uses: actions/checkout@v4
+        with:
+          repository: '3lvia/core'
+          token: ${{ steps.app-token.outputs.token }}
+          path: 'core'
+
+      - uses: ./analyze
+        with:
+          checkout: 'false'
+          language: ${{ matrix.language }}
+          working-directory: 'core/applications'
 
   unit-tests:
     name: Unit Tests
@@ -109,57 +166,28 @@ jobs:
       issues: read
       pull-requests: write
     steps:
-      - name: Checkout repository
+      - name: Checkout this repository
         uses: actions/checkout@v4
+
+      - name: Get GitHub App token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Checkout core repository
+        uses: actions/checkout@v4
+        with:
+          repository: '3lvia/core'
+          token: ${{ steps.app-token.outputs.token }}
+          path: 'core'
 
       - uses: ./unittest
         with:
           checkout: 'false'
-
-  integration-tests:
-    name: Integration Tests
-    needs: [set-matrices]
-    strategy:
-      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix) }}
-    concurrency:
-      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-integration-tests'
-      cancel-in-progress: true
-    runs-on: ${{ matrix.runner }}
-    permissions:
-      contents: read
-      checks: write
-      issues: read
-      pull-requests: write
-      id-token: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - uses: ./integrationtest
-        with:
-          checkout: 'false'
-          system: ${{ env.SYSTEM_NAME }}
-
-  analyze:
-    name: Analyze
-    needs: [set-matrices]
-    strategy:
-      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix) }}
-    concurrency:
-      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-analyze'
-      cancel-in-progress: true
-    runs-on: ${{ matrix.runner }}
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - uses: ./analyze
-        with:
-          checkout: 'false'
+          working-directory: 'core/applications/demo-api'
 
   build:
     name: Build
@@ -169,7 +197,7 @@ jobs:
       matrix: ${{ fromJson(needs.set-matrices.outputs.matrix-build) }}
     concurrency:
       group: |
-        ${{ github.workflow }}-${{ github.event_name }}-${{ github.job }}-${{ matrix.runner }}-${{ matrix.application-name }}-${{ matrix.project-file }}-${{ matrix.docker-include-files }}-${{ matrix.registry }}
+        ${{ github.workflow }}-${{ github.event_name }}-${{ github.job }}-${{ matrix.runner }}-${{ matrix.application-name }}-${{ matrix.project-file }}-${{ matrix.registry }}
       cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
     permissions:
@@ -181,18 +209,31 @@ jobs:
       security-events: write
     environment: build
     steps:
-      - name: Checkout repository
+      - name: Checkout this repository
         uses: actions/checkout@v4
+
+      - name: Get GitHub App token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Checkout core repository
+        uses: actions/checkout@v4
+        with:
+          repository: '3lvia/core'
+          token: ${{ steps.app-token.outputs.token }}
+          path: 'core'
 
       - uses: ./build
         with:
           checkout: 'false'
           name: ${{ matrix.application-name }}
           namespace: ${{ env.SYSTEM_NAME }}
-          project-file: ${{ matrix.project-file }}
+          project-file: 'core/${{ matrix.project-file }}'
           docker-additional-tags: 'v42,v1.2.3'
-          docker-include-files: ${{ matrix.docker-include-files }}
-          severity: 'CRITICAL'
           registry: ${{ matrix.registry }}
           trivy-upload-report: 'true'
           trivy-post-comment: 'true'
@@ -260,7 +301,7 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.set-matrices.outputs.matrix-deploy) }}
     concurrency:
-      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.application-name }}-deploy-dev'
+      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.application-name }}-${{ matrix.runtime-cloud-provider }}-deploy-dev'
       cancel-in-progress: false
     runs-on: ${{ matrix.runner }}
     permissions:
@@ -268,8 +309,23 @@ jobs:
       id-token: write
     environment: dev
     steps:
-      - name: Checkout repository
+      - name: Checkout this repository
         uses: actions/checkout@v4
+
+      - name: Get GitHub App token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Checkout core repository
+        uses: actions/checkout@v4
+        with:
+          repository: '3lvia/core'
+          token: ${{ steps.app-token.outputs.token }}
+          path: 'core'
 
       - uses: ./deploy
         with:
@@ -277,38 +333,54 @@ jobs:
           name: ${{ matrix.application-name }}
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'dev'
-          helm-values-file: ${{ matrix.helm-values-file }}
+          helm-values-file: 'core/.github/deploy/values-${{ matrix.application-name }}.yml'
           slack-channel: '#team-core-alerts-muted'
+          runtime-cloud-provider: ${{ matrix.runtime-cloud-provider }}
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
-
-  deploy-dev-gke:
-    name: Deploy Dev GKE
-    needs: [set-matrices, build]
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix-deploy) }}
-    concurrency:
-      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.application-name }}-deploy-dev-gke'
-      cancel-in-progress: false
-    runs-on: ${{ matrix.runner }}
-    permissions:
-      contents: read
-      id-token: write
-    environment: dev
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - uses: ./deploy
-        with:
-          checkout: 'false'
-          name: ${{ matrix.application-name }}
-          namespace: ${{ env.SYSTEM_NAME }}
-          environment: 'dev'
-          helm-values-file: ${{ matrix.helm-values-file }}
-          runtime-cloud-provider: 'GKE'
           GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
           GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
+
+  integration-tests:
+    name: Integration Tests
+    needs: [set-matrices, deploy-dev]
+    strategy:
+      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix) }}
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-integration-tests'
+      cancel-in-progress: true
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      checks: write
+      issues: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+
+      - name: Get GitHub App token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Checkout core repository
+        uses: actions/checkout@v4
+        with:
+          repository: '3lvia/core'
+          token: ${{ steps.app-token.outputs.token }}
+          path: 'core'
+
+      - uses: ./integrationtest
+        with:
+          checkout: 'false'
+          system: ${{ env.SYSTEM_NAME }}
+          working-directory: 'core/applications/demo-api'
+        env:
+          BASE_URL: 'https://core.dev-elvia.io/demo-api'
 
   trivy-iac-scan:
     name: Trivy IaC Scan
