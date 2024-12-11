@@ -243,8 +243,8 @@ jobs:
                     -R '${{ github.repository }}' \
                     '${{ github.event.pull_request.number }}' \
                     --json comments \
-                    -q '.comments | .[] | select(.author.login == "github-actions") | .body | contains("<!-- vulnerable-service -->\n# :warning: Vulnerabilities detected in")')
-          if [[ "$result" == 'true' ]]; then
+                    -q '.comments | .[] | select(.author.login == "github-actions" and (.body | contains("<!-- vulnerable-service -->\n# :warning: Vulnerabilities detected in")))')
+          if [[ -n "$result" ]]; then
             echo "Pull request comment was created successfully!"
           else
             echo "Pull request comment was not created."
