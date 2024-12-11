@@ -36,7 +36,7 @@ jobs:
         with:
           # This can be set to a more specific path if you want to analyze only a part of the repository.
           working-directory: '.'
-          languages: 'go'
+          language: 'go'
 
   build-scan:
     name: Build and Scan
