@@ -67,15 +67,19 @@ jobs:
             sed -i "s/#  pull_request:/  pull_request:/g" "$new_workflow_path"
             sed -i 's/#    branches:/    branches:/g' "$new_workflow_path"
             sed -i 's/branches: \[trunk\]/branches: \[$default-branch\]/g' "$new_workflow_path"
+            sed -i "s/checkout: 'false'.*\$//g" "$new_workflow_path"
+
+            # We checkout core repo to test on demo apps, so we remove this part from the examples.
+            perl -0777 -i -pe 's/# START REMOVE FROM EXAMPLE.*?# END REMOVE FROM EXAMPLE\n//gms' "$new_workflow_path"
 
             # Special case for ISS example
             sed -i 's/branches: \[too-complicated-to-setup-tests-for-this-so-we-dont\]/branches: \[$default-branch\]/g' "$new_workflow_path"
 
-            # Special case for removing concurrency groups for demo-api-go, since it is deployed twice (go.mod and Dockerfile)
+            # Special case for replacing name of concurrency group for demo-api-go, since it is deployed twice (go.mod and Dockerfile).
             # TODO: loop and don't hardcode envs three times
-            sed -i "s/group: 'dev-.*--this-block-is-removed-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'/${{ '\${{ github.workflow }}-\${{ github.ref }}-deploy-dev' }}/g" "$new_workflow_path"
-            sed -i "s/group: 'test-.*--this-block-is-removed-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'/${{ '\${{ github.workflow }}-\${{ github.ref }}-deploy-test' }}/g" "$new_workflow_path"
-            sed -i "s/group: 'prod-.*--this-block-is-removed-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'/${{ '\${{ github.workflow }}-\${{ github.ref }}-deploy-prod' }}/g" "$new_workflow_path"
+            sed -i "s/group: 'dev-.*--this-group-is-replaced-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'/group: '${{ '\${{ github.workflow }}-\${{ github.ref }}-deploy-dev' }}'/g" "$new_workflow_path"
+            sed -i "s/group: 'test-.*--this-group-is-replaced-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'/group: '${{ '\${{ github.workflow }}-\${{ github.ref }}-deploy-test' }}'/g" "$new_workflow_path"
+            sed -i "s/group: 'prod-.*--this-group-is-replaced-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'/group: '${{ '\${{ github.workflow }}-\${{ github.ref }}-deploy-prod' }}'/g" "$new_workflow_path"
 
             new_workflow_properties_file="dotgithub/workflow-templates/${file_name_no_prefix%.yml}.properties.json"
             if [ ! -f "$new_workflow_properties_file" ]; then
