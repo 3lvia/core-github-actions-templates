@@ -256,7 +256,6 @@ you must first add your Github repository to [github-repositories-terraform](htt
 | `GKE_CLUSTER_LOCATION`          | Location of the GKE cluster to deploy to.                                                                                                                                                                                               | no       | `europe-west1`              |
 | `GKE_CLUSTER_NAME`              | Name of the GKE cluster to deploy to. Defaults to Elvias normal clusters.                                                                                                                                                               | no       |                             |
 | `GKE_PROJECT_ID`                | Project ID of GKE to deploy to. Defaults to Elvias normal clusters.                                                                                                                                                                     | no       |                             |
-| `checkout`                      | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                                                                                                    | no       | `true`                      |
 | `environment`                   | Environment to deploy to.                                                                                                                                                                                                               | yes      |                             |
 | `helm-chart-repository-url`     | Location of Elvias Helm chart repository, should only be changed if testing a new version of the chart.                                                                                                                                 | no       | ``                          |
 | `helm-values-file`              | Path to Helm values file, relative to the root of the repository.                                                                                                                                                                       | no       | `.github/deploy/values.yml` |
@@ -332,12 +331,6 @@ More permissions might be required depending on the inputs set, see the actions 
     # Project ID of GKE to deploy to. Defaults to Elvias normal clusters.
     #
     # Required: no
-
-    checkout:
-    # If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.
-    #
-    # Required: no
-    # Default: 'true'
 
     environment:
     # Environment to deploy to.
