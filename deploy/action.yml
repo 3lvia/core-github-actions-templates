@@ -31,10 +31,6 @@ inputs:
     description: 'The type of workload to deploy to kubernetes. Must be `deployment` or `statefulset`.'
     required: false
     default: 'deployment'
-  checkout:
-    description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
-    required: false
-    default: 'true'
   runtime-cloud-provider:
     description: 'Kubernetes cloud provider to deploy to: `AKS`, `GKE` or ISS (Elvia only).'
     required: false
@@ -78,10 +74,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Checkout repository
-      if: ${{ inputs.checkout == 'true' }}
-      uses: actions/checkout@v4
-
     - name: Resolve Vault address and short repository name
       shell: bash
       run: |
