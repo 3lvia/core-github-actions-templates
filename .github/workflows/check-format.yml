@@ -26,5 +26,7 @@ jobs:
       - name: Install dependencies
         run: yarn global add prettier
 
-      - name: Check format of workflows and README
-        run: prettier -c --single-quote "**/*.yml" "**/*.md"
+      - name: Check format of workflows and markdown files
+        run: |
+          echo '.github/workflows/example-*.yml' > .prettierignore
+          prettier -c --single-quote "**/*.yml" "**/*.md"
