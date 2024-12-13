@@ -117,6 +117,8 @@ you must first add your GitHub repository to [github-repositories-terraform](htt
 | `severity`               | Severity levels to scan for. See [Trivy documentation](https://github.com/aquasecurity/trivy-action?tab=readme-ov-file#inputs) for more information.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | no       | `CRITICAL`     |
 | `trivy-cve-ignores`      | Comma-separated list of CVEs for Trivy to ignore. See [Trivy documentation](https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore) for syntax.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | no       |                |
 | `trivy-post-comment`     | If `true`, the action will post a comment to the PR with the Trivy scan results. The comment will only be posted if the action is ran on a pull request. This action requires the permission `pull-requests: write` to be set for the job.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | no       | `false`        |
+| `trivy-results-ref`      | The ref where Trivy results will be uploaded. Defaults to `github.ref`. ONLY USED FOR INTERNAL TESTING.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | no       |                |
+| `trivy-results-sha`      | The sha of the HEAD of the ref where Trivy results will be uploaded. Defaults to `github.sha`. ONLY USED FOR INTERNAL TESTING.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | no       |                |
 | `trivy-upload-report`    | If `true`, the action will upload Trivy scan results to GitHub Advanced Security. This actions requires GitHub Advanced Security to be enabled for the repository, and the permissions `actions: read` and `security-events: write` to be set for the job.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | no       | `false`        |
 
 ### Outputs
@@ -223,6 +225,16 @@ More permissions might be required depending on the inputs set, see the actions 
     #
     # Required: no
     # Default: 'false'
+
+    trivy-results-ref:
+    # The ref where Trivy results will be uploaded. Defaults to `github.ref`. ONLY USED FOR INTERNAL TESTING.
+    #
+    # Required: no
+
+    trivy-results-sha:
+    # The sha of the HEAD of the ref where Trivy results will be uploaded. Defaults to `github.sha`. ONLY USED FOR INTERNAL TESTING.
+    #
+    # Required: no
 
     trivy-upload-report:
     # If `true`, the action will upload Trivy scan results to GitHub Advanced Security. This actions requires GitHub Advanced Security to be enabled for the repository, and the permissions `actions: read` and `security-events: write` to be set for the job.
@@ -544,8 +556,11 @@ Run CodeQL analysis.
 | Name                   | Description                                                                                                                                                               | Required | Default                       |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------- |
 | `checkout`             | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                                      | no       | `true`                        |
+| `codeql-results-ref`   | The ref where CodeQL results will be uploaded. Defaults to `github.ref`. ONLY USED FOR INTERNAL TESTING.                                                                  | no       |                               |
+| `codeql-results-sha`   | The sha of the HEAD of the ref where CodeQL results will be uploaded. Defaults to `github.sha`. ONLY USED FOR INTERNAL TESTING.                                           | no       |                               |
 | `dotnet-tool-manifest` | Path to the .NET tool manifest file, relative to the root of the repository. Only needed if you require .NET tools that are outside of `working-directory` for the build. | no       | `./.config/dotnet-tools.json` |
 | `language`             | Language to run CodeQL analyze on. Use a matrix strategy to run for multiple languages.                                                                                   | no       | `csharp`                      |
+| `upload-results`       | If `true` the action will upload CodeQL results to GitHub Security Code Scanning. If `false`, the action will not upload results.                                         | no       | `true`                        |
 | `working-directory`    | Will run CodeQL Analysis on projects under this working directory.                                                                                                        | no       | `./`                          |
 
 ### Permissions
@@ -570,6 +585,16 @@ More permissions might be required depending on the inputs set, see the actions 
     # Required: no
     # Default: 'true'
 
+    codeql-results-ref:
+    # The ref where CodeQL results will be uploaded. Defaults to `github.ref`. ONLY USED FOR INTERNAL TESTING.
+    #
+    # Required: no
+
+    codeql-results-sha:
+    # The sha of the HEAD of the ref where CodeQL results will be uploaded. Defaults to `github.sha`. ONLY USED FOR INTERNAL TESTING.
+    #
+    # Required: no
+
     dotnet-tool-manifest:
     # Path to the .NET tool manifest file, relative to the root of the repository. Only needed if you require .NET tools that are outside of `working-directory` for the build.
     #
@@ -581,6 +606,12 @@ More permissions might be required depending on the inputs set, see the actions 
     #
     # Required: no
     # Default: 'csharp'
+
+    upload-results:
+    # If `true` the action will upload CodeQL results to GitHub Security Code Scanning. If `false`, the action will not upload results.
+    #
+    # Required: no
+    # Default: 'true'
 
     working-directory:
     # Will run CodeQL Analysis on projects under this working directory.
