@@ -38,8 +38,9 @@ jobs:
         id: app-token
         with:
           app-id: ${{ vars.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          repositories: 'core'
 
       - name: Checkout core repository
         uses: actions/checkout@v4
@@ -77,8 +78,9 @@ jobs:
         id: app-token
         with:
           app-id: ${{ vars.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          repositories: 'core'
 
       - name: Checkout core repository
         uses: actions/checkout@v4
@@ -120,8 +122,9 @@ jobs:
         id: app-token
         with:
           app-id: ${{ vars.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          repositories: 'core'
 
       - name: Checkout core repository
         uses: actions/checkout@v4
@@ -166,8 +169,9 @@ jobs:
         id: app-token
         with:
           app-id: ${{ vars.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          repositories: 'core'
 
       - name: Checkout core repository
         uses: actions/checkout@v4
@@ -212,8 +216,9 @@ jobs:
         id: app-token
         with:
           app-id: ${{ vars.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          repositories: 'core'
 
       - name: Checkout core repository
         uses: actions/checkout@v4

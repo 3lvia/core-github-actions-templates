@@ -40,6 +40,7 @@ jobs:
           app-id: ${{ vars.GH_APP_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          repositories: 'core'
 
       - name: Checkout core repository
         uses: actions/checkout@v4
@@ -77,6 +78,7 @@ jobs:
           app-id: ${{ vars.GH_APP_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          repositories: 'core'
 
       - name: Checkout core repository
         uses: actions/checkout@v4
@@ -115,6 +117,7 @@ jobs:
           app-id: ${{ vars.GH_APP_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          repositories: 'core'
 
       - name: Checkout core repository
         uses: actions/checkout@v4
@@ -129,6 +132,8 @@ jobs:
           system: ${{ env.SYSTEM_NAME }}
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
+        env:
+          BASE_URL: 'https://core.dev-elvia.io/demo-api'
 # END REMOVE FROM EXAMPLE
 
   build-scan:
@@ -154,6 +159,7 @@ jobs:
           app-id: ${{ vars.GH_APP_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          repositories: 'core'
 
       - name: Checkout core repository
         uses: actions/checkout@v4
@@ -199,6 +205,7 @@ jobs:
           app-id: ${{ vars.GH_APP_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          repositories: 'core'
 
       - name: Checkout core repository
         uses: actions/checkout@v4
@@ -243,6 +250,7 @@ jobs:
           app-id: ${{ vars.GH_APP_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          repositories: 'core'
 
       - name: Checkout core repository
         uses: actions/checkout@v4
@@ -287,6 +295,7 @@ jobs:
           app-id: ${{ vars.GH_APP_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          repositories: 'core'
 
       - name: Checkout core repository
         uses: actions/checkout@v4
