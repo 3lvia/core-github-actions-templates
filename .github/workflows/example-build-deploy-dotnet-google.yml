@@ -56,6 +56,7 @@ jobs:
           language: 'csharp'
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
+          upload-results: 'false'
           ref: ${{ steps.checkout.outputs.ref }}
           sha: ${{ steps.checkout.outputs.commit }}
 # END REMOVE FROM EXAMPLE
@@ -178,13 +179,11 @@ jobs:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
           project-file: ${{ env.PROJECT_FILE }}
-          trivy-upload-report: 'true'
+          trivy-upload-report: 'false'
           trivy-post-comment: 'true'
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
-          trivy-results-ref: ${{ steps.checkout.outputs.ref }}
-          trivy-results-sha: ${{ steps.checkout.outputs.commit }}
 # END REMOVE FROM EXAMPLE
 
   deploy-dev:
