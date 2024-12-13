@@ -46,7 +46,6 @@ jobs:
           repositories: 'core'
 
       - name: Checkout core repository
-        id: checkout
         uses: actions/checkout@v4
         with:
           repository: '3lvia/core'
@@ -57,13 +56,11 @@ jobs:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
           project-file: ${{ env.PROJECT_FILE }}
-          trivy-upload-report: 'true'
+          trivy-upload-report: 'false'
           trivy-post-comment: 'true'
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
-          trivy-results-ref: ${{ steps.checkout.outputs.ref }}
-          trivy-results-sha: ${{ steps.checkout.outputs.commit }}
 # END REMOVE FROM EXAMPLE
 
   deploy-dev:

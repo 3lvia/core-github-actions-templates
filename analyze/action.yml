@@ -19,6 +19,10 @@ inputs:
     description: 'Language to run CodeQL analyze on. Use a matrix strategy to run for multiple languages.'
     required: false
     default: 'csharp'
+  upload-results:
+    description: 'If `true` the action will upload CodeQL results to GitHub Security Code Scanning. If `false`, the action will not upload results.'
+    required: false
+    default: 'true'
   codeql-results-ref:
     description: |
       The ref where CodeQL results will be uploaded. Defaults to `github.ref`.
@@ -75,3 +79,4 @@ runs:
       with:
         ref: ${{ inputs.codeql-results-ref == '' && github.ref || inputs.codeql-results-ref }}
         sha: ${{ inputs.codeql-results-sha == '' && github.sha || inputs.codeql-results-sha }}
+        upload-database: ${{ inputs.upload-results }}

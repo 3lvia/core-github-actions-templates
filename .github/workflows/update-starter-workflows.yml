@@ -69,6 +69,9 @@ jobs:
             sed -i 's/branches: \[trunk\]/branches: \[$default-branch\]/g' "$new_workflow_path"
             sed -i "s/checkout: 'false'.*\$//g" "$new_workflow_path"
 
+            # We disable Trivy uploading report in testing, so reenable here.
+            sed -i "s/trivy-upload-report: 'false'/trivy-upload-report: 'true'/g" "$new_workflow_path"
+
             # We checkout core repo to test on demo apps, so we remove this part from the examples.
             perl -0777 -i -pe 's/# START REMOVE FROM EXAMPLE.*?# END REMOVE FROM EXAMPLE\n//gms' "$new_workflow_path"
 
