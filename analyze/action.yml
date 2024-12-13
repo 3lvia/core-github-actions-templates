@@ -19,6 +19,16 @@ inputs:
     description: 'Language to run CodeQL analyze on. Use a matrix strategy to run for multiple languages.'
     required: false
     default: 'csharp'
+  codeql-results-ref:
+    description: |
+      The ref where CodeQL results will be uploaded. Defaults to `github.ref`.
+      ONLY USED FOR INTERNAL TESTING.
+    required: false
+  codeql-results-sha:
+    description: |
+      The sha of the HEAD of the ref where CodeQL results will be uploaded. Defaults to `github.sha`.
+      ONLY USED FOR INTERNAL TESTING.
+    required: false
 
 runs:
   using: 'composite'
@@ -62,3 +72,6 @@ runs:
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
+      with:
+        ref: ${{ inputs.codeql-results-ref == '' && github.ref || inputs.codeql-results-ref }}
+        sha: ${{ inputs.codeql-results-sha == '' && github.sha || inputs.codeql-results-sha }}

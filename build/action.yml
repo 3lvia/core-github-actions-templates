@@ -91,6 +91,16 @@ inputs:
     description: 'If `true`, the action will push the Docker image to the registry.'
     required: false
     default: 'true'
+  trivy-results-ref:
+    description: |
+      The ref where Trivy results will be uploaded. Defaults to `github.ref`.
+      ONLY USED FOR INTERNAL TESTING.
+    required: false
+  trivy-results-sha:
+    description: |
+      The sha of the HEAD of the ref where Trivy results will be uploaded. Defaults to `github.sha`.
+      ONLY USED FOR INTERNAL TESTING.
+    required: false
   AZURE_TENANT_ID:
     description: 'Tenant ID of the Azure Container Registry to push to. Only required if using your own ACR.'
     required: false
@@ -214,6 +224,8 @@ runs:
       with:
         sarif_file: 'trivy.sarif'
         category: 'Trivy'
+        ref: ${{ inputs.trivy-results-ref == '' && github.ref || inputs.trivy-results-ref }}
+        sha: ${{ inputs.trivy-results-sha == '' && github.sha || inputs.trivy-results-sha }}
 
     - name: Add comment for Trivy scan results to PR
       if: ${{ github.event_name == 'pull_request' && inputs.trivy-post-comment == 'true' && !cancelled() }}
