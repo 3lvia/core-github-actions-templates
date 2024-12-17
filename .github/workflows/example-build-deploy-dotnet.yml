@@ -57,8 +57,6 @@ jobs:
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
           upload-resport: 'false'
-          codeql-results-ref: ${{ steps.checkout.outputs.ref }}
-          codeql-results-sha: ${{ steps.checkout.outputs.commit }}
 # END REMOVE FROM EXAMPLE
 
   unit-tests:

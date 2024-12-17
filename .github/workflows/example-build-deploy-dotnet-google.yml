@@ -57,8 +57,6 @@ jobs:
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
           upload-results: 'false'
-          ref: ${{ steps.checkout.outputs.ref }}
-          sha: ${{ steps.checkout.outputs.commit }}
 # END REMOVE FROM EXAMPLE
 
   unit-tests:

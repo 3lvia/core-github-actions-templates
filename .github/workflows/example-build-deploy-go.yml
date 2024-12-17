@@ -56,9 +56,7 @@ jobs:
           language: 'go'
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
-          upload-results: 'true'
-          codeql-results-ref: ${{ steps.checkout.outputs.ref }}
-          codeql-results-sha: ${{ steps.checkout.outputs.commit }}
+          upload-results: 'false'
 # END REMOVE FROM EXAMPLE
 
   build-scan:
