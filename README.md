@@ -556,8 +556,6 @@ Run CodeQL analysis.
 | Name                   | Description                                                                                                                                                               | Required | Default                       |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------- |
 | `checkout`             | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                                      | no       | `true`                        |
-| `codeql-results-ref`   | The ref where CodeQL results will be uploaded. Defaults to `github.ref`. ONLY USED FOR INTERNAL TESTING.                                                                  | no       |                               |
-| `codeql-results-sha`   | The sha of the HEAD of the ref where CodeQL results will be uploaded. Defaults to `github.sha`. ONLY USED FOR INTERNAL TESTING.                                           | no       |                               |
 | `dotnet-tool-manifest` | Path to the .NET tool manifest file, relative to the root of the repository. Only needed if you require .NET tools that are outside of `working-directory` for the build. | no       | `./.config/dotnet-tools.json` |
 | `language`             | Language to run CodeQL analyze on. Use a matrix strategy to run for multiple languages.                                                                                   | no       | `csharp`                      |
 | `upload-results`       | If `true` the action will upload CodeQL results to GitHub Security Code Scanning. If `false`, the action will not upload results.                                         | no       | `true`                        |
@@ -584,16 +582,6 @@ More permissions might be required depending on the inputs set, see the actions 
     #
     # Required: no
     # Default: 'true'
-
-    codeql-results-ref:
-    # The ref where CodeQL results will be uploaded. Defaults to `github.ref`. ONLY USED FOR INTERNAL TESTING.
-    #
-    # Required: no
-
-    codeql-results-sha:
-    # The sha of the HEAD of the ref where CodeQL results will be uploaded. Defaults to `github.sha`. ONLY USED FOR INTERNAL TESTING.
-    #
-    # Required: no
 
     dotnet-tool-manifest:
     # Path to the .NET tool manifest file, relative to the root of the repository. Only needed if you require .NET tools that are outside of `working-directory` for the build.
