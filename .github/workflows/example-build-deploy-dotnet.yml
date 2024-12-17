@@ -56,7 +56,7 @@ jobs:
           language: 'csharp'
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
-          upload-resport: 'false'
+          upload-report: 'false'
 # END REMOVE FROM EXAMPLE
 
   unit-tests:
