@@ -124,7 +124,7 @@ jobs:
       - name: Tag image and push to GCR
         # On pull requests, only push to dev GCR
         if: ${{ github.ref == 'refs/heads/trunk' || (github.event_name == 'pull_request' && matrix.environment == 'dev') }}
-        uses: 3lvia/core-github-actions-templates/iss-tag-push-image@feat/iss-tag
+        uses: 3lvia/core-github-actions-templates/iss-tag-push-image@trunk
         with:
           old-image-name-with-tag: ${{ needs.build-scan.outputs.image }}
           new-image-name: 'gcr.io/${{ vars.GC_ISS_PROJECT_ID  }}/${{ env.SYSTEM_NAME }}-${{ env.APPLICATION_NAME }}'
