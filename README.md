@@ -957,6 +957,9 @@ More permissions might be required depending on the inputs set, see the actions 
 
 <!-- gh-actions-docs-end -->
 
+<!-- gh-actions-docs-start path=vault/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
+<!-- gh-actions-docs-end -->
+
 ## Elvia-specific Actions
 
 The below list of actions are specific to Elvia's infrastructure and will not work outside our organization:
@@ -966,6 +969,7 @@ The below list of actions are specific to Elvia's infrastructure and will not wo
 - [PlayWright Test](#playwright-test)
 - [Validate Metrics](#validate-metrics)
 - [ISS Tag & Push Image](#iss-tag-push-image)
+- [Vault](#vault)
 
 # Development
 
