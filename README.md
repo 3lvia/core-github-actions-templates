@@ -60,6 +60,10 @@ see [here](#elvia-specific-actions) for more information.
     - [Inputs](#inputs-10)
     - [Permissions](#permissions-10)
     - [Usage](#usage-10)
+  - [Vault](#vault)
+    - [Inputs](#inputs-11)
+    - [Permissions](#permissions-11)
+    - [Usage](#usage-11)
   - [Elvia-specific Actions](#elvia-specific-actions)
 - [Development](#development)
   - [Formatting](#formatting)
@@ -958,6 +962,51 @@ More permissions might be required depending on the inputs set, see the actions 
 <!-- gh-actions-docs-end -->
 
 <!-- gh-actions-docs-start path=vault/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
+
+## Vault
+
+Get secrets from Elvia's Vault.
+
+### Inputs
+
+| Name          | Description                                                                                                                        | Required | Default |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------- | ------- |
+| `environment` | Environment is used to find correct Vault instance.                                                                                | yes      | `dev`   |
+| `secrets`     | Secrets to fetch from Vault; see [here](https://github.com/hashicorp/vault-action?tab=readme-ov-file#multiple-secrets) for syntax. | yes      |         |
+| `system`      | System name is used to log in to Vault using the correct role.                                                                     | yes      |         |
+
+### Permissions
+
+This action requires the following base [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+
+- `contents: read`
+- `id-token: write`
+
+More permissions might be required depending on the inputs set, see the actions documentation for more information.
+
+### Usage
+
+```yaml
+- name: Vault
+  uses: 3lvia/core-github-actions-templates/vault@trunk
+  with:
+    environment:
+    # Environment is used to find correct Vault instance.
+    #
+    # Required: yes
+    # Default: 'dev'
+
+    secrets:
+    # Secrets to fetch from Vault; see [here](https://github.com/hashicorp/vault-action?tab=readme-ov-file#multiple-secrets) for syntax.
+    #
+    # Required: yes
+
+    system:
+    # System name is used to log in to Vault using the correct role.
+    #
+    # Required: yes
+```
+
 <!-- gh-actions-docs-end -->
 
 ## Elvia-specific Actions
