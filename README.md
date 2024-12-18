@@ -965,7 +965,7 @@ More permissions might be required depending on the inputs set, see the actions 
 
 ## Vault
 
-Get secrets from Elvia's Vault.
+Get secrets from Elvia's Vault for use in GitHub Actions.
 
 ### Inputs
 
