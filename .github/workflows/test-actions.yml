@@ -489,8 +489,8 @@ jobs:
       - name: Check that secret was fetched successfully
         run: |
           if [[ -z '${{ env.APP_INSIGHTS_NAME }}' ]]; then
-            echo "Secret was not fetched."
+            echo 'Secret was not fetched.'
             exit 1
           else
-            echo "Secret was fetched successfully!"
+            echo 'Secret was fetched successfully!'
           fi

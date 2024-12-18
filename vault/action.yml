@@ -1,5 +1,5 @@
 name: Vault
-description: "Get secrets from Elvia's Vault."
+description: "Get secrets from Elvia's Vault for use in GitHub Actions."
 inputs:
   system:
     description: 'System name is used to log in to Vault using the correct role.'
