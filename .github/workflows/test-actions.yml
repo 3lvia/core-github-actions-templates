@@ -320,7 +320,8 @@ jobs:
       contents: read
       id-token: write
     environment: dev
-    if: ${{ contains(needs.prepare-jobs.outputs.all-changed-files, 'deploy/action.yml') }}
+    # Changes in build might affect deploy, so we test deploy as well if build has changed.
+    if: ${{ contains(needs.prepare-jobs.outputs.all-changed-files, 'build/action.yml') || contains(needs.prepare-jobs.outputs.all-changed-files, 'deploy/action.yml') }}
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
