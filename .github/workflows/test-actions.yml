@@ -20,8 +20,8 @@ env:
   SYSTEM_NAME: 'core'
 
 jobs:
-  set-matrices:
-    name: Set matrices
+  prepare-jobs:
+    name: Prepare jobs
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrices.outputs.matrix }}
@@ -29,6 +29,7 @@ jobs:
       matrix-build: ${{ steps.set-matrices.outputs.matrix-build }}
       matrix-deploy: ${{ steps.set-matrices.outputs.matrix-deploy }}
       matrix-trivy: ${{ steps.set-matrices.outputs.matrix-trivy }}
+      all-changed-files: ${{ steps.changed-files.outputs.all_changed_files }}
     steps:
       - name: Set matrices
         id: set-matrices
@@ -113,11 +114,18 @@ jobs:
         env:
           RUNNER: ${{ github.event_name == 'workflow_dispatch' && inputs.runner || 'elvia-runner' }}
 
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+
+      - name: Print changed files
+        run: echo '${{ steps.changed-files.outputs.all_changed_files }}'
+
   analyze:
     name: Analyze
-    needs: [set-matrices]
+    needs: [prepare-jobs]
     strategy:
-      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix-analyze) }}
+      matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix-analyze) }}
     concurrency:
       group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-${{ matrix.language }}-analyze'
       cancel-in-progress: true
@@ -126,6 +134,7 @@ jobs:
       actions: read
       contents: read
       security-events: write
+    if: ${{ contains(needs.pepare-jobs.outputs.all-changed-files, 'analyze/action.yml') }}
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
@@ -153,9 +162,9 @@ jobs:
 
   unit-tests:
     name: Unit Tests
-    needs: [set-matrices]
+    needs: [prepare-jobs]
     strategy:
-      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix) }}
     concurrency:
       group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-unit-tests'
       cancel-in-progress: true
@@ -165,6 +174,7 @@ jobs:
       checks: write
       issues: read
       pull-requests: write
+    if: ${{ contains(needs.pepare-jobs.outputs.all-changed-files, 'unittest/action.yml') }}
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
@@ -191,10 +201,10 @@ jobs:
 
   build:
     name: Build
-    needs: [set-matrices]
+    needs: [prepare-jobs]
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix-build) }}
+      matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix-build) }}
     concurrency:
       group: |
         ${{ github.workflow }}-${{ github.event_name }}-${{ github.job }}-${{ matrix.runner }}-${{ matrix.application-name }}-${{ matrix.project-file }}-${{ matrix.registry }}
@@ -208,6 +218,7 @@ jobs:
       pull-requests: write
       security-events: write
     environment: build
+    if: ${{ contains(needs.pepare-jobs.outputs.all-changed-files, 'build/action.yml') }}
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
@@ -241,6 +252,7 @@ jobs:
 
   build-vulnerable-service:
     name: Build Vulnerable Service
+    needs: [prepare-jobs]
     concurrency:
       group: '${{ github.workflow }}-${{ github.event_name }}-build-vulnerable-service'
       cancel-in-progress: true
@@ -252,7 +264,7 @@ jobs:
       security-events: write
     environment: build
     # We are testing if a PR comment is created, so ony run on PR.
-    if: ${{ github.event_name == 'pull_request' }}
+    if: ${{ github.event_name == 'pull_request' && contains(needs.prepare-jobs.outputs.all-changed-files, 'build/action.yml') }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -296,10 +308,10 @@ jobs:
 
   deploy-dev:
     name: Deploy Dev
-    needs: [set-matrices, build]
+    needs: [prepare-jobs, build]
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix-deploy) }}
+      matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix-deploy) }}
     concurrency:
       group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.application-name }}-${{ matrix.runtime-cloud-provider }}-deploy-dev'
       cancel-in-progress: false
@@ -308,6 +320,7 @@ jobs:
       contents: read
       id-token: write
     environment: dev
+    if: ${{ contains(needs.prepare-jobs.outputs.all-changed-files, 'deploy/action.yml') }}
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
@@ -342,9 +355,9 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    needs: [set-matrices, deploy-dev]
+    needs: [prepare-jobs, deploy-dev]
     strategy:
-      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix) }}
     concurrency:
       group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-integration-tests'
       cancel-in-progress: true
@@ -355,6 +368,7 @@ jobs:
       issues: read
       pull-requests: write
       id-token: write
+    if: ${{ contains(needs.prepare-jobs.outputs.all-changed-files, 'integrationtest/action.yml') }}
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
@@ -384,10 +398,10 @@ jobs:
 
   trivy-iac-scan:
     name: Trivy IaC Scan
-    needs: [set-matrices]
+    needs: [prepare-jobs]
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix-trivy) }}
+      matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix-trivy) }}
     concurrency:
       group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-trivy-iac-scan'
       cancel-in-progress: true
@@ -396,6 +410,7 @@ jobs:
       actions: read
       contents: read
       security-events: write
+    if: ${{ contains(needs.prepare-jobs.outputs.all-changed-files, 'trivy-iac-scan/action.yml') }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -404,15 +419,16 @@ jobs:
         with:
           checkout: 'false'
 
-  terraform-format-check:
-    name: Terraform Format Check
-    needs: [set-matrices]
+  terraform-format:
+    name: Terraform Format
+    needs: [prepare-jobs]
     strategy:
-      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix) }}
     concurrency:
-      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-terraform-format-check'
+      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-terraform-format'
       cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
+    if: ${{ contains(needs.prepare-jobs.outputs.all-changed-files, 'terraform-format/action.yml') }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -423,9 +439,9 @@ jobs:
 
   slack-message-vault:
     name: Slack Message using Vault
-    needs: [set-matrices]
+    needs: [prepare-jobs]
     strategy:
-      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix) }}
     concurrency:
       group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-slack-message-vault'
       cancel-in-progress: true
@@ -433,6 +449,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    if: ${{ contains(needs.prepare-jobs.outputs.all-changed-files, 'slack-message/action.yml') }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -446,13 +463,14 @@ jobs:
 
   slack-message-token:
     name: Slack Message using token
-    needs: [set-matrices]
+    needs: [prepare-jobs]
     strategy:
-      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix) }}
     concurrency:
       group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-slack-message-token'
       cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
+    if: ${{ contains(needs.prepare-jobs.outputs.all-changed-files, 'slack-message/action.yml') }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -465,9 +483,9 @@ jobs:
 
   vault:
     name: Vault
-    needs: [set-matrices]
+    needs: [prepare-jobs]
     strategy:
-      matrix: ${{ fromJson(needs.set-matrices.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix) }}
     concurrency:
       group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-vault'
       cancel-in-progress: true
@@ -475,6 +493,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    if: ${{ contains(needs.prepare-jobs.outputs.all-changed-files, 'vault/action.yml') }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
