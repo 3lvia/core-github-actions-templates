@@ -1,4 +1,4 @@
-name: Build and deploy to Kubernetes with Dockerfile
+name: Build and deploy to Atlas with Dockerfile
 
 on:
   push:

@@ -1,4 +1,4 @@
-name: Build and deploy a Python application to Kubernetes
+name: Build and deploy Python to Atlas
 
 on:
   push:

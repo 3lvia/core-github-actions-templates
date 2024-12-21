@@ -1,4 +1,4 @@
-name: Build and deploy a .NET application to Kubernetes
+name: Build and deploy .NET to Atlas
 
 on:
   push:

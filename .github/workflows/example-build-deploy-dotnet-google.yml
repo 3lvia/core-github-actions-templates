@@ -1,4 +1,4 @@
-name: Build and deploy a .NET application to Kubernetes on Google Cloud
+name: Build and deploy .NET to Atlas on Google Cloud
 
 on:
   push:
