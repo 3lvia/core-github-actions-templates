@@ -1,4 +1,4 @@
-name: Build and Deploy Go to Kubernetes
+name: Build and deploy a Go application to Kubernetes
 
 on:
   push:

@@ -1,4 +1,4 @@
-name: Build and Deploy .NET to ISS
+name: Build and deploy a .NET application to ISS
 
 on:
   push:

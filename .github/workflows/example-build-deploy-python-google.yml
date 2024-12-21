@@ -1,4 +1,4 @@
-name: Build and Deploy Python to Kubernetes on Google Cloud
+name: Build and deploy a Python application to Kubernetes on Google Cloud
 
 on:
   push:

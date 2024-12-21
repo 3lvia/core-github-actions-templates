@@ -1,4 +1,4 @@
-name: Build and Deploy Go to Kubernetes on Google Cloud
+name: Build and deploy a Go application to Kubernetes on Google Cloud
 
 on:
   push:

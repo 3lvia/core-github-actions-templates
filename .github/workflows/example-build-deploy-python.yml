@@ -1,4 +1,4 @@
-name: Build and Deploy Python to Kubernetes
+name: Build and deploy a Python application to Kubernetes
 
 on:
   push:
