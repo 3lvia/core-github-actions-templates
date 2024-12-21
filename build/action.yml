@@ -23,8 +23,8 @@ inputs:
       Please use `project-file` instead, which is a drop-in replacement. `dockerfile` will be removed in the future.
   project-file:
     description: |
-      Path to a `.csproj`-file for .NET, a `go.mod` file for Go or a Dockerfile for any other project.
-      E.g. `applications/my-app/my-app.csproj`, `pkg/my-app/go.mod` or `src/Dockerfile`.
+      Path to a `.csproj`-file for .NET, a `go.mod` file for Go, a `uv.lock` file for Python or a Dockerfile for any other project.
+      E.g. `applications/my-app/my-app.csproj`, `pkg/my-app/go.mod`, `uv.lock` or `src/Dockerfile`.
       If you require files outside the directory of the `project-file` to build your application, you will need to set `docker-build-context`.
     required: false
   go-main-package-dir:
@@ -161,7 +161,7 @@ runs:
     - name: Install 3lv CLI
       uses: 3lvia/cli/setup@trunk
       with:
-        version: '0.23.1' # TODO: remove this (which will get latest version) when 3lv CLI is stable
+        version: '0.24.0' # TODO: remove this (which will get latest version) when 3lv CLI is stable
 
     - name: Handle deprecated inputs
       shell: bash

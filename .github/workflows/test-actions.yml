@@ -31,6 +31,9 @@ jobs:
       matrix-trivy: ${{ steps.set-matrices.outputs.matrix-trivy }}
       all-changed-files: ${{ steps.changed-files.outputs.all_changed_files }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Set matrices
         id: set-matrices
         run: |
@@ -43,7 +46,7 @@ jobs:
             cat << EOF
           {
             "runner": ["$RUNNER"],
-            "language": ["csharp","go"]
+            "language": ["csharp","go","python"]
           }
           EOF
             echo EOF
@@ -58,7 +61,8 @@ jobs:
             "project-file": [
               "applications/demo-api/demo-api/core-demo-api.csproj",
               "applications/demo-api-go/go.mod",
-              "applications/demo-api-go/Dockerfile"
+              "applications/demo-api-go/Dockerfile",
+              "applications/demo-api-python/uv.lock"
             ],
             "registry": ["","ghcr.io/3lvia"],
             "include": [
@@ -68,6 +72,10 @@ jobs:
               {
                 "application-name": "${{ env.APPLICATION_BASE_NAME }}",
                 "project-file": "applications/demo-api/demo-api/core-demo-api.csproj"
+              },
+              {
+                "application-name": "${{ env.APPLICATION_BASE_NAME }}-python",
+                "project-file": "applications/demo-api-python/uv.lock"
               }
             ]
           }
@@ -83,7 +91,8 @@ jobs:
             "runner": ["$RUNNER","ubuntu-latest"],
             "application-name": [
               "${{ env.APPLICATION_BASE_NAME }}",
-              "${{ env.APPLICATION_BASE_NAME }}-go"
+              "${{ env.APPLICATION_BASE_NAME }}-go",
+              "${{ env.APPLICATION_BASE_NAME }}-python"
             ],
             "runtime-cloud-provider": ["AKS","GKE"],
             "include": [
@@ -93,7 +102,11 @@ jobs:
               {
                 "application-name": "${{ env.APPLICATION_BASE_NAME }}-go",
                 "helm-values-file": ".github/deploy/values-demo-api-go.yml"
-              }
+              },
+              {
+                "application-name": "${{ env.APPLICATION_BASE_NAME }}-go",
+                "helm-values-file": ".github/deploy/values-demo-api-python.yml"
+              },
             ]
           }
           EOF
@@ -134,7 +147,7 @@ jobs:
       actions: read
       contents: read
       security-events: write
-    if: ${{ contains(needs.pepare-jobs.outputs.all-changed-files, 'analyze/action.yml') }}
+    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'analyze/action.yml') }}
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
@@ -174,7 +187,7 @@ jobs:
       checks: write
       issues: read
       pull-requests: write
-    if: ${{ contains(needs.pepare-jobs.outputs.all-changed-files, 'unittest/action.yml') }}
+    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'unittest/action.yml') }}
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
@@ -207,7 +220,7 @@ jobs:
       matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix-build) }}
     concurrency:
       group: |
-        ${{ github.workflow }}-${{ github.event_name }}-${{ github.job }}-${{ matrix.runner }}-${{ matrix.application-name }}-${{ matrix.project-file }}-${{ matrix.registry }}
+        ${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-${{ matrix.application-name }}-${{ matrix.project-file }}-${{ matrix.registry }}
       cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
     permissions:
@@ -218,7 +231,7 @@ jobs:
       pull-requests: write
       security-events: write
     environment: build
-    if: ${{ contains(needs.pepare-jobs.outputs.all-changed-files, 'build/action.yml') }}
+    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'build/action.yml') }}
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
@@ -321,7 +334,7 @@ jobs:
       id-token: write
     environment: dev
     # Changes in build might affect deploy, so we test deploy as well if build has changed.
-    if: ${{ contains(needs.prepare-jobs.outputs.all-changed-files, 'build/action.yml') || contains(needs.prepare-jobs.outputs.all-changed-files, 'deploy/action.yml') }}
+    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'build/action.yml') || contains(needs.prepare-jobs.outputs.all-changed-files, 'deploy/action.yml') }}
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
@@ -369,7 +382,7 @@ jobs:
       issues: read
       pull-requests: write
       id-token: write
-    if: ${{ contains(needs.prepare-jobs.outputs.all-changed-files, 'integrationtest/action.yml') }}
+    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'integrationtest/action.yml') }}
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
@@ -411,7 +424,7 @@ jobs:
       actions: read
       contents: read
       security-events: write
-    if: ${{ contains(needs.prepare-jobs.outputs.all-changed-files, 'trivy-iac-scan/action.yml') }}
+    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'trivy-iac-scan/action.yml') }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -429,7 +442,7 @@ jobs:
       group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-terraform-format'
       cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
-    if: ${{ contains(needs.prepare-jobs.outputs.all-changed-files, 'terraform-format/action.yml') }}
+    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'terraform-format/action.yml') }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -450,7 +463,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    if: ${{ contains(needs.prepare-jobs.outputs.all-changed-files, 'slack-message/action.yml') }}
+    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'slack-message/action.yml') }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -471,7 +484,7 @@ jobs:
       group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-slack-message-token'
       cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
-    if: ${{ contains(needs.prepare-jobs.outputs.all-changed-files, 'slack-message/action.yml') }}
+    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'slack-message/action.yml') }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -494,7 +507,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    if: ${{ contains(needs.prepare-jobs.outputs.all-changed-files, 'vault/action.yml') }}
+    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'vault/action.yml') }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
