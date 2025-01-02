@@ -16,7 +16,7 @@ on:
 env:
   SYSTEM_NAME: 'core'
   APPLICATION_NAME: 'demo-api-python'
-  PROJECT_FILE: 'applications/demo-api-python/uv.lock'
+  PROJECT_FILE: 'applications/demo-api-python/pyproject.toml'
   HELM_VALUES_FILE: '.github/deploy/values-demo-api-python.yml'
 
 jobs:

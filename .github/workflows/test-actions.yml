@@ -62,7 +62,7 @@ jobs:
               "applications/demo-api/demo-api/core-demo-api.csproj",
               "applications/demo-api-go/go.mod",
               "applications/demo-api-go/Dockerfile",
-              "applications/demo-api-python/uv.lock"
+              "applications/demo-api-python/pyproject.toml"
             ],
             "registry": ["","ghcr.io/3lvia"],
             "include": [
@@ -75,7 +75,7 @@ jobs:
               },
               {
                 "application-name": "${{ env.APPLICATION_BASE_NAME }}-python",
-                "project-file": "applications/demo-api-python/uv.lock"
+                "project-file": "applications/demo-api-python/pyproject.toml"
               }
             ]
           }
