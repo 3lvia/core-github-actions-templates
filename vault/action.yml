@@ -21,8 +21,10 @@ runs:
       shell: bash
       run: |
         # Set Vault address based on environment
-        if [[ '${{ inputs.environment }}' == 'dev' || '${{ inputs.environment }}' == 'test' ]]; then
-          echo 'VAULT_ADDR=https://vault.${{ inputs.environment }}-elvia.io' >> "$GITHUB_ENV"
+        if [[ '${{ inputs.environment }}' == 'dev' || '${{ inputs.environment }}' == 'sandbox' ]]; then
+          echo 'VAULT_ADDR=https://vault.dev-elvia.io' >> "$GITHUB_ENV"
+        elif [[ '${{ inputs.environment }}' == 'test' ]]; then
+          echo 'VAULT_ADDR=https://vault.test-elvia.io' >> "$GITHUB_ENV"
         elif [[ '${{ inputs.environment }}' == 'prod' ]]; then
           echo 'VAULT_ADDR=https://vault.elvia.io' >> "$GITHUB_ENV"
         else

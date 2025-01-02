@@ -22,29 +22,11 @@ runs:
       if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@v4
 
-    - name: Parse input and set environment variables
-      shell: bash
-      run: |
-        if [[ '${{ inputs.environment }}' == 'dev' ]]; then
-          echo 'VAULT_ADDR=https://vault.dev-elvia.io' >> "$GITHUB_ENV"
-        elif [[ '${{ inputs.environment }}' == 'test' ]]; then
-          echo 'VAULT_ADDR=https://vault.test-elvia.io' >> "$GITHUB_ENV"
-        elif [[ '${{ inputs.environment }}' == 'prod' ]]; then
-          echo 'VAULT_ADDR=https://vault.elvia.io' >> "$GITHUB_ENV"
-        else
-          echo 'Unsupported environment: ${{ inputs.environment }}'
-          exit 1
-        fi
-
-        echo "REPO_SHORT_NAME=${GITHUB_REPOSITORY##*/}" >> "$GITHUB_ENV"
-
     - name: Login Vault and export token
-      uses: hashicorp/vault-action@v3
+      uses: 3lvia/core-github-actions-templates/vault@trunk
       with:
-        url: ${{ env.VAULT_ADDR }}
-        role: 'jwt-github-${{ inputs.system }}-${{ env.REPO_SHORT_NAME }}'
-        method: 'jwt'
-        path: 'jwt-github'
+        system: ${{ inputs.system }}
+        environment: ${{ inputs.environment }}
         exportToken: 'true'
 
     - name: Build .NET project
