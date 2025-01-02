@@ -6,11 +6,13 @@ inputs:
     required: true
   environment:
     description: 'Environment is used to find correct Vault instance.'
-    required: true
     default: 'dev'
   secrets:
     description: 'Secrets to fetch from Vault; see [here](https://github.com/hashicorp/vault-action?tab=readme-ov-file#multiple-secrets) for syntax.'
-    required: true
+  exportToken:
+    description: |
+      Whether to export the Vault token as an environment variable. Set this to true if you need to be authenticated to Vault in subsequent steps.
+    default: 'false'
 
 runs:
   using: 'composite'
@@ -37,6 +39,7 @@ runs:
         role: 'jwt-github-${{ inputs.system }}-${{ env.REPO_SHORT_NAME }}'
         method: 'jwt'
         path: 'jwt-github'
+        exportToken: ${{ inputs.exportToken }}
         secrets: |
           ${{ inputs.secrets }}
 
@@ -44,5 +47,6 @@ runs:
       if: failure()
       shell: bash
       run: |
+        # Show message on failure
         echo "To access Vault, this repository must be added to https://github.com/3lvia/github-repositories-terraform/tree/trunk/systems"
         exit 1
