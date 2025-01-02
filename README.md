@@ -969,11 +969,12 @@ Get secrets from Elvia's Vault for use in GitHub Actions.
 
 ### Inputs
 
-| Name          | Description                                                                                                                        | Required | Default |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------- | ------- |
-| `environment` | Environment is used to find correct Vault instance.                                                                                | yes      | `dev`   |
-| `secrets`     | Secrets to fetch from Vault; see [here](https://github.com/hashicorp/vault-action?tab=readme-ov-file#multiple-secrets) for syntax. | yes      |         |
-| `system`      | System name is used to log in to Vault using the correct role.                                                                     | yes      |         |
+| Name          | Description                                                                                                                                  | Required | Default |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------- |
+| `environment` | Environment is used to find correct Vault instance.                                                                                          | no       | `dev`   |
+| `exportToken` | Whether to export the Vault token as an environment variable. Set this to true if you need to be authenticated to Vault in subsequent steps. | no       | `false` |
+| `secrets`     | Secrets to fetch from Vault; see [here](https://github.com/hashicorp/vault-action?tab=readme-ov-file#multiple-secrets) for syntax.           | no       |         |
+| `system`      | System name is used to log in to Vault using the correct role.                                                                               | yes      |         |
 
 ### Permissions
 
@@ -993,13 +994,16 @@ More permissions might be required depending on the inputs set, see the actions 
     environment:
     # Environment is used to find correct Vault instance.
     #
-    # Required: yes
     # Default: 'dev'
+
+    exportToken:
+    # Whether to export the Vault token as an environment variable. Set this to true if you need to be authenticated to Vault in subsequent steps.
+    #
+    # Default: 'false'
 
     secrets:
     # Secrets to fetch from Vault; see [here](https://github.com/hashicorp/vault-action?tab=readme-ov-file#multiple-secrets) for syntax.
     #
-    # Required: yes
 
     system:
     # System name is used to log in to Vault using the correct role.
