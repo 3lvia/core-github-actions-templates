@@ -231,7 +231,8 @@ jobs:
       pull-requests: write
       security-events: write
     environment: build
-    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'build/action.yml') }}
+    # Integration tests depend on deploy which depends on build, so we need to run build if integration tests have changed.
+    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'build/action.yml') || contains(needs.prepare-jobs.outputs.all-changed-files, 'integrationtest/action.yml') }}
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
@@ -334,7 +335,8 @@ jobs:
       id-token: write
     environment: dev
     # Changes in build might affect deploy, so we test deploy as well if build has changed.
-    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'build/action.yml') || contains(needs.prepare-jobs.outputs.all-changed-files, 'deploy/action.yml') }}
+    # Also, since integration tests are run after deploy, we need to run deploy if integration tests have changed.
+    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'build/action.yml') || contains(needs.prepare-jobs.outputs.all-changed-files, 'deploy/action.yml') || contains(needs.prepare-jobs.outputs.all-changed-files, 'integrationtest/action.yml') }}
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
