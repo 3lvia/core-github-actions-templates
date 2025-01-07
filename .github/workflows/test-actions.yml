@@ -219,9 +219,7 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix-build) }}
     concurrency:
-      group: |
-        ${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-${{ matrix.application-name }}-${{ matrix.project-file }}-${{ matrix.registry }}
-      cancel-in-progress: true
+      group: '${{ matrix.application-name }}-${{ matrix.registry }}'
     runs-on: ${{ matrix.runner }}
     permissions:
       actions: read
