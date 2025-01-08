@@ -140,7 +140,7 @@ jobs:
     strategy:
       matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix-analyze) }}
     concurrency:
-      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-${{ matrix.language }}-analyze'
+      group: '${{ github.workflow_ref }}-${{ matrix.runner }}-${{ matrix.language }}-analyze'
       cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
     permissions:
@@ -179,7 +179,7 @@ jobs:
     strategy:
       matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix) }}
     concurrency:
-      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-unit-tests'
+      group: '${{ github.workflow_ref }}-${{ matrix.runner }}-unit-tests'
       cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
     permissions:
@@ -220,7 +220,7 @@ jobs:
       matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix-build) }}
     concurrency:
       group: |
-        ${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-${{ matrix.application-name }}-${{ matrix.project-file }}-${{ matrix.registry }}
+        ${{ github.workflow_ref }}-${{ matrix.runner }}-${{ matrix.application-name }}-${{ matrix.project-file }}-${{ matrix.registry }}
       cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
     permissions:
@@ -268,7 +268,7 @@ jobs:
     name: Build Vulnerable Service
     needs: [prepare-jobs]
     concurrency:
-      group: '${{ github.workflow }}-${{ github.event_name }}-build-vulnerable-service'
+      group: '${{ github.workflow_ref }}-build-vulnerable-service'
       cancel-in-progress: true
     runs-on: elvia-runner
     permissions:
@@ -327,7 +327,7 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix-deploy) }}
     concurrency:
-      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.application-name }}-${{ matrix.runtime-cloud-provider }}-deploy-dev'
+      group: '${{ github.workflow_ref }}-${{ matrix.application-name }}-${{ matrix.runtime-cloud-provider }}-deploy-dev'
       cancel-in-progress: false
     runs-on: ${{ matrix.runner }}
     permissions:
@@ -375,7 +375,7 @@ jobs:
     strategy:
       matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix) }}
     concurrency:
-      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-integration-tests'
+      group: '${{ github.workflow_ref }}-${{ matrix.runner }}-integration-tests'
       cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
     permissions:
@@ -419,7 +419,7 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix-trivy) }}
     concurrency:
-      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-trivy-iac-scan'
+      group: '${{ github.workflow_ref }}-${{ matrix.runner }}-trivy-iac-scan'
       cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
     permissions:
@@ -441,7 +441,7 @@ jobs:
     strategy:
       matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix) }}
     concurrency:
-      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-terraform-format'
+      group: '${{ github.workflow_ref }}-${{ matrix.runner }}-terraform-format'
       cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
     if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'terraform-format/action.yml') }}
