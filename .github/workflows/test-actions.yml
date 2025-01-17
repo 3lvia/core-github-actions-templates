@@ -262,6 +262,7 @@ jobs:
           registry: ${{ matrix.registry }}
           trivy-upload-report: 'true'
           trivy-post-comment: 'true'
+          sign-image: 'true'
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
 
   build-vulnerable-service:
