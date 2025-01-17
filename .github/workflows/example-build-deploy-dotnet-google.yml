@@ -96,8 +96,6 @@ jobs:
           test-coverage: 'true'
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
-          codeql-results-ref: ${{ steps.checkout.outputs.ref }}
-          codeql-results-sha: ${{ steps.checkout.outputs.commit }}
 # END REMOVE FROM EXAMPLE
 
   integration-tests:
@@ -182,6 +180,7 @@ jobs:
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
+          sign-image: 'true'
 # END REMOVE FROM EXAMPLE
 
   deploy-dev:
