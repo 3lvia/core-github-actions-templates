@@ -61,7 +61,6 @@ jobs:
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
-          sign-image: 'true'
 # END REMOVE FROM EXAMPLE
 
   deploy-dev:

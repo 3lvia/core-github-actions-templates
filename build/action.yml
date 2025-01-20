@@ -71,9 +71,9 @@ inputs:
     required: false
     default: 'false'
   sign-image:
-    description: 'If `true`, the action will sign the Docker image with Cosign. This will default to `true` in the near future.'
+    description: 'If `true`, the action will sign the Docker image with Cosign.'
     required: false
-    default: 'false'
+    default: 'true'
   checkout:
     description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
     required: false
