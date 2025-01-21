@@ -231,8 +231,8 @@ jobs:
       pull-requests: write
       security-events: write
     environment: build
-    # Integration tests depend on deploy which depends on build, so we need to run build if integration tests have changed.
-    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'build/action.yml') || contains(needs.prepare-jobs.outputs.all-changed-files, 'integrationtest/action.yml') }}
+    # Integration tests depend on deploy which depends on build, so we need to run build if deploy or integration tests have changed.
+    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'build/action.yml') || contains(needs.prepare-jobs.outputs.all-changed-files, 'deploy/action.yml') || contains(needs.prepare-jobs.outputs.all-changed-files, 'integrationtest/action.yml') }}
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4

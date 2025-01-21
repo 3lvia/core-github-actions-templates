@@ -24,9 +24,8 @@ inputs:
     required: false
     default: '.github/deploy/values.yml'
   helm-chart-repository-url:
-    description: 'Location of Elvias Helm chart repository, should only be changed if testing a new version of the chart.'
+    description: "Location of Elvia's Helm chart repository; should only be changed if testing a new version of the chart."
     required: false
-    default: ''
   workload-type:
     description: 'The type of workload to deploy to kubernetes. Must be `deployment` or `statefulset`.'
     required: false
@@ -39,6 +38,12 @@ inputs:
     description: 'Kubernetes cloud provider to deploy to: `AKS`, `GKE` or ISS (Elvia only).'
     required: false
     default: 'AKS'
+  override-image-tag:
+    description: |
+      Overrides the default image tag of 'github.sha-github.run_number'.
+      **This should not normally be set; only change this if you know what you are doing.**
+    required: false
+    default: ''
   slack-channel:
     description: 'Slack channel to notify on failure. Leave empty to disable notifications.'
     required: false
@@ -136,7 +141,7 @@ runs:
           --environment '${{ inputs.environment }}' \
           --workload-type '${{ inputs.workload-type }}' \
           --runtime-cloud-provider '${{ inputs.runtime-cloud-provider }}' \
-          --image-tag '${{ github.sha }}-${{ github.run_number }}' \
+          --image-tag "$IMAGE_TAG" \
           --add-deployment-annotation \
           --grafana-url "$GRAFANA_URL" \
           --grafana-api-key "$GRAFANA_API_KEY" \
@@ -144,6 +149,7 @@ runs:
           '${{ inputs.name }}'
       env:
         HELM_VALUES_FILE: ${{ inputs.helm-values-path == '' && inputs.helm-values-file || inputs.helm-values-path }}
+        IMAGE_TAG: ${{ inputs.override-image-tag == '' && format('{0}-{1}', github.sha, github.run_number) || inputs.override-image-tag }}
         # Pass optional inputs as environment variables, since they can be empty.
         # The CLI does not accept empty strings passed to the flags, e.g. `--gke-project-id ''` will cause an error.
         3LV_AZURE_TENANT_ID: ${{ inputs.AZURE_TENANT_ID }}
