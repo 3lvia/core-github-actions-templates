@@ -270,11 +270,12 @@ you must first add your Github repository to [github-repositories-terraform](htt
 | `GKE_PROJECT_ID`                | Project ID of GKE to deploy to. Defaults to Elvias normal clusters.                                                                                                                                                                     | no       |                             |
 | `checkout`                      | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                                                                                                    | no       | `true`                      |
 | `environment`                   | Environment to deploy to.                                                                                                                                                                                                               | yes      |                             |
-| `helm-chart-repository-url`     | Location of Elvias Helm chart repository, should only be changed if testing a new version of the chart.                                                                                                                                 | no       | ``                          |
+| `helm-chart-repository-url`     | Location of Elvia's Helm chart repository; should only be changed if testing a new version of the chart.                                                                                                                                | no       |                             |
 | `helm-values-file`              | Path to Helm values file, relative to the root of the repository.                                                                                                                                                                       | no       | `.github/deploy/values.yml` |
 | `helm-values-path`              | :warning: **DEPRECATED**: _Please use `helm-values-file` instead, which is a drop-in replacement. `helm-values-path` will be removed in the future._ :warning:<br><br>Path to Helm values file, relative to the root of the repository. | no       |                             |
 | `name`                          | Name of application. Do not include namespace.                                                                                                                                                                                          | yes      |                             |
 | `namespace`                     | Namespace or system of the application.                                                                                                                                                                                                 | yes      |                             |
+| `override-image-tag`            | Overrides the default image tag of 'github.sha-github.run_number'. **This should not normally be set; only change this if you know what you are doing.**                                                                                | no       | ``                          |
 | `runtime-cloud-provider`        | Kubernetes cloud provider to deploy to: `AKS`, `GKE` or ISS (Elvia only).                                                                                                                                                               | no       | `AKS`                       |
 | `slack-channel`                 | Slack channel to notify on failure. Leave empty to disable notifications.                                                                                                                                                               | no       | ``                          |
 | `workload-type`                 | The type of workload to deploy to kubernetes. Must be `deployment` or `statefulset`.                                                                                                                                                    | no       | `deployment`                |
@@ -357,10 +358,9 @@ More permissions might be required depending on the inputs set, see the actions 
     # Required: yes
 
     helm-chart-repository-url:
-    # Location of Elvias Helm chart repository, should only be changed if testing a new version of the chart.
+    # Location of Elvia's Helm chart repository; should only be changed if testing a new version of the chart.
     #
     # Required: no
-    # Default: ''
 
     helm-values-file:
     # Path to Helm values file, relative to the root of the repository.
@@ -377,6 +377,12 @@ More permissions might be required depending on the inputs set, see the actions 
     # Namespace or system of the application.
     #
     # Required: yes
+
+    override-image-tag:
+    # Overrides the default image tag of 'github.sha-github.run_number'. **This should not normally be set; only change this if you know what you are doing.**
+    #
+    # Required: no
+    # Default: ''
 
     runtime-cloud-provider:
     # Kubernetes cloud provider to deploy to: `AKS`, `GKE` or ISS (Elvia only).
