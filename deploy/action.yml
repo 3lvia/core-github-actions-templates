@@ -38,16 +38,19 @@ inputs:
     description: 'Kubernetes cloud provider to deploy to: `AKS`, `GKE` or ISS (Elvia only).'
     required: false
     default: 'AKS'
+  image-digest:
+    description: |
+      Use a image digest instead of the default tag. This is more secure than using a tag.
+      You can get this value as an output from the `build`-action.
+    required: false
   override-image-tag:
     description: |
-      Overrides the default image tag of 'github.sha-github.run_number'.
+      Overrides the default image tag of 'github.sha-github.run_number'. Takes precedence over `image-name-digest`.
       **This should not normally be set; only change this if you know what you are doing.**
     required: false
-    default: ''
   slack-channel:
     description: 'Slack channel to notify on failure. Leave empty to disable notifications.'
     required: false
-    default: ''
   AZURE_CLIENT_ID:
     description: 'Client ID of a service principal that has access to AKS. Only required for deploying to AKS.'
     required: false
@@ -130,7 +133,7 @@ runs:
     - name: Install 3lv CLI
       uses: 3lvia/cli/setup@trunk
       with:
-        version: '0.28.1' # TODO: remove this (which will get latest version) when 3lv CLI is stable
+        version: 'feat/use-full-image-deploy' # TODO: remove this (which will get latest version) when 3lv CLI is stable
 
     - name: Deploy
       shell: bash
@@ -139,19 +142,21 @@ runs:
           --system-name '${{ inputs.namespace }}' \
           --helm-values-file "$HELM_VALUES_FILE" \
           --environment '${{ inputs.environment }}' \
+          --image-tag "$IMAGE_TAG" \
           --workload-type '${{ inputs.workload-type }}' \
           --runtime-cloud-provider '${{ inputs.runtime-cloud-provider }}' \
-          --image-tag "$IMAGE_TAG" \
           --add-deployment-annotation \
           --grafana-url "$GRAFANA_URL" \
           --grafana-api-key "$GRAFANA_API_KEY" \
           --run-id '${{ github.run_id }}' \
           '${{ inputs.name }}'
       env:
-        HELM_VALUES_FILE: ${{ inputs.helm-values-path == '' && inputs.helm-values-file || inputs.helm-values-path }}
-        IMAGE_TAG: ${{ inputs.override-image-tag == '' && format('{0}-{1}', github.sha, github.run_number) || inputs.override-image-tag }}
+        HELM_VALUES_FILE: ${{ inputs.helm-values-path != '' && inputs.helm-values-path || inputs.helm-values-file }}
+        # Order of precedence: digest if not empty, tag if not empty, finally default to '{sha}-{run_number}'
+        IMAGE_TAG: ${{ inputs.override-image-tag != '' && inputs.override-image-tag || format('{0}-{1}', github.sha, github.run_number) }}
         # Pass optional inputs as environment variables, since they can be empty.
         # The CLI does not accept empty strings passed to the flags, e.g. `--gke-project-id ''` will cause an error.
+        3LV_IMAGE_DIGEST: ${{ inputs.image-digest }}
         3LV_AZURE_TENANT_ID: ${{ inputs.AZURE_TENANT_ID }}
         3LV_AZURE_CLIENT_ID: ${{ inputs.AZURE_CLIENT_ID }}
         3LV_AZURE_FEDERATED_TOKEN: ${{ steps.get-federated-token.outputs.token }}
