@@ -168,7 +168,7 @@ runs:
     - name: Install 3lv CLI
       uses: 3lvia/cli/setup@trunk
       with:
-        version: '0.29.3' # TODO: remove this (which will get latest version) when 3lv CLI is stable
+        version: '0.28.1' # TODO: remove this (which will get latest version) when 3lv CLI is stable
 
     - name: Install Cosign if not using Elvia runner
       if: ${{ !startsWith(runner.name, 'elvia-runner-') && inputs.sign-image == 'true' }}
