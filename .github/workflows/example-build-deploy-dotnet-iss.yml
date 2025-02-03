@@ -83,6 +83,7 @@ jobs:
     permissions:
       actions: read
       contents: write
+      id-token: write
       packages: write
       pull-requests: write
       security-events: write
