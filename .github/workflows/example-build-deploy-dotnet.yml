@@ -32,7 +32,7 @@ jobs:
       group: '${{ github.workflow }}-${{ github.ref }}-analyze'
       cancel-in-progress: true
     steps:
-# START REMOVE FROM EXAMPLE
+      # START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
         uses: actions/create-github-app-token@v1
         id: app-token
@@ -48,16 +48,16 @@ jobs:
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
-# END REMOVE FROM EXAMPLE
+      # END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/analyze@trunk
         with:
           # This can be set to a more specific path if you want to analyze only a part of the repository.
           working-directory: '.'
           language: 'csharp'
-# START REMOVE FROM EXAMPLE
+          # START REMOVE FROM EXAMPLE
           checkout: 'false'
           upload-results: 'false'
-# END REMOVE FROM EXAMPLE
+  # END REMOVE FROM EXAMPLE
 
   unit-tests:
     name: Unit Tests
@@ -72,7 +72,7 @@ jobs:
       group: '${{ github.workflow }}-${{ github.ref }}-unit-tests'
       cancel-in-progress: true
     steps:
-# START REMOVE FROM EXAMPLE
+      # START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
         uses: actions/create-github-app-token@v1
         id: app-token
@@ -87,15 +87,15 @@ jobs:
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
-# END REMOVE FROM EXAMPLE
+      # END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/unittest@trunk
         with:
           # This can be set to a more specific path if you want to search for tests in only a part of the repository.
           working-directory: '.'
           test-coverage: 'true'
-# START REMOVE FROM EXAMPLE
+          # START REMOVE FROM EXAMPLE
           checkout: 'false'
-# END REMOVE FROM EXAMPLE
+  # END REMOVE FROM EXAMPLE
 
   integration-tests:
     name: Integration Tests
@@ -111,7 +111,7 @@ jobs:
       group: '${{ github.workflow }}-${{ github.ref }}-integration-tests'
       cancel-in-progress: true
     steps:
-# START REMOVE FROM EXAMPLE
+      # START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
         uses: actions/create-github-app-token@v1
         id: app-token
@@ -126,17 +126,17 @@ jobs:
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
-# END REMOVE FROM EXAMPLE
+      # END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/integrationtest@trunk
         with:
           # This can be set to a more specific path if you want to search for tests in only a part of the repository.
           working-directory: '.'
           system: ${{ env.SYSTEM_NAME }}
-# START REMOVE FROM EXAMPLE
+          # START REMOVE FROM EXAMPLE
           checkout: 'false'
         env:
           BASE_URL: 'https://core.dev-elvia.io/demo-api'
-# END REMOVE FROM EXAMPLE
+  # END REMOVE FROM EXAMPLE
 
   build-scan:
     name: Build and Scan
@@ -153,7 +153,7 @@ jobs:
       cancel-in-progress: true
     environment: build
     steps:
-# START REMOVE FROM EXAMPLE
+      # START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
         uses: actions/create-github-app-token@v1
         id: app-token
@@ -168,7 +168,7 @@ jobs:
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
-# END REMOVE FROM EXAMPLE
+      # END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/build@trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
@@ -177,9 +177,9 @@ jobs:
           trivy-upload-report: 'false'
           trivy-post-comment: 'true'
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
-# START REMOVE FROM EXAMPLE
+          # START REMOVE FROM EXAMPLE
           checkout: 'false'
-# END REMOVE FROM EXAMPLE
+  # END REMOVE FROM EXAMPLE
 
   deploy-dev:
     name: Deploy Dev
@@ -199,7 +199,7 @@ jobs:
       group: '${{ github.workflow }}-${{ github.ref }}-deploy-dev'
     environment: dev
     steps:
-# START REMOVE FROM EXAMPLE
+      # START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
         uses: actions/create-github-app-token@v1
         id: app-token
@@ -214,7 +214,7 @@ jobs:
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
-# END REMOVE FROM EXAMPLE
+      # END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/deploy@trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
@@ -225,9 +225,9 @@ jobs:
           # Can be commented out if you don't want this.
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
-# START REMOVE FROM EXAMPLE
+          # START REMOVE FROM EXAMPLE
           checkout: 'false'
-# END REMOVE FROM EXAMPLE
+  # END REMOVE FROM EXAMPLE
 
   deploy-test:
     name: Deploy Test
@@ -244,7 +244,7 @@ jobs:
     # Only on push to trunk
     if: github.ref == 'refs/heads/trunk'
     steps:
-# START REMOVE FROM EXAMPLE
+      # START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
         uses: actions/create-github-app-token@v1
         id: app-token
@@ -259,7 +259,7 @@ jobs:
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
-# END REMOVE FROM EXAMPLE
+      # END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/deploy@trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
@@ -270,9 +270,9 @@ jobs:
           # Can be commented out if you don't want this.
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
-# START REMOVE FROM EXAMPLE
+          # START REMOVE FROM EXAMPLE
           checkout: 'false'
-# END REMOVE FROM EXAMPLE
+  # END REMOVE FROM EXAMPLE
 
   deploy-prod:
     name: Deploy Prod
@@ -289,7 +289,7 @@ jobs:
     # Only on push to trunk
     if: github.ref == 'refs/heads/trunk'
     steps:
-# START REMOVE FROM EXAMPLE
+      # START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
         uses: actions/create-github-app-token@v1
         id: app-token
@@ -304,7 +304,7 @@ jobs:
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
-# END REMOVE FROM EXAMPLE
+      # END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/deploy@trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
@@ -315,6 +315,6 @@ jobs:
           # Can be commented out if you don't want this.
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
-# START REMOVE FROM EXAMPLE
+          # START REMOVE FROM EXAMPLE
           checkout: 'false'
 # END REMOVE FROM EXAMPLE
