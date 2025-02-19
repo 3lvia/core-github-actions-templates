@@ -8,11 +8,7 @@ inputs:
   slack-api-token:
     description: |
       Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`.
-
-      If no input is provided, the action will attempt to read the token from Elvia's Vault instance.
-      Reading the token from Vault is only possible if the repository you are running this action from has been added to [github-repositories-terraform](https://github.com/3lvia/github-repositories-terraform),
-      and you are running inside the GitHub Actions environments `dev`, `test` or `prod`.
-    required: false
+    required: true
 
 runs:
   using: 'composite'
