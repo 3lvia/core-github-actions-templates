@@ -60,10 +60,14 @@ see [here](#elvia-specific-actions) for more information.
     - [Inputs](#inputs-10)
     - [Permissions](#permissions-10)
     - [Usage](#usage-10)
-  - [Vault](#vault)
+  - [Vulnerabilities Slack Alert](#vulnerabilities-slack-alert)
     - [Inputs](#inputs-11)
     - [Permissions](#permissions-11)
     - [Usage](#usage-11)
+  - [Vault](#vault)
+    - [Inputs](#inputs-12)
+    - [Permissions](#permissions-12)
+    - [Usage](#usage-12)
   - [Elvia-specific Actions](#elvia-specific-actions)
 - [Development](#development)
   - [Formatting](#formatting)
@@ -982,6 +986,43 @@ More permissions might be required depending on the inputs set, see the actions 
 <!-- gh-actions-docs-end -->
 
 <!-- gh-actions-docs-start path=vulnerabilities-slack-alert/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,security-events:read -->
+
+## Vulnerabilities Slack Alert
+
+Fetches vulnerabilities from the GitHub Security Advisory API and sends a message to a Slack channel with a list of new vulnerabilities from the past week.
+
+### Inputs
+
+| Name              | Description                                                                                               | Required | Default |
+| ----------------- | --------------------------------------------------------------------------------------------------------- | -------- | ------- |
+| `slack-api-token` | Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`. | yes      |         |
+| `slack-channel`   | Slack channel to send message to. The app "Github Workflow Notifications" must be added to the channel.   | yes      |         |
+
+### Permissions
+
+This action requires the following base [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+
+- `contents: read`
+- `security-events: read`
+
+More permissions might be required depending on the inputs set, see the actions documentation for more information.
+
+### Usage
+
+```yaml
+- name: Vulnerabilities Slack Alert
+  uses: 3lvia/core-github-actions-templates/vulnerabilities-slack-alert@trunk
+  with:
+    slack-api-token:
+    # Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`.
+    #
+    # Required: yes
+
+    slack-channel:
+    # Slack channel to send message to. The app "Github Workflow Notifications" must be added to the channel.
+    #
+    # Required: yes
+```
 
 <!-- gh-actions-docs-end -->
 
