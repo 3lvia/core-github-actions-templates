@@ -981,6 +981,10 @@ More permissions might be required depending on the inputs set, see the actions 
 
 <!-- gh-actions-docs-end -->
 
+<!-- gh-actions-docs-start path=vulnerabilities-slack-alert/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,security-events:read -->
+
+<!-- gh-actions-docs-end -->
+
 <!-- gh-actions-docs-start path=vault/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
 
 ## Vault
