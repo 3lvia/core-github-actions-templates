@@ -35,7 +35,7 @@ jobs:
       cancel-in-progress: true
     environment: build
     steps:
-      # START REMOVE FROM EXAMPLE
+# START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
         uses: actions/create-github-app-token@v1
         id: app-token
@@ -50,7 +50,7 @@ jobs:
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
-      # END REMOVE FROM EXAMPLE
+# END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/build@trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
@@ -59,9 +59,9 @@ jobs:
           trivy-upload-report: 'false'
           trivy-post-comment: 'true'
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
-          # START REMOVE FROM EXAMPLE
+# START REMOVE FROM EXAMPLE
           checkout: 'false'
-  # END REMOVE FROM EXAMPLE
+# END REMOVE FROM EXAMPLE
 
   deploy-dev:
     name: Deploy Dev
@@ -78,7 +78,7 @@ jobs:
       group: 'dev-google--this-group-is-replaced-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'
     environment: dev
     steps:
-      # START REMOVE FROM EXAMPLE
+# START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
         uses: actions/create-github-app-token@v1
         id: app-token
@@ -93,7 +93,7 @@ jobs:
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
-      # END REMOVE FROM EXAMPLE
+# END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/deploy@trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
@@ -106,9 +106,9 @@ jobs:
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
           GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
           GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
-          # START REMOVE FROM EXAMPLE
+# START REMOVE FROM EXAMPLE
           checkout: 'false'
-  # END REMOVE FROM EXAMPLE
+# END REMOVE FROM EXAMPLE
 
   deploy-test:
     name: Deploy Test
@@ -125,7 +125,7 @@ jobs:
     # Only on push to trunk
     if: github.ref == 'refs/heads/trunk'
     steps:
-      # START REMOVE FROM EXAMPLE
+# START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
         uses: actions/create-github-app-token@v1
         id: app-token
@@ -140,7 +140,7 @@ jobs:
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
-      # END REMOVE FROM EXAMPLE
+# END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/deploy@trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
@@ -153,9 +153,9 @@ jobs:
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
           GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
           GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
-          # START REMOVE FROM EXAMPLE
+# START REMOVE FROM EXAMPLE
           checkout: 'false'
-  # END REMOVE FROM EXAMPLE
+# END REMOVE FROM EXAMPLE
 
   deploy-prod:
     name: Deploy Prod
@@ -172,7 +172,7 @@ jobs:
     # Only on push to trunk
     if: github.ref == 'refs/heads/trunk'
     steps:
-      # START REMOVE FROM EXAMPLE
+# START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
         uses: actions/create-github-app-token@v1
         id: app-token
@@ -187,7 +187,7 @@ jobs:
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
-      # END REMOVE FROM EXAMPLE
+# END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/deploy@trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
@@ -200,6 +200,6 @@ jobs:
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
           GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
           GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
-          # START REMOVE FROM EXAMPLE
+# START REMOVE FROM EXAMPLE
           checkout: 'false'
 # END REMOVE FROM EXAMPLE
