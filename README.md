@@ -778,12 +778,13 @@ Run Playwright tests written in .NET.
 
 ### Inputs
 
-| Name           | Description                                                                                                                          | Required | Default |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- |
-| `checkout`     | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`  |
-| `environment`  | Environment is used to find correct Vault instance.                                                                                  | yes      |         |
-| `system`       | System is used to log in to Vault using correct role.                                                                                | yes      |         |
-| `test-project` | Name of test project file to run.                                                                                                    | yes      |         |
+| Name            | Description                                                                                                                          | Required | Default |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- |
+| `checkout`      | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`  |
+| `configuration` | Value to set for the `--configuration` flag when running `dotnet test`.                                                              | no       | `Debug` |
+| `environment`   | Environment is used to find correct Vault instance.                                                                                  | yes      |         |
+| `system`        | System is used to log in to Vault using correct role.                                                                                | yes      |         |
+| `test-project`  | Name of test project file to run.                                                                                                    | yes      |         |
 
 ### Permissions
 
@@ -808,6 +809,12 @@ More permissions might be required depending on the inputs set, see the actions 
     #
     # Required: no
     # Default: 'true'
+
+    configuration:
+    # Value to set for the `--configuration` flag when running `dotnet test`.
+    #
+    # Required: no
+    # Default: 'Debug'
 
     environment:
     # Environment is used to find correct Vault instance.
