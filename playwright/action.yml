@@ -14,6 +14,10 @@ inputs:
     description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
     required: false
     default: 'true'
+  configuration:
+    description: 'Value to set for the `--configuration` flag when running `dotnet test`.'
+    required: false
+    default: 'Debug'
 
 runs:
   using: 'composite'
@@ -42,7 +46,7 @@ runs:
 
     - name: Run .NET tests
       shell: bash
-      run: dotnet test -l:trx '${{ inputs.test-project }}'
+      run: dotnet test -l:trx --configuration '${{ inputs.configuration }}' '${{ inputs.test-project }}'
 
     - name: Publish test results
       uses: EnricoMi/publish-unit-test-result-action@v2
