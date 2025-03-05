@@ -106,7 +106,7 @@ runs:
         kubelogin-version: 'latest'
 
     - name: Authenticate with Google Cloud
-      uses: google-github-actions/auth@v2.1.7
+      uses: google-github-actions/auth@v2.1.8
       if: ${{ inputs.runtime-cloud-provider == 'GKE' }}
       with:
         workload_identity_provider: ${{ inputs.GC_WORKLOAD_IDENTITY_PROVIDER }}
