@@ -10,7 +10,7 @@ inputs:
       Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`.
     required: true
   github-token:
-    description: 'GitHub token is used to authenticate on behalf of the GitHub Actions workflow and for interacting with the GitHub API.
+    description: 'GitHub token is used to authenticate on behalf of the GitHub Actions workflow and for interacting with the GitHub API.'
     required: true
 
 runs:
