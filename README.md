@@ -957,10 +957,11 @@ Fetches vulnerabilities from the GitHub Security Advisory API and sends a messag
 
 ### Inputs
 
-| Name              | Description                                                                                               | Required | Default |
-| ----------------- | --------------------------------------------------------------------------------------------------------- | -------- | ------- |
-| `slack-api-token` | Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`. | yes      |         |
-| `slack-channel`   | Slack channel to send message to. The app "Github Workflow Notifications" must be added to the channel.   | yes      |         |
+| Name              | Description                                                                                                            | Required | Default |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------- | -------- | ------- |
+| `github-token`    | GitHub token is used to authenticate on behalf of the GitHub Actions workflow and for interacting with the GitHub API. | yes      |         |
+| `slack-api-token` | Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`.              | yes      |         |
+| `slack-channel`   | Slack channel to send message to. The app "Github Workflow Notifications" must be added to the channel.                | yes      |         |
 
 ### Permissions
 
@@ -977,6 +978,11 @@ More permissions might be required depending on the inputs set, see the actions 
 - name: Vulnerabilities Slack Alert
   uses: 3lvia/core-github-actions-templates/vulnerabilities-slack-alert@trunk
   with:
+    github-token:
+    # GitHub token is used to authenticate on behalf of the GitHub Actions workflow and for interacting with the GitHub API.
+    #
+    # Required: yes
+
     slack-api-token:
     # Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`.
     #
