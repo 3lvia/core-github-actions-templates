@@ -42,9 +42,9 @@ runs:
         echo "$results" > results.json
 
         if [ "$SORT_BY_NEWEST" == "true" ]; then
-          vulnerabilities=$(jq '[.[] | select(.state == \"open\")] | sort_by(.created_at) | reverse' results.json)
+          vulnerabilities=$(jq '[.[] | select(.state == "open")] | sort_by(.created_at) | reverse' results.json)
         else
-          vulnerabilities=$(jq '[.[] | select(.state == \"open\")] | sort_by(.created_at) | reverse | sort_by(.rule.security_severity_level)' results.json)
+          vulnerabilities=$(jq '[.[] | select(.state == "open")] | sort_by(.created_at) | reverse | sort_by(.rule.security_severity_level)' results.json)
         fi
 
         echo "$vulnerabilities" > vulnerabilities.json
@@ -66,7 +66,7 @@ runs:
           echo "$vulnerabilities"
           message="*:warning: Vulnerabilities discovered during code scanning.* \n*Code Scanning Vulnerabilities:*"
 
-          vulnerabilities=$(echo "$vulnerabilities" | jq -c ".[:$MAX_ALERTS] | .[] | {code: (.rule.tags[] | select(startswith(\"external/cwe/\"))), date: .created_at, severity: .rule.security_severity_level, url: .html_url}")
+          vulnerabilities=$(echo "$vulnerabilities" | jq -c ".[:$MAX_ALERTS] | .[] | {code: (.rule.tags[] | select(startswith("external/cwe/"))), date: .created_at, severity: .rule.security_severity_level, url: .html_url}")
           for vulnerability in $vulnerabilities; do
             code=$(echo $vulnerability | jq -r '.code')
             date=$(echo $vulnerability | jq -r '.date' | sed 's/T/ /' | sed 's/Z//')
