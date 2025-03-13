@@ -10,8 +10,17 @@ inputs:
       Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`.
     required: true
   github-token:
-    description: 'GitHub token is used to authenticate on behalf of the GitHub Actions workflow and for interacting with the GitHub API.'
+    description: |
+      'GitHub token is used to authenticate on behalf of the GitHub Actions workflow and for interacting with the GitHub API. You can use the GitHub secret `GITHUB_TOKEN`.'
     required: true
+  date-created:
+    description: |
+      'Sorts vulnerabilities by date created. If set to `newest`, the newest vulnerabilities are shown. By default the list is sorted by severity.'
+    required: false
+  max-alerts:
+    description: 'Maximum number of vulnerabilities to show in the Slack alert. By default, the top 3 most severe vulnerabilities are shown.'
+    required: false
+    default: '3'
 
 runs:
   using: 'composite'
@@ -27,22 +36,32 @@ runs:
           exit 1
         fi
         echo "$results" > results.json
+        total_vulnerabilities=$(jq length results.json)
+        echo "total_vulnerabilities=$total_vulnerabilities" >> $GITHUB_ENV
 
-        new_vulnerabilities=$(jq '[.[] | select((.created_at > "'$(date -d '1 week ago' --utc +%Y-%m-%dT%H:%M:%SZ)'" or .updated_at > "'$(date -d '1 week ago' --utc +%Y-%m-%dT%H:%M:%SZ)'") and .state == "open")]' results.json)
-        echo "$new_vulnerabilities" > new_vulnerabilities.json
+        if [ "${{ inputs.date-created }}" == "newest" ]; then
+          vulnerabilities=$(jq '[.[] | select(.state == \"open\")] | sort_by(.created_at) | reverse' results.json)
+        else
+          vulnerabilities=$(jq '[.[] | select(.state == \"open\")] | sort_by(.created_at) | reverse | sort_by(.rule.security_severity_level)' results.json)
+        fi
+
+        echo "$vulnerabilities" >> $GITHUB_ENV
 
     - name: Construct Slack message
       id: construct-slack-message
       shell: bash
       run: |
-        results="$(cat new_vulnerabilities.json | jq -c .)"
-        if [ "$results" != '[]' ]; then
+        max_alerts=${{ inputs.max-alerts }}
+        vulnerabilities=${{ env.vulnerabilities }}
+        total_vulnerabilities=${{ env.total_vulnerabilities }}
+
+        if [ "$vulnerabilities" != '[]' ]; then
           echo "Vulnerabilities have been found during code scanning."
           echo "Code Scanning Vulnerabilities:"
-          echo "$results"
+          echo "$vulnerabilities"
           message="*:warning: Vulnerabilities discovered during code scanning.* \n*Code Scanning Vulnerabilities:*"
 
-          vulnerabilities=$(jq -c '.[] | {code: (.rule.tags[] | select(startswith("external/cwe/"))), date: .created_at, severity: .rule.security_severity_level, url: .html_url}' new_vulnerabilities.json)
+          vulnerabilities=$(echo "$vulnerabilities" | jq -c ".[:$max_alerts] | .[] | {code: (.rule.tags[] | select(startswith(\"external/cwe/\"))), date: .created_at, severity: .rule.security_severity_level, url: .html_url}")
           for vulnerability in $vulnerabilities; do
             code=$(echo $vulnerability | jq -r '.code')
             date=$(echo $vulnerability | jq -r '.date' | sed 's/T/ /' | sed 's/Z//')
@@ -50,6 +69,12 @@ runs:
             url=$(echo $vulnerability | jq -r '.url')
             message="$message \n\n*Code:* $code \n*Date:* $date \n*Severity:* $severity \n*URL:* $url"
           done
+
+          if [ "$total_vulnerabilities" -gt "$max_alerts" ]; then
+            remaining_count=$((total_vulnerabilities - max_alerts))
+            message="$message \n\nand *$remaining_count* more vulnerabilities"
+          fi
+
         else
           message="*:white_check_mark: No new vulnerabilities have been found.*"
         fi
