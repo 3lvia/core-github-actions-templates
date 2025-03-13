@@ -957,11 +957,13 @@ Fetches vulnerabilities from the GitHub Security Advisory API and sends a messag
 
 ### Inputs
 
-| Name              | Description                                                                                                            | Required | Default |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------- | -------- | ------- |
-| `github-token`    | GitHub token is used to authenticate on behalf of the GitHub Actions workflow and for interacting with the GitHub API. | yes      |         |
-| `slack-api-token` | Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`.              | yes      |         |
-| `slack-channel`   | Slack channel to send message to. The app "Github Workflow Notifications" must be added to the channel.                | yes      |         |
+| Name              | Description                                                                                                                                                                                      | Required | Default |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- |
+| `github-token`    | 'GitHub token is used to authenticate on behalf of the GitHub Actions workflow and for interacting with the GitHub API. You can use the GitHub secret `GITHUB_TOKEN`.'                           | yes      |         |
+| `max-alerts`      | Maximum number of vulnerabilities to show in the Slack alert. By default, the top 3 most severe vulnerabilities are shown.                                                                       | no       | `3`     |
+| `slack-api-token` | Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`.                                                                                        | yes      |         |
+| `slack-channel`   | Slack channel to send message to. The app "Github Workflow Notifications" must be added to the channel.                                                                                          | yes      |         |
+| `sort-by-newest`  | 'Sorts vulnerabilities by newest first. Set to `true` to have the vulnerabilities shown in order with newest first. By default the list is grouped by severity and then sorted by date created.' | no       | `false` |
 
 ### Permissions
 
@@ -979,9 +981,15 @@ More permissions might be required depending on the inputs set, see the actions 
   uses: 3lvia/core-github-actions-templates/vulnerabilities-slack-alert@trunk
   with:
     github-token:
-    # GitHub token is used to authenticate on behalf of the GitHub Actions workflow and for interacting with the GitHub API.
+    # 'GitHub token is used to authenticate on behalf of the GitHub Actions workflow and for interacting with the GitHub API. You can use the GitHub secret `GITHUB_TOKEN`.'
     #
     # Required: yes
+
+    max-alerts:
+    # Maximum number of vulnerabilities to show in the Slack alert. By default, the top 3 most severe vulnerabilities are shown.
+    #
+    # Required: no
+    # Default: '3'
 
     slack-api-token:
     # Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`.
@@ -992,6 +1000,12 @@ More permissions might be required depending on the inputs set, see the actions 
     # Slack channel to send message to. The app "Github Workflow Notifications" must be added to the channel.
     #
     # Required: yes
+
+    sort-by-newest:
+    # 'Sorts vulnerabilities by newest first. Set to `true` to have the vulnerabilities shown in order with newest first. By default the list is grouped by severity and then sorted by date created.'
+    #
+    # Required: no
+    # Default: 'false'
 ```
 
 <!-- gh-actions-docs-end -->
