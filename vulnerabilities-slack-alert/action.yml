@@ -66,7 +66,7 @@ runs:
           echo "$vulnerabilities"
           message="*:warning: Vulnerabilities discovered during code scanning.* \n*Code Scanning Vulnerabilities:*"
 
-          vulnerabilities=$(echo "$vulnerabilities" | jq -c '.[:$MAX_ALERTS] | .[] | {code: (.rule.tags[] | select(startswith("external/cwe/"))), date: .created_at, severity: .rule.security_severity_level, url: .html_url}')
+          vulnerabilities=$(echo "$vulnerabilities" | jq -c '.[:'"$MAX_ALERTS"'] | .[] | {code: (.rule.tags[] | select(startswith("external/cwe/"))), date: .created_at, severity: .rule.security_severity_level, url: .html_url}')
           for vulnerability in $vulnerabilities; do
             code=$(echo $vulnerability | jq -r '.code')
             date=$(echo $vulnerability | jq -r '.date' | sed 's/T/ /' | sed 's/Z//')
