@@ -140,8 +140,11 @@ you must first add your GitHub repository to [github-repositories-terraform](htt
 
 This action requires the following base [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
+- `actions: read`
 - `contents: read`
 - `id-token: write`
+- `pull-requests: write`
+- `security-events: write`
 
 More permissions might be required depending on the inputs set, see the actions documentation for more information.
 
