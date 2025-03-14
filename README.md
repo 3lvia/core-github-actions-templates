@@ -94,7 +94,7 @@ See [core-github-actions-runner](https://github.com/3lvia/core-github-actions-ru
 
 # Actions Documentation
 
-<!-- gh-actions-docs-start path=build/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
+<!-- gh-actions-docs-start path=build/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=actions:read,contents:read,id-token:write,pull-requests:write,security-events:write -->
 
 ## Build
 
