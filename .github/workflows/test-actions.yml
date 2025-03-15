@@ -29,7 +29,6 @@ jobs:
       matrix-build: ${{ steps.set-matrices.outputs.matrix-build }}
       matrix-deploy: ${{ steps.set-matrices.outputs.matrix-deploy }}
       matrix-trivy: ${{ steps.set-matrices.outputs.matrix-trivy }}
-      all-changed-files: ${{ steps.changed-files.outputs.all_changed_files }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -127,13 +126,6 @@ jobs:
         env:
           RUNNER: ${{ github.event_name == 'workflow_dispatch' && inputs.runner || 'elvia-runner' }}
 
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v45
-
-      - name: Print changed files
-        run: echo '${{ steps.changed-files.outputs.all_changed_files }}'
-
   analyze:
     name: Analyze
     needs: [prepare-jobs]
@@ -147,7 +139,7 @@ jobs:
       actions: read
       contents: read
       security-events: write
-    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'analyze/action.yml') }}
+    if: ${{ github.event_name != 'pull_request' }}
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
@@ -188,7 +180,7 @@ jobs:
       checks: write
       issues: read
       pull-requests: write
-    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'unittest/action.yml') }}
+    if: ${{ github.event_name != 'pull_request' }}
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
@@ -233,8 +225,7 @@ jobs:
       pull-requests: write
       security-events: write
     environment: build
-    # Integration tests depend on deploy which depends on build, so we need to run build if deploy or integration tests have changed.
-    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'build/action.yml') || contains(needs.prepare-jobs.outputs.all-changed-files, 'deploy/action.yml') || contains(needs.prepare-jobs.outputs.all-changed-files, 'integrationtest/action.yml') }}
+    if: ${{ github.event_name != 'pull_request' }}
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
@@ -281,7 +272,7 @@ jobs:
       security-events: write
     environment: build
     # We are testing if a PR comment is created, so ony run on PR.
-    if: ${{ github.event_name == 'pull_request' && contains(needs.prepare-jobs.outputs.all-changed-files, 'build/action.yml') }}
+    if: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -339,7 +330,7 @@ jobs:
     environment: dev
     # Changes in build might affect deploy, so we test deploy as well if build has changed.
     # Also, since integration tests are run after deploy, we need to run deploy if integration tests have changed.
-    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'build/action.yml') || contains(needs.prepare-jobs.outputs.all-changed-files, 'deploy/action.yml') || contains(needs.prepare-jobs.outputs.all-changed-files, 'integrationtest/action.yml') }}
+    if: ${{ github.event_name != 'pull_request' }}
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
@@ -389,7 +380,7 @@ jobs:
       issues: read
       pull-requests: write
       id-token: write
-    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'integrationtest/action.yml') }}
+    if: ${{ github.event_name != 'pull_request' }}
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
@@ -432,7 +423,7 @@ jobs:
       actions: read
       contents: read
       security-events: write
-    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'trivy-iac-scan/action.yml') }}
+    if: ${{ github.event_name != 'pull_request' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -450,7 +441,7 @@ jobs:
       group: '${{ github.workflow_ref }}-${{ matrix.runner }}-terraform-format'
       cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
-    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'terraform-format/action.yml') }}
+    if: ${{ github.event_name != 'pull_request' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -471,7 +462,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'slack-message/action.yml') }}
+    if: ${{ github.event_name != 'pull_request' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -492,7 +483,7 @@ jobs:
       group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-slack-message-token'
       cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
-    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'slack-message/action.yml') }}
+    if: ${{ github.event_name != 'pull_request' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -515,7 +506,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    if: ${{ github.event_name != 'pull_request' || contains(needs.prepare-jobs.outputs.all-changed-files, 'vault/action.yml') }}
+    if: ${{ github.event_name != 'pull_request' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
