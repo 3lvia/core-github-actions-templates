@@ -68,6 +68,7 @@ jobs:
             sed -i 's/#    branches:/    branches:/g' "$new_workflow_path"
             sed -i 's/branches: \[trunk\]/branches: \[$default-branch\]/g' "$new_workflow_path"
             sed -i "s/checkout: 'false'.*\$//g" "$new_workflow_path"
+            sed -i "s/working-directory: 'applications\/demo-api\/demo-api'/working-directory: '.'/g" "$new_workflow_path"
 
             # We disable Trivy uploading report in testing, so reenable here.
             sed -i "s/trivy-upload-report: 'false'/trivy-upload-report: 'true'/g" "$new_workflow_path"
