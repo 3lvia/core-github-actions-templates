@@ -164,7 +164,7 @@ jobs:
         with:
           checkout: 'false'
           language: ${{ matrix.language }}
-          working-directory: 'core/applications'
+          working-directory: 'core/applications/demo-api'
 
   unit-tests:
     name: Unit Tests
