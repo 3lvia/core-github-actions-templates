@@ -6,7 +6,7 @@ inputs:
     description: 'Slack channel to send message to. The app "Github Workflow Notifications" must be added to the channel.'
     required: true
   environment:
-    description: 'Environment is used to find the correct Vault instance.'
+    description: 'Environment is used to find the correct Vault instance. Eg. `test`, `dev`, `prod` and other.'
     required: true
   namespace:
     description: 'Namespace is used to find the correct Vault role.'
