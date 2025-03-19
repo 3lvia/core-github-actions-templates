@@ -892,7 +892,7 @@ More permissions might be required depending on the inputs set, see the actions 
 
 <!-- gh-actions-docs-end -->
 
-<!-- gh-actions-docs-start path=slack-message/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contens:read,id-token:write -->
+<!-- gh-actions-docs-start path=slack-message/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
 
 ## Slack Message
 
@@ -913,7 +913,7 @@ Permission `id-token:write` is only required if you're not defining the `slack-a
 
 This action requires the following base [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
-- `contens: read`
+- `contents: read`
 - `id-token: write`
 
 More permissions might be required depending on the inputs set, see the actions documentation for more information.
@@ -1013,7 +1013,7 @@ More permissions might be required depending on the inputs set, see the actions 
 
 <!-- gh-actions-docs-end -->
 
-<!-- gh-actions-docs-start path=iss-tag-push-image/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contens:read,packages:read -->
+<!-- gh-actions-docs-start path=iss-tag-push-image/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,packages:read -->
 
 ## ISS Tag & Push Image
 
@@ -1032,7 +1032,7 @@ _Only useful for ISS deployments._
 
 This action requires the following base [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
-- `contens: read`
+- `contents: read`
 - `packages: read`
 
 More permissions might be required depending on the inputs set, see the actions documentation for more information.
