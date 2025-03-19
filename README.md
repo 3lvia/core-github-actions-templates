@@ -897,17 +897,17 @@ More permissions might be required depending on the inputs set, see the actions 
 ## Slack Message
 
 Sends a message to a Slack channel.
-Permission `id-token:write` is only required if you're not defining the `slack-api-token` input.
 
 ### Inputs
 
-| Name              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Required | Default |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------- |
-| `environment`     | Environment is used to find the correct Vault instance. Not required if you use `slack-api-token`.                                                                                                                                                                                                                                                                                                                                                                                                        | no       |         |
-| `message`         | Message to send to the Slack channel.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | yes      |         |
-| `namespace`       | Namespace is used to find the correct Vault role. Not required if you use `slack-api-token`.                                                                                                                                                                                                                                                                                                                                                                                                              | no       |         |
-| `slack-api-token` | Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`. If no input is provided, the action will attempt to read the token from Elvia's Vault instance. Reading the token from Vault is only possible if the repository you are running this action from has been added to [github-repositories-terraform](https://github.com/3lvia/github-repositories-terraform), and you are running inside the GitHub Actions environments `dev`, `test` or `prod`. | no       |         |
-| `slack-channel`   | Slack channel to send message to. The app "Github Workflow Notifications" must be added to the channel.                                                                                                                                                                                                                                                                                                                                                                                                   | yes      |         |
+| Name              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Required | Default |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------- |
+| `environment`     | Environment is used to find the correct Vault instance.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | no       |         |
+| `message`         | Message to send to the Slack channel.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | yes      |         |
+| `namespace`       | :warning: **DEPRECATED**: _Please use `system` instead, which is a drop-in replacement. `namespace` will be removed in the future._ :warning:<br><br>Namespace is used to find the correct Vault role.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | no       |         |
+| `slack-api-token` | :warning: **DEPRECATED**: _Please send in `environment` and `system` and add permissions `contents: read` and `id-token: write`. `slack-api-token` will be removed in the future._ :warning:<br><br>Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`. If no input is provided, the action will attempt to read the token from Elvia's Vault instance. Reading the token from Vault is only possible if the repository you are running this action from has been added to [github-repositories-terraform](https://github.com/3lvia/github-repositories-terraform), and you are running inside the GitHub Actions environments `dev`, `test` or `prod`. | no       |         |
+| `slack-channel`   | Slack channel to send message to. The app "Github Workflow Notifications" must be added to the channel.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | yes      |         |
+| `system`          | System is used to find the correct Vault role.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | no       |         |
 
 ### Permissions
 
@@ -925,7 +925,7 @@ More permissions might be required depending on the inputs set, see the actions 
   uses: 3lvia/core-github-actions-templates/slack-message@trunk
   with:
     environment:
-    # Environment is used to find the correct Vault instance. Not required if you use `slack-api-token`.
+    # Environment is used to find the correct Vault instance.
     #
     # Required: no
 
@@ -934,20 +934,15 @@ More permissions might be required depending on the inputs set, see the actions 
     #
     # Required: yes
 
-    namespace:
-    # Namespace is used to find the correct Vault role. Not required if you use `slack-api-token`.
-    #
-    # Required: no
-
-    slack-api-token:
-    # Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`.  If no input is provided, the action will attempt to read the token from Elvia's Vault instance. Reading the token from Vault is only possible if the repository you are running this action from has been added to [github-repositories-terraform](https://github.com/3lvia/github-repositories-terraform), and you are running inside the GitHub Actions environments `dev`, `test` or `prod`.
-    #
-    # Required: no
-
     slack-channel:
     # Slack channel to send message to. The app "Github Workflow Notifications" must be added to the channel.
     #
     # Required: yes
+
+    system:
+    # System is used to find the correct Vault role.
+    #
+    # Required: no
 ```
 
 <!-- gh-actions-docs-end -->
@@ -960,13 +955,15 @@ Fetches vulnerabilities from the GitHub Security Advisory API and sends a messag
 
 ### Inputs
 
-| Name              | Description                                                                                                                                                                                      | Required | Default |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- |
-| `github-token`    | 'GitHub token is used to authenticate on behalf of the GitHub Actions workflow and for interacting with the GitHub API. You can use the GitHub secret `GITHUB_TOKEN`.'                           | yes      |         |
-| `max-alerts`      | Maximum number of vulnerabilities to show in the Slack alert. By default, the top 3 most severe vulnerabilities are shown.                                                                       | no       | `3`     |
-| `slack-api-token` | Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`.                                                                                        | yes      |         |
-| `slack-channel`   | Slack channel to send message to. The app "Github Workflow Notifications" must be added to the channel.                                                                                          | yes      |         |
-| `sort-by-newest`  | 'Sorts vulnerabilities by newest first. Set to `true` to have the vulnerabilities shown in order with newest first. By default the list is grouped by severity and then sorted by date created.' | no       | `false` |
+| Name              | Description                                                                                                                                                                                                                                                                                                   | Required | Default |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------- |
+| `environment`     | Environment is used to find the correct Vault instance.                                                                                                                                                                                                                                                       | no       |         |
+| `github-token`    | 'GitHub token is used to authenticate on behalf of the GitHub Actions workflow and for interacting with the GitHub API. You can use the GitHub secret `GITHUB_TOKEN`.'                                                                                                                                        | yes      |         |
+| `max-alerts`      | Maximum number of vulnerabilities to show in the Slack alert. By default, the top 3 most severe vulnerabilities are shown.                                                                                                                                                                                    | no       | `3`     |
+| `slack-api-token` | :warning: **DEPRECATED**: _Please send in `environment` and `system` and add permissions `contents: read` and `id-token: write`. `slack-api-token` will be removed in the future._ :warning:<br><br>Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`. | yes      |         |
+| `slack-channel`   | Slack channel to send message to. The app "Github Workflow Notifications" must be added to the channel.                                                                                                                                                                                                       | yes      |         |
+| `sort-by-newest`  | 'Sorts vulnerabilities by newest first. Set to `true` to have the vulnerabilities shown in order with newest first. By default the list is grouped by severity and then sorted by date created.'                                                                                                              | no       | `false` |
+| `system`          | System is used to find the correct Vault role.                                                                                                                                                                                                                                                                | no       |         |
 
 ### Permissions
 
@@ -983,6 +980,11 @@ More permissions might be required depending on the inputs set, see the actions 
 - name: Vulnerabilities Slack Alert
   uses: 3lvia/core-github-actions-templates/vulnerabilities-slack-alert@trunk
   with:
+    environment:
+    # Environment is used to find the correct Vault instance.
+    #
+    # Required: no
+
     github-token:
     # 'GitHub token is used to authenticate on behalf of the GitHub Actions workflow and for interacting with the GitHub API. You can use the GitHub secret `GITHUB_TOKEN`.'
     #
@@ -994,11 +996,6 @@ More permissions might be required depending on the inputs set, see the actions 
     # Required: no
     # Default: '3'
 
-    slack-api-token:
-    # Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`.
-    #
-    # Required: yes
-
     slack-channel:
     # Slack channel to send message to. The app "Github Workflow Notifications" must be added to the channel.
     #
@@ -1009,6 +1006,11 @@ More permissions might be required depending on the inputs set, see the actions 
     #
     # Required: no
     # Default: 'false'
+
+    system:
+    # System is used to find the correct Vault role.
+    #
+    # Required: no
 ```
 
 <!-- gh-actions-docs-end -->
