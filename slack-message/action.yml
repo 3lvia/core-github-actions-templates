@@ -1,7 +1,6 @@
 name: 'Slack Message'
 description: |
   Sends a message to a Slack channel.
-  Permission `id-token:write` is only required if you're not defining the `slack-api-token` input.
 inputs:
   slack-channel:
     description: 'Slack channel to send message to. The app "Github Workflow Notifications" must be added to the channel.'
@@ -17,11 +16,18 @@ inputs:
       Reading the token from Vault is only possible if the repository you are running this action from has been added to [github-repositories-terraform](https://github.com/3lvia/github-repositories-terraform),
       and you are running inside the GitHub Actions environments `dev`, `test` or `prod`.
     required: false
+    deprecationMessage: |
+      Please send in `environment` and `system` and add permissions `contents: read` and `id-token: write`. `slack-api-token` will be removed in the future.
   environment:
-    description: 'Environment is used to find the correct Vault instance. Not required if you use `slack-api-token`.'
+    description: 'Environment is used to find the correct Vault instance.'
     required: false
   namespace:
-    description: 'Namespace is used to find the correct Vault role. Not required if you use `slack-api-token`.'
+    description: 'Namespace is used to find the correct Vault role.'
+    required: false
+    deprecationMessage: |
+      Please use `system` instead, which is a drop-in replacement. `namespace` will be removed in the future.
+  system:
+    description: 'System is used to find the correct Vault role.'
     required: false
 
 runs:
@@ -31,7 +37,7 @@ runs:
       if: ${{ inputs.slack-api-token == '' }}
       uses: 3lvia/core-github-actions-templates/vault@trunk
       with:
-        system: ${{ inputs.namespace }}
+        system: ${{ inputs.system == '' && inputs.namespace || inputs.system }}
         environment: ${{ inputs.environment }}
         secrets: |
           shared/kv/data/tokens slack-api-token | SLACK_API_TOKEN

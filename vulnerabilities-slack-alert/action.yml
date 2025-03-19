@@ -9,6 +9,8 @@ inputs:
     description: |
       Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`.
     required: true
+    deprecationMessage: |
+      Please send in `environment` and `system` and add permissions `contents: read` and `id-token: write`. `slack-api-token` will be removed in the future.
   github-token:
     description: |
       'GitHub token is used to authenticate on behalf of the GitHub Actions workflow and for interacting with the GitHub API. You can use the GitHub secret `GITHUB_TOKEN`.'
@@ -22,6 +24,12 @@ inputs:
     description: 'Maximum number of vulnerabilities to show in the Slack alert. By default, the top 3 most severe vulnerabilities are shown.'
     required: false
     default: '3'
+  environment:
+    description: 'Environment is used to find the correct Vault instance.'
+    required: false
+  system:
+    description: 'System is used to find the correct Vault role.'
+    required: false
 
 runs:
   using: 'composite'
@@ -91,3 +99,5 @@ runs:
         message: ${{ steps.construct-slack-message.outputs.message }}
         slack-api-token: ${{ inputs.slack-api-token }}
         slack-channel: ${{ inputs.slack-channel }}
+        environment: ${{ inputs.environment }}
+        system: ${{ inputs.system }}
