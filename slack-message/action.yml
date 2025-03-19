@@ -37,7 +37,7 @@ runs:
       if: ${{ inputs.slack-api-token == '' }}
       uses: 3lvia/core-github-actions-templates/vault@trunk
       with:
-        system: ${{ inputs.system }}
+        system: ${{ inputs.system == '' && inputs.namespace || inputs.system }}
         environment: ${{ inputs.environment }}
         secrets: |
           shared/kv/data/tokens slack-api-token | SLACK_API_TOKEN
