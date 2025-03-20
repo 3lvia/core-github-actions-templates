@@ -85,11 +85,11 @@ runs:
   steps:
     - run: |
         # Explicit checks for required inputs, due to https://github.com/actions/runner/issues/1070
-        [[ "${{ inputs.namespace }}" ]] || { echo "namespace input is empty" ; exit 1; }
-        [[ "${{ inputs.environment }}" ]] || { echo "environment input is empty" ; exit 1; }
-        [[ "${{ inputs.name }}" ]] || { echo "name input is empty" ; exit 1; }
-        [[ "${{ inputs.workload-type }}" == 'deployment' || "${{ inputs.workload-type }}" == 'statefulset' ]] || { echo "workload-type input must be 'deployment' or 'statefulset'" ; exit 1; }
-        [[ "${{ inputs.runtime-cloud-provider }}" == 'AKS' || "${{ inputs.runtime-cloud-provider }}" == 'GKE' || "${{ inputs.runtime-cloud-provider }}" == 'ISS' ]] || { echo "runtime-cloud-provider input must be 'AKS', 'GKE' or 'ISS'" ; exit 1; }
+        [[ "${{ inputs.namespace }}" ]] || { echo "Parameter `namespace` is required, but is empty." ; exit 1; }
+        [[ "${{ inputs.environment }}" ]] || { echo "Parameter `environment` is required, but is empty." ; exit 1; }
+        [[ "${{ inputs.name }}" ]] || { echo "Parameter `name` is required, but is empty." ; exit 1; }
+        [[ "${{ inputs.workload-type }}" == 'deployment' || "${{ inputs.workload-type }}" == 'statefulset' ]] || { echo "Parameter `workload-type` must be 'deployment' or 'statefulset'" ; exit 1; }
+        [[ "${{ inputs.runtime-cloud-provider }}" == 'AKS' || "${{ inputs.runtime-cloud-provider }}" == 'GKE' || "${{ inputs.runtime-cloud-provider }}" == 'ISS' ]] || { echo "Parameter `runtime-cloud-provider` input must be 'AKS', 'GKE' or 'ISS'" ; exit 1; }
       shell: bash
 
     - name: Checkout repository
