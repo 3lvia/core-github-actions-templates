@@ -89,7 +89,7 @@ runs:
         [[ "${{ inputs.environment }}" ]] || { echo "Parameter 'environment' is required, but is empty." ; exit 1; }
         [[ "${{ inputs.name }}" ]] || { echo "Parameter 'name' is required, but is empty." ; exit 1; }
         [[ "${{ inputs.workload-type }}" == 'deployment' || "${{ inputs.workload-type }}" == 'statefulset' ]] || { echo "Parameter 'workload-type' must be 'deployment' or 'statefulset'" ; exit 1; }
-        [[ "${{ inputs.runtime-cloud-provider }}" == 'AKS' || "${{ inputs.runtime-cloud-provider }}" == 'GKE' || "${{ inputs.runtime-cloud-provider }}" == 'ISS' ]] || { echo "Parameter 'runtime-cloud-provider'` input must be 'AKS', 'GKE' or 'ISS'" ; exit 1; }
+        [[ "${{ inputs.runtime-cloud-provider }}" == 'AKS' || "${{ inputs.runtime-cloud-provider }}" == 'GKE' || "${{ inputs.runtime-cloud-provider }}" == 'ISS' ]] || { echo "Parameter 'runtime-cloud-provider' input must be 'AKS', 'GKE' or 'ISS'" ; exit 1; }
       shell: bash
 
     - name: Checkout repository
@@ -176,7 +176,7 @@ runs:
       if: ${{ failure() && inputs.slack-channel != '' }}
       uses: 3lvia/core-github-actions-templates/slack-message@trunk
       with:
-        namespace: ${{ inputs.namespace }}
+        system: ${{ inputs.namespace }}
         environment: ${{ inputs.environment }}
         slack-channel: ${{ inputs.slack-channel }}
         message: |
