@@ -33,6 +33,12 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - run: |
+        # Explicit checks for required inputs, due to https://github.com/actions/runner/issues/1070
+        [[ "${{ inputs.slack-channel }}" ]] || { echo "slack-channel input is empty" ; exit 1; }
+        [[ "${{ inputs.message }}" ]] || { echo "message input is empty" ; exit 1; }
+      shell: bash
+
     - name: Read Slack API token from Vault
       if: ${{ inputs.slack-api-token == '' }}
       uses: 3lvia/core-github-actions-templates/vault@trunk
