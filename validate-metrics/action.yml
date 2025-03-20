@@ -23,9 +23,9 @@ runs:
   steps:
     - run: |
         # Explicit checks for required inputs, due to https://github.com/actions/runner/issues/1070
-        [[ "${{ inputs.system }}" ]] || { echo "Parameter `system` is required, but is empty." ; exit 1; }
-        [[ "${{ inputs.environment }}" ]] || { echo "Parameter `environment` is required, but is empty." ; exit 1; }
-        [[ "${{ inputs.query }}" ]] || { echo "Parameter `query` is required, but is empty." ; exit 1; }
+        [[ "${{ inputs.system }}" ]] || { echo "Parameter 'system' is required, but is empty." ; exit 1; }
+        [[ "${{ inputs.environment }}" ]] || { echo "Parameter 'environment' is required, but is empty." ; exit 1; }
+        [[ "${{ inputs.query }}" ]] || { echo "Parameter 'query' is required, but is empty." ; exit 1; }
       shell: bash
 
     - name: Checkout repository
