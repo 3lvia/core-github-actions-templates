@@ -38,7 +38,7 @@ runs:
         [[ "${{ inputs.slack-channel }}" ]] || { echo "slack-channel input is empty" ; exit 1; }
         [[ "${{ inputs.message }}" ]] || { echo "message input is empty" ; exit 1; }
       shell: bash
-      
+
     - name: Read Slack API token from Vault
       if: ${{ inputs.slack-api-token == '' }}
       uses: 3lvia/core-github-actions-templates/vault@trunk

@@ -27,7 +27,7 @@ runs:
         [[ "${{ inputs.environment }}" ]] || { echo "environment input is empty" ; exit 1; }
         [[ "${{ inputs.query }}" ]] || { echo "query input is empty" ; exit 1; }
       shell: bash
-      
+
     - name: Checkout repository
       if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@v4

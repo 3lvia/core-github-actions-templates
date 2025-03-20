@@ -91,7 +91,7 @@ runs:
         [[ "${{ inputs.workload-type }}" == 'deployment' || "${{ inputs.workload-type }}" == 'statefulset' ]] || { echo "workload-type input must be 'deployment' or 'statefulset'" ; exit 1; }
         [[ "${{ inputs.runtime-cloud-provider }}" == 'AKS' || "${{ inputs.runtime-cloud-provider }}" == 'GKE' || "${{ inputs.runtime-cloud-provider }}" == 'ISS' ]] || { echo "runtime-cloud-provider input must be 'AKS', 'GKE' or 'ISS'" ; exit 1; }
       shell: bash
-      
+
     - name: Checkout repository
       if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@v4
