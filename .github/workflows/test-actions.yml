@@ -472,27 +472,7 @@ jobs:
           slack-channel: '#team-core-alerts-muted'
           message: ':test_tube: Testing Slack Message using Vault in ${{ github.workflow }} for ${{ github.event_name }} event.'
           environment: 'dev'
-          namespace: 'core'
-
-  slack-message-token:
-    name: Slack Message using token
-    needs: [prepare-jobs]
-    strategy:
-      matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix) }}
-    concurrency:
-      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-slack-message-token'
-      cancel-in-progress: true
-    runs-on: ${{ matrix.runner }}
-    if: ${{ github.event_name != 'pull_request' }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - uses: ./slack-message
-        with:
-          slack-channel: '#team-core-alerts-muted'
-          message: ':test_tube: Testing Slack Message using token in ${{ github.workflow }} for ${{ github.event_name }} event.'
-          slack-api-token: ${{ secrets.SLACK_API_TOKEN }}
+          system: 'core'
 
   vault:
     name: Vault
