@@ -21,6 +21,7 @@ inputs:
   environment:
     description: 'Environment is used to find the correct Vault instance.'
     required: false
+    default: 'dev'
   system:
     description: 'System is used to find the correct Vault role.'
     required: false

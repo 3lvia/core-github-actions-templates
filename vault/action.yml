@@ -22,6 +22,10 @@ runs:
         [[ "${{ inputs.system }}" ]] || { echo "Parameter 'system' is required, but is empty." ; exit 1; }
       shell: bash
 
+    - run: |
+        echo "ACTIONS_ID_TOKEN_REQUEST_URL: $ACTIONS_ID_TOKEN_REQUEST_URL "
+      shell: bash
+
     - name: Set Vault address based on environment
       shell: bash
       run: |
