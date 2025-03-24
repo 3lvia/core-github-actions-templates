@@ -24,6 +24,10 @@ runs:
 
     - run: |
         echo "ACTIONS_ID_TOKEN_REQUEST_URL: $ACTIONS_ID_TOKEN_REQUEST_URL "
+        if [[ -z "$ACTIONS_ID_TOKEN_REQUEST_URL" ]]; then
+          echo "This action requires the permission 'id-token: write' to be added to the workflow."
+          exit 1
+        fi
       shell: bash
 
     - name: Set Vault address based on environment
