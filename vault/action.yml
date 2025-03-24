@@ -22,14 +22,6 @@ runs:
         [[ "${{ inputs.system }}" ]] || { echo "Parameter 'system' is required, but is empty." ; exit 1; }
       shell: bash
 
-    - run: |
-        echo "ACTIONS_ID_TOKEN_REQUEST_URL: $ACTIONS_ID_TOKEN_REQUEST_URL "
-        if [[ -z "$ACTIONS_ID_TOKEN_REQUEST_URL" ]]; then
-          echo "This action requires the permission 'id-token: write' to be added to the workflow."
-          exit 1
-        fi
-      shell: bash
-
     - name: Set Vault address based on environment
       shell: bash
       run: |
@@ -64,4 +56,8 @@ runs:
       run: |
         # Show message on failure
         echo "To access Vault, this repository must be added to https://github.com/3lvia/github-repositories-terraform/tree/trunk/systems"
+        if [[ -z "$ACTIONS_ID_TOKEN_REQUEST_URL" ]]; then
+          echo "This action requires the permission 'id-token: write' to be added to the workflow."
+          exit 1
+        fi
         exit 1
