@@ -5,12 +5,6 @@ inputs:
   slack-channel:
     description: 'Slack channel to send message to. The app "Github Workflow Notifications" must be added to the channel.'
     required: true
-  slack-api-token:
-    description: |
-      Slack API token. Within the Elvia organization, you can use GitHub organization secret `SLACK_API_TOKEN`.
-    required: false
-    deprecationMessage: |
-      Please send in `environment` and `system` and add permissions `contents: read` and `id-token: write`. `slack-api-token` will be removed in the future.
   github-token:
     description: |
       'GitHub token is used to authenticate on behalf of the GitHub Actions workflow and for interacting with the GitHub API. You can use the GitHub secret `GITHUB_TOKEN`.'
@@ -97,7 +91,6 @@ runs:
       uses: 3lvia/core-github-actions-templates/slack-message@trunk
       with:
         message: ${{ steps.construct-slack-message.outputs.message }}
-        slack-api-token: ${{ inputs.slack-api-token }}
         slack-channel: ${{ inputs.slack-channel }}
         environment: ${{ inputs.environment }}
         system: ${{ inputs.system }}
