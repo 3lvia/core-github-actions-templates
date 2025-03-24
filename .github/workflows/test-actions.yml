@@ -529,12 +529,12 @@ jobs:
           fi
 
   vault2:
-    name: Vault
+    name: Vault2
     needs: [prepare-jobs]
     strategy:
       matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix) }}
     concurrency:
-      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-vault'
+      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-vault2'
       cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
     # if: ${{ github.event_name != 'pull_request' }}
