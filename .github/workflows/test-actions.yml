@@ -474,27 +474,6 @@ jobs:
           environment: 'dev'
           system: 'core'
 
-  slack-message-token:
-    name: Slack Message using token
-    needs: [prepare-jobs]
-    strategy:
-      matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix) }}
-    concurrency:
-      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-slack-message-token'
-      cancel-in-progress: true
-    runs-on: ${{ matrix.runner }}
-    # if: ${{ github.event_name != 'pull_request' }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - uses: ./slack-message
-        with:
-          slack-channel: '#team-core-alerts-muted'
-          message: ':test_tube: Testing Slack Message using token in ${{ github.workflow }} for ${{ github.event_name }} event.'
-          slack-api-token: ${{ secrets.SLACK_API_TOKEN }}
-          system: 'core'
-
   vault:
     name: Vault
     needs: [prepare-jobs]
@@ -507,36 +486,6 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    # if: ${{ github.event_name != 'pull_request' }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - uses: ./vault
-        with:
-          environment: 'dev'
-          system: 'core'
-          secrets: |
-            core/kv/data/info/appinsights/core name | APP_INSIGHTS_NAME
-
-      - name: Check that secret was fetched successfully
-        run: |
-          if [[ -z '${{ env.APP_INSIGHTS_NAME }}' ]]; then
-            echo 'Secret was not fetched.'
-            exit 1
-          else
-            echo 'Secret was fetched successfully!'
-          fi
-
-  vault2:
-    name: Vault2
-    needs: [prepare-jobs]
-    strategy:
-      matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix) }}
-    concurrency:
-      group: '${{ github.workflow }}-${{ github.event_name }}-${{ matrix.runner }}-vault2'
-      cancel-in-progress: true
-    runs-on: ${{ matrix.runner }}
     # if: ${{ github.event_name != 'pull_request' }}
     steps:
       - name: Checkout repository
