@@ -492,6 +492,7 @@ jobs:
           slack-channel: '#team-core-alerts-muted'
           message: ':test_tube: Testing Slack Message using token in ${{ github.workflow }} for ${{ github.event_name }} event.'
           slack-api-token: ${{ secrets.SLACK_API_TOKEN }}
+          system: 'core'
 
   vault:
     name: Vault
