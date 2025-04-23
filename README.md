@@ -131,10 +131,12 @@ you must first add your GitHub repository to [github-repositories-terraform](htt
 
 ### Outputs
 
-| Name           | Description                                           |
-| -------------- | ----------------------------------------------------- |
-| `image-digest` | Name of the Docker image that was built, with digest. |
-| `image-name`   | Name of the Docker image that was built, with tag.    |
+| Name                     | Description                                                    |
+| ------------------------ | -------------------------------------------------------------- |
+| `image-digest`           | Digest of the Docker image that was built.                     |
+| `image-name-with-digest` | Name of the Docker image that was built, including the digest. |
+| `image-name-with-tag`    | Name of the Docker image that was built, including the tag.    |
+| `image-repository`       | Repository name of the Docker image that was built.            |
 
 ### Permissions
 
