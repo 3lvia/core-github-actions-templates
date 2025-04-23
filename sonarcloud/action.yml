@@ -64,12 +64,12 @@ runs:
     - name: Build and analyze
       shell: bash
       run: |
-        ./sonar/scanner/dotnet-sonarscanner begin /k:"${{ inputs.sonarcloud-project-key }}" /o:"elvia" /d:sonar.token="${{ inputs.sonarcloud-token }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.scanner.scanAll=false
+        ./sonar/scanner/dotnet-sonarscanner begin /k:"${{ inputs.sonarcloud-project-key }}" /o:"elvia" /d:sonar.token="${{ inputs.sonarcloud-token }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=*_coverage.xml /d:sonar.scanner.scanAll=false
 
         testprojects=`find . -iname "${{ inputs.test-projects }}"`
         for testproject in $testprojects;
         do
-          ./sonar/scanner/dotnet-coverage collect "dotnet test -l:trx $testproject" -f xml  -o 'coverage.xml'
+          ./sonar/scanner/dotnet-coverage collect "dotnet test -l:trx $testproject" -f xml  -o '$(uuidgen)_coverage.xml'
         done
 
         ./sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ inputs.sonarcloud-token }}"
