@@ -92,7 +92,7 @@ jobs:
       group: '${{ github.workflow }}-${{ github.ref }}-build-scan'
       cancel-in-progress: true
     outputs:
-      image: ${{ steps.build.outputs.image-name }}
+      image: ${{ steps.build.outputs.image-name-with-tag }}
     steps:
       - uses: 3lvia/core-github-actions-templates/build@trunk
         id: build
