@@ -109,12 +109,18 @@ inputs:
     required: false
 
 outputs:
-  image-name:
-    description: 'Name of the Docker image that was built, with tag.'
-    value: ${{ steps.get-outputs.outputs.image-name }}
+  image-repository:
+    description: 'Repository name of the Docker image that was built.'
+    value: ${{ steps.get-outputs.outputs.image-repository }}
   image-digest:
-    description: 'Name of the Docker image that was built, with digest.'
-    value: ${{ steps.get-outputs.outputs.image-name }}
+    description: 'Digest of the Docker image that was built.'
+    value: ${{ steps.get-outputs.outputs.image-digest }}
+  image-name-with-tag:
+    description: 'Name of the Docker image that was built, including the tag.'
+    value: ${{ steps.get-outputs.outputs.image-name-with-tag }}
+  image-name-with-digest:
+    description: 'Name of the Docker image that was built, including the digest.'
+    value: ${{ steps.get-outputs.outputs.image-name-with-digest }}
 
 runs:
   using: 'composite'
@@ -219,17 +225,20 @@ runs:
       shell: bash
       id: get-outputs
       run: |
-        IMAGE_NAME=$(cat /tmp/3lv-cli-output/image-name)
+        IMAGE_NAME_WITH_TAG=$(cat /tmp/3lv-cli-output/image-name)
+        IMAGE_NAME_WITH_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE_NAME_WITH_TAG")
 
-        echo "image-name=$IMAGE_NAME" >> "$GITHUB_OUTPUT"
-        echo "image-digest=$(docker inspect --format='{{index .RepoDigests 0}}' $IMAGE_NAME)" >> "$GITHUB_OUTPUT"
+        echo "image-name-with-tag=$IMAGE_NAME_WITH_TAG" >> "$GITHUB_OUTPUT"
+        echo "image-name-with-digest=$IMAGE_NAME_WITH_DIGEST" >> "$GITHUB_OUTPUT"
+        echo "image-repository=$(echo $IMAGE_NAME_WITH_DIGEST | cut -d'@' -f1)" >> "$GITHUB_OUTPUT"
+        echo "image-digest=$(echo $IMAGE_NAME_WITH_DIGEST | cut -d'@' -f2)" >> "$GITHUB_OUTPUT"
 
     - name: Sign image with Cosign using GitHub OIDC token
       if: ${{ inputs.sign-image == 'true' }}
       shell: bash
-      run: cosign sign -y --oidc-provider='github-actions' "$IMAGE_DIGEST"
+      run: cosign sign -y --oidc-provider='github-actions' "$IMAGE_NAME_WITH_DIGEST"
       env:
-        IMAGE_DIGEST: ${{ steps.get-outputs.outputs.image-digest }}
+        IMAGE_NAME_WITH_DIGEST: ${{ steps.get-outputs.outputs.image-name-with-digest }}
 
     - name: Verify image signatue
       if: ${{ inputs.sign-image == 'true' }}
@@ -238,10 +247,10 @@ runs:
         cosign verify \
           --certificate-identity "$CERTIFICATE_IDENTITY" \
           --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
-          "$IMAGE_DIGEST" | jq
+          "$IMAGE_NAME_WITH_DIGEST" | jq
       env:
         CERTIFICATE_IDENTITY: 'https://github.com/${{ github.workflow_ref }}'
-        IMAGE_DIGEST: ${{ steps.get-outputs.outputs.image-digest }}
+        IMAGE_NAME_WITH_DIGEST: ${{ steps.get-outputs.outputs.image-name-with-digest }}
 
     - name: Upload Trivy scan results to GitHub Advanced Security
       if: ${{ inputs.trivy-upload-report == 'true' && !cancelled() }}
