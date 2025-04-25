@@ -1,6 +1,5 @@
 name: 'Deploy Argo CD'
-description: |
-  Deploys an application to Kubernetes using Argo CD.
+description: 'Deploys an application to Kubernetes using Argo CD.'
 inputs:
   name:
     description: 'Name of application. Do not include namespace.'
@@ -8,16 +7,27 @@ inputs:
   system:
     description: 'System (namespace) of the application.'
     required: true
-  image-repository:
-    description: "Repository of the Docker image to deploy, e.g. 'containerregistryelvia.azurecr.io'."
-    required: false
-    default: ''
-  image-digest:
-    description: 'Digest of the Docker image to deploy, e.g. sha256:1234567890abcdef...'
-    required: true
   environment:
     description: 'Environment to deploy to.'
     required: true
+  image:
+    description: 'Image to deploy.'
+    required: true
+  registry:
+    description: 'Docker registry to use.'
+    required: false
+    default: 'containerregistryelvia.azurecr.io'
+  AZURE_TENANT_ID:
+    description: 'Azure Tenant ID for authentication.'
+    required: false
+    default: '2186a6ec-c227-4291-9806-d95340bf439d'
+  AZURE_CLIENT_ID:
+    description: 'Azure Client ID for authentication.'
+    required: true
+  AZURE_SUBSCRIPTION_ID:
+    description: 'Azure Subscription ID for authentication.'
+    required: false
+    default: '9edbf217-b7c1-4f6a-ae76-d046cf932ff0'
   checkout:
     description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
     required: false
@@ -43,49 +53,38 @@ runs:
           exit 1
         fi
 
-        if [[ -z "$IMAGE_DIGEST" ]]; then
-          echo "Error: input 'image-digest' is required."
-          exit 1
-        fi
-
         if [[ -z "$ENVIRONMENT" ]]; then
           echo "Error: input 'environment' is required."
           exit 1
         fi
+
+        if [[ -z "$AZURE_CLIENT_ID" ]]; then
+          echo "Error: input 'AZURE_CLIENT_ID' is required."
+          exit 1
+        fi
       env:
         NAME: ${{ inputs.name }}
         SYSTEM: ${{ inputs.system }}
-        IMAGE_DIGEST: ${{ inputs.image-digest }}
         ENVIRONMENT: ${{ inputs.environment }}
+        AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
 
-    - name: Install OIDC Client from Core Package
-      shell: bash
-      run: npm install @actions/core@1.11.1 @actions/http-client
-
-    - name: Get OIDC Token
-      uses: actions/github-script@v7
-      id: get-token
+    - name: Azure login
+      uses: azure/login@v2
       with:
-        script: |
-          const core_ = require('@actions/core')
-          let idToken = await core_.getIDToken()
-          core_.setOutput('token', idToken)
+        tenant-id: ${{ inputs.AZURE_TENANT_ID }}
+        client-id: ${{ inputs.AZURE_CLIENT_ID }}
+        subscription-id: ${{ inputs.AZURE_SUBSCRIPTION_ID }}
 
-    # TODO: use prod deployment of deployvia
-    - name: Send deployment request
+    - name: Install skopeo
       shell: bash
       run: |
-        curl -v \
-          -X POST \
-          -H "X-GitHub-OIDC-Token: $GH_ID_TOKEN" \
-          -H "Content-Type: application/json" \
-          -d "{\"image_repository\": \"$IMAGE_REPOSITORY\",\"image_digest\":\"$IMAGE_DIGEST\",\"system\": \"$SYSTEM\",\"environment\": \"$ENVIRONMENT\",\"application_name\": \"$NAME\"}" \
-          --fail-with-body \
-          https://coregke.dev-elvia.io/deployvia/deployment
+        sudo apt-get update
+        sudo apt-get install -y skopeo
+
+    - name: Copy image to new tag
+      shell: bash
+      run: skopeo copy "docker://$IMAGE_NAME:$IMAGE_TAG" "docker://$IMAGE_NAME:$ENVIRONMENT"
       env:
-        GH_ID_TOKEN: ${{ steps.get-token.outputs.token }}
-        IMAGE_REPOSITORY: ${{ inputs.image-repository }}
-        IMAGE_DIGEST: ${{ inputs.image-digest }}
-        SYSTEM: ${{ inputs.system }}
         ENVIRONMENT: ${{ inputs.environment }}
-        NAME: ${{ inputs.name }}
+        IMAGE_NAME: ${{ contains(inputs.registry, 'azurecr.io') && format('{0}/{1}-{2}:{3}-{4}', inputs.registry, inputs.name, inputs.system) || format('{0}/{1}/{2}', inputs.registry, inputs.name, inputs.system) }}
+        IMAGE_TAG: ${{ format('{0}-{1}', github.sha, github.run_number) }}

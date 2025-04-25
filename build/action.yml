@@ -85,7 +85,7 @@ inputs:
     description: |
       What container registry to use, we support Azure Container Registry (ACR) and GitHub Container Registry (GHCR).
       You should set this to the URL of the registry you want to use, e.g. `ghcr.io/3lvia` or `myregistry.azurecr.io`.
-      The action will authenticate with the registry depending on the value of the URL, i.e. if the URL contains `azurecr.io`jor `ghcr.io`.
+      The action will authenticate with the registry depending on the value of the URL, i.e. if the URL contains `azurecr.io` or `ghcr.io`.
 
       If set to an ACR registry, Elvia's private Azure Container Registry will be used by default.
       You can also set these explictly to point to your own ACR.
