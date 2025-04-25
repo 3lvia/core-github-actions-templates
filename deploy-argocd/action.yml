@@ -66,7 +66,7 @@ runs:
         NAME: ${{ inputs.name }}
         SYSTEM: ${{ inputs.system }}
         ENVIRONMENT: ${{ inputs.environment }}
-        AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        AZURE_CLIENT_ID: ${{ inputs.AZURE_CLIENT_ID }}
 
     - name: Azure login
       uses: azure/login@v2
