@@ -75,6 +75,14 @@ runs:
         client-id: ${{ inputs.AZURE_CLIENT_ID }}
         subscription-id: ${{ inputs.AZURE_SUBSCRIPTION_ID }}
 
+    - name: Authenticate to Azure Container Registry
+      shell: bash
+      run: |
+        registry_name=$(echo "$REGISTRY" | cut -d '.' -f 1)
+        az acr login -n "$registry_name"
+      env:
+        REGISTRY: ${{ inputs.registry }}
+
     - name: Install skopeo
       shell: bash
       run: |
