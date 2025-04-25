@@ -94,5 +94,5 @@ runs:
       run: skopeo copy "docker://$IMAGE_NAME:$IMAGE_TAG" "docker://$IMAGE_NAME:$ENVIRONMENT"
       env:
         ENVIRONMENT: ${{ inputs.environment }}
-        IMAGE_NAME: ${{ contains(inputs.registry, 'azurecr.io') && format('{0}/{1}-{2}', inputs.registry, inputs.name, inputs.system) || format('{0}/{1}/{2}', inputs.registry, inputs.name, inputs.system) }}
+        IMAGE_NAME: ${{ contains(inputs.registry, 'azurecr.io') && format('{0}/{1}-{2}', inputs.registry, inputs.system, inputs.name) || format('{0}/{1}/{2}', inputs.registry, inputs.system, inputs.name) }}
         IMAGE_TAG: ${{ format('{0}-{1}', github.sha, github.run_number) }}
