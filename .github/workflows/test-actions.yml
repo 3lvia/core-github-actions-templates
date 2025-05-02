@@ -352,6 +352,7 @@ jobs:
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'dev'
           helm-values-file: 'core/.github/deploy/values-${{ matrix.application-name }}.yml'
+          helm-chart-repository-url: 'https://raw.githubusercontent.com/3lvia/kubernetes-charts/819af167eae45675474fc833019fd50517136799'
           slack-channel: '#team-core-alerts-muted'
           runtime-cloud-provider: ${{ matrix.runtime-cloud-provider }}
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
