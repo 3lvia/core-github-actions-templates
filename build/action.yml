@@ -176,8 +176,6 @@ runs:
 
     - name: Install 3lv CLI
       uses: 3lvia/cli/setup@trunk
-      with:
-        version: 'feat/use-docker-naming-convention'
 
     - name: Install Cosign if not using Elvia runner
       if: ${{ !startsWith(runner.name, 'elvia-runner-') && inputs.sign-image == 'true' }}

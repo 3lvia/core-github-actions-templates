@@ -17,17 +17,12 @@ inputs:
     description: 'Docker registry to use.'
     required: false
     default: 'containerregistryelvia.azurecr.io'
-  AZURE_TENANT_ID:
-    description: 'Azure Tenant ID for authentication.'
-    required: false
-    default: '2186a6ec-c227-4291-9806-d95340bf439d'
-  AZURE_CLIENT_ID:
-    description: 'Azure Client ID for authentication.'
+  ACR_USERNAME:
+    description: 'Username for Azure Container Registry, if using it.'
     required: true
-  AZURE_SUBSCRIPTION_ID:
-    description: 'Azure Subscription ID for authentication.'
-    required: false
-    default: '9edbf217-b7c1-4f6a-ae76-d046cf932ff0'
+  ACR_PASSWORD:
+    description: 'Password for Azure Container Registry, if using it.'
+    required: true
   checkout:
     description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
     required: false
@@ -58,41 +53,52 @@ runs:
           exit 1
         fi
 
-        if [[ -z "$AZURE_CLIENT_ID" ]]; then
-          echo "Error: input 'AZURE_CLIENT_ID' is required."
+        if [[ -z "$ACR_USERNAME" ]]; then
+          echo "Error: input 'ACR_USERNAME' is required."
+          exit 1
+        fi
+
+        if [[ -z "$ACR_PASSWORD" ]]; then
+          echo "Error: input 'ACR_PASSWORD' is required."
           exit 1
         fi
       env:
         NAME: ${{ inputs.name }}
         SYSTEM: ${{ inputs.system }}
         ENVIRONMENT: ${{ inputs.environment }}
-        AZURE_CLIENT_ID: ${{ inputs.AZURE_CLIENT_ID }}
+        ACR_USERNAME: ${{ inputs.ACR_USERNAME }}
+        ACR_PASSWORD: ${{ inputs.ACR_PASSWORD }}
 
-    - name: Azure login
-      uses: azure/login@v2
+    #   - name: Login to GitHub Container Registry
+    #     if: contains(inputs.registry, 'ghcr.io')
+    #     uses: docker/login-action@v3
+    #     with:
+    #       registry: 'ghcr.io'
+    #       username: ${{ github.actor }}
+    #       password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Login to Azure Container Registry
+      if: contains(inputs.registry, 'azurecr.io')
+      uses: docker/login-action@v3
       with:
-        tenant-id: ${{ inputs.AZURE_TENANT_ID }}
-        client-id: ${{ inputs.AZURE_CLIENT_ID }}
-        subscription-id: ${{ inputs.AZURE_SUBSCRIPTION_ID }}
-
-    - name: Authenticate to Azure Container Registry
-      shell: bash
-      run: |
-        registry_name=$(echo "$REGISTRY" | cut -d '.' -f 1)
-        az acr login -n "$registry_name"
-      env:
-        REGISTRY: ${{ inputs.registry }}
-
-    - name: Install skopeo
-      shell: bash
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y skopeo
+        registry: ${{ inputs.registry }}
+        username: ${{ inputs.ACR_USERNAME }}
+        password: ${{ inputs.ACR_PASSWORD }}
 
     - name: Copy image to new tag
       shell: bash
       run: skopeo copy "docker://$IMAGE_NAME:$IMAGE_TAG" "docker://$IMAGE_NAME:$ENVIRONMENT"
       env:
         ENVIRONMENT: ${{ inputs.environment }}
-        IMAGE_NAME: ${{ contains(inputs.registry, 'azurecr.io') && format('{0}/{1}-{2}', inputs.registry, inputs.system, inputs.name) || format('{0}/{1}/{2}', inputs.registry, inputs.system, inputs.name) }}
+        IMAGE_NAME: ${{ format('{0}/{1}/{2}', inputs.registry, inputs.system, inputs.name) }}
         IMAGE_TAG: ${{ format('{0}-{1}', github.sha, github.run_number) }}
+#
+# TODO: actually implement this, requires access to Argo CD cluster
+#   - name: Wait for Argo CD application to sync
+#     shell: bash
+#     run: |
+#       argocd app wait -l "elvia.no/system=$SYSTEM,elvia.no/application=$NAME,kubernetes.io/environment=$ENVIRONMENT" --timeout 600
+#     env:
+#       NAME: ${{ inputs.name }}
+#       SYSTEM: ${{ inputs.system }}
+#       ENVIRONMENT: ${{ inputs.environment }}
