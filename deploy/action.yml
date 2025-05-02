@@ -27,7 +27,7 @@ inputs:
     description: "Location of Elvia's Helm chart repository; should only be changed if testing a new version of the chart."
     required: false
   workload-type:
-    description: 'The type of workload to deploy to kubernetes. Must be `deployment` or `statefulset`.'
+    description: 'The type of workload to deploy to Kubernetes. Must be `deployment` or `statefulset`.'
     required: false
     default: 'deployment'
   checkout:
