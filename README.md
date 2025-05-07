@@ -52,22 +52,26 @@ see [here](#elvia-specific-actions) for more information.
     - [Inputs](#inputs-8)
     - [Permissions](#permissions-8)
     - [Usage](#usage-8)
-  - [Slack Message](#slack-message)
+  - [Verify Edna Deploy](#verify-edna-deploy)
     - [Inputs](#inputs-9)
     - [Permissions](#permissions-9)
     - [Usage](#usage-9)
-  - [Vulnerabilities Slack Alert](#vulnerabilities-slack-alert)
+  - [Slack Message](#slack-message)
     - [Inputs](#inputs-10)
     - [Permissions](#permissions-10)
     - [Usage](#usage-10)
-  - [ISS Tag & Push Image](#iss-tag--push-image)
+  - [Vulnerabilities Slack Alert](#vulnerabilities-slack-alert)
     - [Inputs](#inputs-11)
     - [Permissions](#permissions-11)
     - [Usage](#usage-11)
-  - [Vault](#vault)
+  - [ISS Tag & Push Image](#iss-tag--push-image)
     - [Inputs](#inputs-12)
     - [Permissions](#permissions-12)
     - [Usage](#usage-12)
+  - [Vault](#vault)
+    - [Inputs](#inputs-13)
+    - [Permissions](#permissions-13)
+    - [Usage](#usage-13)
   - [Elvia-specific Actions](#elvia-specific-actions)
 - [Development](#development)
   - [Formatting](#formatting)
@@ -895,6 +899,70 @@ More permissions might be required depending on the inputs set, see the actions 
 <!-- gh-actions-docs-end -->
 
 <!-- gh-actions-docs-start path=verify-edna-deploy/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=id-token:write -->
+
+## Verify Edna Deploy
+
+Checking if a certain metric has been updated after the deployment happened
+Returns success (return code 0) if the query has a result.
+Returns failure if the result is empty (return code 1).
+
+### Inputs
+
+| Name          | Description                                                                                                                          | Required | Default |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- |
+| `application` | Application name is used in the derived PromQL query.                                                                                | yes      |         |
+| `checkout`    | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`  |
+| `environment` | Environment is used to find correct vault instance.                                                                                  | yes      |         |
+| `system`      | System name is used in the derived PromQL query.                                                                                     | yes      |         |
+| `topic`       | Topic name is used in the derived PromQL query.                                                                                      | yes      |         |
+| `type`        | publisher or consumer.                                                                                                               | yes      |         |
+
+### Permissions
+
+This action requires the following base [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+
+- `id-token: write`
+
+More permissions might be required depending on the inputs set, see the actions documentation for more information.
+
+### Usage
+
+```yaml
+- name: Verify Edna Deploy
+  uses: 3lvia/core-github-actions-templates/verify-edna-deploy@trunk
+  with:
+    application:
+    # Application name is used in the derived PromQL query.
+    #
+    # Required: yes
+
+    checkout:
+    # If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.
+    #
+    # Required: no
+    # Default: 'true'
+
+    environment:
+    # Environment is used to find correct vault instance.
+    #
+    # Required: yes
+
+    system:
+    # System name is used in the derived PromQL query.
+    #
+    # Required: yes
+
+    topic:
+    # Topic name is used in the derived PromQL query.
+    #
+    # Required: yes
+
+    type:
+    # publisher or consumer.
+    #
+    # Required: yes
+```
+
 <!-- gh-actions-docs-end -->
 
 <!-- gh-actions-docs-start path=slack-message/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
