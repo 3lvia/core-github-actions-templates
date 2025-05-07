@@ -921,6 +921,7 @@ Returns failure if the result is empty (return code 1).
 
 This action requires the following base [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
 
+- `contents: read`
 - `id-token: write`
 
 More permissions might be required depending on the inputs set, see the actions documentation for more information.
