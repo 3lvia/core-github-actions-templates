@@ -898,7 +898,7 @@ More permissions might be required depending on the inputs set, see the actions 
 
 <!-- gh-actions-docs-end -->
 
-<!-- gh-actions-docs-start path=verify-edna-deploy/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=id-token:write -->
+<!-- gh-actions-docs-start path=verify-edna-deploy/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
 
 ## Verify Edna Deploy
 
