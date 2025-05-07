@@ -26,7 +26,7 @@ inputs:
   coverlet-runsettings-file:
     description: |
       Path to a coverlet runsettings file, relative to the root of the repository.
-      If not specified, no runsettings file will be used.
+      If not specified, no runsettings file will be used for coverlet.
     required: false
     default: ''
 

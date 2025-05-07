@@ -22,6 +22,12 @@ inputs:
     description: 'Pattern to use to find test projects.'
     required: false
     default: '*unit*test*csproj'
+  dotnet-coverage-runsettings-file:
+    description: |
+      Path to a dotnet-coverage runsettings file, relative to the root of the repository.
+      If not specified, no runsettings file will be used for dotnet-coverage.
+    required: false
+    default: ''
 
 runs:
   using: 'composite'
@@ -67,13 +73,17 @@ runs:
         ./sonar/scanner/dotnet-sonarscanner begin /k:"$SONAR_CLOUD_PROJECT_KEY" /o:"elvia" /d:sonar.token="$SONAR_TOKEN" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=*_coverage.xml /d:sonar.scanner.scanAll=false
 
         testprojects=$(find . -iname "$TEST_PROJECTS")
-        for testproject in $testprojects;
-        do
-          ./sonar/scanner/dotnet-coverage collect "dotnet test -l:trx $testproject" -f xml -o "$(uuidgen)_coverage.xml"
+        for testproject in $testprojects; do
+          if [[ "$DOTNET_COVERAGE_RUNSETTINGS_FILE" != '' ]]; then
+            ./sonar/scanner/dotnet-coverage collect "dotnet test -l:trx $testproject" -f xml -o "$(uuidgen)_coverage.xml" --settings "$DOTNET_COVERAGE_RUNSETTINGS_FILE"
+          else
+            ./sonar/scanner/dotnet-coverage collect "dotnet test -l:trx $testproject" -f xml -o "$(uuidgen)_coverage.xml"
+          fi
         done
 
         ./sonar/scanner/dotnet-sonarscanner end /d:sonar.token="$SONAR_TOKEN"
       env:
+        DOTNET_COVERAGE_RUNSETTINGS_FILE: ${{ inputs.dotnet-coverage-runsettings-file }}
         GITHUB_TOKEN: ${{ inputs.github-token }} # Needed to get PR information, if any
         SONAR_TOKEN: ${{ inputs.sonarcloud-token }}
         SONAR_CLOUD_PROJECT_KEY: ${{ inputs.sonarcloud-project-key }}
