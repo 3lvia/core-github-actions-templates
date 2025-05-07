@@ -1,0 +1,47 @@
+name: 'Verify Edna Deploy'
+description: |
+  Checking if a certain metric has been updated after the deployment happened
+  Returns success (return code 0) if the query has a result.
+  Returns failure if the result is empty (return code 1).
+inputs:
+  environment:
+    description: 'Environment is used to find correct vault instance.'
+    required: true
+  system:
+    description: 'System name is used in the derived PromQL query.'
+    required: true
+  application:
+    description: 'Application name is used in the derived PromQL query.'
+    required: true
+  topic:
+    description: 'Topic name is used in the derived PromQL query.'
+    required: true
+  type:
+    description: 'publisher or consumer.'
+    required: true
+  checkout:
+    description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout repository
+      if: ${{ inputs.checkout == 'true' }}
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+
+    - name: Login Vault and export token
+      uses: 3lvia/core-github-actions-templates/vault@trunk
+      with:
+        system: ${{ inputs.system }}
+        environment: ${{ inputs.environment }}
+        exportToken: 'true'
+
+    - name: Run validation script
+      shell: bash
+      run: |
+        pip install -r '${{ github.action_path }}/requirements.txt'
+        python '${{ github.action_path }}/validate_edna_deploy.py' --topic '${{ inputs.topic }}' --system '${{ inputs.system }}' --application '${{ inputs.application }}' --environment '${{ inputs.environment }}' --type '${{ inputs.type }}'
