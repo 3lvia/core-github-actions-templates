@@ -13,11 +13,12 @@ inputs:
   application:
     description: 'Application name is used in the derived PromQL query.'
     required: true
-  type:
-    description: 'Publisher or consumer.'
-    required: true
   topic:
     description: 'Topic name is used in the derived PromQL query.'
+    required: true
+  type:
+    description: 'publisher or consumer.'
+    required: true
   checkout:
     description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
     required: false

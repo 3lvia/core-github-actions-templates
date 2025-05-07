@@ -896,6 +896,73 @@ More permissions might be required depending on the inputs set, see the actions 
 
 <!-- gh-actions-docs-start path=slack-message/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
 
+## Verify Edna Deploy
+
+Checking if a certain metric has been updated after the deployment happened
+Returns success (return code 0) if the query has a result.
+Returns failure if the result is empty (return code 1).
+
+### Inputs
+
+| Name          | Description                                                                                                                          | Required | Default |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- |
+| `checkout`    | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`  |
+| `environment` | Environment is used to find correct vault instance.                                                                                  | yes      |         |
+| `system`      | System name is used in the derived PromQL query.                                                                                     | yes      |         |
+| `application` | Application name is used in the derived PromQL query.                                                                                | yes      |         |
+| `topic`       | Topic name is used in the derived PromQL query.                                                                                      | yes      |         |
+| `type`        | publisher or consumer.                                                                                                               | yes      |         |
+
+### Permissions
+
+This action requires the following base [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+
+- `id-token: write`
+
+More permissions might be required depending on the inputs set, see the actions documentation for more information.
+
+### Usage
+
+```yaml
+- name: Verify Edna Deploy
+  uses: 3lvia/core-github-actions-templates/verify-edna-deploy@trunk
+  with:
+    checkout:
+    # If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.
+    #
+    # Required: no
+    # Default: 'true'
+
+    environment:
+    # Environment is used to find correct vault instance.
+    #
+    # Required: yes
+
+    system:
+    # System name is used in the derived PromQL query.
+    #
+    # Required: yes
+
+    application:
+    # Application name is used in the derived PromQL query.
+    #
+    # Required: yes
+
+    topic:
+    # Topic name is used in the derived PromQL query.
+    #
+    # Required: yes
+
+    type:
+    # publisher or consumer.
+    #
+    # Required: yes
+```
+
+<!-- gh-actions-docs-end -->
+
+<!-- gh-actions-docs-start path=slack-message/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
+
 ## Slack Message
 
 Sends a message to a Slack channel.
