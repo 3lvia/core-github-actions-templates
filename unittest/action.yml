@@ -23,6 +23,12 @@ inputs:
     description: 'If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector.'
     required: false
     default: 'false'
+  coverlet-runsettings-file:
+    description: |
+      Path to a coverlet runsettings file, relative to the root of the repository.
+      If not specified, no runsettings file will be used.
+    required: false
+    default: ''
 
 runs:
   using: 'composite'
@@ -38,21 +44,29 @@ runs:
     - name: Run unit tests
       shell: bash
       run: |
-        testprojects=$(find . -ipath '*${{ inputs.test-projects }}')
+        testprojects=$(find . -ipath "*$TEST_PROJECTS")
         if [[ -z $testprojects ]]; then
-            echo "Unable to find any dotnet projects matching the pattern ${{ inputs.test-projects }}. Set the pattern using the parameter test-projects."
+            echo "Unable to find any dotnet projects matching the pattern $TEST_PROJECTS. Set the pattern using the parameter test-projects."
             exit 0 # TODO: Fail the action if no test projects are found
         else
             echo "Running dotnet test on test projects: $testprojects"
         fi
-        for testproject in $testprojects;
-        do
-          if [[ '${{ inputs.test-coverage }}' == 'true' ]]; then
-            dotnet test -l:trx --collect:"XPlat Code Coverage" "$testproject"
+
+        for testproject in $testprojects; do
+          if [[ "$TEST_COVERAGE" == 'true' ]]; then
+            if [[ "$COVERLET_RUNSETTINGS_FILE" != '' ]]; then
+              dotnet test -l:trx --collect:"XPlat Code Coverage" --settings "$COVERLET_RUNSETTINGS_FILE" "$testproject"
+            else
+              dotnet test -l:trx --collect:"XPlat Code Coverage" "$testproject"
+            fi
           else
             dotnet test -l:trx "$testproject"
           fi
         done
+      env:
+        TEST_PROJECTS: ${{ inputs.test-projects }}
+        TEST_COVERAGE: ${{ inputs.test-coverage }}
+        COVERLET_RUNSETTINGS_FILE: ${{ inputs.coverlet-runsettings-file }}
       working-directory: ${{ inputs.working-directory }}
 
     - name: Publish test results
