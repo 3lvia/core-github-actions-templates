@@ -5,24 +5,24 @@ description: |
   Returns failure if the result is empty (return code 1).
 inputs:
   environment:
-    description: 'Environment is used to find correct vault instance.'
+    description: "Environment is used to find correct vault instance."
     required: true
   system:
-    description: 'System name is used in the derived PromQL query.'
+    description: "System name is used in the derived PromQL query."
     required: true
   application:
-    description: 'Application name is used in the derived PromQL query.'
+    description: "Application name is used in the derived PromQL query."
     required: true
   topic:
-    description: 'Topic name is used in the derived PromQL query.'
+    description: "Topic name is used in the derived PromQL query."
     required: true
   type:
-    description: 'publisher or consumer.'
+    description: "publisher or consumer."
     required: true
   checkout:
-    description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
+    description: "If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out."
     required: false
-    default: 'true'
+    default: "true"
 
 runs:
   using: composite
@@ -38,7 +38,7 @@ runs:
       with:
         system: ${{ inputs.system }}
         environment: ${{ inputs.environment }}
-        exportToken: 'true'
+        exportToken: "true"
 
     - name: Run validation script
       shell: bash
