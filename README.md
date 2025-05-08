@@ -432,13 +432,14 @@ Run .NET unit tests.
 
 ### Inputs
 
-| Name                   | Description                                                                                                                                                               | Required | Default                       |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------- |
-| `checkout`             | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                                      | no       | `true`                        |
-| `dotnet-tool-manifest` | Path to the .NET tool manifest file, relative to the root of the repository. Only needed if you require .NET tools that are outside of `working-directory` for the build. | no       | `./.config/dotnet-tools.json` |
-| `test-coverage`        | If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector.                                                        | no       | `false`                       |
-| `test-projects`        | Pattern to use to find test projects.                                                                                                                                     | no       | `unit*test*csproj`            |
-| `working-directory`    | Will run unit tests on projects under this working directory.                                                                                                             | no       | `./`                          |
+| Name                        | Description                                                                                                                                                               | Required | Default                       |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------- |
+| `checkout`                  | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                                      | no       | `true`                        |
+| `coverlet-runsettings-file` | Path to a coverlet runsettings file, relative to the root of the repository. If not specified, no runsettings file will be used for coverlet.                             | no       | ``                            |
+| `dotnet-tool-manifest`      | Path to the .NET tool manifest file, relative to the root of the repository. Only needed if you require .NET tools that are outside of `working-directory` for the build. | no       | `./.config/dotnet-tools.json` |
+| `test-coverage`             | If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector.                                                        | no       | `false`                       |
+| `test-projects`             | Pattern to use to find test projects.                                                                                                                                     | no       | `unit*test*csproj`            |
+| `working-directory`         | Will run unit tests on projects under this working directory.                                                                                                             | no       | `./`                          |
 
 ### Permissions
 
@@ -462,6 +463,12 @@ More permissions might be required depending on the inputs set, see the actions 
     #
     # Required: no
     # Default: 'true'
+
+    coverlet-runsettings-file:
+    # Path to a coverlet runsettings file, relative to the root of the repository. If not specified, no runsettings file will be used for coverlet.
+    #
+    # Required: no
+    # Default: ''
 
     dotnet-tool-manifest:
     # Path to the .NET tool manifest file, relative to the root of the repository. Only needed if you require .NET tools that are outside of `working-directory` for the build.
@@ -643,14 +650,15 @@ Run SonarCloud scanning on .NET code.
 
 ### Inputs
 
-| Name                     | Description                                                                                                                          | Required | Default             |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------- |
-| `checkout`               | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`              |
-| `github-token`           | Should normally be `secrets.GITHUB_TOKEN`.                                                                                           | yes      |                     |
-| `sonarcloud-project-key` | The SonarCloud project key or id. Normally on the form `3lvia_repo-name`. The project must be manually created on sonarcloud.io.     | yes      |                     |
-| `sonarcloud-token`       | Should normally be `secrets.SONAR_TOKEN`.                                                                                            | yes      |                     |
-| `test-projects`          | Pattern to use to find test projects.                                                                                                | no       | `*unit*test*csproj` |
-| `working-directory`      | Will run SonarCloud on projects under this working directory.                                                                        | no       | `./`                |
+| Name                               | Description                                                                                                                                                 | Required | Default             |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------- |
+| `checkout`                         | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                        | no       | `true`              |
+| `dotnet-coverage-runsettings-file` | Path to a dotnet-coverage runsettings file, relative to the root of the repository. If not specified, no runsettings file will be used for dotnet-coverage. | no       | ``                  |
+| `github-token`                     | Should normally be `secrets.GITHUB_TOKEN`.                                                                                                                  | yes      |                     |
+| `sonarcloud-project-key`           | The SonarCloud project key or id. Normally on the form `3lvia_repo-name`. The project must be manually created on sonarcloud.io.                            | yes      |                     |
+| `sonarcloud-token`                 | Should normally be `secrets.SONAR_TOKEN`.                                                                                                                   | yes      |                     |
+| `test-projects`                    | Pattern to use to find test projects.                                                                                                                       | no       | `*unit*test*csproj` |
+| `working-directory`                | Will run SonarCloud on projects under this working directory.                                                                                               | no       | `./`                |
 
 ### Permissions
 
@@ -675,6 +683,12 @@ More permissions might be required depending on the inputs set, see the actions 
     #
     # Required: no
     # Default: 'true'
+
+    dotnet-coverage-runsettings-file:
+    # Path to a dotnet-coverage runsettings file, relative to the root of the repository. If not specified, no runsettings file will be used for dotnet-coverage.
+    #
+    # Required: no
+    # Default: ''
 
     github-token:
     # Should normally be `secrets.GITHUB_TOKEN`.
