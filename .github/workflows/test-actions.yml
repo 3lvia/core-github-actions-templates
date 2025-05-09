@@ -120,9 +120,9 @@ jobs:
           {
             "runner": ["$RUNNER"],
             "application-name": [
-              "${{ env.APPLICATION_BASE_NAME }}",
+              "${{ env.APPLICATION_BASE_NAME }}-go",
             ],
-            environment: ["sandbox"]
+            environment: ["sandbox", "dev"]
           }
           EOF
             echo EOF
