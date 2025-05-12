@@ -327,9 +327,52 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
+  deploy-argocd:
+    name: 'Deploy ${{ matrix.environment }} with Argo CD'
+    needs: [prepare-jobs, build]
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix-deploy-argocd) }}
+    concurrency:
+      group: '${{ github.workflow_ref }}-${{ matrix.application-name }}-deploy-${{ matrix.environment }}'
+      cancel-in-progress: false
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+
+      - name: Get GitHub App token
+        uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: 'core'
+
+      - name: Checkout core repository
+        uses: actions/checkout@v4
+        with:
+          repository: '3lvia/core'
+          token: ${{ steps.app-token.outputs.token }}
+          path: 'core'
+
+      - uses: ./deploy-argocd
+        with:
+          checkout: 'false'
+          name: ${{ matrix.application-name }}
+          system: ${{ env.SYSTEM_NAME }}
+          environment: ${{ matrix.environment }}
+          slack-channel: '#team-core-alerts-muted'
+          ACR_USERNAME: ${{ vars.ACR_USERNAME }}
+          ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+
   deploy-dev:
     name: Deploy Dev
-    needs: [prepare-jobs, build]
+    needs: [prepare-jobs, build, deploy-argocd]
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix-deploy) }}
@@ -374,49 +417,6 @@ jobs:
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
           GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
           GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
-
-  deploy-argocd:
-    name: 'Deploy ${{ matrix.environment }} with Argo CD'
-    needs: [prepare-jobs, build, deploy-dev]
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix-deploy-argocd) }}
-    concurrency:
-      group: '${{ github.workflow_ref }}-${{ matrix.application-name }}-deploy-${{ matrix.environment }}'
-      cancel-in-progress: false
-    runs-on: ${{ matrix.runner }}
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - name: Checkout this repository
-        uses: actions/checkout@v4
-
-      - name: Get GitHub App token
-        uses: actions/create-github-app-token@v2
-        id: app-token
-        with:
-          app-id: ${{ vars.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: 'core'
-
-      - name: Checkout core repository
-        uses: actions/checkout@v4
-        with:
-          repository: '3lvia/core'
-          token: ${{ steps.app-token.outputs.token }}
-          path: 'core'
-
-      - uses: ./deploy-argocd
-        with:
-          checkout: 'false'
-          name: ${{ matrix.application-name }}
-          system: ${{ env.SYSTEM_NAME }}
-          environment: ${{ matrix.environment }}
-          slack-channel: '#team-core-alerts-muted'
-          ACR_USERNAME: ${{ vars.ACR_USERNAME }}
-          ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
 
   integration-tests:
     name: Integration Tests
