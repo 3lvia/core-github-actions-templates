@@ -103,8 +103,11 @@ runs:
       shell: bash
       id: check-image-digest
       run: |
-        old_image_digest=$(skopeo inspect docker://$OLD_IMAGE | jq -r '.Digest')
-        new_image_digest=$(skopeo inspect docker://$NEW_IMAGE | jq -r '.Digest')
+        docker pull "$OLD_IMAGE"
+        docker pull "$NEW_IMAGE"
+
+        old_image_digest=$(skopeo inspect -f '{{.Digest}}' "docker://$OLD_IMAGE")
+        new_image_digest=$(skopeo inspect -f '{{.Digest}}' "docker://$NEW_IMAGE")
 
         if [[ "$old_image_digest" == "$new_image_digest" ]]; then
           echo "Image digest has not changed from currently deployed image. Skipping deployment."
@@ -120,8 +123,8 @@ runs:
           echo "skip-deployment=false" >> "$GITHUB_OUTPUT"
         fi
       env:
-        NEW_IMAGE: ${{ format('{0}/{1}/{2}:{3}-{4}', inputs.registry, inputs.system, inputs.name, github.sha, github.run_number) }}
         OLD_IMAGE: ${{ format('{0}/{1}/{2}:{3}', inputs.registry, inputs.system, inputs.name, inputs.environment) }}
+        NEW_IMAGE: ${{ format('{0}/{1}/{2}:{3}-{4}', inputs.registry, inputs.system, inputs.name, github.sha, github.run_number) }}
 
     - name: Copy image to new tag and push
       if: ${{ steps.check-image-digest.outputs.skip-deployment != 'true' }}
