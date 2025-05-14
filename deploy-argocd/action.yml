@@ -103,11 +103,17 @@ runs:
       shell: bash
       id: check-image-digest
       run: |
+        # Check if image digest has changed
+
+        # NOTE: for some reason, skopeo inspect does not work, complains about 403.
+        # As a a workaround, we just pull the images and check the digests with docker inspect.
+        # Another option would be docker manifest inspect which supports not pulling, but the command is experimental.
+
         docker pull "$OLD_IMAGE"
         docker pull "$NEW_IMAGE"
 
-        old_image_digest=$(skopeo inspect -f '{{.Digest}}' "docker://$OLD_IMAGE")
-        new_image_digest=$(skopeo inspect -f '{{.Digest}}' "docker://$NEW_IMAGE")
+        old_image_digest=$(docker inspect -f '{{index .RepoDigests 0}}' "$OLD_IMAGE" | cut -d '@' -f2)
+        new_image_digest=$(docker inspect -f '{{index .RepoDigests 0}}' "$NEW_IMAGE" | cut -d '@' -f2)
 
         if [[ "$old_image_digest" == "$new_image_digest" ]]; then
           echo "Image digest has not changed from currently deployed image. Skipping deployment."
@@ -139,6 +145,7 @@ runs:
       if: ${{ steps.check-image-digest.outputs.skip-deployment != 'true' }}
       shell: bash
       run: |
+        # Wait for Argo CD application to sync
         curl -v \
           -H "X-GitHub-OIDC-Token: $GH_ID_TOKEN" \
           -H 'Content-Type: application/json' \
