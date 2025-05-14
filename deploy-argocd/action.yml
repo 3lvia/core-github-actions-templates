@@ -99,7 +99,32 @@ runs:
           let idToken = await core_.getIDToken()
           core_.setOutput('token', idToken)
 
+    - name: Check if image digest has changed
+      shell: bash
+      id: check-image-digest
+      run: |
+        old_image_digest=$(skopeo inspect docker://$OLD_IMAGE | jq -r '.Digest')
+        new_image_digest=$(skopeo inspect docker://$NEW_IMAGE | jq -r '.Digest')
+
+        if [[ "$old_image_digest" == "$new_image_digest" ]]; then
+          echo "Image digest has not changed from currently deployed image. Skipping deployment."
+          echo "Currently deployed image: $OLD_IMAGE"
+          echo "Currently deployed digest: $old_image_digest"
+          echo "skip-deployment=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "Image digest has changed. Proceeding with deployment."
+          echo "Currently deployed image: $OLD_IMAGE"
+          echo "Currently deployed digest: $old_image_digest"
+          echo "New image: $NEW_IMAGE"
+          echo "New digest: $new_image_digest"
+          echo "skip-deployment=false" >> "$GITHUB_OUTPUT"
+        fi
+      env:
+        NEW_IMAGE: ${{ format('{0}/{1}/{2}:{3}-{4}', inputs.registry, inputs.system, inputs.name, github.sha, github.run_number) }}
+        OLD_IMAGE: ${{ format('{0}/{1}/{2}:{3}', inputs.registry, inputs.system, inputs.name, inputs.environment) }}
+
     - name: Copy image to new tag and push
+      if: ${{ steps.check-image-digest.outputs.skip-deployment != 'true' }}
       shell: bash
       run: skopeo copy "docker://$IMAGE_NAME:$IMAGE_TAG" "docker://$IMAGE_NAME:$ENVIRONMENT"
       env:
@@ -108,6 +133,7 @@ runs:
         IMAGE_TAG: ${{ format('{0}-{1}', github.sha, github.run_number) }}
 
     - name: Wait for Argo CD application to sync
+      if: ${{ steps.check-image-digest.outputs.skip-deployment != 'true' }}
       shell: bash
       run: |
         curl -v \
