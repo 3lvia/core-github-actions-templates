@@ -91,23 +91,9 @@ jobs:
             "runner": ["$RUNNER","ubuntu-latest"],
             "application-name": [
               "${{ env.APPLICATION_BASE_NAME }}",
-              "${{ env.APPLICATION_BASE_NAME }}-go",
-              "${{ env.APPLICATION_BASE_NAME }}-python"
             ],
             "runtime-cloud-provider": ["AKS","GKE"],
-            "include": [
-              {
-                "helm-values-file": ".github/deploy/values-demo-api.yml"
-              },
-              {
-                "application-name": "${{ env.APPLICATION_BASE_NAME }}-go",
-                "helm-values-file": ".github/deploy/values-demo-api-go.yml"
-              },
-              {
-                "application-name": "${{ env.APPLICATION_BASE_NAME }}-go",
-                "helm-values-file": ".github/deploy/values-demo-api-python.yml"
-              },
-            ]
+            "helm-values-file": ".github/deploy/values-demo-api.yml"
           }
           EOF
             echo EOF
