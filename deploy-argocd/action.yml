@@ -110,10 +110,13 @@ runs:
           let idToken = await core_.getIDToken()
           core_.setOutput('token', idToken)
 
-    - name: Copy image to new tag and push
+    - name: Copy image to tag ${{ inputs.environment }}
       if: ${{ steps.check-image-digest.outputs.skip-deployment != 'true' }}
       shell: bash
-      run: skopeo copy "docker://$IMAGE" "docker://$IMAGE_NAME:$ENVIRONMENT"
+      run: |
+        # Copy image to new tag and push
+        image_without_tag_and_or_digest="$(echo $IMAGE | cut -d':' -f1 | cut -d'@' -f1)"
+        skopeo copy "docker://$IMAGE" "docker://$image_without_tag_and_or_digest:$ENVIRONMENT"
       env:
         ENVIRONMENT: ${{ inputs.environment }}
         IMAGE: ${{ inputs.image }}
