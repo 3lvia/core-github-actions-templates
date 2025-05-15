@@ -264,6 +264,7 @@ jobs:
           path: 'core'
 
       - uses: ./build
+        id: build
         with:
           checkout: 'false'
           name: ${{ matrix.application-name }}
