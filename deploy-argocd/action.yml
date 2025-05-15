@@ -131,7 +131,7 @@ runs:
           -H "X-GitHub-OIDC-Token: $GH_ID_TOKEN" \
           -H 'X-Timeout: 3m' \
           -H 'Content-Type: application/json' \
-          -d "{\"image\":\"$IMAGE\",\"system\":\"$SYSTEM\",\"cluster_type\":\"$CLUSTER_TYPE\",\"environment\":\"$ENVIRONMENT\",\"application_name\":\"$NAME\",\"check_all_clusters\":\"$CHECK_ALL_CLUSTERS\"}" \
+          -d "{\"image\":\"$IMAGE\",\"system\":\"$SYSTEM\",\"cluster_type\":\"$CLUSTER_TYPE\",\"environment\":\"$ENVIRONMENT\",\"application_name\":\"$NAME\",\"check_all_clusters\":$CHECK_ALL_CLUSTERS}" \
           --fail-with-body \
           "$DEPLOYVIA_URL"
       env:
