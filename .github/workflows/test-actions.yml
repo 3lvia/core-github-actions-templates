@@ -64,7 +64,6 @@ jobs:
               "applications/demo-api-go/Dockerfile",
               "applications/demo-api-python/pyproject.toml"
             ],
-            "registry": ["","ghcr.io/3lvia"],
             "include": [
               {
                 "application-name": "${{ env.APPLICATION_BASE_NAME }}-go"
@@ -229,7 +228,7 @@ jobs:
       matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix-build) }}
     concurrency:
       group: |
-        ${{ github.workflow_ref }}-${{ matrix.runner }}-${{ matrix.application-name }}-${{ matrix.project-file }}-${{ matrix.registry }}
+        ${{ github.workflow_ref }}-${{ matrix.runner }}-${{ matrix.application-name }}-${{ matrix.project-file }}
       cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
     permissions:
@@ -240,7 +239,9 @@ jobs:
       pull-requests: write
       security-events: write
     outputs:
-      image: ${{ steps.build.outputs.image-name-with-digest }}
+      image-demo-api: ${{ steps.build-demo-api.outputs.image-name-with-digest }}
+      image-demo-api-go: ${{ steps.build-demo-api-go.outputs.image-name-with-digest }}
+      image-demo-api-python: ${{ steps.build-demo-api-python.outputs.image-name-with-digest }}
     environment: build
     steps:
       - name: Checkout this repository
@@ -263,14 +264,13 @@ jobs:
           path: 'core'
 
       - uses: ./build
-        id: build
+        id: 'build-${{ matrix.application-name }}'
         with:
           checkout: 'false'
           name: ${{ matrix.application-name }}
           namespace: ${{ env.SYSTEM_NAME }}
           project-file: 'core/${{ matrix.project-file }}'
           docker-additional-tags: 'v42,v1.2.3'
-          registry: ${{ matrix.registry }}
           trivy-upload-report: 'true'
           trivy-post-comment: 'true'
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
@@ -370,7 +370,7 @@ jobs:
           name: ${{ matrix.application-name }}
           system: ${{ env.SYSTEM_NAME }}
           environment: ${{ matrix.environment }}
-          image: ${{ needs.build.outputs.image }}
+          image: ${{ matrix.application-name == 'demo-api-go' && needs.build.outputs.image-demo-api-go || needs.build.outputs.image-demo-api-python }}
           slack-channel: '#team-core-alerts-muted'
           ACR_USERNAME: ${{ vars.ACR_USERNAME }}
           ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
