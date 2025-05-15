@@ -121,6 +121,9 @@ outputs:
   image-name-with-digest:
     description: 'Name of the Docker image that was built, including the digest.'
     value: ${{ steps.get-outputs.outputs.image-name-with-digest }}
+  image:
+    description: 'Same as `image-name-with-digest`.'
+    value: ${{ steps.get-outputs.outputs.image-name-with-digest }}
 
 runs:
   using: 'composite'
