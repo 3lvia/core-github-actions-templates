@@ -26,6 +26,10 @@ inputs:
   helm-chart-repository-url:
     description: "Location of Elvia's Helm chart repository; should only be changed if testing a new version of the chart."
     required: false
+  dry-run:
+    description: 'Simulate the deployment without actually deploying.'
+    required: false
+    default: 'false'
   workload-type:
     description: 'The type of workload to deploy to Kubernetes. Must be `deployment` or `statefulset`.'
     required: false
@@ -169,6 +173,7 @@ runs:
         3LV_GKE_CLUSTER_NAME: ${{ inputs.GKE_CLUSTER_NAME }}
         3LV_GKE_CLUSTER_LOCATION: ${{ inputs.GKE_CLUSTER_LOCATION }}
         3LV_HELM_CHART_REPOSITORY_URL: ${{ inputs.helm-chart-repository-url }}
+        3LV_DRY_RUN: ${{ inputs.dry-run }}
 
     - name: Notify Slack on failure
       if: ${{ failure() && inputs.slack-channel != '' }}

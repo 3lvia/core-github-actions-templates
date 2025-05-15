@@ -64,7 +64,6 @@ jobs:
               "applications/demo-api-go/Dockerfile",
               "applications/demo-api-python/pyproject.toml"
             ],
-            "registry": ["","ghcr.io/3lvia"],
             "include": [
               {
                 "application-name": "${{ env.APPLICATION_BASE_NAME }}-go"
@@ -121,6 +120,7 @@ jobs:
             "runner": ["$RUNNER"],
             "application-name": [
               "${{ env.APPLICATION_BASE_NAME }}-go",
+              "${{ env.APPLICATION_BASE_NAME }}-python"
             ],
             environment: ["sandbox", "dev"]
           }
@@ -228,7 +228,7 @@ jobs:
       matrix: ${{ fromJson(needs.prepare-jobs.outputs.matrix-build) }}
     concurrency:
       group: |
-        ${{ github.workflow_ref }}-${{ matrix.runner }}-${{ matrix.application-name }}-${{ matrix.project-file }}-${{ matrix.registry }}
+        ${{ github.workflow_ref }}-${{ matrix.runner }}-${{ matrix.application-name }}-${{ matrix.project-file }}
       cancel-in-progress: true
     runs-on: ${{ matrix.runner }}
     permissions:
@@ -238,6 +238,10 @@ jobs:
       packages: write # Required for publishing to GitHub Container Registry
       pull-requests: write
       security-events: write
+    outputs:
+      image-demo-api: ${{ steps.build-output.outputs.image-name-with-digest-demo-api }}
+      image-demo-api-go: ${{ steps.build-output.outputs.image-name-with-digest-demo-api-go }}
+      image-demo-api-python: ${{ steps.build-output.outputs.image-name-with-digest-demo-api-python }}
     environment: build
     steps:
       - name: Checkout this repository
@@ -260,16 +264,23 @@ jobs:
           path: 'core'
 
       - uses: ./build
+        id: build
         with:
           checkout: 'false'
           name: ${{ matrix.application-name }}
           namespace: ${{ env.SYSTEM_NAME }}
           project-file: 'core/${{ matrix.project-file }}'
           docker-additional-tags: 'v42,v1.2.3'
-          registry: ${{ matrix.registry }}
           trivy-upload-report: 'true'
           trivy-post-comment: 'true'
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
+
+      - name: Set build output
+        id: build-output
+        run: echo "image-name-with-digest-$APPLICATION_NAME=$IMAGE_NAME_WITH_DIGEST" >> "$GITHUB_OUTPUT"
+        env:
+          APPLICATION_NAME: ${{ matrix.application-name }}
+          IMAGE_NAME_WITH_DIGEST: ${{ steps.build.outputs.image-name-with-digest }}
 
   build-vulnerable-service:
     name: Build Vulnerable Service
@@ -328,7 +339,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
   deploy-argocd:
-    name: 'Deploy ${{ matrix.environment }} with Argo CD'
+    name: Deploy Argo CD
     needs: [prepare-jobs, build]
     strategy:
       fail-fast: false
@@ -366,6 +377,7 @@ jobs:
           name: ${{ matrix.application-name }}
           system: ${{ env.SYSTEM_NAME }}
           environment: ${{ matrix.environment }}
+          image: ${{ matrix.application-name == 'demo-api-go' && needs.build.outputs.image-demo-api-go || needs.build.outputs.image-demo-api-python }}
           slack-channel: '#team-core-alerts-muted'
           ACR_USERNAME: ${{ vars.ACR_USERNAME }}
           ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
@@ -414,6 +426,7 @@ jobs:
           helm-chart-repository-url: 'https://raw.githubusercontent.com/3lvia/kubernetes-charts/819af167eae45675474fc833019fd50517136799'
           slack-channel: '#team-core-alerts-muted'
           runtime-cloud-provider: ${{ matrix.runtime-cloud-provider }}
+          dry-run: ${{ matrix.application-name == 'demo-api' && 'false' || 'true' }} # dry-run everything except demo-api, since rest is deployed via Argo CD
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
           GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
           GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
