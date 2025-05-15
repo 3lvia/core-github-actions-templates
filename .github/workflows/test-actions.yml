@@ -329,7 +329,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
   deploy-argocd:
-    name: 'Deploy ${{ matrix.environment }} with Argo CD'
+    name: Deploy Argo CD
     needs: [prepare-jobs, build]
     strategy:
       fail-fast: false
