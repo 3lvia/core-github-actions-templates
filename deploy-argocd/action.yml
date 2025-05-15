@@ -7,6 +7,9 @@ inputs:
   system:
     description: 'System (namespace) of the application.'
     required: true
+  image:
+    description: 'Full name of the image to deploy (including digest), e.g. `containerregistryelvia.azurecr.io/core/demo-api-go:v3@sha256:123456789abdefgh`.'
+    required: true
   cluster-type:
     description: 'Type of cluster to check deployment status for. Can be `aks`, `gke` or `iss`.'
     required: true
@@ -110,10 +113,10 @@ runs:
     - name: Copy image to new tag and push
       if: ${{ steps.check-image-digest.outputs.skip-deployment != 'true' }}
       shell: bash
-      run: skopeo copy "docker://$IMAGE_NAME:$IMAGE_TAG" "docker://$IMAGE_NAME:$ENVIRONMENT"
+      run: skopeo copy "docker://$IMAGE" "docker://$IMAGE_NAME:$ENVIRONMENT"
       env:
         ENVIRONMENT: ${{ inputs.environment }}
-        IMAGE_NAME: ${{ format('{0}/{1}/{2}', inputs.registry, inputs.system, inputs.name) }}
+        IMAGE: ${{ inputs.image }}
         IMAGE_TAG: ${{ format('{0}-{1}', github.sha, github.run_number) }}
 
     - name: Wait for Argo CD application to sync
@@ -135,5 +138,5 @@ runs:
         CLUSTER_TYPE: ${{ inputs.cluster-type }}
         CHECK_ALL_CLUSTERS: ${{ inputs.check-all-clusters }}
         ENVIRONMENT: ${{ inputs.environment }}
-        IMAGE: ${{ format('{0}/{1}/{2}:{3}', inputs.registry, inputs.system, inputs.name, inputs.environment) }}
+        IMAGE: ${{ inputs.image }}
         DEPLOYVIA_URL: ${{ format('https://deployvia.{0}/deployment', (inputs.environment == 'sandbox' && 'dev-elvia.io' || 'elvia.io')) }}

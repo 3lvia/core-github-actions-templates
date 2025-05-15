@@ -239,6 +239,8 @@ jobs:
       packages: write # Required for publishing to GitHub Container Registry
       pull-requests: write
       security-events: write
+    outputs:
+      image: ${{ steps.build.outputs.image-name-with-digest }}
     environment: build
     steps:
       - name: Checkout this repository
@@ -261,6 +263,7 @@ jobs:
           path: 'core'
 
       - uses: ./build
+        id: build
         with:
           checkout: 'false'
           name: ${{ matrix.application-name }}
@@ -367,6 +370,7 @@ jobs:
           name: ${{ matrix.application-name }}
           system: ${{ env.SYSTEM_NAME }}
           environment: ${{ matrix.environment }}
+          image: ${{ needs.build.outputs.image }}
           slack-channel: '#team-core-alerts-muted'
           ACR_USERNAME: ${{ vars.ACR_USERNAME }}
           ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
