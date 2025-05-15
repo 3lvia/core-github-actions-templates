@@ -137,6 +137,7 @@ you must first add your GitHub repository to [github-repositories-terraform](htt
 
 | Name                     | Description                                                    |
 | ------------------------ | -------------------------------------------------------------- |
+| `image`                  | Same as `image-name-with-digest`.                              |
 | `image-digest`           | Digest of the Docker image that was built.                     |
 | `image-name-with-digest` | Name of the Docker image that was built, including the digest. |
 | `image-name-with-tag`    | Name of the Docker image that was built, including the tag.    |
