@@ -121,6 +121,7 @@ jobs:
             "runner": ["$RUNNER"],
             "application-name": [
               "${{ env.APPLICATION_BASE_NAME }}-go",
+              "${{ env.APPLICATION_BASE_NAME }}-python"
             ],
             environment: ["sandbox", "dev"]
           }
@@ -414,6 +415,7 @@ jobs:
           helm-chart-repository-url: 'https://raw.githubusercontent.com/3lvia/kubernetes-charts/819af167eae45675474fc833019fd50517136799'
           slack-channel: '#team-core-alerts-muted'
           runtime-cloud-provider: ${{ matrix.runtime-cloud-provider }}
+          dry-run: ${{ matrix.application-name == 'demo-api' && 'false' || 'true' }} # dry-run everything except demo-api, since rest is deployed via Argo CD
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
           GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
           GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
