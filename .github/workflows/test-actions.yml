@@ -239,9 +239,9 @@ jobs:
       pull-requests: write
       security-events: write
     outputs:
-      image-demo-api: ${{ steps.build-demo-api.outputs.image-name-with-digest }}
-      image-demo-api-go: ${{ steps.build-demo-api-go.outputs.image-name-with-digest }}
-      image-demo-api-python: ${{ steps.build-demo-api-python.outputs.image-name-with-digest }}
+      image-demo-api: ${{ steps.build.outputs.image-name-with-digest-demo-api }}
+      image-demo-api-go: ${{ steps.build.outputs.image-name-with-digest-demo-api-go }}
+      image-demo-api-python: ${{ steps.build.outputs.image-name-with-digest-demo-api-python }}
     environment: build
     steps:
       - name: Checkout this repository
@@ -264,7 +264,6 @@ jobs:
           path: 'core'
 
       - uses: ./build
-        id: 'build-${{ matrix.application-name }}'
         with:
           checkout: 'false'
           name: ${{ matrix.application-name }}
@@ -274,6 +273,13 @@ jobs:
           trivy-upload-report: 'true'
           trivy-post-comment: 'true'
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
+
+      - name: Set build output
+        id: build
+        run: echo "image-name-with-digest-$APPLICATION_NAME=$IMAGE_NAME_WITH_DIGEST" >> "$GITHUB_OUTPUT"
+        env:
+          APPLICATION_NAME: ${{ matrix.application-name }}
+          IMAGE_NAME_WITH_DIGEST: ${{ steps.build.outputs.image-name-with-digest }}
 
   build-vulnerable-service:
     name: Build Vulnerable Service
