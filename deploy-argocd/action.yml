@@ -11,6 +11,12 @@ inputs:
     description: 'Type of cluster to check deployment status for. Can be `aks`, `gke` or `iss`.'
     required: true
     default: 'aks'
+  check-all-clusters:
+    description: |
+      If `true`, the action will check all clusters for deployment status.
+      If `false`, the action will only check the cluster specified in `cluster-type`.
+    required: false
+    default: 'false'
   environment:
     description: 'Environment to deploy to.'
     required: true
@@ -25,7 +31,9 @@ inputs:
     description: 'Password for Azure Container Registry, if using it.'
     required: true
   checkout:
-    description: 'If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.'
+    description: |
+      If `true`, the action will check out the repository.
+      If `false`, the action will assume the repository has already been checked out.
     required: false
     default: 'true'
   slack-channel:
@@ -99,47 +107,6 @@ runs:
           let idToken = await core_.getIDToken()
           core_.setOutput('token', idToken)
 
-    - name: Check if image digest has changed
-      shell: bash
-      id: check-image-digest
-      run: |
-        # Check if image digest has changed
-
-        # NOTE: for some reason, skopeo inspect does not work, complains about 403.
-        # As a a workaround, we just pull the images and check the digests with docker inspect.
-        # Another option would be docker manifest inspect which supports not pulling, but the command is experimental.
-
-        if ! docker pull "$OLD_IMAGE"; then
-          echo 'Failed to pull old image. This may be expected if the image does not exist yet.'
-          echo 'Proceeding with deployment.'
-          echo 'skip-deployment=false' >> "$GITHUB_OUTPUT"
-          exit 0
-        fi
-
-        docker pull "$NEW_IMAGE"
-
-        old_image_digest=$(docker inspect -f '{{index .RepoDigests 0}}' "$OLD_IMAGE" | cut -d '@' -f2)
-        new_image_digest=$(docker inspect -f '{{index .RepoDigests 0}}' "$NEW_IMAGE" | cut -d '@' -f2)
-
-        if [[ "$old_image_digest" == "$new_image_digest" ]]; then
-          echo 'Image digest has not changed from currently deployed image.'
-          printf 'Skipping deployment.\n\n'
-          echo "Currently deployed image: $OLD_IMAGE"
-          echo "Currently deployed digest: $old_image_digest"
-          echo "skip-deployment=true" >> "$GITHUB_OUTPUT"
-        else
-          echo 'Image digest has changed from currently deployed image.'
-          printf 'Proceeding with deployment.\n\n'
-          echo "Currently deployed image: $OLD_IMAGE"
-          printf 'Currently deployed digest: %s\n\n' "$old_image_digest"
-          echo "New image: $NEW_IMAGE"
-          echo "New digest: $new_image_digest"
-          echo "skip-deployment=false" >> "$GITHUB_OUTPUT"
-        fi
-      env:
-        OLD_IMAGE: ${{ format('{0}/{1}/{2}:{3}', inputs.registry, inputs.system, inputs.name, inputs.environment) }}
-        NEW_IMAGE: ${{ format('{0}/{1}/{2}:{3}-{4}', inputs.registry, inputs.system, inputs.name, github.sha, github.run_number) }}
-
     - name: Copy image to new tag and push
       if: ${{ steps.check-image-digest.outputs.skip-deployment != 'true' }}
       shell: bash
@@ -156,8 +123,9 @@ runs:
         # Wait for Argo CD application to sync
         curl -v \
           -H "X-GitHub-OIDC-Token: $GH_ID_TOKEN" \
+          -H 'X-Timeout: 3m' \
           -H 'Content-Type: application/json' \
-          -d "{\"image\":\"$IMAGE\",\"system\":\"$SYSTEM\",\"cluster_type\":\"$CLUSTER_TYPE\",\"environment\":\"$ENVIRONMENT\",\"application_name\":\"$NAME\"}" \
+          -d "{\"image\":\"$IMAGE\",\"system\":\"$SYSTEM\",\"cluster_type\":\"$CLUSTER_TYPE\",\"environment\":\"$ENVIRONMENT\",\"application_name\":\"$NAME\",\"check_all_clusters\":\"$CHECK_ALL_CLUSTERS\"}" \
           --fail-with-body \
           "$DEPLOYVIA_URL"
       env:
@@ -165,6 +133,7 @@ runs:
         NAME: ${{ inputs.name }}
         SYSTEM: ${{ inputs.system }}
         CLUSTER_TYPE: ${{ inputs.cluster-type }}
+        CHECK_ALL_CLUSTERS: ${{ inputs.check-all-clusters }}
         ENVIRONMENT: ${{ inputs.environment }}
         IMAGE: ${{ format('{0}/{1}/{2}:{3}', inputs.registry, inputs.system, inputs.name, inputs.environment) }}
         DEPLOYVIA_URL: ${{ format('https://deployvia.{0}/deployment', (inputs.environment == 'sandbox' && 'dev-elvia.io' || 'elvia.io')) }}
