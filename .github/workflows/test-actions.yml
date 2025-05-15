@@ -239,9 +239,9 @@ jobs:
       pull-requests: write
       security-events: write
     outputs:
-      image-demo-api: ${{ steps.build.outputs.image-name-with-digest-demo-api }}
-      image-demo-api-go: ${{ steps.build.outputs.image-name-with-digest-demo-api-go }}
-      image-demo-api-python: ${{ steps.build.outputs.image-name-with-digest-demo-api-python }}
+      image-demo-api: ${{ steps.build-output.outputs.image-name-with-digest-demo-api }}
+      image-demo-api-go: ${{ steps.build-output.outputs.image-name-with-digest-demo-api-go }}
+      image-demo-api-python: ${{ steps.build-output.outputs.image-name-with-digest-demo-api-python }}
     environment: build
     steps:
       - name: Checkout this repository
@@ -276,7 +276,7 @@ jobs:
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
 
       - name: Set build output
-        id: build
+        id: build-output
         run: echo "image-name-with-digest-$APPLICATION_NAME=$IMAGE_NAME_WITH_DIGEST" >> "$GITHUB_OUTPUT"
         env:
           APPLICATION_NAME: ${{ matrix.application-name }}
