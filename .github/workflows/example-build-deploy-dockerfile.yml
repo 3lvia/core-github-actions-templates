@@ -106,6 +106,7 @@ jobs:
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
+          dry-run: 'true'
 # END REMOVE FROM EXAMPLE
 
   deploy-test:
@@ -151,6 +152,7 @@ jobs:
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
+          dry-run: 'true'
 # END REMOVE FROM EXAMPLE
 
   deploy-prod:
@@ -196,4 +198,5 @@ jobs:
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
+          dry-run: 'true'
 # END REMOVE FROM EXAMPLE

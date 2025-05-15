@@ -108,6 +108,7 @@ jobs:
           GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
+          dry-run: 'true'
 # END REMOVE FROM EXAMPLE
 
   deploy-test:
@@ -155,6 +156,7 @@ jobs:
           GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
+          dry-run: 'true'
 # END REMOVE FROM EXAMPLE
 
   deploy-prod:
@@ -202,4 +204,5 @@ jobs:
           GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
+          dry-run: 'true'
 # END REMOVE FROM EXAMPLE
