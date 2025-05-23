@@ -17,7 +17,7 @@ jobs:
       security-events: write
       packages: write
     env:
-      IMAGE_NAME: 'ghcr.io/3lvia/arc'
+      IMAGE_NAME: 'ghcr.io/3lvia/actions-runner'
       TRIVY_SARIF: 'trivy-results.sarif'
     steps:
       - name: Checkout repository
@@ -36,7 +36,7 @@ jobs:
       - name: Build image with cache and push to registry
         uses: docker/build-push-action@v6
         with:
-          context: '.github/arc'
+          context: 'arc'
           push: 'true'
           tags: "${{ env.IMAGE_NAME }}:${{ github.sha }}${{ (github.event_name == 'push' && github.ref == 'refs/heads/trunk') && format(',{0}:latest', env.IMAGE_NAME) || '' }}"
           cache-from: 'type=registry,ref=${{ env.IMAGE_NAME }}:latest'

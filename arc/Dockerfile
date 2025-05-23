@@ -71,15 +71,17 @@ RUN apt-get update -y && \
         iptables \
         podman \
         buildah \
+        jq \
         apt-transport-https \
         ca-certificates \
         gnupg \
-        slirp4netns
+        slirp4netns \
+        skopeo
 
-ARG NODEJS_VERSION=20
+ARG NODEJS_VERSION=22
 ARG TRIVY_VERSION=0.51.1
 
-# Install Node.js v20
+# Install Node.js v22
 RUN curl -fsSL https://deb.nodesource.com/setup_${NODEJS_VERSION}.x | bash - && \
     apt-get install -y nodejs
 
@@ -89,7 +91,7 @@ RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/
 # Install Azure CLI
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
-# Install .NET 6, 7 and 8
+# Install .NET 6, 7, 8 and 9
 # (The install script for Azure CLI already adds the Microsoft package repository, so we can just install the .NET packages from there)
 RUN apt-get install -y \
     dotnet-sdk-6.0 \
@@ -102,6 +104,10 @@ RUN apt-get install -y \
 RUN apt-get install -y \
     dotnet-sdk-8.0 \
     aspnetcore-runtime-8.0
+
+RUN apt-get install -y \
+    dotnet-sdk-9.0 \
+    aspnetcore-runtime-9.0
 
 # Install gcloud CLI
 RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
