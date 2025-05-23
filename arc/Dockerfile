@@ -64,9 +64,11 @@ COPY --from=build /usr/local/lib/docker/cli-plugins/docker-buildx /usr/local/lib
 
 RUN install -o root -g root -m 755 docker/* /usr/bin/ && rm -rf docker
 
+# ---------------------------------------------------------------------------
 # End of source
 # ---------------------------------------------------------------------------
 
+# Install common packages
 RUN apt-get update -y && \
     apt-get upgrade -y && \
     apt-get install -y \
@@ -82,7 +84,8 @@ RUN apt-get update -y && \
         gnupg \
         slirp4netns \
         skopeo \
-        wget
+        wget \
+        golang
 
 ARG NODEJS_VERSION=22
 ARG TRIVY_VERSION=0.51.1
@@ -100,14 +103,13 @@ RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 # Install .NET 8 and 9
 RUN wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
     dpkg -i packages-microsoft-prod.deb && \
-    rm packages-microsoft-prod.deb
-
-RUN apt-get update && \
+    rm packages-microsoft-prod.deb && \
+    apt-get update && \
     apt-get install -y \
-    dotnet-sdk-8.0 \
-    aspnetcore-runtime-8.0 \
-    dotnet-sdk-9.0 \
-    aspnetcore-runtime-9.0
+        dotnet-sdk-8.0 \
+        aspnetcore-runtime-8.0 \
+        dotnet-sdk-9.0 \
+        aspnetcore-runtime-9.0
 
 # Install gcloud CLI
 RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
