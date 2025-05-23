@@ -85,7 +85,8 @@ RUN apt-get update -y && \
         slirp4netns \
         skopeo \
         wget \
-        golang
+        golang \
+        golang-1.23-go
 
 ARG NODEJS_VERSION=22
 ARG TRIVY_VERSION=0.51.1
@@ -111,11 +112,13 @@ RUN wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod
         dotnet-sdk-9.0 \
         aspnetcore-runtime-9.0
 
-# Install gcloud CLI
+# Install gcloud CLI and GKE auth plugin
 RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
     echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
     apt-get update -y && \
-    apt-get install -y google-cloud-cli
+    apt-get install -y \
+        google-cloud-cli \
+        google-cloud-cli-gke-gcloud-auth-plugin
 
 # Install kubectl
 RUN curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg && \
