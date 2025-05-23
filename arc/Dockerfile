@@ -137,6 +137,11 @@ RUN wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | te
     apt-get update -y && \
     apt-get install -y gh
 
+# Install Cosign
+RUN curl -O -L "https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64" && \
+    mv cosign-linux-amd64 /usr/local/bin/cosign && \
+    chmod +x /usr/local/bin/cosign
+
 RUN usermod \
     --add-subuids 100000-165535 \
     --add-subgids 100000-165535 runner
