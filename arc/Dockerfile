@@ -1,12 +1,12 @@
 # Source: https://github.com/actions/runner/blob/main/images/Dockerfile
-FROM mcr.microsoft.com/dotnet/runtime-deps:6.0-jammy as build
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-jammy AS build
 
 ARG TARGETOS=linux
 ARG TARGETARCH=amd64
-ARG RUNNER_VERSION=2.316.1
-ARG RUNNER_CONTAINER_HOOKS_VERSION=0.6.0
-ARG DOCKER_VERSION=25.0.4
-ARG BUILDX_VERSION=0.13.1
+ARG RUNNER_VERSION=2.324.0
+ARG RUNNER_CONTAINER_HOOKS_VERSION=0.7.0
+ARG DOCKER_VERSION=28.1.1
+ARG BUILDX_VERSION=0.23.0
 
 RUN apt update -y && apt install curl unzip -y
 
@@ -32,17 +32,22 @@ RUN export RUNNER_ARCH=${TARGETARCH} \
         "https://github.com/docker/buildx/releases/download/v${BUILDX_VERSION}/buildx-v${BUILDX_VERSION}.linux-${TARGETARCH}" \
     && chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx
 
-FROM mcr.microsoft.com/dotnet/runtime-deps:6.0-jammy
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-jammy
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV RUNNER_MANUALLY_TRAP_SIG=1
 ENV ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT=1
 ENV ImageOS=ubuntu22
 
-RUN apt-get update -y \
-    && apt-get install -y --no-install-recommends \
-    sudo \
-    lsb-release \
+# 'gpg-agent' and 'software-properties-common' are needed for the 'add-apt-repository' command that follows
+RUN apt update -y \
+    && apt install -y --no-install-recommends sudo lsb-release gpg-agent software-properties-common curl jq unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Configure git-core/ppa based on guidance here:  https://git-scm.com/download/linux
+RUN add-apt-repository ppa:git-core/ppa \
+    && apt update -y \
+    && apt install -y git \
     && rm -rf /var/lib/apt/lists/*
 
 RUN adduser --disabled-password --gecos "" --uid 1001 runner \
@@ -76,7 +81,8 @@ RUN apt-get update -y && \
         ca-certificates \
         gnupg \
         slirp4netns \
-        skopeo
+        skopeo \
+        wget
 
 ARG NODEJS_VERSION=22
 ARG TRIVY_VERSION=0.51.1
@@ -91,21 +97,15 @@ RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/
 # Install Azure CLI
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
-# Install .NET 6, 7, 8 and 9
-# (The install script for Azure CLI already adds the Microsoft package repository, so we can just install the .NET packages from there)
-RUN apt-get install -y \
-    dotnet-sdk-6.0 \
-    aspnetcore-runtime-6.0
+# Install .NET 8 and 9
+RUN wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
+    dpkg -i packages-microsoft-prod.deb && \
+    rm packages-microsoft-prod.deb
 
-RUN apt-get install -y \
-    dotnet-sdk-7.0 \
-    aspnetcore-runtime-7.0
-
-RUN apt-get install -y \
+RUN apt-get update && \
+    apt-get install -y \
     dotnet-sdk-8.0 \
-    aspnetcore-runtime-8.0
-
-RUN apt-get install -y \
+    aspnetcore-runtime-8.0 \
     dotnet-sdk-9.0 \
     aspnetcore-runtime-9.0
 
