@@ -64,6 +64,10 @@ runs:
         done
       working-directory: ${{ inputs.working-directory }}
 
+    - name: Setup Go
+      if: ${{ inputs.language == 'go' }}
+      uses: actions/setup-go@v5
+
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
       with:
