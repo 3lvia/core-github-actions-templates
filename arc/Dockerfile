@@ -86,7 +86,8 @@ RUN apt-get update -y && \
         skopeo \
         wget \
         golang \
-        golang-1.23-go
+        golang-1.23-go \
+        python3-pip
 
 ARG NODEJS_VERSION=22
 ARG TRIVY_VERSION=0.51.1
