@@ -42,12 +42,6 @@ runs:
         echo "codeql-config.yml:"
         cat codeql-config.yml
 
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
-      with:
-        config-file: 'codeql-config.yml'
-        languages: ${{ inputs.language }}
-
     - name: Restore .NET tools
       if: ${{ inputs.language == 'csharp' }}
       shell: bash
@@ -67,6 +61,12 @@ runs:
     - name: Setup Go
       if: ${{ inputs.language == 'go' }}
       uses: actions/setup-go@v5
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        config-file: 'codeql-config.yml'
+        languages: ${{ inputs.language }}
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
