@@ -1,4 +1,8 @@
-# Source: https://github.com/actions/runner/blob/main/images/Dockerfile
+# ---------------------------------------------------------------------------
+# Start of source: 
+# https://github.com/actions/runner/blob/main/images/Dockerfile
+# ---------------------------------------------------------------------------
+
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-jammy AS build
 
 ARG TARGETOS=linux
@@ -147,6 +151,13 @@ RUN wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | te
 RUN curl -O -L "https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64" && \
     mv cosign-linux-amd64 /usr/local/bin/cosign && \
     chmod +x /usr/local/bin/cosign
+
+
+RUN export HOME=/home/runner 
+
+# ---------------------------------------------------------------------------
+# Start of source
+# ---------------------------------------------------------------------------
 
 RUN usermod \
     --add-subuids 100000-165535 \
