@@ -19,6 +19,10 @@ inputs:
     description: 'Language to run CodeQL analyze on. Use a matrix strategy to run for multiple languages.'
     required: false
     default: 'csharp'
+  go-version:
+    description: 'Version of Go to use. Only used if `language` is set to `go`.'
+    required: false
+    default: 'stable'
   upload-results:
     description: 'If `true` the action will upload CodeQL results to GitHub Security Code Scanning. If `false`, the action will not upload results.'
     required: false
@@ -61,6 +65,8 @@ runs:
     - name: Setup Go
       if: ${{ inputs.language == 'go' }}
       uses: actions/setup-go@v5
+      with:
+        go-version: ${{ inputs.go-version }}
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
