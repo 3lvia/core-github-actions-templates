@@ -87,7 +87,7 @@ RUN apt-get update -y && \
         wget \
         golang \
         golang-1.23-go \
-        oras
+        pipx
 
 ARG NODEJS_VERSION=22
 ARG TRIVY_VERSION=0.51.1
@@ -147,6 +147,14 @@ RUN wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | te
 RUN curl -O -L "https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64" && \
     mv cosign-linux-amd64 /usr/local/bin/cosign && \
     chmod +x /usr/local/bin/cosign
+
+# Install oras
+RUN export ORAS_VERSION="1.2.2" && \
+    curl -LO "https://github.com/oras-project/oras/releases/download/v${ORAS_VERSION}/oras_${ORAS_VERSION}_linux_amd64.tar.gz" && \
+    mkdir -p oras-install/ && \
+    tar -zxf oras_${ORAS_VERSION}_*.tar.gz -C oras-install/ && \
+    sudo mv oras-install/oras /usr/local/bin/ && \
+    rm -rf oras_${ORAS_VERSION}_*.tar.gz oras-install/
 
 RUN usermod \
     --add-subuids 100000-165535 \
