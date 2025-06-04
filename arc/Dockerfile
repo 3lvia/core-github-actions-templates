@@ -85,9 +85,9 @@ RUN apt-get update -y && \
         slirp4netns \
         skopeo \
         wget \
-        golang \
-        golang-1.23-go \
-        python3-pip
+        python3-pip \
+        util-linux \
+        file
 
 ARG NODEJS_VERSION=22
 ARG TRIVY_VERSION=0.51.1
