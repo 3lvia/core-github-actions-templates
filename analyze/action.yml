@@ -35,6 +35,18 @@ runs:
       if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@v4
 
+    - name: Setup Go
+      if: ${{ inputs.language == 'go' }}
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ inputs.go-version }}
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        config-file: 'codeql-config.yml'
+        languages: ${{ inputs.language }}
+
     - name: Create codeql-config
       shell: bash
       run: |
@@ -61,18 +73,6 @@ runs:
           dotnet build "$project"
         done
       working-directory: ${{ inputs.working-directory }}
-
-    - name: Setup Go
-      if: ${{ inputs.language == 'go' }}
-      uses: actions/setup-go@v5
-      with:
-        go-version: ${{ inputs.go-version }}
-
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
-      with:
-        config-file: 'codeql-config.yml'
-        languages: ${{ inputs.language }}
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
