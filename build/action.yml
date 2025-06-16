@@ -11,16 +11,6 @@ inputs:
   namespace:
     description: 'Namespace or system of the application. Required for Elvia applications.'
     required: false
-  csproj-file:
-    description: 'Path to a csproj-file, e.g. `src/my-app/my-app.csproj`.'
-    required: false
-    deprecationMessage: |
-      Please use `project-file` instead, which is a drop-in replacement. `csproj-file` will be removed in the future.
-  dockerfile:
-    description: 'Path to a Dockerfile, e.g. `src/Dockerfile`.'
-    required: false
-    deprecationMessage: |
-      Please use `project-file` instead, which is a drop-in replacement. `dockerfile` will be removed in the future.
   project-file:
     description: |
       Path to a `.csproj`-file for .NET, a `go.mod` file for Go, a `pyproject.toml` file for Python or a Dockerfile for any other project.
