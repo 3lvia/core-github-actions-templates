@@ -4,13 +4,13 @@ on:
   push:
     branches: [trunk]
     paths:
-      - '.github/workflows/example-*.yml'
-      - '.github/workflows/update-starter-workflows.yml'
+      - '.github/workflows/example-*.yaml'
+      - '.github/workflows/update-starter-workflows.yaml'
   pull_request:
     branches: [trunk]
     paths:
-      - '.github/workflows/example-*.yml'
-      - '.github/workflows/update-starter-workflows.yml'
+      - '.github/workflows/example-*.yaml'
+      - '.github/workflows/update-starter-workflows.yaml'
 
 env:
   REPOSITORY: 'core-github-actions-templates'
@@ -48,7 +48,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p dotgithub/workflow-templates
-          for workflow_path in ${{ env.REPOSITORY }}/.github/workflows/example-*.yml; do
+          for workflow_path in $REPOSITORY/.github/workflows/example-*.yaml; do
             echo "Processing $workflow_path"
 
             file_name=$(basename "$workflow_path")
@@ -99,6 +99,8 @@ jobs:
               echo "Properties file $new_workflow_properties_file already exists for $new_workflow_path, will not overwrite."
             fi
           done
+        env:
+          REPOSITORY: ${{ env.REPOSITORY }}
 
       - name: Get examples diff
         if: github.event_name == 'pull_request'

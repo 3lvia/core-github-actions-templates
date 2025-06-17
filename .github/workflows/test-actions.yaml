@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [trunk]
     paths:
-      - '.github/workflows/test-actions.yml'
+      - '.github/workflows/test-actions.yaml'
       - '**/action.yml'
       - '!README.md'
   workflow_dispatch:
@@ -96,15 +96,15 @@ jobs:
             "runtime-cloud-provider": ["AKS","GKE"],
             "include": [
               {
-                "helm-values-file": ".github/deploy/values-demo-api.yml"
+                "helm-values-file": ".github/deploy/values-demo-api.yaml"
               },
               {
                 "application-name": "${{ env.APPLICATION_BASE_NAME }}-go",
-                "helm-values-file": ".github/deploy/values-demo-api-go.yml"
+                "helm-values-file": ".github/deploy/values-demo-api-go.yaml"
               },
               {
                 "application-name": "${{ env.APPLICATION_BASE_NAME }}-go",
-                "helm-values-file": ".github/deploy/values-demo-api-python.yml"
+                "helm-values-file": ".github/deploy/values-demo-api-python.yaml"
               },
             ]
           }
@@ -422,8 +422,7 @@ jobs:
           name: ${{ matrix.application-name }}
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'dev'
-          helm-values-file: 'core/.github/deploy/values-${{ matrix.application-name }}.yml'
-          helm-chart-repository-url: 'https://raw.githubusercontent.com/3lvia/kubernetes-charts/819af167eae45675474fc833019fd50517136799'
+          helm-values-file: 'core/.github/deploy/values-${{ matrix.application-name }}.yaml'
           slack-channel: '#team-core-alerts-muted'
           runtime-cloud-provider: ${{ matrix.runtime-cloud-provider }}
           dry-run: ${{ matrix.application-name == 'demo-api' && 'false' || 'true' }} # dry-run everything except demo-api, since rest is deployed via Argo CD
@@ -562,9 +561,11 @@ jobs:
 
       - name: Check that secret was fetched successfully
         run: |
-          if [[ -z '${{ env.APP_INSIGHTS_NAME }}' ]]; then
+          if [[ -z "$APP_INSIGHTS_NAME" ]]; then
             echo 'Secret was not fetched.'
             exit 1
           else
             echo 'Secret was fetched successfully!'
           fi
+        env:
+          APP_INSIGHTS_NAME: ${{ env.APP_INSIGHTS_NAME }}

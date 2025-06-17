@@ -1,4 +1,4 @@
-name: Build and deploy Python to Atlas on Google Cloud
+name: Build and deploy Python to Atlas
 
 on:
   push:
@@ -17,7 +17,7 @@ env:
   SYSTEM_NAME: 'core'
   APPLICATION_NAME: 'demo-api-python'
   PROJECT_FILE: 'applications/demo-api-python/pyproject.toml'
-  HELM_VALUES_FILE: '.github/deploy/values-demo-api-python.yml'
+  HELM_VALUES_FILE: '.github/deploy/values-demo-api-python.yaml'
 
 jobs:
   analyze:
@@ -140,12 +140,10 @@ jobs:
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'dev'
           helm-values-file: ${{ env.HELM_VALUES_FILE }}
-          runtime-cloud-provider: 'GKE'
           # Will post to the Slack channel of your system if the deployment fails.
           # Can be commented out if you don't want this.
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
-          GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
-          GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
+          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
           dry-run: 'true'
@@ -188,12 +186,10 @@ jobs:
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'test'
           helm-values-file: ${{ env.HELM_VALUES_FILE }}
-          runtime-cloud-provider: 'GKE'
           # Will post to the Slack channel of your system if the deployment fails.
           # Can be commented out if you don't want this.
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
-          GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
-          GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
+          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
           dry-run: 'true'
@@ -236,12 +232,10 @@ jobs:
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'prod'
           helm-values-file: ${{ env.HELM_VALUES_FILE }}
-          runtime-cloud-provider: 'GKE'
           # Will post to the Slack channel of your system if the deployment fails.
           # Can be commented out if you don't want this.
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
-          GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
-          GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
+          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
           dry-run: 'true'

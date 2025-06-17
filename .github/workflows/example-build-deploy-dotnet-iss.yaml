@@ -17,7 +17,7 @@ env:
   SYSTEM_NAME: 'iss'
   APPLICATION_NAME: 'demo-api'
   PROJECT_FILE: 'applications/demo-api/demo-api/core-demo-api.csproj'
-  HELM_VALUES_FILE: '.github/deploy/values-demo-api.yml'
+  HELM_VALUES_FILE: '.github/deploy/values-demo-api.yaml'
 
 jobs:
   analyze:
