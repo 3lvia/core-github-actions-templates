@@ -1,4 +1,4 @@
-name: Build and deploy .NET to Atlas
+name: Build and deploy Go to Atlas on Google Cloud
 
 on:
   push:
@@ -15,9 +15,9 @@ on:
 
 env:
   SYSTEM_NAME: 'core'
-  APPLICATION_NAME: 'demo-api'
-  PROJECT_FILE: 'applications/demo-api/demo-api/core-demo-api.csproj'
-  HELM_VALUES_FILE: '.github/deploy/values-demo-api.yml'
+  APPLICATION_NAME: 'demo-api-go'
+  PROJECT_FILE: 'applications/demo-api-go/go.mod'
+  HELM_VALUES_FILE: '.github/deploy/values-demo-api-go.yaml'
 
 jobs:
   analyze:
@@ -38,8 +38,8 @@ jobs:
         id: app-token
         with:
           app-id: ${{ vars.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           repositories: 'core'
 
       - name: Checkout core repository
@@ -52,90 +52,11 @@ jobs:
       - uses: 3lvia/core-github-actions-templates/analyze@trunk
         with:
           # This can be set to a more specific path if you want to analyze only a part of the repository.
-          working-directory: 'applications/demo-api/demo-api'
-          language: 'csharp'
+          working-directory: '.'
+          language: 'go'
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
           upload-results: 'false'
-# END REMOVE FROM EXAMPLE
-
-  unit-tests:
-    name: Unit Tests
-    runs-on: elvia-runner
-    permissions:
-      contents: read
-      checks: write
-      issues: read
-      pull-requests: write
-    # Limits the number of concurrent runs of this job to one, and cancels any in progress.
-    concurrency:
-      group: '${{ github.workflow }}-${{ github.ref }}-unit-tests'
-      cancel-in-progress: true
-    steps:
-# START REMOVE FROM EXAMPLE
-      - name: Get GitHub App token
-        uses: actions/create-github-app-token@v2
-        id: app-token
-        with:
-          app-id: ${{ vars.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: 'core'
-
-      - name: Checkout core repository
-        uses: actions/checkout@v4
-        with:
-          repository: '3lvia/core'
-          token: ${{ steps.app-token.outputs.token }}
-# END REMOVE FROM EXAMPLE
-      - uses: 3lvia/core-github-actions-templates/unittest@trunk
-        with:
-          # This can be set to a more specific path if you want to search for tests in only a part of the repository.
-          working-directory: 'applications/demo-api/demo-api'
-          test-coverage: 'true'
-# START REMOVE FROM EXAMPLE
-          checkout: 'false'
-# END REMOVE FROM EXAMPLE
-
-  integration-tests:
-    name: Integration Tests
-    runs-on: elvia-runner
-    permissions:
-      contents: read
-      checks: write
-      issues: read
-      pull-requests: write
-      id-token: write
-    # Limits the number of concurrent runs of this job to one, and cancels any in progress.
-    concurrency:
-      group: '${{ github.workflow }}-${{ github.ref }}-integration-tests'
-      cancel-in-progress: true
-    steps:
-# START REMOVE FROM EXAMPLE
-      - name: Get GitHub App token
-        uses: actions/create-github-app-token@v2
-        id: app-token
-        with:
-          app-id: ${{ vars.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: 'core'
-
-      - name: Checkout core repository
-        uses: actions/checkout@v4
-        with:
-          repository: '3lvia/core'
-          token: ${{ steps.app-token.outputs.token }}
-# END REMOVE FROM EXAMPLE
-      - uses: 3lvia/core-github-actions-templates/integrationtest@trunk
-        with:
-          # This can be set to a more specific path if you want to search for tests in only a part of the repository.
-          working-directory: 'applications/demo-api/demo-api'
-          system: ${{ env.SYSTEM_NAME }}
-# START REMOVE FROM EXAMPLE
-          checkout: 'false'
-        env:
-          BASE_URL: 'https://core.dev-elvia.io/demo-api'
 # END REMOVE FROM EXAMPLE
 
   build-scan:
@@ -159,8 +80,8 @@ jobs:
         id: app-token
         with:
           app-id: ${{ vars.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           repositories: 'core'
 
       - name: Checkout core repository
@@ -186,8 +107,6 @@ jobs:
     # Require all jobs below to be successful before running this job.
     # Any of these can be commented out or removed if you want to deploy anyway.
     needs:
-      - unit-tests
-      - integration-tests
       - build-scan
       - analyze
     runs-on: elvia-runner
@@ -196,7 +115,7 @@ jobs:
       id-token: write
     # Limits the number of concurrent runs of this job to one, but DOES NOT cancel any in progress.
     concurrency:
-      group: '${{ github.workflow }}-${{ github.ref }}-deploy-dev'
+      group: 'dev-google--this-group-is-replaced-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'
     environment: dev
     steps:
 # START REMOVE FROM EXAMPLE
@@ -205,8 +124,8 @@ jobs:
         id: app-token
         with:
           app-id: ${{ vars.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           repositories: 'core'
 
       - name: Checkout core repository
@@ -221,12 +140,15 @@ jobs:
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'dev'
           helm-values-file: ${{ env.HELM_VALUES_FILE }}
+          runtime-cloud-provider: 'GKE'
           # Will post to the Slack channel of your system if the deployment fails.
           # Can be commented out if you don't want this.
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
-          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
+          GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
+          dry-run: 'true'
 # END REMOVE FROM EXAMPLE
 
   deploy-test:
@@ -239,7 +161,7 @@ jobs:
       id-token: write
     # Limits the number of concurrent runs of this job to one, but DOES NOT cancel any in progress.
     concurrency:
-      group: '${{ github.workflow }}-${{ github.ref }}-deploy-test'
+      group: 'test-google--this-group-is-replaced-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'
     environment: test
     # Only on push to trunk
     if: github.ref == 'refs/heads/trunk'
@@ -250,8 +172,8 @@ jobs:
         id: app-token
         with:
           app-id: ${{ vars.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           repositories: 'core'
 
       - name: Checkout core repository
@@ -266,12 +188,15 @@ jobs:
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'test'
           helm-values-file: ${{ env.HELM_VALUES_FILE }}
+          runtime-cloud-provider: 'GKE'
           # Will post to the Slack channel of your system if the deployment fails.
           # Can be commented out if you don't want this.
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
-          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
+          GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
+          dry-run: 'true'
 # END REMOVE FROM EXAMPLE
 
   deploy-prod:
@@ -284,7 +209,7 @@ jobs:
       id-token: write
     # Limits the number of concurrent runs of this job to one, but DOES NOT cancel any in progress.
     concurrency:
-      group: '${{ github.workflow }}-${{ github.ref }}-deploy-prod'
+      group: 'prod-google--this-group-is-replaced-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'
     environment: prod
     # Only on push to trunk
     if: github.ref == 'refs/heads/trunk'
@@ -295,8 +220,8 @@ jobs:
         id: app-token
         with:
           app-id: ${{ vars.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           repositories: 'core'
 
       - name: Checkout core repository
@@ -311,10 +236,13 @@ jobs:
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'prod'
           helm-values-file: ${{ env.HELM_VALUES_FILE }}
+          runtime-cloud-provider: 'GKE'
           # Will post to the Slack channel of your system if the deployment fails.
           # Can be commented out if you don't want this.
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
-          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
+          GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
+          dry-run: 'true'
 # END REMOVE FROM EXAMPLE

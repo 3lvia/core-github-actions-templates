@@ -1,4 +1,4 @@
-name: Build and deploy to Atlas with Dockerfile
+name: Build and deploy Go application to Atlas
 
 on:
   push:
@@ -16,10 +16,49 @@ on:
 env:
   SYSTEM_NAME: 'core'
   APPLICATION_NAME: 'demo-api-go'
-  PROJECT_FILE: 'applications/demo-api-go/Dockerfile'
-  HELM_VALUES_FILE: '.github/deploy/values-demo-api-go.yml'
+  PROJECT_FILE: 'applications/demo-api-go/go.mod'
+  HELM_VALUES_FILE: '.github/deploy/values-demo-api-go.yaml'
 
 jobs:
+  analyze:
+    name: Analyze
+    runs-on: elvia-runner
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    # Limits the number of concurrent runs of this job to one, and cancels any in progress.
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.ref }}-analyze'
+      cancel-in-progress: true
+    steps:
+# START REMOVE FROM EXAMPLE
+      - name: Get GitHub App token
+        uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ vars.GH_APP_ID }}
+          owner: ${{ github.repository_owner }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          repositories: 'core'
+
+      - name: Checkout core repository
+        uses: actions/checkout@v4
+        id: checkout
+        with:
+          repository: '3lvia/core'
+          token: ${{ steps.app-token.outputs.token }}
+# END REMOVE FROM EXAMPLE
+      - uses: 3lvia/core-github-actions-templates/analyze@trunk
+        with:
+          # This can be set to a more specific path if you want to analyze only a part of the repository.
+          working-directory: '.'
+          language: 'go'
+# START REMOVE FROM EXAMPLE
+          checkout: 'false'
+          upload-results: 'false'
+# END REMOVE FROM EXAMPLE
+
   build-scan:
     name: Build and Scan
     runs-on: elvia-runner
@@ -69,11 +108,12 @@ jobs:
     # Any of these can be commented out or removed if you want to deploy anyway.
     needs:
       - build-scan
+      - analyze
     runs-on: elvia-runner
     permissions:
       contents: read
       id-token: write
-    # Limits the number of concurrent runs of this job to one, and cancels any in progress.
+    # Limits the number of concurrent runs of this job to one, but DOES NOT cancel any in progress.
     concurrency:
       group: 'dev-azure--this-group-is-replaced-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'
     environment: dev
@@ -117,7 +157,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    # Limits the number of concurrent runs of this job to one, and cancels any in progress.
+    # Limits the number of concurrent runs of this job to one, but DOES NOT cancel any in progress.
     concurrency:
       group: 'test-azure--this-group-is-replaced-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'
     environment: test
@@ -163,7 +203,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    # Limits the number of concurrent runs of this job to one, and cancels any in progress.
+    # Limits the number of concurrent runs of this job to one, but DOES NOT cancel any in progress.
     concurrency:
       group: 'prod-azure--this-group-is-replaced-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'
     environment: prod

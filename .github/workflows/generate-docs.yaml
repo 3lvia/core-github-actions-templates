@@ -4,7 +4,7 @@ on:
   push:
     branches: [trunk]
     paths:
-      - '.github/workflows/generate-docs.yml'
+      - '.github/workflows/generate-docs.yaml'
       - '**/action.yml'
       - 'README.md'
   workflow_dispatch:

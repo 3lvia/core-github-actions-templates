@@ -1,4 +1,4 @@
-name: Build and deploy Go application to Atlas
+name: Build and deploy Python to Atlas on Google Cloud
 
 on:
   push:
@@ -15,9 +15,9 @@ on:
 
 env:
   SYSTEM_NAME: 'core'
-  APPLICATION_NAME: 'demo-api-go'
-  PROJECT_FILE: 'applications/demo-api-go/go.mod'
-  HELM_VALUES_FILE: '.github/deploy/values-demo-api-go.yml'
+  APPLICATION_NAME: 'demo-api-python'
+  PROJECT_FILE: 'applications/demo-api-python/pyproject.toml'
+  HELM_VALUES_FILE: '.github/deploy/values-demo-api-python.yaml'
 
 jobs:
   analyze:
@@ -53,7 +53,7 @@ jobs:
         with:
           # This can be set to a more specific path if you want to analyze only a part of the repository.
           working-directory: '.'
-          language: 'go'
+          language: 'python'
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
           upload-results: 'false'
@@ -115,7 +115,7 @@ jobs:
       id-token: write
     # Limits the number of concurrent runs of this job to one, but DOES NOT cancel any in progress.
     concurrency:
-      group: 'dev-azure--this-group-is-replaced-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'
+      group: '${{ github.workflow }}-${{ github.ref }}-deploy-dev'
     environment: dev
     steps:
 # START REMOVE FROM EXAMPLE
@@ -140,10 +140,12 @@ jobs:
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'dev'
           helm-values-file: ${{ env.HELM_VALUES_FILE }}
+          runtime-cloud-provider: 'GKE'
           # Will post to the Slack channel of your system if the deployment fails.
           # Can be commented out if you don't want this.
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
-          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
+          GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
           dry-run: 'true'
@@ -159,7 +161,7 @@ jobs:
       id-token: write
     # Limits the number of concurrent runs of this job to one, but DOES NOT cancel any in progress.
     concurrency:
-      group: 'test-azure--this-group-is-replaced-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'
+      group: '${{ github.workflow }}-${{ github.ref }}-deploy-test'
     environment: test
     # Only on push to trunk
     if: github.ref == 'refs/heads/trunk'
@@ -186,10 +188,12 @@ jobs:
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'test'
           helm-values-file: ${{ env.HELM_VALUES_FILE }}
+          runtime-cloud-provider: 'GKE'
           # Will post to the Slack channel of your system if the deployment fails.
           # Can be commented out if you don't want this.
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
-          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
+          GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
           dry-run: 'true'
@@ -205,7 +209,7 @@ jobs:
       id-token: write
     # Limits the number of concurrent runs of this job to one, but DOES NOT cancel any in progress.
     concurrency:
-      group: 'prod-azure--this-group-is-replaced-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'
+      group: '${{ github.workflow }}-${{ github.ref }}-deploy-prod'
     environment: prod
     # Only on push to trunk
     if: github.ref == 'refs/heads/trunk'
@@ -232,10 +236,12 @@ jobs:
           namespace: ${{ env.SYSTEM_NAME }}
           environment: 'prod'
           helm-values-file: ${{ env.HELM_VALUES_FILE }}
+          runtime-cloud-provider: 'GKE'
           # Will post to the Slack channel of your system if the deployment fails.
           # Can be commented out if you don't want this.
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
-          AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
+          GC_SERVICE_ACCOUNT: ${{ vars.GC_SERVICE_ACCOUNT }}
+          GC_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GC_WORKLOAD_IDENTITY_PROVIDER }}
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
           dry-run: 'true'
