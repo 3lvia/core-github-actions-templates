@@ -16,7 +16,7 @@ on:
 env:
   SYSTEM_NAME: 'core'
   APPLICATION_NAME: 'demo-api'
-  PROJECT_FILE: 'applications/demo-api/demo-api/core-demo-api.csproj'
+  PROJECT_FILE: 'applications/demo-api/src/demo-api.csproj'
   HELM_VALUES_FILE: '.github/deploy/values-demo-api.yaml'
 
 jobs:
