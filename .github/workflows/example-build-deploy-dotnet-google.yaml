@@ -52,7 +52,7 @@ jobs:
       - uses: 3lvia/core-github-actions-templates/analyze@trunk
         with:
           # This can be set to a more specific path if you want to analyze only a part of the repository.
-          working-directory: 'applications/demo-api/demo-api'
+          working-directory: 'applications/demo-api/src'
           language: 'csharp'
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
@@ -92,7 +92,7 @@ jobs:
       - uses: 3lvia/core-github-actions-templates/unittest@trunk
         with:
           # This can be set to a more specific path if you want to search for tests in only a part of the repository.
-          working-directory: 'applications/demo-api/demo-api'
+          working-directory: 'applications/demo-api/src'
           test-coverage: 'true'
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
@@ -131,7 +131,7 @@ jobs:
       - uses: 3lvia/core-github-actions-templates/integrationtest@trunk
         with:
           # This can be set to a more specific path if you want to search for tests in only a part of the repository.
-          working-directory: 'applications/demo-api/demo-api'
+          working-directory: 'applications/demo-api/src'
           system: ${{ env.SYSTEM_NAME }}
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
