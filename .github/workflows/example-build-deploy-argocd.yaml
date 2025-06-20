@@ -1,0 +1,206 @@
+name: Build and deploy to Atlas with Argo CD
+
+on:
+  push:
+    branches: [trunk]
+##  Adding a path filter will only trigger the workflow if the files in the path are modified.
+##  This is very useful if you have a monorepo structure.
+##  See https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#onpushpull_requestpull_request_targetpathspaths-ignore for more information.
+##
+#    paths:
+#     - 'applications/my-app/**'
+##
+#  pull_request:
+#    branches: [trunk]
+
+env:
+  SYSTEM_NAME: 'core'
+  APPLICATION_NAME: 'demo-api-go'
+  PROJECT_FILE: 'applications/demo-api-go/go.mod'
+
+jobs:
+  build:
+    name: Build
+    runs-on: elvia-runner
+    permissions:
+      actions: read
+      contents: write
+      id-token: write
+      pull-requests: write
+      security-events: write
+    # Limits the number of concurrent runs of this job to one, and cancels any in progress.
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.ref }}-build'
+      cancel-in-progress: true
+    outputs:
+      image: ${{ steps.build.outputs.image }}
+    environment: build
+    steps:
+# START REMOVE FROM EXAMPLE
+      - name: Get GitHub App token
+        uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: 'core'
+
+      - name: Checkout core repository
+        uses: actions/checkout@v4
+        with:
+          repository: '3lvia/core'
+          token: ${{ steps.app-token.outputs.token }}
+# END REMOVE FROM EXAMPLE
+      - uses: 3lvia/core-github-actions-templates/build@trunk
+        with:
+          name: ${{ env.APPLICATION_NAME }}
+          system: ${{ env.SYSTEM_NAME }}
+          project-file: ${{ env.PROJECT_FILE }}
+          trivy-upload-report: 'false'
+          trivy-post-comment: 'true'
+          AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
+# START REMOVE FROM EXAMPLE
+          checkout: 'false'
+# END REMOVE FROM EXAMPLE
+
+  deploy-dev:
+    name: Deploy Dev
+    # Require all jobs below to be successful before running this job.
+    # Any of these can be commented out or removed if you want to deploy anyway.
+    needs:
+      - unit-tests
+      - integration-tests
+      - build
+      - analyze
+    runs-on: elvia-runner
+    permissions:
+      contents: read
+      id-token: write
+    # Limits the number of concurrent runs of this job to one, but DOES NOT cancel any in progress.
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.ref }}-deploy-dev'
+    environment: dev
+    steps:
+# START REMOVE FROM EXAMPLE
+      - name: Get GitHub App token
+        uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: 'core'
+
+      - name: Checkout core repository
+        uses: actions/checkout@v4
+        with:
+          repository: '3lvia/core'
+          token: ${{ steps.app-token.outputs.token }}
+# END REMOVE FROM EXAMPLE
+      - uses: 3lvia/core-github-actions-templates/deploy-argocd@trunk
+        with:
+          name: ${{ env.APPLICATION_NAME }}
+          system: ${{ env.SYSTEM_NAME }}
+          environment: 'dev'
+          image: ${{ needs.build.outputs.image }}
+          # Will post to the Slack channel of your system if the deployment fails.
+          # Can be commented out if you don't want this.
+          slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
+          ACR_USERNAME: ${{ vars.ACR_USERNAME }}
+          ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+# START REMOVE FROM EXAMPLE
+          checkout: 'false'
+# END REMOVE FROM EXAMPLE
+
+  deploy-test:
+    name: Deploy Test
+    # Only deploy to test after dev
+    needs: [deploy-dev]
+    runs-on: elvia-runner
+    permissions:
+      contents: read
+      id-token: write
+    # Limits the number of concurrent runs of this job to one, but DOES NOT cancel any in progress.
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.ref }}-deploy-test'
+    environment: test
+    # Only on push to trunk
+    if: github.ref == 'refs/heads/trunk'
+    steps:
+# START REMOVE FROM EXAMPLE
+      - name: Get GitHub App token
+        uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: 'core'
+
+      - name: Checkout core repository
+        uses: actions/checkout@v4
+        with:
+          repository: '3lvia/core'
+          token: ${{ steps.app-token.outputs.token }}
+# END REMOVE FROM EXAMPLE
+      - uses: 3lvia/core-github-actions-templates/deploy-argocd@trunk
+        with:
+          name: ${{ env.APPLICATION_NAME }}
+          system: ${{ env.SYSTEM_NAME }}
+          environment: 'test'
+          image: ${{ needs.build.outputs.image }}
+          # Will post to the Slack channel of your system if the deployment fails.
+          # Can be commented out if you don't want this.
+          slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
+          ACR_USERNAME: ${{ vars.ACR_USERNAME }}
+          ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+# START REMOVE FROM EXAMPLE
+          checkout: 'false'
+# END REMOVE FROM EXAMPLE
+
+  deploy-prod:
+    name: Deploy Prod
+    # Only deploy to prod after test
+    needs: [deploy-test]
+    runs-on: elvia-runner
+    permissions:
+      contents: read
+      id-token: write
+    # Limits the number of concurrent runs of this job to one, but DOES NOT cancel any in progress.
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.ref }}-deploy-prod'
+    environment: prod
+    # Only on push to trunk
+    if: github.ref == 'refs/heads/trunk'
+    steps:
+# START REMOVE FROM EXAMPLE
+      - name: Get GitHub App token
+        uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: 'core'
+
+      - name: Checkout core repository
+        uses: actions/checkout@v4
+        with:
+          repository: '3lvia/core'
+          token: ${{ steps.app-token.outputs.token }}
+# END REMOVE FROM EXAMPLE
+      - uses: 3lvia/core-github-actions-templates/deploy-argocd@trunk
+        with:
+          name: ${{ env.APPLICATION_NAME }}
+          system: ${{ env.SYSTEM_NAME }}
+          environment: 'prod'
+          image: ${{ needs.build.outputs.image }}
+          # Will post to the Slack channel of your system if the deployment fails.
+          # Can be commented out if you don't want this.
+          slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
+          ACR_USERNAME: ${{ vars.ACR_USERNAME }}
+          ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+# START REMOVE FROM EXAMPLE
+          checkout: 'false'
+# END REMOVE FROM EXAMPLE
