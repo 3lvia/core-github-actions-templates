@@ -96,6 +96,18 @@ runs:
         username: ${{ inputs.ACR_USERNAME }}
         password: ${{ inputs.ACR_PASSWORD }}
 
+    - name: Copy image to tag ${{ inputs.environment }}
+      if: ${{ steps.check-image-digest.outputs.skip-deployment != 'true' }}
+      shell: bash
+      run: |
+        # Copy image to new tag and push
+        image_without_tag_and_or_digest="$(echo $IMAGE | cut -d':' -f1 | cut -d'@' -f1)"
+        skopeo copy "docker://$IMAGE" "docker://$image_without_tag_and_or_digest:$ENVIRONMENT"
+      env:
+        ENVIRONMENT: ${{ inputs.environment }}
+        IMAGE: ${{ inputs.image }}
+        IMAGE_TAG: ${{ format('{0}-{1}', github.sha, github.run_number) }}
+
     - name: Install OIDC Client from Core Package
       shell: bash
       run: npm install @actions/core@1.11.1 @actions/http-client
@@ -108,18 +120,6 @@ runs:
           const core_ = require('@actions/core')
           let idToken = await core_.getIDToken()
           core_.setOutput('token', idToken)
-
-    - name: Copy image to tag ${{ inputs.environment }}
-      if: ${{ steps.check-image-digest.outputs.skip-deployment != 'true' }}
-      shell: bash
-      run: |
-        # Copy image to new tag and push
-        image_without_tag_and_or_digest="$(echo $IMAGE | cut -d':' -f1 | cut -d'@' -f1)"
-        skopeo copy "docker://$IMAGE" "docker://$image_without_tag_and_or_digest:$ENVIRONMENT"
-      env:
-        ENVIRONMENT: ${{ inputs.environment }}
-        IMAGE: ${{ inputs.image }}
-        IMAGE_TAG: ${{ format('{0}-{1}', github.sha, github.run_number) }}
 
     - name: Wait for Argo CD application to sync
       if: ${{ steps.check-image-digest.outputs.skip-deployment != 'true' }}
