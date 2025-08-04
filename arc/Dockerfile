@@ -5,12 +5,12 @@
 
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-jammy AS build
 
-ARG TARGETOS=linux
-ARG TARGETARCH=amd64
-ARG RUNNER_VERSION=2.324.0
+ARG TARGETOS
+ARG TARGETARCH
+ARG RUNNER_VERSION
 ARG RUNNER_CONTAINER_HOOKS_VERSION=0.7.0
-ARG DOCKER_VERSION=28.1.1
-ARG BUILDX_VERSION=0.23.0
+ARG DOCKER_VERSION=28.3.2
+ARG BUILDX_VERSION=0.26.1
 
 RUN apt update -y && apt install curl unzip -y
 
@@ -158,9 +158,5 @@ RUN export HOME=/home/runner
 # ---------------------------------------------------------------------------
 # Start of source
 # ---------------------------------------------------------------------------
-
-RUN usermod \
-    --add-subuids 100000-165535 \
-    --add-subgids 100000-165535 runner
 
 USER runner
