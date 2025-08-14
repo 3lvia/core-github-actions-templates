@@ -43,7 +43,7 @@ jobs:
           repositories: 'core'
 
       - name: Checkout core repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         id: checkout
         with:
           repository: '3lvia/core'
@@ -85,7 +85,7 @@ jobs:
           repositories: 'core'
 
       - name: Checkout core repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
@@ -129,7 +129,7 @@ jobs:
           repositories: 'core'
 
       - name: Checkout core repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
@@ -175,7 +175,7 @@ jobs:
           repositories: 'core'
 
       - name: Checkout core repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
@@ -221,7 +221,7 @@ jobs:
           repositories: 'core'
 
       - name: Checkout core repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}

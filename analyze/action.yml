@@ -33,7 +33,7 @@ runs:
   steps:
     - name: Checkout repository
       if: ${{ inputs.checkout == 'true' }}
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Setup Go
       if: ${{ inputs.language == 'go' }}
