@@ -138,8 +138,8 @@ jobs:
           BASE_URL: 'https://core.dev-elvia.io/demo-api'
 # END REMOVE FROM EXAMPLE
 
-  build-scan:
-    name: Build and Scan
+  build:
+    name: Build
     runs-on: elvia-runner
     permissions:
       actions: read
@@ -149,7 +149,7 @@ jobs:
       security-events: write
     # Limits the number of concurrent runs of this job to one, and cancels any in progress.
     concurrency:
-      group: '${{ github.workflow }}-${{ github.ref }}-build-scan'
+      group: '${{ github.workflow }}-${{ github.ref }}-build'
       cancel-in-progress: true
     environment: build
     steps:
@@ -188,7 +188,7 @@ jobs:
     needs:
       - unit-tests
       - integration-tests
-      - build-scan
+      - build
       - analyze
     runs-on: elvia-runner
     permissions:

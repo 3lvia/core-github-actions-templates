@@ -77,8 +77,8 @@ jobs:
           working-directory: '.'
           system: ${{ env.SYSTEM_NAME }}
 
-  build-scan:
-    name: Build and Scan
+  build:
+    name: Build
     runs-on: elvia-runner
     permissions:
       actions: read
@@ -89,7 +89,7 @@ jobs:
       security-events: write
     # Limits the number of concurrent runs of this job to one, and cancels any in progress.
     concurrency:
-      group: '${{ github.workflow }}-${{ github.ref }}-build-scan'
+      group: '${{ github.workflow }}-${{ github.ref }}-build'
       cancel-in-progress: true
     outputs:
       image: ${{ steps.build.outputs.image-name-with-tag }}
@@ -106,7 +106,7 @@ jobs:
 
   push-images:
     name: Push images to GCR
-    needs: [build-scan]
+    needs: [build]
     runs-on: 'iss-agent-vm-${{ matrix.environment }}-runner'
     permissions:
       contents: read
@@ -127,7 +127,7 @@ jobs:
         if: ${{ github.ref == 'refs/heads/trunk' || (github.event_name == 'pull_request' && matrix.environment == 'dev') }}
         uses: 3lvia/core-github-actions-templates/iss-tag-push-image@trunk
         with:
-          old-image-name-with-tag: ${{ needs.build-scan.outputs.image }}
+          old-image-name-with-tag: ${{ needs.build.outputs.image }}
           new-image-name: 'gcr.io/${{ vars.GC_ISS_PROJECT_ID  }}/${{ env.SYSTEM_NAME }}-${{ env.APPLICATION_NAME }}'
 
   deploy-dev:
