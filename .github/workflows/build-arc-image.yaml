@@ -52,7 +52,7 @@ jobs:
             RUNNER_VERSION=${{ steps.get-runner-version.outputs.runner-version }}
 
       - name: Scan image with Trivy
-        uses: aquasecurity/trivy-action@0.31.0
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           image-ref: '${{ env.IMAGE_NAME }}:${{ github.sha }}'
           format: 'sarif'
