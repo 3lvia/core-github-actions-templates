@@ -9,8 +9,8 @@ ARG TARGETOS
 ARG TARGETARCH
 ARG RUNNER_VERSION
 ARG RUNNER_CONTAINER_HOOKS_VERSION=0.7.0
-ARG DOCKER_VERSION=28.3.2
-ARG BUILDX_VERSION=0.26.1
+ARG DOCKER_VERSION=28.4.0
+ARG BUILDX_VERSION=0.28.0
 
 RUN apt update -y && apt install curl unzip -y
 
@@ -134,9 +134,9 @@ RUN curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | gpg --d
     apt-get install -y kubectl
 
 # Install Helm
-RUN curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | tee /usr/share/keyrings/helm.gpg > /dev/null && \
-    apt-get install apt-transport-https --yes && \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | tee /etc/apt/sources.list.d/helm-stable-debian.list && \
+RUN  apt-get install curl gpg apt-transport-https --yes && \
+    curl -fsSL https://packages.buildkite.com/helm-linux/helm-debian/gpgkey | gpg --dearmor | tee /usr/share/keyrings/helm.gpg > /dev/null && \
+    echo 'deb [signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main' | tee /etc/apt/sources.list.d/helm-stable-debian.list && \
     apt-get update -y && \
     apt-get install -y helm
 
