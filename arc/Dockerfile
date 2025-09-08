@@ -152,6 +152,13 @@ RUN curl -O -L "https://github.com/sigstore/cosign/releases/latest/download/cosi
     mv cosign-linux-amd64 /usr/local/bin/cosign && \
     chmod +x /usr/local/bin/cosign
 
+# Install Powershell
+RUN wget -q https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb && \
+    dpkg -i packages-microsoft-prod.deb && \
+    rm packages-microsoft-prod.deb && \
+    apt-get update -y && \
+    apt-get install -y powershell
+
 # Add symlink for python3
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
