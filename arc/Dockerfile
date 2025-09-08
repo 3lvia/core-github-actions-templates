@@ -159,6 +159,13 @@ RUN wget -q https://packages.microsoft.com/config/ubuntu/22.04/packages-microsof
     apt-get update -y && \
     apt-get install -y powershell
 
+# Install dependencies for Playwright
+RUN apt-get install -y \
+        libatk1.0-0 \
+        libatk-bridge2.0-0 \
+        libatspi2.0-0 \
+        libxcomposite1
+
 # Add symlink for python3
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
