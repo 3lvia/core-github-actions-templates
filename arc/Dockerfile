@@ -152,6 +152,8 @@ RUN curl -O -L "https://github.com/sigstore/cosign/releases/latest/download/cosi
     mv cosign-linux-amd64 /usr/local/bin/cosign && \
     chmod +x /usr/local/bin/cosign
 
+# Add symlink for python3
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
 RUN export HOME=/home/runner 
 
