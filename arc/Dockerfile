@@ -94,7 +94,7 @@ RUN apt-get update -y && \
         file
 
 ARG NODEJS_VERSION=24
-ARG TRIVY_VERSION=0.51.1
+ARG TRIVY_VERSION=0.66.0
 
 # Install Node.js
 RUN curl -fsSL https://deb.nodesource.com/setup_${NODEJS_VERSION}.x | bash - && \
