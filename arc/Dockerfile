@@ -93,10 +93,10 @@ RUN apt-get update -y && \
         util-linux \
         file
 
-ARG NODEJS_VERSION=22
+ARG NODEJS_VERSION=24
 ARG TRIVY_VERSION=0.51.1
 
-# Install Node.js v22
+# Install Node.js
 RUN curl -fsSL https://deb.nodesource.com/setup_${NODEJS_VERSION}.x | bash - && \
     apt-get install -y nodejs
 
