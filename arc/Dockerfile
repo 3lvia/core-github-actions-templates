@@ -167,6 +167,9 @@ RUN apt-get install -y \
         libatspi2.0-0 \
         libxcomposite1
 
+# Install Postgres
+RUN apt-get install -y postgresql-client
+
 # Add symlink for python3
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
