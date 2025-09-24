@@ -97,7 +97,6 @@ runs:
         password: ${{ inputs.ACR_PASSWORD }}
 
     - name: Copy image to tag ${{ inputs.environment }}
-      if: ${{ steps.check-image-digest.outputs.skip-deployment != 'true' }}
       shell: bash
       run: |
         # Copy image to new tag and push
@@ -108,21 +107,16 @@ runs:
         IMAGE: ${{ inputs.image }}
         IMAGE_TAG: ${{ format('{0}-{1}', github.sha, github.run_number) }}
 
-    - name: Install OIDC Client from Core Package
+    - name: Get OIDC token
       shell: bash
-      run: npm install @actions/core@1.11.1 @actions/http-client
-
-    - name: Get OIDC Token
-      uses: actions/github-script@v7
       id: get-token
-      with:
-        script: |
-          const core_ = require('@actions/core')
-          let idToken = await core_.getIDToken()
-          core_.setOutput('token', idToken)
+      run: |
+        # Get OIDC token from GitHub Actions
+        token=$(curl -s -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://AzureADTokenExchange" | jq -r '.value')
+        echo "::add-mask::$token"
+        echo "token=$token" >> "$GITHUB_OUTPUT"
 
     - name: Wait for Argo CD application to sync
-      if: ${{ steps.check-image-digest.outputs.skip-deployment != 'true' }}
       shell: bash
       run: |
         # Wait for Argo CD application to sync
