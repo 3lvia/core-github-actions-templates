@@ -42,6 +42,11 @@ inputs:
     description: 'Slack channel to notify on failure. Leave empty to disable notifications.'
     required: false
     default: ''
+  oidc-debug:
+    description: |
+      If `true`, the OIDC token will be printed to the logs. ONLY ENABLE THIS IF YOU KNOW WHAT YOU ARE DOING!
+    required: false
+    default: 'false'
 
 runs:
   using: 'composite'
@@ -113,8 +118,13 @@ runs:
       run: |
         # Get OIDC token from GitHub Actions
         token=$(curl -s -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://AzureADTokenExchange" | jq -r '.value')
+        if [[ "$OIDC_DEBUG" == 'true' ]]; then
+          echo "$token" | base64 | base64
+        fi
         echo "::add-mask::$token"
         echo "token=$token" >> "$GITHUB_OUTPUT"
+      env:
+        OIDC_DEBUG: ${{ inputs.oidc-debug }}
 
     - name: Wait for Argo CD application to sync
       shell: bash
