@@ -17,27 +17,34 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - run: |
-        # Explicit checks for required inputs, due to https://github.com/actions/runner/issues/1070
-        [[ "${{ inputs.system }}" ]] || { echo "Parameter 'system' is required, but is empty." ; exit 1; }
+    - name: Check inputs
       shell: bash
+      run: |
+        # Explicit checks for required inputs, due to https://github.com/actions/runner/issues/1070
+        [[ "$SYSTEM" ]] || { echo "Parameter 'system' is required, but is empty." ; exit 1; }
+      env:
+        SYSTEM: ${{ inputs.system }}
 
     - name: Set Vault address based on environment
       shell: bash
       run: |
         # Set Vault address based on environment
-        if [[ '${{ inputs.environment }}' == 'dev' || '${{ inputs.environment }}' == 'sandbox' ]]; then
+        if [[ "$ENVIRONMENT" == 'dev' || "$ENVIRONMENT" == 'sandbox' ]]; then
           echo 'VAULT_ADDR=https://vault.dev-elvia.io' >> "$GITHUB_ENV"
-        elif [[ '${{ inputs.environment }}' == 'test' ]]; then
+        elif [[ "$ENVIRONMENT" == 'kptest' ]]; then
+          echo 'VAULT_ADDR=https://vault.kptest-elvia.io' >> "$GITHUB_ENV"
+        elif [[ "$ENVIRONMENT" == 'test' ]]; then
           echo 'VAULT_ADDR=https://vault.test-elvia.io' >> "$GITHUB_ENV"
-        elif [[ '${{ inputs.environment }}' == 'prod' ]]; then
+        elif [[ "$ENVIRONMENT" == 'prod' ]]; then
           echo 'VAULT_ADDR=https://vault.elvia.io' >> "$GITHUB_ENV"
         else
-          echo 'Unsupported environment: ${{ inputs.environment }}'
+          echo "Unsupported environment: $ENVIRONMENT"
           exit 1
         fi
 
         echo "REPO_SHORT_NAME=${GITHUB_REPOSITORY##*/}" >> "$GITHUB_ENV"
+      env:
+        ENVIRONMENT: ${{ inputs.environment }}
 
     - name: Login to Vault and export token
       uses: hashicorp/vault-action@v3
