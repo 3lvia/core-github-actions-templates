@@ -254,7 +254,7 @@ runs:
 
     - name: Add comment for Trivy scan results to PR
       if: ${{ github.event_name == 'pull_request' && inputs.trivy-post-comment == 'true' && !cancelled() }}
-      uses: actions/github-script@v7
+      uses: actions/github-script@v8
       env:
         APPLICATION_NAME: ${{ inputs.name }}
       with:
