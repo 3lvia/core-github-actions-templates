@@ -133,6 +133,7 @@ runs:
 
     - name: Read Grafana secrets from Vault
       uses: 3lvia/core-github-actions-templates/vault@trunk
+      continue-on-error: true
       with:
         system: ${{ inputs.namespace }}
         environment: ${{ inputs.environment }}
@@ -147,20 +148,23 @@ runs:
       shell: bash
       run: |
         3lv deploy \
-          --system-name '${{ inputs.namespace }}' \
+          --system-name "$SYSTEM_NAME" \
           --helm-values-file "$HELM_VALUES_FILE" \
-          --environment '${{ inputs.environment }}' \
-          --workload-type '${{ inputs.workload-type }}' \
-          --runtime-cloud-provider '${{ inputs.runtime-cloud-provider }}' \
+          --environment "$ENVIRONMENT" \
+          --workload-type "$WORKLOAD_TYPE" \
+          --runtime-cloud-provider "$RUNTIME_CLOUD_PROVIDER" \
           --image-tag "$IMAGE_TAG" \
-          --add-deployment-annotation \
-          --grafana-url "$GRAFANA_URL" \
-          --grafana-api-key "$GRAFANA_API_KEY" \
-          --run-id '${{ github.run_id }}' \
-          '${{ inputs.name }}'
+          --run-id "$RUN_ID" \
+          "$NAME"
       env:
+        SYSTEM_NAME: ${{ inputs.namespace }}
         HELM_VALUES_FILE: ${{ inputs.helm-values-path == '' && inputs.helm-values-file || inputs.helm-values-path }}
         IMAGE_TAG: ${{ inputs.override-image-tag == '' && format('{0}-{1}', github.sha, github.run_number) || inputs.override-image-tag }}
+        ENVIRONMENT: ${{ inputs.environment }}
+        WORKLOAD_TYPE: ${{ inputs.workload-type }}
+        RUNTIME_CLOUD_PROVIDER: ${{ inputs.runtime-cloud-provider }}
+        RUN_ID: ${{ github.run_id }}
+        NAME: ${{ inputs.name }}
         # Pass optional inputs as environment variables, since they can be empty.
         # The CLI does not accept empty strings passed to the flags, e.g. `--gke-project-id ''` will cause an error.
         3LV_AZURE_TENANT_ID: ${{ inputs.AZURE_TENANT_ID }}
@@ -174,6 +178,9 @@ runs:
         3LV_GKE_CLUSTER_LOCATION: ${{ inputs.GKE_CLUSTER_LOCATION }}
         3LV_HELM_CHART_REPOSITORY_URL: ${{ inputs.helm-chart-repository-url }}
         3LV_DRY_RUN: ${{ inputs.dry-run }}
+        3LV_ADD_DEPLOYMENT_ANNOTATION: ${{ env.GRAFANA_URL != '' && env.GRAFANA_API_KEY != '' }}
+        3LV_GRAFANA_URL: ${{ env.GRAFANA_URL }}
+        3LV_GRAFANA_API_KEY: ${{ env.GRAFANA_API_KEY }}
 
     - name: Notify Slack on failure
       if: ${{ failure() && inputs.slack-channel != '' }}
