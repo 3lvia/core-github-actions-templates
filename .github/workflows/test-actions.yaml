@@ -117,7 +117,6 @@ jobs:
             echo 'matrix-deploy-argocd<<EOF'
             cat << EOF
           {
-            "runner": ["$RUNNER"],
             "application-name": [
               "${{ env.APPLICATION_BASE_NAME }}-go",
               "${{ env.APPLICATION_BASE_NAME }}-python"
@@ -347,7 +346,7 @@ jobs:
     concurrency:
       group: '${{ github.workflow_ref }}-${{ matrix.application-name }}-deploy-${{ matrix.environment }}'
       cancel-in-progress: false
-    runs-on: ${{ matrix.runner }}
+    runs-on: ${{ matrix.environment == 'sandbox' && 'elvia-runner-sandbox' || 'elvia-runner' }}
     permissions:
       contents: read
       id-token: write
