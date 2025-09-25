@@ -44,6 +44,10 @@ runs:
         distribution: 'zulu'
         java-version: '17'
 
+    - name: Install uuidgen
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install -y uuid-runtime
+
     - name: Cache SonarCloud packages
       uses: actions/cache@v4
       with:
