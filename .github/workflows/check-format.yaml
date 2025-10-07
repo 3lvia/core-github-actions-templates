@@ -23,11 +23,8 @@ jobs:
         with:
           node-version: 24
 
-      - name: Install yarn
-        run: sudo apt install yarn -y --no-install-recommends
-
       - name: Install dependencies
-        run: yarn global add prettier
+        run: npm install -g prettier
 
       - name: Check format of workflows and markdown files
         run: |

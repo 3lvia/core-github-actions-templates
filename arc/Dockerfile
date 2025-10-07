@@ -72,10 +72,10 @@ RUN install -o root -g root -m 755 docker/* /usr/bin/ && rm -rf docker
 # End of source
 # ---------------------------------------------------------------------------
 
-# Install common packages
+# Upgrade all packages & install common packages
 RUN apt-get update -y && \
     apt-get upgrade -y && \
-    apt-get install -y \
+    apt-get install -y --no-install-recommends \
         unzip \
         curl \
         uidmap \
@@ -99,7 +99,7 @@ ARG TRIVY_VERSION=0.67.0
 
 # Install Node.js
 RUN curl -fsSL https://deb.nodesource.com/setup_${NODEJS_VERSION}.x | bash - && \
-    apt-get install -y nodejs
+    apt-get install -y --no-install-recommends nodejs
 
 # Install Trivy
 RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v${TRIVY_VERSION}
@@ -139,14 +139,14 @@ RUN  apt-get install curl gpg apt-transport-https --yes && \
     curl -fsSL https://packages.buildkite.com/helm-linux/helm-debian/gpgkey | gpg --dearmor | tee /usr/share/keyrings/helm.gpg > /dev/null && \
     echo 'deb [signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main' | tee /etc/apt/sources.list.d/helm-stable-debian.list && \
     apt-get update -y && \
-    apt-get install -y helm
+    apt-get install -y --no-install-recommends helm
 
 # Install GitHub CLI
 RUN wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null && \
     chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg && \
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
     apt-get update -y && \
-    apt-get install -y gh
+    apt-get install -y --no-install-recommends gh
 
 # Install Cosign
 RUN curl -O -L "https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64" && \
@@ -158,17 +158,17 @@ RUN wget -q https://packages.microsoft.com/config/ubuntu/22.04/packages-microsof
     dpkg -i packages-microsoft-prod.deb && \
     rm packages-microsoft-prod.deb && \
     apt-get update -y && \
-    apt-get install -y powershell
+    apt-get install -y --no-install-recommends powershell
 
 # Install dependencies for Playwright
-RUN apt-get install -y \
+RUN apt-get install -y --no-install-recommends \
         libatk1.0-0 \
         libatk-bridge2.0-0 \
         libatspi2.0-0 \
         libxcomposite1
 
 # Install Postgres
-RUN apt-get install -y postgresql-client
+RUN apt-get install -y --no-install-recommends postgresql-client
 
 # Add symlink for python3
 RUN ln -s /usr/bin/python3 /usr/bin/python
