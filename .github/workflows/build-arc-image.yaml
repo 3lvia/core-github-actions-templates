@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [trunk]
   schedule:
-    - cron: '3 4 * * 5'
+    - cron: '3 4 * * 5' # Every Friday at 04:03 UTC
 
 jobs:
   build:
@@ -55,6 +55,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.33.1
         with:
           image-ref: '${{ env.IMAGE_NAME }}:${{ github.sha }}'
+          ignore-unfixed: 'true'
           format: 'sarif'
           exit-code: '0'
           output: ${{ env.TRIVY_SARIF }}
