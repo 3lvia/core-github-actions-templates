@@ -165,7 +165,8 @@ RUN apt-get install -y --no-install-recommends \
         libatk1.0-0 \
         libatk-bridge2.0-0 \
         libatspi2.0-0 \
-        libxcomposite1
+        libxcomposite1 \
+        libatomic1
 
 # Install Postgres
 RUN apt-get install -y --no-install-recommends postgresql-client
