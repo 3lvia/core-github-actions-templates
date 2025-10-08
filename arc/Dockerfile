@@ -92,7 +92,8 @@ RUN apt-get update -y && \
         python3-pip \
         util-linux \
         file \
-        gettext
+        gettext \
+        make
 
 ARG NODEJS_VERSION=24
 ARG TRIVY_VERSION=0.67.0
