@@ -102,6 +102,9 @@ ARG TRIVY_VERSION=0.67.0
 RUN curl -fsSL https://deb.nodesource.com/setup_${NODEJS_VERSION}.x | bash - && \
     apt-get install -y --no-install-recommends nodejs
 
+# Install yarn
+RUN npm install -g yarn
+
 # Install Trivy
 RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v${TRIVY_VERSION}
 
