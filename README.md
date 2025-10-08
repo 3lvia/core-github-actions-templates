@@ -297,7 +297,7 @@ you must first add your Github repository to [github-repositories-terraform](htt
 | `override-image-tag`            | Overrides the default image tag of 'github.sha-github.run_number'. **This should not normally be set; only change this if you know what you are doing.**                                                                                | no       | ``                          |
 | `runtime-cloud-provider`        | Kubernetes cloud provider to deploy to: `AKS`, `GKE` or ISS (Elvia only).                                                                                                                                                               | no       | `AKS`                       |
 | `slack-channel`                 | Slack channel to notify on failure. Leave empty to disable notifications.                                                                                                                                                               | no       | ``                          |
-| `workload-type`                 | The type of workload to deploy to Kubernetes. Must be `deployment` or `statefulset`.                                                                                                                                                    | no       | `deployment`                |
+| `workload-type`                 | The type of workload to deploy to Kubernetes. Must be `deployment`, `statefulset` or `job`.                                                                                                                                             | no       | `deployment`                |
 
 ### Permissions
 
@@ -422,7 +422,7 @@ More permissions might be required depending on the inputs set, see the actions 
     # Default: ''
 
     workload-type:
-    # The type of workload to deploy to Kubernetes. Must be `deployment` or `statefulset`.
+    # The type of workload to deploy to Kubernetes. Must be `deployment`, `statefulset` or `job`.
     #
     # Required: no
     # Default: 'deployment'
