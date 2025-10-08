@@ -152,11 +152,6 @@ RUN wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | te
     apt-get update -y && \
     apt-get install -y --no-install-recommends gh
 
-# Install Cosign
-RUN curl -O -L "https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64" && \
-    mv cosign-linux-amd64 /usr/local/bin/cosign && \
-    chmod +x /usr/local/bin/cosign
-
 # Install Powershell
 RUN wget -q https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb && \
     dpkg -i packages-microsoft-prod.deb && \
