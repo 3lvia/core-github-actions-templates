@@ -8,6 +8,10 @@ on:
   schedule:
     - cron: '3 4 * * *' # Daily at 04:03 UTC
 
+concurrency:
+  group: 'build-arc-image'
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
