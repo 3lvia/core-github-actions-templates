@@ -170,11 +170,18 @@ runs:
     - name: Install 3lv CLI
       uses: 3lvia/cli/setup@trunk
 
+    #   - name: Install Cosign
+    #     uses: sigstore/cosign-installer@v3
+    #     with:
+    #       # TODO: Upgrade to v3
+    #       cosign-release: 'v3.0.1'
+
     - name: Install Cosign
-      uses: sigstore/cosign-installer@v3
-      with:
-        # TODO: Upgrade to v3
-        cosign-release: 'v2.6.1'
+      shell: bash
+      run: |
+        curl -O -L 'https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64'
+        sudo mv cosign-linux-amd64 /usr/local/bin/cosign
+        sudo chmod +x /usr/local/bin/cosign
 
     - name: Handle deprecated inputs
       shell: bash
@@ -191,6 +198,9 @@ runs:
         else
           echo 'PROJECT_FILE=${{ inputs.project-file }}' >> "$GITHUB_ENV"
         fi
+      env:
+        PROJECT_FILE: ${{ inputs.project-file }}
+        DOCKERFILE: ${{ inputs.dockerfile }}
 
     - name: Build with 3lv
       shell: bash
