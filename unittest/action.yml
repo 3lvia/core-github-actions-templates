@@ -80,7 +80,7 @@ runs:
 
     - name: Combine Coverage Reports # This is because one report is produced per project, and we want one result for all of them.
       if: ${{ inputs.test-coverage == 'true' }}
-      uses: danielpalme/ReportGenerator-GitHub-Action@1978db745da4a573ca4baa2d0f67175df51a148c # v5.4.16
+      uses: danielpalme/ReportGenerator-GitHub-Action@f3c6b3f8a29686284ef7a7cf6dccb79a01d98444 # v5.4.18
       continue-on-error: true
       with:
         reports: '**/*.cobertura.xml' # REQUIRED # The coverage reports that should be parsed (separated by semicolon). Globbing is supported.
