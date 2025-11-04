@@ -99,7 +99,7 @@ RUN apt-get update -y && \
 
 ARG NODEJS_VERSION=24
 ARG TRIVY_VERSION=0.67.2
-ARG KUBECTL_VERSION=1.32.0
+ARG KUBECTL_VERSION=1.32
 
 # Install Node.js
 RUN curl -fsSL https://deb.nodesource.com/setup_${NODEJS_VERSION}.x | bash - && \
