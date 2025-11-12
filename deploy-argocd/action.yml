@@ -8,7 +8,7 @@ inputs:
     description: 'System (namespace) of the application.'
     required: true
   image:
-    description: 'Full name of the image to deploy (including digest), e.g. `containerregistryelvia.azurecr.io/core/demo-api-go:v3@sha256:123456789abdefgh`.'
+    description: 'Name of image to deploy with digest (but without tag!), e.g. `containerregistryelvia.azurecr.io/core/demo-api-go@sha256:123456789abdefgh`.'
     required: true
   cluster-type:
     description: 'Type of cluster to check deployment status for. Can be `aks`, `gke` or `iss`.'
@@ -101,7 +101,7 @@ runs:
       run: |
         # Copy image to new tag and push
         image_without_tag_and_or_digest="$(echo $IMAGE | cut -d':' -f1 | cut -d'@' -f1)"
-        skopeo copy --all "docker://$IMAGE" "docker://$image_without_tag_and_or_digest:$ENVIRONMENT"
+        skopeo copy --all --debug "docker://$IMAGE" "docker://$image_without_tag_and_or_digest:$ENVIRONMENT"
       env:
         ENVIRONMENT: ${{ inputs.environment }}
         IMAGE: ${{ inputs.image }}
