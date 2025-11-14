@@ -101,14 +101,16 @@ runs:
       run: |
         image_without_tag_and_or_digest="$(echo $IMAGE | cut -d':' -f1 | cut -d'@' -f1)"
 
-        docker run --rm \
-          --env SRC_CREDS="$ACR_USERNAME:$ACR_PASSWORD" \
-          --env DEST_CREDS="$ACR_USERNAME:$ACR_PASSWORD" \
-          --env IMAGE="$IMAGE" \
-          --env IMAGE_WITHOUT_TAG_AND_OR_DIGEST="$image_without_tag_and_or_digest" \
-          --env ENVIRONMENT="$ENVIRONMENT" \
+        docker run \
+          --rm \
+          --entrypoint '/bin/sh' \
+          -e SRC_CREDS="$ACR_USERNAME:$ACR_PASSWORD" \
+          -e DEST_CREDS="$ACR_USERNAME:$ACR_PASSWORD" \
+          -e IMAGE="$IMAGE" \
+          -e IMAGE_WITHOUT_TAG_AND_OR_DIGEST="$image_without_tag_and_or_digest" \
+          -e ENVIRONMENT="$ENVIRONMENT" \
           quay.io/skopeo/stable:latest \
-          sh -c 'skopeo copy --preserve-digests --src-creds="$SRC_CREDS" --dest-creds="$DEST_CREDS" docker://$IMAGE docker://$IMAGE_WITHOUT_TAG_AND_OR_DIGEST:$ENVIRONMENT'
+          -c 'skopeo copy --preserve-digests --src-creds="$SRC_CREDS" --dest-creds="$DEST_CREDS" docker://$IMAGE docker://$IMAGE_WITHOUT_TAG_AND_OR_DIGEST:$ENVIRONMENT'
       env:
         ACR_USERNAME: ${{ inputs.ACR_USERNAME }}
         ACR_PASSWORD: ${{ inputs.ACR_PASSWORD }}
