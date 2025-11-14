@@ -101,7 +101,7 @@ runs:
       run: |
         # Copy image to new tag and push
         image_without_tag_and_or_digest="$(echo $IMAGE | cut -d':' -f1 | cut -d'@' -f1)"
-        skopeo copy --preserve-digests --debug "docker://$IMAGE" "docker://$image_without_tag_and_or_digest:$ENVIRONMENT"
+        docker run quay.io/skopeo/stable:latest copy --preserve-digests --debug "docker://$IMAGE" "docker://$image_without_tag_and_or_digest:$ENVIRONMENT"
       env:
         ENVIRONMENT: ${{ inputs.environment }}
         IMAGE: ${{ inputs.image }}
