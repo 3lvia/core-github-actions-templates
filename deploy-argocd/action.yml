@@ -99,23 +99,17 @@ runs:
     - name: Copy image to tag '${{ inputs.environment }}'
       shell: bash
       run: |
-        image_without_tag_and_or_digest="$(echo $IMAGE | cut -d':' -f1 | cut -d'@' -f1)"
+        image_without_registry_tag_or_digest="$(echo $IMAGE | cut -d'/' -f2- | cut -d':' -f1 | cut -d'@' -f1)"
 
-        docker run \
-          --rm \
-          --entrypoint '/bin/sh' \
-          -e SRC_CREDS="$ACR_USERNAME:$ACR_PASSWORD" \
-          -e DEST_CREDS="$ACR_USERNAME:$ACR_PASSWORD" \
-          -e IMAGE="$IMAGE" \
-          -e IMAGE_WITHOUT_TAG_AND_OR_DIGEST="$image_without_tag_and_or_digest" \
-          -e ENVIRONMENT="$ENVIRONMENT" \
-          quay.io/skopeo/stable:latest \
-          -c 'skopeo copy --preserve-digests --src-creds="$SRC_CREDS" --dest-creds="$DEST_CREDS" docker://$IMAGE docker://$IMAGE_WITHOUT_TAG_AND_OR_DIGEST:$ENVIRONMENT'
+        az acr import \
+          --source "$IMAGE" \
+          --name "$REGISTRY" \
+          --image "$image_without_registry_tag_or_digest:$ENVIRONMENT" \
+          --force
       env:
-        ACR_USERNAME: ${{ inputs.ACR_USERNAME }}
-        ACR_PASSWORD: ${{ inputs.ACR_PASSWORD }}
-        ENVIRONMENT: ${{ inputs.environment }}
         IMAGE: ${{ inputs.image }}
+        REGISTRY: ${{ inputs.registry }}
+        ENVIRONMENT: ${{ inputs.environment }}
 
     - name: Get OIDC token
       shell: bash
