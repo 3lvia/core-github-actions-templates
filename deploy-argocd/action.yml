@@ -99,16 +99,21 @@ runs:
     - name: Copy image to tag '${{ inputs.environment }}'
       shell: bash
       run: |
-        # Copy image to tag
         image_without_tag_and_or_digest="$(echo $IMAGE | cut -d':' -f1 | cut -d'@' -f1)"
+
         docker run --rm \
-          -v "$HOME/.docker/config.json:/root/.docker/config.json:ro" \
+          --env SRC_CREDS="$ACR_USERNAME:$ACR_PASSWORD" \
+          --env DEST_CREDS="$ACR_USERNAME:$ACR_PASSWORD" \
+          --env IMAGE="$IMAGE" \
+          --env IMAGE_WITHOUT_TAG_AND_OR_DIGEST="$image_without_tag_and_or_digest" \
+          --env ENVIRONMENT="$ENVIRONMENT" \
           quay.io/skopeo/stable:latest \
-          copy --preserve-digests --debug "docker://$IMAGE" "docker://$image_without_tag_and_or_digest:$ENVIRONMENT"
+          sh -c 'skopeo copy --preserve-digests --src-creds="$SRC_CREDS" --dest-creds="$DEST_CREDS" docker://$IMAGE docker://$IMAGE_WITHOUT_TAG_AND_OR_DIGEST:$ENVIRONMENT'
       env:
+        ACR_USERNAME: ${{ inputs.ACR_USERNAME }}
+        ACR_PASSWORD: ${{ inputs.ACR_PASSWORD }}
         ENVIRONMENT: ${{ inputs.environment }}
         IMAGE: ${{ inputs.image }}
-        IMAGE_TAG: ${{ format('{0}-{1}', github.sha, github.run_number) }}
 
     - name: Get OIDC token
       shell: bash
