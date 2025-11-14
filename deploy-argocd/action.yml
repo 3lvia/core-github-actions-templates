@@ -96,12 +96,15 @@ runs:
         username: ${{ inputs.ACR_USERNAME }}
         password: ${{ inputs.ACR_PASSWORD }}
 
-    - name: Copy image to tag ${{ inputs.environment }}
+    - name: Copy image to tag '${{ inputs.environment }}'
       shell: bash
       run: |
-        # Copy image to new tag and push
+        # Copy image to tag
         image_without_tag_and_or_digest="$(echo $IMAGE | cut -d':' -f1 | cut -d'@' -f1)"
-        docker run quay.io/skopeo/stable:latest copy --preserve-digests --debug "docker://$IMAGE" "docker://$image_without_tag_and_or_digest:$ENVIRONMENT"
+        docker run --rm \
+          -v "$HOME/.docker/config.json:/root/.docker/config.json:ro" \
+          quay.io/skopeo/stable:latest \
+          copy --preserve-digests --debug "docker://$IMAGE" "docker://$image_without_tag_and_or_digest:$ENVIRONMENT"
       env:
         ENVIRONMENT: ${{ inputs.environment }}
         IMAGE: ${{ inputs.image }}
