@@ -108,10 +108,10 @@ runs:
           --env SRC_CREDS="$ACR_USERNAME:$ACR_PASSWORD" \
           --env DEST_CREDS="$ACR_USERNAME:$ACR_PASSWORD" \
           --env IMAGE="$IMAGE" \
-          --env IMAGE_WITHOUT_TAG_AND_OR_DIGEST="$image_without_tag_and_or_digest" \
+          --env IMAGE_WITHOUT_REGISTRY_TAG_OR_DIGEST="$image_without_registry_tag_or_digest" \
           --env ENVIRONMENT="$ENVIRONMENT" \
           quay.io/skopeo/stable:latest \
-          -c 'skopeo copy --preserve-digests --src-creds="$SRC_CREDS" --dest-creds="$DEST_CREDS" docker://$IMAGE docker://$IMAGE_WITHOUT_TAG_AND_OR_DIGEST:$ENVIRONMENT'
+          -c 'skopeo copy --preserve-digests --src-creds="$SRC_CREDS" --dest-creds="$DEST_CREDS" docker://$IMAGE docker://$IMAGE_WITHOUT_REGISTRY_TAG_OR_DIGEST:$ENVIRONMENT'
       env:
         IMAGE: ${{ inputs.image }}
         REGISTRY: ${{ inputs.registry }}
