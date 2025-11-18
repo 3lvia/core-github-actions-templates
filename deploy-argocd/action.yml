@@ -109,7 +109,7 @@ runs:
           --env IMAGE_WITHOUT_TAG_AND_OR_DIGEST="$image_without_tag_and_or_digest" \
           --env ENVIRONMENT="$ENVIRONMENT" \
           quay.io/skopeo/stable:latest \
-          sh -c 'skopeo copy --preserve-digests --src-creds="$SRC_CREDS" --dest-creds="$DEST_CREDS" docker://$IMAGE docker://$IMAGE_WITHOUT_TAG_AND_OR_DIGEST:$ENVIRONMENT'
+          /bin/sh -c 'skopeo copy --preserve-digests --src-creds="$SRC_CREDS" --dest-creds="$DEST_CREDS" docker://$IMAGE docker://$IMAGE_WITHOUT_TAG_AND_OR_DIGEST:$ENVIRONMENT'
       env:
         IMAGE: ${{ inputs.image }}
         REGISTRY: ${{ inputs.registry }}
