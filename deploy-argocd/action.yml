@@ -99,8 +99,7 @@ runs:
     - name: Copy image to tag '${{ inputs.environment }}'
       shell: bash
       run: |
-        image_without_registry_tag_or_digest="$(echo $IMAGE | cut -d'/' -f2- | cut -d':' -f1 | cut -d'@' -f1)"
-        registry="$(echo $REGISTRY | cut -d'.' -f1)"
+        image_without_tag_or_digest="$(echo $IMAGE | cut -d':' -f1 | cut -d'@' -f1)"
 
         docker run \
           --rm \
@@ -108,13 +107,12 @@ runs:
           --env SRC_CREDS="$ACR_USERNAME:$ACR_PASSWORD" \
           --env DEST_CREDS="$ACR_USERNAME:$ACR_PASSWORD" \
           --env IMAGE="$IMAGE" \
-          --env IMAGE_WITHOUT_REGISTRY_TAG_OR_DIGEST="$image_without_registry_tag_or_digest" \
+          --env IMAGE_WITHOUT_TAG_OR_DIGEST="$image_without_tag_or_digest" \
           --env ENVIRONMENT="$ENVIRONMENT" \
           quay.io/skopeo/stable:latest \
-          -c 'skopeo copy --preserve-digests --src-creds="$SRC_CREDS" --dest-creds="$DEST_CREDS" docker://$IMAGE docker://$IMAGE_WITHOUT_REGISTRY_TAG_OR_DIGEST:$ENVIRONMENT'
+          -c 'skopeo copy --preserve-digests --src-creds="$SRC_CREDS" --dest-creds="$DEST_CREDS" docker://$IMAGE docker://$IMAGE_WITHOUT_TAG_OR_DIGEST:$ENVIRONMENT'
       env:
         IMAGE: ${{ inputs.image }}
-        REGISTRY: ${{ inputs.registry }}
         ENVIRONMENT: ${{ inputs.environment }}
         ACR_USERNAME: ${{ inputs.ACR_USERNAME }}
         ACR_PASSWORD: ${{ inputs.ACR_PASSWORD }}
