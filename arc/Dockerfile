@@ -115,16 +115,18 @@ RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/
 # Install Azure CLI
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
-# Install .NET 8 and 9
-RUN wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
-    dpkg -i packages-microsoft-prod.deb && \
-    rm packages-microsoft-prod.deb && \
-    apt-get update && \
-    apt-get install -y \
-        dotnet-sdk-8.0 \
-        aspnetcore-runtime-8.0 \
-        dotnet-sdk-9.0 \
-        aspnetcore-runtime-9.0
+# Install .NET 8, 9 and 10
+RUN apt install gpg -y && \
+    wget https://dot.net/v1/dotnet-install.asc && \
+    gpg --import dotnet-install.asc && \
+    wget https://dot.net/v1/dotnet-install.sh && \
+    wget https://dot.net/v1/dotnet-install.sig && \
+    gpg --verify dotnet-install.sig dotnet-install.sh && \
+    chmod +x dotnet-install.sh && \
+    ./dotnet-install.sh --channel 8.0 && \
+    ./dotnet-install.sh --channel 9.0 && \
+    ./dotnet-install.sh --channel 10.0 && \
+    rm dotnet-install.sh dotnet-install.asc dotnet-install.sig
 
 # Install gcloud CLI and GKE auth plugin
 RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
