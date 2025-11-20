@@ -123,10 +123,13 @@ RUN apt install gpg -y && \
     wget https://dot.net/v1/dotnet-install.sig && \
     gpg --verify dotnet-install.sig dotnet-install.sh && \
     chmod +x dotnet-install.sh && \
-    ./dotnet-install.sh --channel 8.0 && \
-    ./dotnet-install.sh --channel 9.0 && \
-    ./dotnet-install.sh --channel 10.0 && \
+    ./dotnet-install.sh --install-dir /home/runner/.dotnet --no-path --channel 8.0 && \
+    ./dotnet-install.sh --install-dir /home/runner/.dotnet --no-path --channel 9.0 && \
+    ./dotnet-install.sh --install-dir /home/runner/.dotnet --no-path --channel 10.0 && \
     rm dotnet-install.sh dotnet-install.asc dotnet-install.sig
+
+ENV DOTNET_ROOT=/home/runner/.dotnet
+ENV PATH="${DOTNET_ROOT}:${PATH}"
 
 # Install gcloud CLI and GKE auth plugin
 RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
@@ -179,7 +182,7 @@ RUN apt-get install -y --no-install-recommends postgresql-client
 # Add symlink for python3
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
-RUN export HOME=/home/runner 
+ENV HOME=/home/runner
 
 # ---------------------------------------------------------------------------
 # Start of source
