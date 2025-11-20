@@ -183,6 +183,7 @@ RUN apt-get install -y --no-install-recommends postgresql-client
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
 ENV HOME=/home/runner
+RUN chown -R runner:runner /home/runner
 
 # ---------------------------------------------------------------------------
 # Start of source
