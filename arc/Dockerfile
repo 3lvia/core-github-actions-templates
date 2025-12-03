@@ -9,8 +9,8 @@ ARG TARGETOS
 ARG TARGETARCH
 ARG RUNNER_VERSION
 ARG RUNNER_CONTAINER_HOOKS_VERSION=0.7.0
-ARG DOCKER_VERSION=29.0.1
-ARG BUILDX_VERSION=0.30.0
+ARG DOCKER_VERSION=29.0.2
+ARG BUILDX_VERSION=0.30.1
 
 RUN apt update -y && apt install curl unzip -y
 
@@ -58,8 +58,6 @@ RUN add-apt-repository ppa:git-core/ppa \
     && apt install -y git \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /home/runner
-
 RUN adduser --disabled-password --gecos "" --uid 1001 runner \
     && groupadd docker --gid 123 \
     && usermod -aG sudo runner \
@@ -67,6 +65,8 @@ RUN adduser --disabled-password --gecos "" --uid 1001 runner \
     && echo "%sudo   ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers \
     && echo "Defaults env_keep += \"DEBIAN_FRONTEND\"" >> /etc/sudoers \
     && chmod 777 /home/runner
+
+WORKDIR /home/runner
 
 COPY --chown=runner:docker --from=build /actions-runner .
 COPY --from=build /usr/local/lib/docker/cli-plugins/docker-buildx /usr/local/lib/docker/cli-plugins/docker-buildx
@@ -99,7 +99,7 @@ RUN apt-get update -y && \
         make
 
 ARG NODEJS_VERSION=24
-ARG TRIVY_VERSION=0.67.2
+ARG TRIVY_VERSION=0.68.1
 ARG KUBECTL_VERSION=1.32
 
 # Install Node.js
@@ -129,7 +129,7 @@ RUN apt install gpg -y && \
     rm dotnet-install.sh dotnet-install.asc dotnet-install.sig
 
 ENV DOTNET_ROOT=/home/runner/.dotnet
-ENV PATH="${DOTNET_ROOT}:${PATH}"
+ENV PATH="${PATH}:${DOTNET_ROOT}:${DOTNET_ROOT}/tools"
 
 # Install gcloud CLI and GKE auth plugin
 RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
@@ -183,6 +183,7 @@ RUN apt-get install -y --no-install-recommends postgresql-client
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
 ENV HOME=/home/runner
+# TODO: Might not need this anymore?
 RUN chown -R runner:runner /home/runner
 
 # ---------------------------------------------------------------------------
