@@ -79,15 +79,7 @@ runs:
         ENVIRONMENT: ${{ inputs.environment }}
         ACR_USERNAME: ${{ inputs.ACR_USERNAME }}
         ACR_PASSWORD: ${{ inputs.ACR_PASSWORD }}
-
-    #   - name: Login to GitHub Container Registry
-    #     if: contains(inputs.registry, 'ghcr.io')
-    #     uses: docker/login-action@v3
-    #     with:
-    #       registry: 'ghcr.io'
-    #       username: ${{ github.actor }}
-    #       password: ${{ secrets.GITHUB_TOKEN }}
-
+        
     - name: Login to Azure Container Registry
       if: contains(inputs.registry, 'azurecr.io')
       uses: docker/login-action@v3
@@ -117,11 +109,11 @@ runs:
         ACR_USERNAME: ${{ inputs.ACR_USERNAME }}
         ACR_PASSWORD: ${{ inputs.ACR_PASSWORD }}
 
-    - name: Get ACR image digest
+    - name: Get ACR image digest for environment tag
       id: get-acr-digest
       shell: bash
       run: |
-        registry_full=$(echo "$IMAGE" | cut -d'/' -f1)
+        registry_with_domain=$(echo "$IMAGE" | cut -d'/' -f1)
         registry=$(echo "$IMAGE" | cut -d'/' -f1 | cut -d'.' -f1)
         repository=$(echo "$IMAGE" | cut -d'/' -f2- | cut -d'@' -f1)
 
@@ -137,7 +129,7 @@ runs:
           exit 1
         fi
 
-        full_image="$registry_full/$repository@$digest"
+        full_image="$registry_with_domain/$repository@$digest"
         echo "image_with_digest=$full_image" >> "$GITHUB_OUTPUT"
       env:
         IMAGE: ${{ inputs.image }}
