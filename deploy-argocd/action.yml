@@ -121,6 +121,7 @@ runs:
       id: get-acr-digest
       shell: bash
       run: |
+        registry_full=$(echo "$IMAGE" | cut -d'/' -f1)
         registry=$(echo "$IMAGE" | cut -d'/' -f1 | cut -d'.' -f1)
         repository=$(echo "$IMAGE" | cut -d'/' -f2- | cut -d'@' -f1)
 
@@ -136,7 +137,7 @@ runs:
           exit 1
         fi
 
-        full_image="$registry/$repository@$digest"
+        full_image="$registry_full/$repository@$digest"
         echo "image_with_digest=$full_image" >> "$GITHUB_OUTPUT"
       env:
         IMAGE: ${{ inputs.image }}
