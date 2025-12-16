@@ -80,14 +80,6 @@ runs:
         ACR_USERNAME: ${{ inputs.ACR_USERNAME }}
         ACR_PASSWORD: ${{ inputs.ACR_PASSWORD }}
 
-    #   - name: Login to GitHub Container Registry
-    #     if: contains(inputs.registry, 'ghcr.io')
-    #     uses: docker/login-action@v3
-    #     with:
-    #       registry: 'ghcr.io'
-    #       username: ${{ github.actor }}
-    #       password: ${{ secrets.GITHUB_TOKEN }}
-
     - name: Login to Azure Container Registry
       if: contains(inputs.registry, 'azurecr.io')
       uses: docker/login-action@v3
@@ -117,11 +109,11 @@ runs:
         ACR_USERNAME: ${{ inputs.ACR_USERNAME }}
         ACR_PASSWORD: ${{ inputs.ACR_PASSWORD }}
 
-    - name: Get ACR image digest
+    - name: Get ACR image digest for environment tag
       id: get-acr-digest
       shell: bash
       run: |
-        registry_full=$(echo "$IMAGE" | cut -d'/' -f1)
+        registry_with_domain=$(echo "$IMAGE" | cut -d'/' -f1)
         registry=$(echo "$IMAGE" | cut -d'/' -f1 | cut -d'.' -f1)
         repository=$(echo "$IMAGE" | cut -d'/' -f2- | cut -d'@' -f1)
 
@@ -137,7 +129,7 @@ runs:
           exit 1
         fi
 
-        full_image="$registry_full/$repository@$digest"
+        full_image="$registry_with_domain/$repository@$digest"
         echo "image_with_digest=$full_image" >> "$GITHUB_OUTPUT"
       env:
         IMAGE: ${{ inputs.image }}
@@ -172,7 +164,6 @@ runs:
         CLUSTER_TYPE: ${{ inputs.cluster-type }}
         CHECK_ALL_CLUSTERS: ${{ inputs.check-all-clusters }}
         ENVIRONMENT: ${{ inputs.environment }}
-        # IMAGE: ${{ inputs.image }}
         IMAGE:  ${{ steps.get-acr-digest.outputs.image_with_digest }}
         DEPLOYVIA_URL: ${{ format('https://deployvia.{0}/deployment', (inputs.environment == 'sandbox' && 'dev-elvia.io' || 'elvia.io')) }}
 
