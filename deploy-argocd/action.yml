@@ -96,43 +96,45 @@ runs:
         username: ${{ inputs.ACR_USERNAME }}
         password: ${{ inputs.ACR_PASSWORD }}
 
-    - name: Copy image to tag '${{ inputs.environment }}'
+    - name: Copy image to tag '${{ inputs.environment }}' and emit digest
+      id: copy-and-digest
       shell: bash
       run: |
-        image_without_tag_or_digest="$(echo $IMAGE | cut -d':' -f1 | cut -d'@' -f1)"
+        set -euo pipefail
+        image_without_tag_or_digest="$(echo "$IMAGE" | cut -d':' -f1 | cut -d'@' -f1)"
 
-        docker run \
-          --rm \
-          --entrypoint '/bin/sh' \
-          --env SRC_CREDS="$ACR_USERNAME:$ACR_PASSWORD" \
-          --env DEST_CREDS="$ACR_USERNAME:$ACR_PASSWORD" \
-          --env IMAGE="$IMAGE" \
-          --env IMAGE_WITHOUT_TAG_OR_DIGEST="$image_without_tag_or_digest" \
-          --env ENVIRONMENT="$ENVIRONMENT" \
-          quay.io/skopeo/stable:latest \
-          -c 'skopeo copy --preserve-digests --src-creds="$SRC_CREDS" --dest-creds="$DEST_CREDS" docker://$IMAGE docker://$IMAGE_WITHOUT_TAG_OR_DIGEST:$ENVIRONMENT'
+        # Kjør skopeo copy og skriv digest til stdout fra containeren
+        digest="$(
+          docker run \
+            --rm \
+            --entrypoint /bin/sh \
+            --env SRC_CREDS="$ACR_USERNAME:$ACR_PASSWORD" \
+            --env DEST_CREDS="$ACR_USERNAME:$ACR_PASSWORD" \
+            --env IMAGE="$IMAGE" \
+            --env IMAGE_WITHOUT_TAG_OR_DIGEST="$image_without_tag_or_digest" \
+            --env ENVIRONMENT="$ENVIRONMENT" \
+            quay.io/skopeo/stable:latest \
+            -c 'skopeo copy --preserve-digests \
+                  --src-creds="$SRC_CREDS" \
+                  --dest-creds="$DEST_CREDS" \
+                  docker://$IMAGE \
+                  docker://$IMAGE_WITHOUT_TAG_OR_DIGEST:$ENVIRONMENT \
+                  --digestfile /dev/stdout' \
+          | tr -d '\r\n'
+        )"
+
+        if [[ -z "${digest:-}" ]]; then
+          echo "Error: Could not read digest from skopeo copy"
+          exit 1
+        fi
+
+        image_with_digest="$image_without_tag_or_digest@$digest"
+        echo "image_with_digest=$image_with_digest" >> "$GITHUB_OUTPUT"
       env:
         IMAGE: ${{ inputs.image }}
         ENVIRONMENT: ${{ inputs.environment }}
         ACR_USERNAME: ${{ inputs.ACR_USERNAME }}
         ACR_PASSWORD: ${{ inputs.ACR_PASSWORD }}
-
-    - name: Get updated IMAGE with digest via tag for environment
-      id: get-image-with-digest
-      shell: bash
-      run: |
-        image_without_tag_or_digest="$(echo $IMAGE | cut -d':' -f1 | cut -d'@' -f1)"
-        image_with_digest=$(docker inspect --format='{{index .RepoDigests 0}}' "$image_without_tag_or_digest:$ENVIRONMENT")
-
-        if [[ -z "$image_with_digest" ]]; then
-          echo "Error: Could not get digest for image"
-          exit 1
-        fi
-
-        echo "image_with_digest=$image_with_digest" >> "$GITHUB_OUTPUT"
-      env:
-        IMAGE: ${{ inputs.image }}
-        ENVIRONMENT: ${{ inputs.environment }}
 
     - name: Get OIDC token
       shell: bash
@@ -162,7 +164,7 @@ runs:
         CHECK_ALL_CLUSTERS: ${{ inputs.check-all-clusters }}
         ENVIRONMENT: ${{ inputs.environment }}
         # IMAGE: ${{ inputs.image }}
-        IMAGE: ${{ steps.get-image-with-digest.outputs.image_with_digest }}
+        IMAGE:  ${{ steps.copy-and-digest.outputs.image_with_digest }}
         DEPLOYVIA_URL: ${{ format('https://deployvia.{0}/deployment', (inputs.environment == 'sandbox' && 'dev-elvia.io' || 'elvia.io')) }}
 
     - name: Notify Slack on failure
