@@ -121,13 +121,12 @@ runs:
       id: get-acr-digest
       shell: bash
       run: |
-        registry=$(echo "$IMAGE" | cut -d'/' -f1)
+        registry=$(echo "$IMAGE" | cut -d'/' -f1 | cut -d'.' -f1)
         repository=$(echo "$IMAGE" | cut -d'/' -f2- | cut -d'@' -f1)
 
         digest=$(az acr repository show \
-          --name "${registry%.azurecr.io}" \
-          --repository "$repository" \
-          --tag "$ENVIRONMENT" \
+          --name "$registry" \
+          --image "$repository:$ENVIRONMENT" \
           --query 'digest' -o tsv)
 
         if [[ -z "${digest:-}" ]]; then
@@ -139,7 +138,7 @@ runs:
         echo "image_with_digest=$full_image" >> "$GITHUB_OUTPUT"
       env:
         IMAGE: ${{ inputs.image }}
-        ENVIRONMENT: ${{ inputs.environment }}    
+        ENVIRONMENT: ${{ inputs.environment }}
 
     - name: Get OIDC token
       shell: bash
