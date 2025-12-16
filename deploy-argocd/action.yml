@@ -117,6 +117,23 @@ runs:
         ACR_USERNAME: ${{ inputs.ACR_USERNAME }}
         ACR_PASSWORD: ${{ inputs.ACR_PASSWORD }}
 
+    - name: Get updated IMAGE with digest via tag for environment
+      id: get-image-with-digest
+      shell: bash
+      run: |
+        image_without_tag_or_digest="$(echo $IMAGE | cut -d':' -f1 | cut -d'@' -f1)"
+        image_with_digest=$(docker inspect --format='{{index .RepoDigests 0}}' "$image_without_tag_or_digest:$ENVIRONMENT")
+
+        if [[ -z "$image_with_digest" ]]; then
+          echo "Error: Could not get digest for image"
+          exit 1
+        fi
+
+        echo "image_with_digest=$image_with_digest" >> "$GITHUB_OUTPUT"
+      env:
+        IMAGE: ${{ inputs.image }}
+        ENVIRONMENT: ${{ inputs.environment }}
+
     - name: Get OIDC token
       shell: bash
       id: get-token
@@ -144,7 +161,8 @@ runs:
         CLUSTER_TYPE: ${{ inputs.cluster-type }}
         CHECK_ALL_CLUSTERS: ${{ inputs.check-all-clusters }}
         ENVIRONMENT: ${{ inputs.environment }}
-        IMAGE: ${{ inputs.image }}
+        # IMAGE: ${{ inputs.image }}
+        IMAGE: ${{ steps.get-image-with-digest.outputs.image_with_digest }}
         DEPLOYVIA_URL: ${{ format('https://deployvia.{0}/deployment', (inputs.environment == 'sandbox' && 'dev-elvia.io' || 'elvia.io')) }}
 
     - name: Notify Slack on failure
