@@ -96,45 +96,50 @@ runs:
         username: ${{ inputs.ACR_USERNAME }}
         password: ${{ inputs.ACR_PASSWORD }}
 
-    - name: Copy image to tag '${{ inputs.environment }}' and emit digest
-      id: copy-and-digest
+    - name: Copy image to tag '${{ inputs.environment }}'
       shell: bash
       run: |
-        set -euo pipefail
-        image_without_tag_or_digest="$(echo "$IMAGE" | cut -d':' -f1 | cut -d'@' -f1)"
+        image_without_tag_or_digest="$(echo $IMAGE | cut -d':' -f1 | cut -d'@' -f1)"
 
-        # Kjør skopeo copy og skriv digest til stdout fra containeren
-        digest="$(
-          docker run \
-            --rm \
-            --entrypoint /bin/sh \
-            --env SRC_CREDS="$ACR_USERNAME:$ACR_PASSWORD" \
-            --env DEST_CREDS="$ACR_USERNAME:$ACR_PASSWORD" \
-            --env IMAGE="$IMAGE" \
-            --env IMAGE_WITHOUT_TAG_OR_DIGEST="$image_without_tag_or_digest" \
-            --env ENVIRONMENT="$ENVIRONMENT" \
-            quay.io/skopeo/stable:latest \
-            -c 'skopeo copy --preserve-digests \
-                  --src-creds="$SRC_CREDS" \
-                  --dest-creds="$DEST_CREDS" \
-                  docker://$IMAGE \
-                  docker://$IMAGE_WITHOUT_TAG_OR_DIGEST:$ENVIRONMENT \
-                  --digestfile /dev/stdout' \
-          | tr -d '\r\n'
-        )"
-
-        if [[ -z "${digest:-}" ]]; then
-          echo "Error: Could not read digest from skopeo copy"
-          exit 1
-        fi
-
-        image_with_digest="$image_without_tag_or_digest@$digest"
-        echo "image_with_digest=$image_with_digest" >> "$GITHUB_OUTPUT"
+        docker run \
+          --rm \
+          --entrypoint '/bin/sh' \
+          --env SRC_CREDS="$ACR_USERNAME:$ACR_PASSWORD" \
+          --env DEST_CREDS="$ACR_USERNAME:$ACR_PASSWORD" \
+          --env IMAGE="$IMAGE" \
+          --env IMAGE_WITHOUT_TAG_OR_DIGEST="$image_without_tag_or_digest" \
+          --env ENVIRONMENT="$ENVIRONMENT" \
+          quay.io/skopeo/stable:latest \
+          -c 'skopeo copy --preserve-digests --src-creds="$SRC_CREDS" --dest-creds="$DEST_CREDS" docker://$IMAGE docker://$IMAGE_WITHOUT_TAG_OR_DIGEST:$ENVIRONMENT'
       env:
         IMAGE: ${{ inputs.image }}
         ENVIRONMENT: ${{ inputs.environment }}
         ACR_USERNAME: ${{ inputs.ACR_USERNAME }}
         ACR_PASSWORD: ${{ inputs.ACR_PASSWORD }}
+
+    - name: Get ACR image digest
+      id: get-acr-digest
+      shell: bash
+      run: |
+        registry=$(echo "$IMAGE" | cut -d'/' -f1)
+        repository=$(echo "$IMAGE" | cut -d'/' -f2- | cut -d'@' -f1)
+
+        digest=$(az acr repository show \
+          --name "${registry%.azurecr.io}" \
+          --repository "$repository" \
+          --tag "$ENVIRONMENT" \
+          --query 'digest' -o tsv)
+
+        if [[ -z "${digest:-}" ]]; then
+          echo "Error: Could not retrieve digest for $repository:$ENVIRONMENT"
+          exit 1
+        fi
+
+        full_image="$registry/$repository@$digest"
+        echo "image_with_digest=$full_image" >> "$GITHUB_OUTPUT"
+      env:
+        IMAGE: ${{ inputs.image }}
+        ENVIRONMENT: ${{ inputs.environment }}    
 
     - name: Get OIDC token
       shell: bash
@@ -164,7 +169,7 @@ runs:
         CHECK_ALL_CLUSTERS: ${{ inputs.check-all-clusters }}
         ENVIRONMENT: ${{ inputs.environment }}
         # IMAGE: ${{ inputs.image }}
-        IMAGE:  ${{ steps.copy-and-digest.outputs.image_with_digest }}
+        IMAGE:  ${{ steps.get-acr-digest.outputs.image_with_digest }}
         DEPLOYVIA_URL: ${{ format('https://deployvia.{0}/deployment', (inputs.environment == 'sandbox' && 'dev-elvia.io' || 'elvia.io')) }}
 
     - name: Notify Slack on failure
