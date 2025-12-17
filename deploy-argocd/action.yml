@@ -1,50 +1,50 @@
-name: "Deploy Argo CD"
-description: "Deploys an application to Kubernetes using Argo CD."
+name: 'Deploy Argo CD'
+description: 'Deploys an application to Kubernetes using Argo CD.'
 inputs:
   name:
-    description: "Name of application. Do not include namespace."
+    description: 'Name of application. Do not include namespace.'
     required: true
   system:
-    description: "System (namespace) of the application."
+    description: 'System (namespace) of the application.'
     required: true
   image:
-    description: "Name of image to deploy with digest (but without tag!), e.g. `containerregistryelvia.azurecr.io/core/demo-api-go@sha256:123456789abdefgh`."
+    description: 'Name of image to deploy with digest (but without tag!), e.g. `containerregistryelvia.azurecr.io/core/demo-api-go@sha256:123456789abdefgh`.'
     required: true
   cluster-type:
-    description: "Type of cluster to check deployment status for. Can be `aks`, `gke` or `iss`."
+    description: 'Type of cluster to check deployment status for. Can be `aks`, `gke` or `iss`.'
     required: true
-    default: "aks"
+    default: 'aks'
   check-all-clusters:
     description: |
       If `true`, the action will check all clusters for deployment status.
       If `false`, the action will only check the cluster specified in `cluster-type`.
     required: false
-    default: "false"
+    default: 'false'
   environment:
-    description: "Environment to deploy to."
+    description: 'Environment to deploy to.'
     required: true
   registry:
-    description: "Docker registry to use."
+    description: 'Docker registry to use.'
     required: false
-    default: "containerregistryelvia.azurecr.io"
+    default: 'containerregistryelvia.azurecr.io'
   ACR_USERNAME:
-    description: "Username for Azure Container Registry, if using it."
+    description: 'Username for Azure Container Registry, if using it.'
     required: true
   ACR_PASSWORD:
-    description: "Password for Azure Container Registry, if using it."
+    description: 'Password for Azure Container Registry, if using it.'
     required: true
   checkout:
     description: |
       If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.
     required: false
-    default: "true"
+    default: 'true'
   slack-channel:
-    description: "Slack channel to notify on failure. Leave empty to disable notifications."
+    description: 'Slack channel to notify on failure. Leave empty to disable notifications.'
     required: false
-    default: ""
+    default: ''
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Validate required inputs
       shell: bash
