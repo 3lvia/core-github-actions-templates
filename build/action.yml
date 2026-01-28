@@ -17,7 +17,7 @@ inputs:
       E.g. `applications/my-app/my-app.csproj`, `pkg/my-app/go.mod`, `pyproject.toml` or `src/Dockerfile`.
       If you require files outside the directory of the `project-file` to build your application, you will need to set `docker-build-context`.
     required: false
-  go-main-package-dir:
+  go-main-package-directory:
     description: |
       Where the main package directory for Go projects is located, e.g. `./cmd/my-app`.
       Defaults to `./cmd/inputs.name`.
