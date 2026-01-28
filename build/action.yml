@@ -176,22 +176,6 @@ runs:
         # TODO: Upgrade to v3
         cosign-release: 'v2.6.1'
 
-    - name: Handle deprecated inputs
-      shell: bash
-      run: |
-        if [[ '${{ inputs.project-file }}' == '' ]]; then
-          if [[ '${{ inputs.csproj-file }}' != '' ]]; then
-            echo "Input 'csproj-file' is deprecated. Please use 'project-file' instead."
-            echo 'PROJECT_FILE=${{ inputs.csproj-file }}' >> "$GITHUB_ENV"
-          fi
-          if [[ '${{ inputs.dockerfile }}' != '' ]]; then
-            echo "Input 'dockerfile' is deprecated. Please use 'project-file' instead."
-            echo 'PROJECT_FILE=${{ inputs.dockerfile }}' >> "$GITHUB_ENV"
-          fi
-        else
-          echo 'PROJECT_FILE=${{ inputs.project-file }}' >> "$GITHUB_ENV"
-        fi
-
     - name: Build with 3lv
       shell: bash
       run: |
@@ -203,12 +187,12 @@ runs:
       env:
         ADDITIONAL_TAGS: "${{ github.sha }}-${{ github.run_number }}${{ inputs.docker-additional-tags == '' && '' || ',' }}${{ inputs.docker-additional-tags }}"
         # Pass optional inputs as environment variables, since they can be empty.
-        # The CLI does not accept empty strings passed to the flags, e.g. `--go-main-package-dir ''` will cause an error.
+        # The CLI does not accept empty strings passed to the flags, e.g. `--go-main-package-directory ''` will cause an error.
         3LV_SYSTEM_NAME: ${{ inputs.namespace }}
         3LV_PUSH: ${{ inputs.push }}
         3LV_REGISTRY: ${{ inputs.registry }}
         3LV_BUILD_CONTEXT: ${{ inputs.docker-build-context }}
-        3LV_GO_MAIN_PACKAGE_DIR: ${{ inputs.go-main-package-dir }}
+        3LV_GO_MAIN_PACKAGE_DIRECTORY: ${{ inputs.go-main-package-directory }}
         3LV_CACHE_TAG: ${{ inputs.docker-cache-tag }}
         3LV_BUILD_ARGS: ${{ inputs.docker-build-args }}
         3LV_SCAN_SEVERITY: ${{ inputs.severity }}
