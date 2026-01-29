@@ -183,8 +183,10 @@ runs:
           --project-file "$PROJECT_FILE" \
           --scan-formats table,sarif,markdown \
           --additional-tags "$ADDITIONAL_TAGS" \
-          '${{ inputs.name }}'
+          "$APPLICATION_NAME"
       env:
+        APPLICATION_NAME: ${{ inputs.name }}
+        PROJECT_FILE: ${{ inputs.project-file }}
         ADDITIONAL_TAGS: "${{ github.sha }}-${{ github.run_number }}${{ inputs.docker-additional-tags == '' && '' || ',' }}${{ inputs.docker-additional-tags }}"
         # Pass optional inputs as environment variables, since they can be empty.
         # The CLI does not accept empty strings passed to the flags, e.g. `--go-main-package-directory ''` will cause an error.
