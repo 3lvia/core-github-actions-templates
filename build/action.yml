@@ -20,7 +20,7 @@ inputs:
   go-main-package-directory:
     description: |
       Where the main package directory for Go projects is located, e.g. `./cmd/my-app`.
-      Defaults to `./cmd/inputs.name`.
+      Defaults to `./`
     required: false
   docker-build-context:
     description: |
