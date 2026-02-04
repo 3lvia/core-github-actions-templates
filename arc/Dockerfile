@@ -99,7 +99,7 @@ RUN apt-get update -y && \
         make
 
 ARG NODEJS_VERSION=24
-ARG TRIVY_VERSION=0.68.1
+ARG TRIVY_VERSION=0.69.0
 ARG KUBECTL_VERSION=1.32
 
 # Install Node.js
