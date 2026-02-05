@@ -44,5 +44,6 @@ runs:
     - name: Run PromQL query
       shell: bash
       run: |
-        pip install -r '${{ github.action_path }}/requirements.txt'
+        sudo apt install pipx
+        pipx install -r '${{ github.action_path }}/requirements.txt'
         python '${{ github.action_path }}/validate_metrics.py' --query '${{ inputs.query }}'
