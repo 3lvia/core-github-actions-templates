@@ -43,6 +43,7 @@ runs:
     - name: Run validation script
       shell: bash
       run: |
-        sudo apt install pipx -y
-        pipx install -r '${{ github.action_path }}/requirements.txt'
+        python -m venv .venv
+        source .venv/bin/activate 
+        pip install -r '${{ github.action_path }}/requirements.txt'
         python '${{ github.action_path }}/validate_edna_deploy.py' --topic '${{ inputs.topic }}' --system '${{ inputs.system }}' --application '${{ inputs.application }}' --env '${{ inputs.environment }}' --type '${{ inputs.type }}'
