@@ -35,7 +35,7 @@ runs:
   steps:
     - name: Checkout repository
       if: ${{ inputs.checkout == 'true' }}
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Restore .NET tools
       shell: bash

@@ -30,7 +30,7 @@ runs:
 
     - name: Checkout repository
       if: ${{ inputs.checkout == 'true' }}
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
@@ -41,10 +41,12 @@ runs:
         environment: ${{ inputs.environment }}
         exportToken: 'true'
 
+    - uses: actions/setup-python@v6
+      with:
+        python-version: "3.12"
+
     - name: Run PromQL query
       shell: bash
       run: |
-        python -m venv .venv
-        source .venv/bin/activate 
         pip install -r '${{ github.action_path }}/requirements.txt'
         python '${{ github.action_path }}/validate_metrics.py' --query '${{ inputs.query }}'
