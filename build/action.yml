@@ -44,7 +44,7 @@ inputs:
       Disable Docker layer caching. When `true`, the build will not use cached layers from the registry.
       Defaults to `true` on re-runs and manual workflow dispatches, ensuring fresh builds pick up security patches.
     required: false
-    default: ${{ github.run_attempt > 1 || github.event_name == 'workflow_dispatch' }}
+    default: ${{ github.run_attempt > 1 || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' }}
   severity:
     description: |
       Severity levels to scan for.
