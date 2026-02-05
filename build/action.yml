@@ -39,6 +39,12 @@ inputs:
   docker-build-args:
     description: 'Comma-separated list of build arguments to pass to Docker when building, e.g. `ARG1=value1,ARG2=value2`.'
     required: false
+  docker-disable-cache:
+    description: |
+      Disable Docker layer caching. When `true`, the build will not use cached layers from the registry.
+      Defaults to `true` on re-runs and manual workflow dispatches, ensuring fresh builds pick up security patches.
+    required: false
+    default: ${{ github.run_attempt > 1 || github.event_name == 'workflow_dispatch' }}
   severity:
     description: |
       Severity levels to scan for.
@@ -198,6 +204,7 @@ runs:
         3LV_CACHE_TAG: ${{ inputs.docker-cache-tag }}
         3LV_BUILD_ARGS: ${{ inputs.docker-build-args }}
         3LV_SCAN_SEVERITY: ${{ inputs.severity }}
+        3LV_DISABLE_CACHE: ${{ inputs.docker-disable-cache }}
         3LV_AZURE_TENANT_ID: ${{ inputs.AZURE_TENANT_ID }}
         3LV_AZURE_CLIENT_ID: ${{ inputs.AZURE_CLIENT_ID }}
         3LV_AZURE_FEDERATED_TOKEN: ${{ steps.get-federated-token.outputs.token }}
