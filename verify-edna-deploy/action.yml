@@ -42,7 +42,7 @@ runs:
 
     - uses: actions/setup-python@v6
       with:
-        python-version: "3.12"
+        python-version: '3.12'
 
     - name: Run validation script
       shell: bash
