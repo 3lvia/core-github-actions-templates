@@ -54,7 +54,7 @@ inputs:
   trivy-cve-ignores:
     description: |
       Comma-separated list of CVEs for Trivy to ignore.
-      See [Trivy documentation](https://aquasecurity.github.io/trivy/v0.49/docs/configuration/filtering/#trivyignore) for syntax.
+      See [Trivy documentation](https://trivy.dev/docs/latest/configuration/filtering/#trivyignore) for syntax.
     required: false
   trivy-upload-report:
     description: |
