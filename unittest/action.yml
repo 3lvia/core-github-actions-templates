@@ -109,7 +109,7 @@ runs:
 
     - name: Add Coverage PR Comment
       if: ${{ inputs.test-coverage == 'true' && github.event_name == 'pull_request' }}
-      uses: marocchino/sticky-pull-request-comment@aaf617804e8ce598ae82d38f1b107e812ab81ba0 # v3.0.1
+      uses: marocchino/sticky-pull-request-comment@70d2764d1a7d5d9560b100cbea0077fc8f633987 # v3.0.2
       continue-on-error: true
       with:
         recreate: 'true'
