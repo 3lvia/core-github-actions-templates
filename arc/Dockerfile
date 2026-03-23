@@ -100,6 +100,7 @@ RUN apt-get update -y && \
 
 ARG NODEJS_VERSION=24
 ARG TRIVY_VERSION=0.69.2
+ARG TRIVY_CHECKSUM=affa59a1e37d86e4b8ab2cd02f0ab2e63d22f1bf9cf6a7aa326c884e25e26ce3
 ARG KUBECTL_VERSION=1.32
 
 # Install Node.js
@@ -113,7 +114,10 @@ RUN npm install -g yarn
 RUN npm update -g
 
 # Install Trivy
-RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v${TRIVY_VERSION}
+RUN curl -sLO https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz \
+    && echo "${TRIVY_CHECKSUM}  trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" | sha256sum -c \
+    && tar -xzf trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz -C /usr/local/bin trivy \
+    && rm trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz
 
 # Install Azure CLI
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
