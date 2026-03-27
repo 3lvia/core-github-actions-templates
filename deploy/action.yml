@@ -105,7 +105,7 @@ runs:
 
     - name: Checkout repository
       if: ${{ inputs.checkout == 'true' }}
-      uses: actions/checkout@v6
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
     - name: Get federated token for Azure
       shell: bash
@@ -118,7 +118,7 @@ runs:
         echo "token=$token" >> "$GITHUB_OUTPUT"
 
     - name: Setup kubelogin if not on Elvia runner
-      uses: azure/use-kubelogin@v1
+      uses: azure/use-kubelogin@76597ae0fcbaace21b05e13a2cbf8daee2c6e820 # v1
       if: ${{ inputs.runtime-cloud-provider == 'AKS' }}
       env:
         GITHUB_TOKEN: ${{ github.token }}
@@ -126,20 +126,20 @@ runs:
         kubelogin-version: 'latest'
 
     - name: Authenticate with Google Cloud
-      uses: google-github-actions/auth@v3.0.0
+      uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
       if: ${{ inputs.runtime-cloud-provider == 'GKE' }}
       with:
         workload_identity_provider: ${{ inputs.GC_WORKLOAD_IDENTITY_PROVIDER }}
         service_account: ${{ inputs.GC_SERVICE_ACCOUNT }}
 
     - name: Setup Google Cloud CLI with GKE auth plugin if not on Elvia runner
-      uses: google-github-actions/setup-gcloud@v3.0.1
+      uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
       if: ${{ inputs.runtime-cloud-provider == 'GKE' && !startsWith(runner.name, 'elvia-runner-') }}
       with:
         install_components: 'gke-gcloud-auth-plugin'
 
     - name: Read Grafana secrets from Vault
-      uses: 3lvia/core-github-actions-templates/vault@trunk
+      uses: 3lvia/core-github-actions-templates/vault@cc1b0db028f5909e4f49ab8855240f00a7c5f109 # trunk
       continue-on-error: true
       with:
         system: ${{ inputs.namespace }}
@@ -149,7 +149,7 @@ runs:
           monitoring/kv/data/shared grafana_editor_api_key | GRAFANA_API_KEY
 
     - name: Install 3lv CLI
-      uses: 3lvia/cli/setup@trunk
+      uses: 3lvia/cli/setup@07d05a374a322286c553692fa3a0f82d5a42455c # trunk
 
     - name: Deploy
       shell: bash
@@ -191,7 +191,7 @@ runs:
 
     - name: Notify Slack on failure
       if: ${{ failure() && inputs.slack-channel != '' }}
-      uses: 3lvia/core-github-actions-templates/slack-message@trunk
+      uses: 3lvia/core-github-actions-templates/slack-message@cc1b0db028f5909e4f49ab8855240f00a7c5f109 # trunk
       with:
         system: ${{ inputs.namespace }}
         environment: ${{ inputs.environment }}

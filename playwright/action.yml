@@ -24,10 +24,10 @@ runs:
   steps:
     - name: Checkout repository
       if: ${{ inputs.checkout == 'true' }}
-      uses: actions/checkout@v6
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
     - name: Login Vault and export token
-      uses: 3lvia/core-github-actions-templates/vault@trunk
+      uses: 3lvia/core-github-actions-templates/vault@cc1b0db028f5909e4f49ab8855240f00a7c5f109 # trunk
       with:
         system: ${{ inputs.system }}
         environment: ${{ inputs.environment }}
