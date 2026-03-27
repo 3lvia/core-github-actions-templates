@@ -169,7 +169,7 @@ runs:
 
     - name: Notify Slack on failure
       if: ${{ failure() && inputs.slack-channel != '' }}
-      uses: 3lvia/core-github-actions-templates/slack-message@cc1b0db028f5909e4f49ab8855240f00a7c5f109 # trunk
+      uses: 3lvia/core-github-actions-templates/slack-message@trunk
       with:
         system: ${{ inputs.system }}
         environment: ${{ inputs.environment }}
@@ -178,3 +178,4 @@ runs:
           :warning: *Deploy feilet* :warning:
           GitHub Actions feilet under deploy av *${{ inputs.system }}/${{ inputs.name }}* i miljøet *${{ inputs.environment }}*.
           Se <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|her> for detaljer.
+

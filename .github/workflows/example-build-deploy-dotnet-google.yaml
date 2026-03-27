@@ -34,7 +34,7 @@ jobs:
     steps:
 # START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3
         id: app-token
         with:
           app-id: ${{ vars.GH_APP_ID }}
@@ -43,7 +43,7 @@ jobs:
           repositories: 'core'
 
       - name: Checkout core repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         id: checkout
         with:
           repository: '3lvia/core'
@@ -74,7 +74,7 @@ jobs:
     steps:
 # START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3
         id: app-token
         with:
           app-id: ${{ vars.GH_APP_ID }}
@@ -83,7 +83,7 @@ jobs:
           repositories: 'core'
 
       - name: Checkout core repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         id: checkout
         with:
           repository: '3lvia/core'
@@ -114,7 +114,7 @@ jobs:
     steps:
 # START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3
         id: app-token
         with:
           app-id: ${{ vars.GH_APP_ID }}
@@ -123,7 +123,7 @@ jobs:
           repositories: 'core'
 
       - name: Checkout core repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
@@ -156,7 +156,7 @@ jobs:
     steps:
 # START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3
         id: app-token
         with:
           app-id: ${{ vars.GH_APP_ID }}
@@ -165,7 +165,7 @@ jobs:
           repositories: 'core'
 
       - name: Checkout core repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
@@ -202,7 +202,7 @@ jobs:
     steps:
 # START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3
         id: app-token
         with:
           app-id: ${{ vars.GH_APP_ID }}
@@ -211,7 +211,7 @@ jobs:
           repositories: 'core'
 
       - name: Checkout core repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
@@ -249,7 +249,7 @@ jobs:
     steps:
 # START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3
         id: app-token
         with:
           app-id: ${{ vars.GH_APP_ID }}
@@ -258,7 +258,7 @@ jobs:
           repositories: 'core'
 
       - name: Checkout core repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
@@ -296,7 +296,7 @@ jobs:
     steps:
 # START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3
         id: app-token
         with:
           app-id: ${{ vars.GH_APP_ID }}
@@ -305,7 +305,7 @@ jobs:
           repositories: 'core'
 
       - name: Checkout core repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
@@ -325,3 +325,5 @@ jobs:
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
 # END REMOVE FROM EXAMPLE
+
+
