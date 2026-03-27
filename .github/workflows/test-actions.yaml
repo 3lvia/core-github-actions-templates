@@ -32,7 +32,7 @@ jobs:
       matrix-trivy: ${{ steps.set-matrices.outputs.matrix-trivy }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Set matrices
         id: set-matrices
@@ -156,7 +156,7 @@ jobs:
       security-events: write
     steps:
       - name: Checkout this repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Get GitHub App token
         uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3
@@ -168,7 +168,7 @@ jobs:
           repositories: 'core'
 
       - name: Checkout core repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
@@ -196,7 +196,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout this repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Get GitHub App token
         uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3
@@ -208,7 +208,7 @@ jobs:
           repositories: 'core'
 
       - name: Checkout core repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
@@ -244,7 +244,7 @@ jobs:
     environment: build
     steps:
       - name: Checkout this repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Get GitHub App token
         uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3
@@ -256,7 +256,7 @@ jobs:
           repositories: 'core'
 
       - name: Checkout core repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
@@ -298,7 +298,7 @@ jobs:
     if: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Create Dockerfile with vulnerabilities
         run: |
@@ -397,7 +397,7 @@ jobs:
     environment: dev
     steps:
       - name: Checkout this repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Get GitHub App token
         uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3
@@ -409,7 +409,7 @@ jobs:
           repositories: 'core'
 
       - name: Checkout core repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
@@ -447,7 +447,7 @@ jobs:
       id-token: write
     steps:
       - name: Checkout this repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Get GitHub App token
         uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3
@@ -459,7 +459,7 @@ jobs:
           repositories: 'core'
 
       - name: Checkout core repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
@@ -489,7 +489,7 @@ jobs:
       security-events: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - uses: ./trivy-iac-scan
         with:
@@ -506,7 +506,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - uses: ./terraform-format
         with:
@@ -526,7 +526,7 @@ jobs:
       id-token: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - uses: ./slack-message
         with:
@@ -549,7 +549,7 @@ jobs:
       id-token: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - uses: ./vault
         with:
