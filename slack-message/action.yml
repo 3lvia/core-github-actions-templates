@@ -57,4 +57,3 @@ runs:
         fi
       env:
         SLACK_API_TOKEN: ${{ env.SLACK_API_TOKEN }}
-

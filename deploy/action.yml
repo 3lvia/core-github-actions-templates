@@ -198,4 +198,3 @@ runs:
         slack-channel: ${{ inputs.slack-channel }}
         message: |
           :warning: ${{ github.repository }} - ${{ github.ref_name }} feilet. Se https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }} for detaljer.
-

@@ -95,4 +95,3 @@ runs:
         slack-channel: ${{ inputs.slack-channel }}
         environment: ${{ inputs.environment }}
         system: ${{ inputs.system }}
-

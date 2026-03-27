@@ -178,4 +178,3 @@ runs:
           :warning: *Deploy feilet* :warning:
           GitHub Actions feilet under deploy av *${{ inputs.system }}/${{ inputs.name }}* i miljøet *${{ inputs.environment }}*.
           Se <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|her> for detaljer.
-

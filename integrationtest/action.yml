@@ -96,4 +96,3 @@ runs:
             echo $result|jq '.'
           fi
         fi
-
