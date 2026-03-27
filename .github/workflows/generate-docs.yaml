@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Generate docs
-        uses: 3lvia/gh-actions-docs@2db29362f0d6d92052f6fa49b71743af5f0c11f8 # v1
+        uses: 3lvia/gh-actions-docs@2db29362f0d6d92052f6fa49b71743af5f0c11f8 # v1.2.5
         with:
           ignore-files: 'my-new-action/action.yml'
           ignore-headers: '# core-github-actions-templates,## Table of Contents'
