@@ -49,7 +49,7 @@ jobs:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
 # END REMOVE FROM EXAMPLE
-      - uses: 3lvia/core-github-actions-templates/analyze@trunk
+      - uses: 3lvia/core-github-actions-templates/analyze@ab1ea9ab3e068493711b81994f8cba72184de19d # trunk
         with:
           # This can be set to a more specific path if you want to analyze only a part of the repository.
           working-directory: '.'
@@ -90,7 +90,7 @@ jobs:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
 # END REMOVE FROM EXAMPLE
-      - uses: 3lvia/core-github-actions-templates/build@trunk
+      - uses: 3lvia/core-github-actions-templates/build@ab1ea9ab3e068493711b81994f8cba72184de19d # trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
@@ -134,7 +134,7 @@ jobs:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
 # END REMOVE FROM EXAMPLE
-      - uses: 3lvia/core-github-actions-templates/deploy@trunk
+      - uses: 3lvia/core-github-actions-templates/deploy@ab1ea9ab3e068493711b81994f8cba72184de19d # trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
@@ -180,7 +180,7 @@ jobs:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
 # END REMOVE FROM EXAMPLE
-      - uses: 3lvia/core-github-actions-templates/deploy@trunk
+      - uses: 3lvia/core-github-actions-templates/deploy@ab1ea9ab3e068493711b81994f8cba72184de19d # trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
@@ -226,7 +226,7 @@ jobs:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
 # END REMOVE FROM EXAMPLE
-      - uses: 3lvia/core-github-actions-templates/deploy@trunk
+      - uses: 3lvia/core-github-actions-templates/deploy@ab1ea9ab3e068493711b81994f8cba72184de19d # trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}

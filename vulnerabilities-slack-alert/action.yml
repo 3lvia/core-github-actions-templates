@@ -89,7 +89,7 @@ runs:
         echo "message=$message" >> $GITHUB_OUTPUT
 
     - name: Send Slack Message
-      uses: 3lvia/core-github-actions-templates/slack-message@trunk
+      uses: 3lvia/core-github-actions-templates/slack-message@ab1ea9ab3e068493711b81994f8cba72184de19d # trunk
       with:
         message: ${{ steps.construct-slack-message.outputs.message }}
         slack-channel: ${{ inputs.slack-channel }}

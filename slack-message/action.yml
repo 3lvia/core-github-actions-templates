@@ -31,7 +31,7 @@ runs:
       shell: bash
 
     - name: Read Slack API token from Vault
-      uses: 3lvia/core-github-actions-templates/vault@trunk
+      uses: 3lvia/core-github-actions-templates/vault@ab1ea9ab3e068493711b81994f8cba72184de19d # trunk
       with:
         system: ${{ inputs.system == '' && inputs.namespace || inputs.system }}
         environment: ${{ inputs.environment }}

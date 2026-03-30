@@ -44,7 +44,7 @@ runs:
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
     - name: Login Vault and export token
-      uses: 3lvia/core-github-actions-templates/vault@trunk
+      uses: 3lvia/core-github-actions-templates/vault@ab1ea9ab3e068493711b81994f8cba72184de19d # trunk
       with:
         system: ${{ inputs.system }}
         environment: ${{ inputs.environment }}
