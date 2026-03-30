@@ -49,7 +49,7 @@ jobs:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
 # END REMOVE FROM EXAMPLE
-      - uses: 3lvia/core-github-actions-templates/analyze@trunk
+      - uses: 3lvia/core-github-actions-templates/analyze@3fb07c631c39ead7a97cf543b6f5d8ecf5a0d086 # trunk
         with:
           # This can be set to a more specific path if you want to analyze only a part of the repository.
           working-directory: 'applications/demo-api/src'
@@ -88,7 +88,7 @@ jobs:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
 # END REMOVE FROM EXAMPLE
-      - uses: 3lvia/core-github-actions-templates/unittest@trunk
+      - uses: 3lvia/core-github-actions-templates/unittest@3fb07c631c39ead7a97cf543b6f5d8ecf5a0d086 # trunk
         with:
           # This can be set to a more specific path if you want to search for tests in only a part of the repository.
           working-directory: 'applications/demo-api/src'
@@ -127,7 +127,7 @@ jobs:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
 # END REMOVE FROM EXAMPLE
-      - uses: 3lvia/core-github-actions-templates/integrationtest@trunk
+      - uses: 3lvia/core-github-actions-templates/integrationtest@3fb07c631c39ead7a97cf543b6f5d8ecf5a0d086 # trunk
         with:
           # This can be set to a more specific path if you want to search for tests in only a part of the repository.
           working-directory: 'applications/demo-api/src'
@@ -169,7 +169,7 @@ jobs:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
 # END REMOVE FROM EXAMPLE
-      - uses: 3lvia/core-github-actions-templates/build@trunk
+      - uses: 3lvia/core-github-actions-templates/build@3fb07c631c39ead7a97cf543b6f5d8ecf5a0d086 # trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
@@ -215,7 +215,7 @@ jobs:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
 # END REMOVE FROM EXAMPLE
-      - uses: 3lvia/core-github-actions-templates/deploy@trunk
+      - uses: 3lvia/core-github-actions-templates/deploy@3fb07c631c39ead7a97cf543b6f5d8ecf5a0d086 # trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
@@ -260,7 +260,7 @@ jobs:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
 # END REMOVE FROM EXAMPLE
-      - uses: 3lvia/core-github-actions-templates/deploy@trunk
+      - uses: 3lvia/core-github-actions-templates/deploy@3fb07c631c39ead7a97cf543b6f5d8ecf5a0d086 # trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
@@ -305,7 +305,7 @@ jobs:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
 # END REMOVE FROM EXAMPLE
-      - uses: 3lvia/core-github-actions-templates/deploy@trunk
+      - uses: 3lvia/core-github-actions-templates/deploy@3fb07c631c39ead7a97cf543b6f5d8ecf5a0d086 # trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}

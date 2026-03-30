@@ -139,7 +139,7 @@ runs:
         install_components: 'gke-gcloud-auth-plugin'
 
     - name: Read Grafana secrets from Vault
-      uses: 3lvia/core-github-actions-templates/vault@trunk
+      uses: 3lvia/core-github-actions-templates/vault@3fb07c631c39ead7a97cf543b6f5d8ecf5a0d086 # trunk
       continue-on-error: true
       with:
         system: ${{ inputs.namespace }}
@@ -191,7 +191,7 @@ runs:
 
     - name: Notify Slack on failure
       if: ${{ failure() && inputs.slack-channel != '' }}
-      uses: 3lvia/core-github-actions-templates/slack-message@trunk
+      uses: 3lvia/core-github-actions-templates/slack-message@3fb07c631c39ead7a97cf543b6f5d8ecf5a0d086 # trunk
       with:
         system: ${{ inputs.namespace }}
         environment: ${{ inputs.environment }}
