@@ -242,7 +242,7 @@ runs:
 
     - name: Upload Trivy scan results to GitHub Advanced Security
       if: ${{ inputs.trivy-upload-report == 'true' && !cancelled() }}
-      uses: github/codeql-action/upload-sarif@38697555549f1db7851b81482ff19f1fa5c4fedc # v4
+      uses: github/codeql-action/upload-sarif@38697555549f1db7851b81482ff19f1fa5c4fedc # v4.34.1
       with:
         sarif_file: 'trivy.sarif'
         category: 'Trivy'
