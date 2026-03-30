@@ -149,7 +149,7 @@ runs:
           monitoring/kv/data/shared grafana_editor_api_key | GRAFANA_API_KEY
 
     - name: Install 3lv CLI
-      uses: 3lvia/cli/setup@07d05a374a322286c553692fa3a0f82d5a42455c # trunk
+      uses: 3lvia/cli/setup@fc1c9934ffd01b6445eb97d54adc7695aba92b1a # trunk
 
     - name: Deploy
       shell: bash

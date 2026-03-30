@@ -174,7 +174,7 @@ runs:
         sudo apt-get install trivy -y
 
     - name: Install 3lv CLI
-      uses: 3lvia/cli/setup@07d05a374a322286c553692fa3a0f82d5a42455c # trunk
+      uses: 3lvia/cli/setup@fc1c9934ffd01b6445eb97d54adc7695aba92b1a # trunk
 
     - name: Install Cosign
       uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3
