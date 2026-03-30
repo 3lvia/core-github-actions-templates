@@ -1,12 +1,12 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    "helpers:pinGitHubActionDigestsToSemver"
-  ],
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigestsToSemver"],
   "minimumReleaseAge": "3 days",
-  "ignorePaths": [".github/test/**"],
-  "nuget": {
-    "ignorePaths": [".github/test/**"]
-  }
+  "packageRules": [
+    {
+      "matchDepTypes": ["action"],
+      "matchPackagePatterns": ["^3lvia/core-github-actions-templates/"],
+      "pinDigests": false
+    }
+  ]
 }
