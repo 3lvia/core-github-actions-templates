@@ -5,7 +5,11 @@
   "packageRules": [
     {
       "matchDepTypes": ["action"],
-      "matchPackagePatterns": ["^3lvia/core-github-actions-templates/"],
+      "matchPackageNames": [
+        "3lvia/core-github-actions-templates",
+        "3lvia/cli",
+        "3lvia/gh-actions-docs"
+      ],
       "pinDigests": false
     }
   ]
