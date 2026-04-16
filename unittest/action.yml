@@ -39,7 +39,9 @@ runs:
 
     - name: Restore .NET tools
       shell: bash
-      run: dotnet tool restore --tool-manifest '${{ inputs.dotnet-tool-manifest }}'
+      run: dotnet tool restore --tool-manifest "$DOTNET_TOOL_MANIFEST"
+      env:
+        DOTNET_TOOL_MANIFEST: ${{ inputs.dotnet-tool-manifest }}
 
     - name: Run unit tests
       shell: bash

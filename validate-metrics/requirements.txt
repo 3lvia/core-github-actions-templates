@@ -1,2 +1,2 @@
-requests
-elvia-vault
+requests==2.33.1
+elvia-vault==0.5.2

@@ -26,9 +26,12 @@ runs:
   steps:
     - run: |
         # Explicit checks for required inputs, due to https://github.com/actions/runner/issues/1070
-        [[ "${{ inputs.slack-channel }}" ]] || { echo "Parameter 'slack-channel' is required, but is empty." ; exit 1; }
-        [[ "${{ inputs.message }}" ]] || { echo "Parameter 'message' is required, but is empty." ; exit 1; }
+        [[ "$SLACK_CHANNEL" ]] || { echo "Parameter 'slack-channel' is required, but is empty." ; exit 1; }
+        [[ "$MESSAGE" ]] || { echo "Parameter 'message' is required, but is empty." ; exit 1; }
       shell: bash
+      env:
+        SLACK_CHANNEL: ${{ inputs.slack-channel }}
+        MESSAGE: ${{ inputs.message }}
 
     - name: Read Slack API token from Vault
       uses: 3lvia/core-github-actions-templates/vault@trunk
