@@ -21,8 +21,11 @@ jobs:
       - name: Check out target repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      - name: Check out policy scripts
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: 3lvia/core-github-actions-templates
+          path: .policy-tools
 
       - name: Validate workflows
-        run: python .github/scripts/verify_action_pinning.py
+        run: python3 .policy-tools/.github/scripts/verify_action_pinning.py
