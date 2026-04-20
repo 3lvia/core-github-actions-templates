@@ -162,19 +162,8 @@ runs:
           echo "$TRIVY_CVE" >> .trivyignore
         done
 
-    - name: Install Trivy if not using Elvia runner
-      if: ${{ !startsWith(runner.name, 'elvia-runner-') }}
-      shell: bash
-      run: |
-        # Install Trivy if not using Elvia runner
-        sudo apt-get install wget apt-transport-https gnupg lsb-release -y --no-install-recommends
-        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-        echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
-        sudo apt-get update
-        sudo apt-get install trivy -y
-
     - name: Install 3lv CLI
-      uses: 3lvia/cli/setup@4b405f7fccb75056bf41c2d19894e68e0895e03a # trunk
+      uses: 3lvia/cli/setup@trunk
 
     - name: Install Cosign
       uses: sigstore/cosign-installer@7e8b541eb2e61bf99390e1afd4be13a184e9ebc5 # v3.10.1
@@ -208,6 +197,7 @@ runs:
         3LV_AZURE_TENANT_ID: ${{ inputs.AZURE_TENANT_ID }}
         3LV_AZURE_CLIENT_ID: ${{ inputs.AZURE_CLIENT_ID }}
         3LV_AZURE_FEDERATED_TOKEN: ${{ steps.get-federated-token.outputs.token }}
+        3LV_SCAN_DISABLE_ERROR: ${{ !startsWith(runner.name, 'elvia-runner-') }} # assume Trivy is not installed on GitHub hosted runners
 
     - name: Get outputs
       shell: bash
@@ -243,13 +233,15 @@ runs:
     - name: Upload Trivy scan results to GitHub Advanced Security
       if: ${{ inputs.trivy-upload-report == 'true' && !cancelled() }}
       uses: github/codeql-action/upload-sarif@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v4.35.2
+      continue-on-error: ${{ !startsWith(runner.name, 'elvia-runner-') }} # assume Trivy is not installed on GitHub hosted runners
       with:
         sarif_file: 'trivy.sarif'
         category: 'Trivy'
 
     - name: Add comment for Trivy scan results to PR
       if: ${{ github.event_name == 'pull_request' && inputs.trivy-post-comment == 'true' && !cancelled() }}
-      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+      continue-on-error: ${{ !startsWith(runner.name, 'elvia-runner-') }} # assume Trivy is not installed on GitHub hosted runners
       env:
         APPLICATION_NAME: ${{ inputs.name }}
       with:
