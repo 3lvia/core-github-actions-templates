@@ -3,6 +3,11 @@ name: Verify action pinning policy
 on:
   pull_request:
   merge_group:
+  push:
+    branches:
+      - main
+      - master
+      - trunk
 
 permissions:
   contents: read
