@@ -120,20 +120,34 @@ def collect_uses(node, found: list[str]) -> None:
         for item in node:
             collect_uses(item, found)
 
+
+def print_summary(
+    workflow_count: int,
+    ok_actions: int,
+    missing_digest_actions: int,
+) -> None:
+    print("Summary:")
+    print(f"- Workflows checked: {workflow_count}")
+    print(f"- OK actions: {ok_actions}")
+    print(f"- Actions with missing digest: {missing_digest_actions}")
+
 def main() -> int:
     workflow_dir = Path(".github/workflows")
     if not workflow_dir.exists():
         print("No .github/workflows directory found; nothing to validate.")
         return 0
 
-    warnings: list[str] = []
-    errors: list[str] = []
+    workflow_files = sorted(workflow_dir.glob("*.y*ml"))
+    warnings: list[tuple[str, str]] = []
+    errors: list[tuple[str, str]] = []
+    ok_actions = 0
+    missing_digest_actions = 0
 
-    for file in sorted(workflow_dir.glob("*.y*ml")):
+    for file in workflow_files:
         try:
             data = yaml.safe_load(file.read_text(encoding="utf-8"))
         except Exception as exc:
-            errors.append(f"{file}: Failed to parse YAML: {exc}")
+            errors.append((str(file), f"Failed to parse YAML: {exc}"))
             continue
 
         uses_values: list[str] = []
@@ -142,26 +156,43 @@ def main() -> int:
         for uses in uses_values:
             result = check_uses(uses)
             if result:
+                missing_digest_actions += 1
                 severity, message = result
-                full_message = f"{file}: {message}"
                 if severity == "warning":
-                    warnings.append(full_message)
+                    warnings.append((str(file), message))
                 else:
-                    errors.append(full_message)
+                    errors.append((str(file), message))
+            else:
+                ok_actions += 1
+
+    print(f"Checked {len(workflow_files)} workflow file(s).")
 
     if warnings:
         print("Warnings:\n")
-        for warning in warnings:
-            print(f"- {warning}")
+        for file, warning in warnings:
+            print(f"::warning file={file}::{warning}")
+            print(f"- {file}: {warning}")
 
     if errors:
+        if WARNING_MODE:
+            print("Policy violations found (warning mode):\n")
+            for file, error in errors:
+                print(f"::warning file={file}::{error}")
+                print(f"- {file}: {error}")
+            print_summary(len(workflow_files), ok_actions, missing_digest_actions)
+            return 0
+
         print("Policy violations found:\n")
-        for error in errors:
-            print(f"- {error}")
-        return 1 if not WARNING_MODE else 0
+        for file, error in errors:
+            print(f"::error file={file}::{error}")
+            print(f"- {file}: {error}")
+        print_summary(len(workflow_files), ok_actions, missing_digest_actions)
+        return 1
 
     if not warnings:
         print("All workflows comply with action pinning policy.")
+
+    print_summary(len(workflow_files), ok_actions, missing_digest_actions)
     
     return 0
 
