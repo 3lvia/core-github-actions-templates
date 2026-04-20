@@ -126,10 +126,30 @@ def print_summary(
     ok_actions: int,
     missing_digest_actions: int,
 ) -> None:
+    print(
+        "::notice::Action pinning summary - "
+        f"workflows={workflow_count}, ok_actions={ok_actions}, "
+        f"missing_digest={missing_digest_actions}"
+    )
     print("Summary:")
     print(f"- Workflows checked: {workflow_count}")
     print(f"- OK actions: {ok_actions}")
     print(f"- Actions with missing digest: {missing_digest_actions}")
+
+    step_summary_path = os.getenv("GITHUB_STEP_SUMMARY")
+    if step_summary_path:
+        summary_lines = [
+            "## Action pinning summary",
+            "",
+            "| Metric | Value |",
+            "| --- | ---: |",
+            f"| Workflows checked | {workflow_count} |",
+            f"| OK actions | {ok_actions} |",
+            f"| Actions with missing digest | {missing_digest_actions} |",
+            "",
+        ]
+        with open(step_summary_path, "a", encoding="utf-8") as summary_file:
+            summary_file.write("\n".join(summary_lines))
 
 def main() -> int:
     workflow_dir = Path(".github/workflows")
