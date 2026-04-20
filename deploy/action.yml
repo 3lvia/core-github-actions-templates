@@ -118,12 +118,12 @@ runs:
         echo "token=$token" >> "$GITHUB_OUTPUT"
 
     - name: Setup kubelogin if not on Elvia runner
-      uses: azure/use-kubelogin@76597ae0fcbaace21b05e13a2cbf8daee2c6e820 # v1
+      uses: azure/use-kubelogin@0ce7c36141aa27d4934872cf00b0120804c98a29 # v1.3
       if: ${{ inputs.runtime-cloud-provider == 'AKS' }}
       env:
         GITHUB_TOKEN: ${{ github.token }}
       with:
-        kubelogin-version: 'latest'
+        kubelogin-version: 'v0.2.17'
 
     - name: Authenticate with Google Cloud
       uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
@@ -149,7 +149,7 @@ runs:
           monitoring/kv/data/shared grafana_editor_api_key | GRAFANA_API_KEY
 
     - name: Install 3lv CLI
-      uses: 3lvia/cli/setup@4b405f7fccb75056bf41c2d19894e68e0895e03a # trunk
+      uses: 3lvia/cli/setup@trunk
 
     - name: Deploy
       shell: bash

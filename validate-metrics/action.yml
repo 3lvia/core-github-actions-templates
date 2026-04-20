@@ -23,10 +23,14 @@ runs:
   steps:
     - run: |
         # Explicit checks for required inputs, due to https://github.com/actions/runner/issues/1070
-        [[ "${{ inputs.system }}" ]] || { echo "Parameter 'system' is required, but is empty." ; exit 1; }
-        [[ "${{ inputs.environment }}" ]] || { echo "Parameter 'environment' is required, but is empty." ; exit 1; }
-        [[ "${{ inputs.query }}" ]] || { echo "Parameter 'query' is required, but is empty." ; exit 1; }
+        [[ "$SYSTEM" ]] || { echo "Parameter 'system' is required, but is empty." ; exit 1; }
+        [[ "$ENVIRONMENT" ]] || { echo "Parameter 'environment' is required, but is empty." ; exit 1; }
+        [[ "$QUERY" ]] || { echo "Parameter 'query' is required, but is empty." ; exit 1; }
       shell: bash
+      env:
+        SYSTEM: ${{ inputs.system }}
+        ENVIRONMENT: ${{ inputs.environment }}
+        QUERY: ${{ inputs.query }}
 
     - name: Checkout repository
       if: ${{ inputs.checkout == 'true' }}
@@ -48,5 +52,8 @@ runs:
     - name: Run PromQL query
       shell: bash
       run: |
-        pip install -r '${{ github.action_path }}/requirements.txt'
-        python '${{ github.action_path }}/validate_metrics.py' --query '${{ inputs.query }}'
+        pip install -r "$GITHUB_ACTION_PATH/requirements.txt"
+        python "$GITHUB_ACTION_PATH/validate_metrics.py" --query "$QUERY"
+      env:
+        GITHUB_ACTION_PATH: ${{ github.action_path }}
+        QUERY: ${{ inputs.query }}
