@@ -15,7 +15,7 @@ permissions:
 jobs:
   verify:
     name: verify-action-pinning
-    runs-on: ubuntu-latest
+    runs-on: elvia-runner
 
     steps:
       - name: Check out target repository
