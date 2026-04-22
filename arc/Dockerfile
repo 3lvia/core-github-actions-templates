@@ -2,15 +2,14 @@
 # Start of source: 
 # https://github.com/actions/runner/blob/main/images/Dockerfile
 # ---------------------------------------------------------------------------
-
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-noble AS build
 
 ARG TARGETOS
 ARG TARGETARCH
 ARG RUNNER_VERSION
-ARG RUNNER_CONTAINER_HOOKS_VERSION=0.8.1
-ARG DOCKER_VERSION=29.3.0
-ARG BUILDX_VERSION=0.32.1
+ARG RUNNER_CONTAINER_HOOKS_VERSION=0.7.0
+ARG DOCKER_VERSION=29.4.0
+ARG BUILDX_VERSION=0.33.0
 
 RUN apt update -y && apt install curl unzip -y
 
@@ -25,7 +24,7 @@ RUN curl -f -L -o runner-container-hooks.zip https://github.com/actions/runner-c
     && unzip ./runner-container-hooks.zip -d ./k8s \
     && rm runner-container-hooks.zip
 
-RUN curl -f -L -o runner-container-hooks.zip https://github.com/actions/runner-container-hooks/releases/download/v0.8.0/actions-runner-hooks-k8s-0.8.0.zip \
+RUN curl -f -L -o runner-container-hooks.zip https://github.com/actions/runner-container-hooks/releases/download/v0.8.1/actions-runner-hooks-k8s-0.8.1.zip \
     && unzip ./runner-container-hooks.zip -d ./k8s-novolume \
     && rm runner-container-hooks.zip
 
@@ -193,6 +192,10 @@ RUN apt-get install -y --no-install-recommends postgresql-client
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
 ENV HOME=/home/runner
+
+# Add HOME/.local/bin to PATH
+ENV PATH="${PATH}:${HOME}:${HOME}/.local/bin"
+
 # TODO: Might not need this anymore?
 RUN chown -R runner:runner /home/runner
 
