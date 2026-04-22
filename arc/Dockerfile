@@ -135,6 +135,9 @@ RUN apt install gpg -y && \
     ./dotnet-install.sh --install-dir /home/runner/.dotnet --no-path --channel 10.0 && \
     rm dotnet-install.sh dotnet-install.asc dotnet-install.sig
 
+# Install golang
+RUN apt-get install -y --no-install-recommends golang
+
 ENV DOTNET_ROOT=/home/runner/.dotnet
 ENV PATH="${PATH}:${DOTNET_ROOT}:${DOTNET_ROOT}/tools"
 
