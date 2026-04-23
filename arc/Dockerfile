@@ -193,7 +193,8 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 
 ENV HOME=/home/runner
 
-# Add HOME/.local/bin to PATH
+# Create $HOME/.local/bin and add to PATH
+RUN mkdir -p "${HOME}/.local/bin"
 ENV PATH="${PATH}:${HOME}:${HOME}/.local/bin"
 
 # TODO: Might not need this anymore?
