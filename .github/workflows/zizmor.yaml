@@ -28,5 +28,5 @@ jobs:
         uses: zizmorcore/zizmor-action@b1d7e1fb5de872772f31590499237e7cce841e8e # v0.5.3
         with:
           advanced-security: true # write to ghas
-          annotations: true
+          # annotations: true
           config: 3lvia/core-github-actions-templates/.github/zizmor.yaml
