@@ -106,6 +106,7 @@ Builds a Docker image, signs it using Cosign, scans it for vulnerabilities using
 This action is a wrapper around the [3lv CLI](https://github.com/3lvia/cli) build command (`3lv build`).
 To use the `Build` and `Deploy` actions with Elvias container registry and runtime services,
 you must first add your GitHub repository to [github-repositories-terraform](https://github.com/3lvia/github-repositories-terraform).
+If you are running on ISS, you should add the repository to [iss-terraform](https://github.com/3lvia/iss-terraform) instead.
 
 ### Inputs
 
@@ -277,7 +278,8 @@ More permissions might be required depending on the inputs set, see the actions 
 Deploys an application to Kubernetes using the Elvia Helm chart.
 This action is a wrapper around the [3lv CLI](https://github.com/3lvia/cli) deploy command (`3lv deploy`).
 To use the `Build` and `Deploy` actions with Elvias container registry and runtime services,
-you must first add your Github repository to [github-repositories-terraform](https://github.com/3lvia/github-repositories-terraform).
+you must first add your GitHub repository to [github-repositories-terraform](https://github.com/3lvia/github-repositories-terraform).
+If you are running on ISS, you should add the repository to [iss-terraform](https://github.com/3lvia/iss-terraform) instead.
 
 ### Inputs
 
