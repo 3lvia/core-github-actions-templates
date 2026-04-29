@@ -27,7 +27,7 @@ jobs:
       - name: Write zizmor config
         shell: bash
         run: |
-          cat > "$RUNNER_TEMP/zizmor.yml" <<'EOF'
+          cat > "$GITHUB_WORKSPACE/.zizmor.yml" <<'EOF'
           rules:
             unpinned-uses:
               config:
@@ -36,9 +36,17 @@ jobs:
                   "*": hash-pin
           EOF
 
+      - name: Verify zizmor config
+        shell: bash
+        run: |
+          test -f "$GITHUB_WORKSPACE/.zizmor.yml"
+          ls -l "$GITHUB_WORKSPACE/.zizmor.yml"
+          echo "--- .zizmor.yml ---"
+          cat "$GITHUB_WORKSPACE/.zizmor.yml"
+
       - name: Run zizmor 🌈
         uses: zizmorcore/zizmor-action@b1d7e1fb5de872772f31590499237e7cce841e8e # v0.5.3
         with:
           advanced-security: true # write to ghas
           # annotations: true
-          config: ${{ runner.temp }}/zizmor.yml
+          config: ${{ github.workspace }}/.zizmor.yml
