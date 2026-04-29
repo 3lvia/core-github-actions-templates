@@ -4,6 +4,7 @@ description: |
   This action is a wrapper around the [3lv CLI](https://github.com/3lvia/cli) build command (`3lv build`).
   To use the `Build` and `Deploy` actions with Elvias container registry and runtime services,
   you must first add your GitHub repository to [github-repositories-terraform](https://github.com/3lvia/github-repositories-terraform).
+  If you are running on ISS, you should add the repository to [iss-terraform](https://github.com/3lvia/iss-terraform) instead.
 inputs:
   name:
     description: 'Name of application. This will be used as the image name. For Elvia applications, do not include the namespace.'

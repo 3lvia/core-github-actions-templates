@@ -62,9 +62,16 @@ runs:
       shell: bash
       run: |
         # Show message on failure
-        echo "::error::To access Vault, this repository must be added to https://github.com/3lvia/github-repositories-terraform/tree/trunk/systems"
+        if [[ "$RUNNER_NAME" == "agent-vm-"* ]]; then
+          echo "::error::To access Vault, this repository must be added to the 'github-actions-deploy' module in https://https://github.com/3lvia/iss-terraform."
+        else
+          echo "::error::To access Vault, this repository must be added to https://github.com/3lvia/github-repositories-terraform/tree/trunk/systems."
+        fi
+
         if [[ -z "$ACTIONS_ID_TOKEN_REQUEST_URL" ]]; then
           echo "::error::This action requires the permission 'id-token: write' to be added to the workflow."
-          exit 1
         fi
+
         exit 1
+      env:
+        RUNNER_NAME: ${{ runner.name }}
