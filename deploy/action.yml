@@ -154,6 +154,8 @@ runs:
       with:
         # Can't get actions runner for ISS to respect .profile or .bashrc, so we install it to a directory that is already in PATH
         install-directory: ${{ inputs.runtime-cloud-provider == 'ISS' && '/usr/local/bin' || '' }}
+        # Need root since install directory is root-owned
+        install-as-root: ${{ inputs.runtime-cloud-provider == 'ISS' && 'true' || 'false' }}
 
     - name: Deploy
       shell: bash
