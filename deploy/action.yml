@@ -151,6 +151,9 @@ runs:
 
     - name: Install 3lv CLI
       uses: 3lvia/cli/setup@trunk
+      with:
+        # Can't get actions runner for ISS to respect .profile or .bashrc, so we install it to a directory that is already in PATH
+        install-directory: ${{ inputs.runtime-cloud-provider == 'ISS' && '/usr/local/bin' || '' }}
 
     - name: Deploy
       shell: bash
