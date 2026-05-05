@@ -174,11 +174,10 @@ jobs:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
           project-file: ${{ env.PROJECT_FILE }}
-          trivy-upload-report: 'false'
-          trivy-post-comment: 'true'
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
 # START REMOVE FROM EXAMPLE
           checkout: 'false'
+          trivy-upload-report: 'false'
 # END REMOVE FROM EXAMPLE
 
   deploy-dev:

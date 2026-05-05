@@ -100,8 +100,6 @@ jobs:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
           project-file: ${{ env.PROJECT_FILE }}
-          trivy-upload-report: 'true'
-          trivy-post-comment: 'true'
           registry: 'ghcr.io/3lvia'
 
   push-images:

@@ -62,14 +62,14 @@ inputs:
       If `true`, the action will upload Trivy scan results to GitHub Advanced Security.
       This actions requires GitHub Advanced Security to be enabled for the repository, and the permissions `actions: read` and `security-events: write` to be set for the job.
     required: false
-    default: 'false'
+    default: 'true'
   trivy-post-comment:
     description: |
       If `true`, the action will post a comment to the PR with the Trivy scan results.
       The comment will only be posted if the action is ran on a pull request.
       This action requires the permission `pull-requests: write` to be set for the job.
     required: false
-    default: 'false'
+    default: 'true'
   sign-image:
     description: 'If `true`, the action will sign the Docker image with Cosign.'
     required: false
@@ -153,15 +153,17 @@ runs:
         # Setup Trivy ignore file
         touch .trivyignore
 
-        if [ -z '${{ inputs.trivy-cve-ignores }}' ]; then
+        if [ -z "$TRIVY_CVE_IGNORES" ]; then
           echo "No CVEs to ignore."
           exit 0
         fi
 
-        echo 'Ignoring CVEs: ${{ inputs.trivy-cve-ignores }}'
-        for TRIVY_CVE in "$(echo ${{ inputs.trivy-cve-ignores }} | sed 's/,/ /g')"; do
+        echo "Ignoring CVEs: $TRIVY_CVE_IGNORES"
+        for TRIVY_CVE in "$(echo $TRIVY_CVE_IGNORES | sed 's/,/ /g')"; do
           echo "$TRIVY_CVE" >> .trivyignore
         done
+      env:
+        TRIVY_CVE_IGNORES: ${{ inputs.trivy-cve-ignores }}
 
     - name: Install 3lv CLI
       uses: 3lvia/cli/setup@trunk
