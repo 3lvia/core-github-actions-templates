@@ -1,0 +1,292 @@
+name: Intility Deploy Service
+description: |
+  Deploy a prebuilt zip artifact as a Windows service with Azure DevOps parity.
+  This action assumes a self-hosted Windows runner with network access to target hosts.
+  If Vault is used, caller workflow must grant id-token: write permission.
+
+inputs:
+  system:
+    description: System name used by the Vault action role mapping.
+    required: true
+  environment:
+    description: Deployment environment.
+    required: true
+  target-host:
+    description: Target host used for remote PowerShell operations.
+    required: true
+  target-path:
+    description: Base deployment path on target host.
+    required: true
+  service-name:
+    description: Service name.
+    required: true
+  serviceuser-user:
+    description: Service user account for InstallService.ps1.
+    required: true
+  serviceuser-password:
+    description: Service user password for InstallService.ps1.
+    required: true
+  replace-target-files:
+    description: ReplaceTokens sources pattern(s), relative to installation folder.
+    required: true
+  variables:
+    description: Vault secrets mapping (same syntax as vault action input secrets).
+    required: false
+    default: ''
+  run-install-script:
+    description: Run InstallService.ps1 after copying files.
+    required: false
+    default: 'true'
+  drop:
+    description: Artifact name produced earlier in the workflow.
+    required: false
+    default: drop
+  agent-user:
+    description: Credential username used for PowerShell remoting.
+    required: true
+  agent-password:
+    description: Credential password used for PowerShell remoting.
+    required: true
+  scripts-source-path:
+    description: Local path to deployment scripts folder containing InstallService.ps1.
+    required: true
+  communication-protocol:
+    description: Remote protocol for PowerShell remoting (http or https).
+    required: false
+    default: http
+  token-pattern:
+    description: Token pattern passed to qetza/replacetokens-action.
+    required: false
+    default: default
+
+runs:
+  using: composite
+  steps:
+    - name: Explicit check for required inputs
+      shell: pwsh
+      run: |
+        if ([string]::IsNullOrWhiteSpace($env:SYSTEM)) { throw "Parameter 'system' is required, but is empty." }
+        if ([string]::IsNullOrWhiteSpace($env:ENVIRONMENT)) { throw "Parameter 'environment' is required, but is empty." }
+        if ([string]::IsNullOrWhiteSpace($env:TARGET_HOST)) { throw "Parameter 'target-host' is required, but is empty." }
+        if ([string]::IsNullOrWhiteSpace($env:TARGET_PATH)) { throw "Parameter 'target-path' is required, but is empty." }
+        if ([string]::IsNullOrWhiteSpace($env:SERVICE_NAME)) { throw "Parameter 'service-name' is required, but is empty." }
+        if ([string]::IsNullOrWhiteSpace($env:SERVICEUSER_USER)) { throw "Parameter 'serviceuser-user' is required, but is empty." }
+        if ([string]::IsNullOrWhiteSpace($env:SERVICEUSER_PASSWORD)) { throw "Parameter 'serviceuser-password' is required, but is empty." }
+        if ([string]::IsNullOrWhiteSpace($env:REPLACE_TARGET_FILES)) { throw "Parameter 'replace-target-files' is required, but is empty." }
+        if ([string]::IsNullOrWhiteSpace($env:SCRIPTS_SOURCE_PATH)) { throw "Parameter 'scripts-source-path' is required, but is empty." }
+        if ([string]::IsNullOrWhiteSpace($env:AGENT_USER)) { throw "Parameter 'agent-user' is required, but is empty." }
+        if ([string]::IsNullOrWhiteSpace($env:AGENT_PASSWORD)) { throw "Parameter 'agent-password' is required, but is empty." }
+        if ($env:COMMUNICATION_PROTOCOL -ne 'http' -and $env:COMMUNICATION_PROTOCOL -ne 'https') { throw "Parameter 'communication-protocol' must be 'http' or 'https'." }
+      env:
+        SYSTEM: ${{ inputs.system }}
+        ENVIRONMENT: ${{ inputs.environment }}
+        TARGET_HOST: ${{ inputs.target-host }}
+        TARGET_PATH: ${{ inputs.target-path }}
+        SERVICE_NAME: ${{ inputs.service-name }}
+        SERVICEUSER_USER: ${{ inputs.serviceuser-user }}
+        SERVICEUSER_PASSWORD: ${{ inputs.serviceuser-password }}
+        REPLACE_TARGET_FILES: ${{ inputs.replace-target-files }}
+        SCRIPTS_SOURCE_PATH: ${{ inputs.scripts-source-path }}
+        AGENT_USER: ${{ inputs.agent-user }}
+        AGENT_PASSWORD: ${{ inputs.agent-password }}
+        COMMUNICATION_PROTOCOL: ${{ inputs.communication-protocol }}
+
+    - name: Resolve deployment paths
+      shell: pwsh
+      run: |
+        $dropPath = Join-Path "${{ runner.temp }}" "${{ inputs.drop }}"
+        $serviceRoot = Join-Path "${{ runner.temp }}" "${{ inputs.service-name }}"
+        $installationPath = Join-Path $serviceRoot "installation"
+        "DROP_PATH=$dropPath" | Out-File -FilePath $env:GITHUB_ENV -Append
+        "SERVICE_ROOT=$serviceRoot" | Out-File -FilePath $env:GITHUB_ENV -Append
+        "INSTALLATION_PATH=$installationPath" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+    - name: Get secrets from Vault
+      if: ${{ inputs.variables != '' }}
+      uses: 3lvia/core-github-actions-templates/vault@trunk
+      with:
+        system: ${{ inputs.system }}
+        environment: ${{ inputs.environment }}
+        secrets: |
+          ${{ inputs.variables }}
+
+    - name: Test connection to server
+      shell: pwsh
+      run: |
+        $securePassword = ConvertTo-SecureString "$env:AGENT_PASSWORD" -AsPlainText -Force
+        $credential = New-Object System.Management.Automation.PSCredential ($env:AGENT_USER, $securePassword)
+        $useSsl = $env:COMMUNICATION_PROTOCOL -eq 'https'
+        $session = New-PSSession -ComputerName $env:TARGET_HOST -Credential $credential -UseSSL:$useSsl
+        try {
+          Invoke-Command -Session $session -ScriptBlock { Write-Output "Intility connection working" }
+        }
+        finally {
+          Remove-PSSession -Session $session
+        }
+      env:
+        TARGET_HOST: ${{ inputs.target-host }}
+        AGENT_USER: ${{ inputs.agent-user }}
+        AGENT_PASSWORD: ${{ inputs.agent-password }}
+        COMMUNICATION_PROTOCOL: ${{ inputs.communication-protocol }}
+
+    - name: Download application zipfile
+      uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+      with:
+        name: ${{ inputs.drop }}
+        path: ${{ env.DROP_PATH }}
+
+    - name: Extract application zipfile
+      shell: pwsh
+      run: |
+        New-Item -Path "$env:INSTALLATION_PATH" -ItemType Directory -Force | Out-Null
+        Remove-Item -Path (Join-Path "$env:INSTALLATION_PATH" '*') -Recurse -Force -ErrorAction SilentlyContinue
+        $zip = Get-ChildItem -Path "$env:DROP_PATH" -Filter '*.zip' | Select-Object -First 1
+        if (-not $zip) {
+          throw "No .zip artifact found in $env:DROP_PATH"
+        }
+        Expand-Archive -Path $zip.FullName -DestinationPath "$env:INSTALLATION_PATH" -Force
+
+    - name: Replace tokens in config files
+      shell: pwsh
+      run: |
+        # qetza/replacetokens-action expects JSON variables. Build one from current process env.
+        $vars = @{}
+        Get-ChildItem Env: | ForEach-Object {
+          $vars[$_.Name] = $_.Value
+        }
+        $json = $vars | ConvertTo-Json -Compress -Depth 5
+        "REPLACE_TOKENS_ENV_VARS=$json" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+    - name: Replace tokens in config files
+      uses: qetza/replacetokens-action@v1
+      with:
+        root: ${{ env.INSTALLATION_PATH }}
+        sources: ${{ inputs.replace-target-files }}
+        token-pattern: ${{ inputs.token-pattern }}
+        variables: |
+          ["$REPLACE_TOKENS_ENV_VARS"]
+
+    - name: Copy application files to remote server
+      shell: pwsh
+      run: |
+        $securePassword = ConvertTo-SecureString "$env:AGENT_PASSWORD" -AsPlainText -Force
+        $credential = New-Object System.Management.Automation.PSCredential ($env:AGENT_USER, $securePassword)
+        $useSsl = $env:COMMUNICATION_PROTOCOL -eq 'https'
+        $targetRoot = "$env:TARGET_PATH\$env:SERVICE_NAME-$env:ENVIRONMENT"
+        $remoteInstallation = "$targetRoot\installation"
+
+        $session = New-PSSession -ComputerName $env:TARGET_HOST -Credential $credential -UseSSL:$useSsl
+        try {
+          Invoke-Command -Session $session -ScriptBlock {
+            param($remoteInstallation)
+            New-Item -Path $remoteInstallation -ItemType Directory -Force | Out-Null
+            Get-ChildItem -Path $remoteInstallation -Force -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+          } -ArgumentList $remoteInstallation
+
+          Copy-Item -Path (Join-Path "$env:INSTALLATION_PATH" '*') -Destination $remoteInstallation -ToSession $session -Recurse -Force
+        }
+        finally {
+          Remove-PSSession -Session $session
+        }
+      env:
+        TARGET_HOST: ${{ inputs.target-host }}
+        TARGET_PATH: ${{ inputs.target-path }}
+        SERVICE_NAME: ${{ inputs.service-name }}
+        ENVIRONMENT: ${{ inputs.environment }}
+        AGENT_USER: ${{ inputs.agent-user }}
+        AGENT_PASSWORD: ${{ inputs.agent-password }}
+        COMMUNICATION_PROTOCOL: ${{ inputs.communication-protocol }}
+
+    - name: Copy Powershell installation files to remote server
+      shell: pwsh
+      run: |
+        $securePassword = ConvertTo-SecureString "$env:AGENT_PASSWORD" -AsPlainText -Force
+        $credential = New-Object System.Management.Automation.PSCredential ($env:AGENT_USER, $securePassword)
+        $useSsl = $env:COMMUNICATION_PROTOCOL -eq 'https'
+        $targetRoot = "$env:TARGET_PATH\$env:SERVICE_NAME-$env:ENVIRONMENT"
+        $remoteScripts = "$targetRoot\scripts"
+
+        if (-not (Test-Path "$env:SCRIPTS_SOURCE_PATH")) {
+          throw "Scripts source path not found: $env:SCRIPTS_SOURCE_PATH"
+        }
+
+        $session = New-PSSession -ComputerName $env:TARGET_HOST -Credential $credential -UseSSL:$useSsl
+        try {
+          Invoke-Command -Session $session -ScriptBlock {
+            param($remoteScripts)
+            New-Item -Path $remoteScripts -ItemType Directory -Force | Out-Null
+            Get-ChildItem -Path $remoteScripts -Force -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+          } -ArgumentList $remoteScripts
+
+          Copy-Item -Path (Join-Path "$env:SCRIPTS_SOURCE_PATH" '*') -Destination $remoteScripts -ToSession $session -Recurse -Force
+        }
+        finally {
+          Remove-PSSession -Session $session
+        }
+      env:
+        TARGET_HOST: ${{ inputs.target-host }}
+        TARGET_PATH: ${{ inputs.target-path }}
+        SERVICE_NAME: ${{ inputs.service-name }}
+        ENVIRONMENT: ${{ inputs.environment }}
+        SCRIPTS_SOURCE_PATH: ${{ inputs.scripts-source-path }}
+        AGENT_USER: ${{ inputs.agent-user }}
+        AGENT_PASSWORD: ${{ inputs.agent-password }}
+        COMMUNICATION_PROTOCOL: ${{ inputs.communication-protocol }}
+
+    - name: Run PowerShell install script
+      if: ${{ inputs.run-install-script == 'true' }}
+      shell: pwsh
+      run: |
+        $securePassword = ConvertTo-SecureString "$env:AGENT_PASSWORD" -AsPlainText -Force
+        $credential = New-Object System.Management.Automation.PSCredential ($env:AGENT_USER, $securePassword)
+        $useSsl = $env:COMMUNICATION_PROTOCOL -eq 'https'
+        $targetRoot = "$env:TARGET_PATH\$env:SERVICE_NAME-$env:ENVIRONMENT"
+        $scriptPath = "$targetRoot\scripts\InstallService.ps1"
+        $applicationPath = "$targetRoot\application"
+        $installationPath = "$targetRoot\installation"
+        $serviceDeploymentName = "$env:SERVICE_NAME-$env:ENVIRONMENT"
+
+        $session = New-PSSession -ComputerName $env:TARGET_HOST -Credential $credential -UseSSL:$useSsl
+        try {
+          Invoke-Command -Session $session -ScriptBlock {
+            param(
+              $scriptPath,
+              $serviceDeploymentName,
+              $applicationPath,
+              $serviceExecutable,
+              $serviceUser,
+              $servicePassword,
+              $installationPath
+            )
+
+            & $scriptPath `
+              $serviceDeploymentName `
+              $serviceDeploymentName `
+              $serviceDeploymentName `
+              $applicationPath `
+              $serviceExecutable `
+              $serviceUser `
+              $servicePassword `
+              $installationPath
+          } -ArgumentList `
+            $scriptPath, `
+            $serviceDeploymentName, `
+            $applicationPath, `
+            "$env:SERVICE_NAME.exe", `
+            $env:SERVICEUSER_USER, `
+            $env:SERVICEUSER_PASSWORD, `
+            $installationPath
+        }
+        finally {
+          Remove-PSSession -Session $session
+        }
+      env:
+        TARGET_HOST: ${{ inputs.target-host }}
+        TARGET_PATH: ${{ inputs.target-path }}
+        SERVICE_NAME: ${{ inputs.service-name }}
+        ENVIRONMENT: ${{ inputs.environment }}
+        SERVICEUSER_USER: ${{ inputs.serviceuser-user }}
+        SERVICEUSER_PASSWORD: ${{ inputs.serviceuser-password }}
+        AGENT_USER: ${{ inputs.agent-user }}
+        AGENT_PASSWORD: ${{ inputs.agent-password }}
+        COMMUNICATION_PROTOCOL: ${{ inputs.communication-protocol }}
