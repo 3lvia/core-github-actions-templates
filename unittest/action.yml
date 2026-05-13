@@ -96,7 +96,7 @@ runs:
 
     - name: Publish Code Coverage Report
       if: ${{ inputs.test-coverage == 'true' }}
-      uses: irongut/CodeCoverageSummary@f13848964841ca2f7a63343b287493e17dc645de # v1.3.0
+      uses: irongut/CodeCoverageSummary@51cc3a756ddcd398d447c044c02cb6aa83fdae95 # v1.3.0
       continue-on-error: true
       with:
         filename: 'Cobertura.xml'
