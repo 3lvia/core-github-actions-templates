@@ -46,7 +46,10 @@ runs:
 
     - name: Run .NET tests
       shell: bash
-      run: dotnet test -l:trx --configuration '${{ inputs.configuration }}' '${{ inputs.test-project }}'
+      run: dotnet test -l:trx --configuration "$CONFIGURATION" "$TEST_PROJECT"
+      env:
+        CONFIGURATION: ${{ inputs.configuration }}
+        TEST_PROJECT: ${{ inputs.test-project }}
 
     - name: Publish test results
       uses: EnricoMi/publish-unit-test-result-action@c950f6fb443cb5af20a377fd0dfaa78838901040 # v2.23.0

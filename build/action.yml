@@ -141,7 +141,7 @@ runs:
 
     - name: Login to GHCR
       if: ${{ contains(inputs.registry, 'ghcr.io') }}
-      uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+      uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
       with:
         registry: 'ghcr.io'
         username: ${{ github.actor }}
@@ -235,7 +235,7 @@ runs:
 
     - name: Upload Trivy scan results to GitHub Advanced Security
       if: ${{ inputs.trivy-upload-report == 'true' && !cancelled() }}
-      uses: github/codeql-action/upload-sarif@e46ed2cbd01164d986452f91f178727624ae40d7 # v4.35.3
+      uses: github/codeql-action/upload-sarif@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v4.36.0
       continue-on-error: ${{ !startsWith(runner.name, 'elvia-runner-') }} # assume Trivy is not installed on GitHub hosted runners
       with:
         sarif_file: 'trivy.sarif'

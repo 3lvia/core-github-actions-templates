@@ -47,13 +47,15 @@ runs:
         cat <<EOF > codeql-config.yml
         name: "CodeQL config"
         paths:
-          - ${{ inputs.working-directory }}
+          - $WORKING_DIRECTORY
         EOF
         echo "codeql-config.yml:"
         cat codeql-config.yml
+      env:
+        WORKING_DIRECTORY: ${{ inputs.working-directory }}
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@e46ed2cbd01164d986452f91f178727624ae40d7 # v4.35.3
+      uses: github/codeql-action/init@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v4.36.0
       with:
         config-file: 'codeql-config.yml'
         languages: ${{ inputs.language }}
@@ -61,7 +63,9 @@ runs:
     - name: Restore .NET tools
       if: ${{ inputs.language == 'csharp' }}
       shell: bash
-      run: dotnet tool restore --tool-manifest '${{ inputs.dotnet-tool-manifest }}'
+      run: dotnet tool restore --tool-manifest "$DOTNET_TOOL_MANIFEST"
+      env:
+        DOTNET_TOOL_MANIFEST: ${{ inputs.dotnet-tool-manifest }}
 
     - name: Build projects
       if: ${{ inputs.language == 'csharp' }}
@@ -75,6 +79,6 @@ runs:
       working-directory: ${{ inputs.working-directory }}
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@e46ed2cbd01164d986452f91f178727624ae40d7 # v4.35.3
+      uses: github/codeql-action/analyze@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v4.36.0
       with:
         upload: ${{ inputs.upload-results == 'true' && 'always' || 'never' }}
