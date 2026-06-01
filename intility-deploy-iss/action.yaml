@@ -1,315 +1,225 @@
-name: Intility Deploy ISS
+name: Deploy to IIS
 description: |
-  Deploy a prebuilt zip artifact to IIS with Azure DevOps parity.
-  This action assumes a self-hosted Windows runner with network access to target hosts.
-  If Vault is used, caller workflow must grant id-token: write permission.
-  Implements IIS lifecycle management: stop site/pool → deploy → start site/pool.
+  Deploy a previously uploaded artifact to IIS via PowerShell remoting and Vault credentials.
+
+  Configuration guidance:
+  - For .NET Core API apps: Use replace_tokens_in_appsettings=true
+  - For .NET Framework apps: Use replace_tokens_in_webconfig=true with webapp_uri and webapp_client_id parameters
 
 inputs:
-  system:
-    description: System name used by the Vault action role mapping.
-    required: true
   environment:
-    description: Deployment environment.
+    description: 'Target environment (dev, test, prod, etc.)'
     required: true
-  target-host:
-    description: Target host used for remote PowerShell operations.
+  system_name:
+    description: 'System name for Vault role'
     required: true
-  target-dir:
-    description: Temporary deployment path on target host.
+  target_host:
+    description: 'Target IIS host machine'
     required: true
-  site-dir:
-    description: Final IIS site directory on target host.
+  site_dir:
+    description: 'IIS site directory on target host'
     required: true
-  site-name:
-    description: IIS site name.
+  temp_dir:
+    description: 'Temporary directory on target host'
     required: true
-  app-pool-name:
-    description: IIS application pool name.
+  app_pool_name:
+    description: 'IIS Application Pool name'
     required: true
-  source-path:
-    description: Local source path to deploy (relative to runner temp or absolute).
+  site_name_full:
+    description: 'Full IIS site name'
     required: true
-  replace-target-files:
-    description: ReplaceTokens sources pattern(s), relative to extracted folder.
+  artifact_name:
+    description: 'Build artifact name to download'
+    required: false
+    default: 'drop'
+  artifact_zip:
+    description: 'Name of the zip file in the artifact'
+    required: false
+    default: 'app.zip'
+  vault_secret_path:
+    description: 'Vault secret path for credentials'
     required: true
-  replace-tokens:
-    description: Inline token variables for replacement (YAML or JSON format).
-    required: true
-  variables:
-    description: Vault secrets mapping (same syntax as vault action input secrets).
+  replace_tokens_in_appsettings:
+    description: 'Whether to replace tokens in appsettings.json (use for .NET Core API apps)'
+    required: false
+    default: 'true'
+  replace_tokens_in_webconfig:
+    description: 'Whether to replace tokens in web.config (use for .NET Framework apps)'
+    required: false
+    default: 'true'
+  webapp_uri:
+    description: 'Webapp URI (required when replace_tokens_in_webconfig=true for .NET Framework apps)'
     required: false
     default: ''
-  agent-user:
-    description: Credential username used for PowerShell remoting.
-    required: true
-  agent-password:
-    description: Credential password used for PowerShell remoting.
-    required: true
-  communication-protocol:
-    description: Remote protocol for PowerShell remoting (http or https).
+  webapp_client_id:
+    description: 'Webapp client ID for Elvid (required when replace_tokens_in_webconfig=true for .NET Framework apps)'
     required: false
-    default: http
-  token-pattern:
-    description: Token pattern passed to qetza/replacetokens-action.
-    required: false
-    default: default
+    default: ''
 
 runs:
   using: composite
   steps:
-    - name: Explicit check for required inputs
-      shell: pwsh
-      run: |
-        if ([string]::IsNullOrWhiteSpace($env:SYSTEM)) { throw "Parameter 'system' is required, but is empty." }
-        if ([string]::IsNullOrWhiteSpace($env:ENVIRONMENT)) { throw "Parameter 'environment' is required, but is empty." }
-        if ([string]::IsNullOrWhiteSpace($env:TARGET_HOST)) { throw "Parameter 'target-host' is required, but is empty." }
-        if ([string]::IsNullOrWhiteSpace($env:TARGET_DIR)) { throw "Parameter 'target-dir' is required, but is empty." }
-        if ([string]::IsNullOrWhiteSpace($env:SITE_DIR)) { throw "Parameter 'site-dir' is required, but is empty." }
-        if ([string]::IsNullOrWhiteSpace($env:SITE_NAME)) { throw "Parameter 'site-name' is required, but is empty." }
-        if ([string]::IsNullOrWhiteSpace($env:APP_POOL_NAME)) { throw "Parameter 'app-pool-name' is required, but is empty." }
-        if ([string]::IsNullOrWhiteSpace($env:SOURCE_PATH)) { throw "Parameter 'source-path' is required, but is empty." }
-        if ([string]::IsNullOrWhiteSpace($env:REPLACE_TARGET_FILES)) { throw "Parameter 'replace-target-files' is required, but is empty." }
-        if ([string]::IsNullOrWhiteSpace($env:REPLACE_TOKENS)) { throw "Parameter 'replace-tokens' is required, but is empty." }
-        if ([string]::IsNullOrWhiteSpace($env:AGENT_USER)) { throw "Parameter 'agent-user' is required, but is empty." }
-        if ([string]::IsNullOrWhiteSpace($env:AGENT_PASSWORD)) { throw "Parameter 'agent-password' is required, but is empty." }
-        if ($env:COMMUNICATION_PROTOCOL -ne 'http' -and $env:COMMUNICATION_PROTOCOL -ne 'https') { throw "Parameter 'communication-protocol' must be 'http' or 'https'." }
+    - name: Set Vault address based on environment
+      shell: powershell
       env:
-        SYSTEM: ${{ inputs.system }}
         ENVIRONMENT: ${{ inputs.environment }}
-        TARGET_HOST: ${{ inputs.target-host }}
-        TARGET_DIR: ${{ inputs.target-dir }}
-        SITE_DIR: ${{ inputs.site-dir }}
-        SITE_NAME: ${{ inputs.site-name }}
-        APP_POOL_NAME: ${{ inputs.app-pool-name }}
-        SOURCE_PATH: ${{ inputs.source-path }}
-        REPLACE_TARGET_FILES: ${{ inputs.replace-target-files }}
-        REPLACE_TOKENS: ${{ inputs.replace-tokens }}
-        AGENT_USER: ${{ inputs.agent-user }}
-        AGENT_PASSWORD: ${{ inputs.agent-password }}
-        COMMUNICATION_PROTOCOL: ${{ inputs.communication-protocol }}
-
-    - name: Resolve deployment paths
-      shell: pwsh
       run: |
-        $dropPath = Join-Path "${{ runner.temp }}" "drop"
-        $extractPath = Join-Path "${{ runner.temp }}" "iss-deployment"
-        "DROP_PATH=$dropPath" | Out-File -FilePath $env:GITHUB_ENV -Append
-        "EXTRACT_PATH=$extractPath" | Out-File -FilePath $env:GITHUB_ENV -Append
+        switch ($env:ENVIRONMENT) {
+          'dev' { 'VAULT_ADDR=https://vault.dev-elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          'sandbox' { 'VAULT_ADDR=https://vault.dev-elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          'kptest' { 'VAULT_ADDR=https://vault.kptest-elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          'test' { 'VAULT_ADDR=https://vault.test-elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          'prod' { 'VAULT_ADDR=https://vault.elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          default { throw "Unsupported environment: $($env:ENVIRONMENT)" }
+        }
 
-    - name: Get secrets from Vault
-      if: ${{ inputs.variables != '' }}
-      uses: 3lvia/core-github-actions-templates/vault@trunk
+    - name: Set Elvid address based on environment
+      shell: powershell
+      env:
+        ENVIRONMENT: ${{ inputs.environment }}
+      run: |
+        switch ($env:ENVIRONMENT) {
+          'dev' { 'ELVID_ADDR=https://elvid.test-elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          'kptest' { 'ELVID_ADDR=https://elvid.test-elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          'test' { 'ELVID_ADDR=https://elvid.test-elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          'prod' { 'ELVID_ADDR=https://elvid.elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          default { throw "Unsupported environment: $($env:ENVIRONMENT)" }
+        }
+
+    - name: Set repo variables
+      shell: powershell
+      env:
+        ENVIRONMENT: ${{ inputs.environment }}
+      run: |
+        $repoShortName = ($env:GITHUB_REPOSITORY -split '/')[-1]
+        "REPO_SHORT_NAME=$repoShortName" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    - name: Login to Vault and export token
+      uses: hashicorp/vault-action@892a26828f195e65540a40b4768ae4571f51ebfc # v4.0.0
       with:
-        system: ${{ inputs.system }}
-        environment: ${{ inputs.environment }}
+        url: ${{ env.VAULT_ADDR }}
+        role: 'jwt-github-${{ inputs.system_name }}-${{ env.REPO_SHORT_NAME }}'
+        method: 'jwt'
+        path: 'jwt-github'
+        exportToken: false
         secrets: |
-          ${{ inputs.variables }}
+          ${{ inputs.vault_secret_path }} agent_username | AGENT_USERNAME ;
+          ${{ inputs.vault_secret_path }} agent_password | AGENT_PASSWORD ;
 
-    - name: Test connection to server
-      shell: pwsh
-      run: |
-        $securePassword = ConvertTo-SecureString "$env:AGENT_PASSWORD" -AsPlainText -Force
-        $credential = New-Object System.Management.Automation.PSCredential ($env:AGENT_USER, $securePassword)
-        $useSsl = $env:COMMUNICATION_PROTOCOL -eq 'https'
-        $session = New-PSSession -ComputerName $env:TARGET_HOST -Credential $credential -UseSSL:$useSsl
-        try {
-          Invoke-Command -Session $session -ScriptBlock { Write-Output "Intility connection working" }
-        }
-        finally {
-          Remove-PSSession -Session $session
-        }
-      env:
-        TARGET_HOST: ${{ inputs.target-host }}
-        AGENT_USER: ${{ inputs.agent-user }}
-        AGENT_PASSWORD: ${{ inputs.agent-password }}
-        COMMUNICATION_PROTOCOL: ${{ inputs.communication-protocol }}
-
-    - name: Download application zipfile
-      uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+    - name: Download artifact
+      uses: actions/download-artifact@v8
       with:
-        name: drop
-        path: ${{ env.DROP_PATH }}
+        name: ${{ inputs.artifact_name }}
+        path: ${{ runner.temp }}/drop
 
-    - name: Extract application zipfile
-      shell: pwsh
+    - name: Extract deployment package
+      shell: powershell
       run: |
-        New-Item -Path "$env:EXTRACT_PATH" -ItemType Directory -Force | Out-Null
-        Remove-Item -Path (Join-Path "$env:EXTRACT_PATH" '*') -Recurse -Force -ErrorAction SilentlyContinue
-        $zip = Get-ChildItem -Path "$env:DROP_PATH" -Filter '*.zip' | Select-Object -First 1
-        if (-not $zip) {
-          throw "No .zip artifact found in $env:DROP_PATH"
-        }
-        Expand-Archive -Path $zip.FullName -DestinationPath "$env:EXTRACT_PATH" -Force
+        $extractPath = "${{ runner.temp }}/${{ inputs.site_name_full }}"
+        New-Item -ItemType Directory -Force -Path $extractPath
+        Expand-Archive -Path "${{ runner.temp }}/drop/${{ inputs.artifact_zip }}" -DestinationPath $extractPath -Force
 
-    - name: Prepare inline token variables for replacement
-      shell: pwsh
+    - name: Replace tokens in appsettings.json
+      if: ${{ inputs.replace_tokens_in_appsettings == 'true' }}
+      shell: powershell
       run: |
-        # Parse inline variables and pass them to the action
-        $vars = @{}
-        Get-ChildItem Env: | ForEach-Object {
-          $vars[$_.Name] = $_.Value
-        }
-        $json = $vars | ConvertTo-Json -Compress -Depth 5
-        "REPLACE_TOKENS_ENV_VARS=$json" | Out-File -FilePath $env:GITHUB_ENV -Append
-        "INLINE_TOKENS=$($env:REPLACE_TOKENS)" | Out-File -FilePath $env:GITHUB_ENV -Append
-      env:
-        REPLACE_TOKENS: ${{ inputs.replace-tokens }}
+        $configPath = "${{ runner.temp }}/${{ inputs.site_name_full }}/appsettings.json"
+        $content = Get-Content $configPath -Raw
+        $content = $content -replace '#{authority}#', '${{ env.ELVID_ADDR }}'
+        $content = $content -replace '#{Build.BuildNumber}#', '${{ github.run_number }}'
+        $content = $content -replace '#{vaultAddr}#', '${{ env.VAULT_ADDR }}'
+        $content = $content -replace '#{Environment}#', '${{ inputs.environment }}'
+        Set-Content -Path $configPath -Value $content -NoNewline
 
-    - name: Replace tokens in config files
-      uses: qetza/replacetokens-action@v1
-      with:
-        root: ${{ env.EXTRACT_PATH }}
-        sources: ${{ inputs.replace-target-files }}
-        token-pattern: ${{ inputs.token-pattern }}
-        variables: |
-          ["$REPLACE_TOKENS_ENV_VARS", "$INLINE_TOKENS"]
-
-    - name: Copy files to remote server
-      shell: pwsh
+    - name: Replace tokens in web.config
+      if: ${{ inputs.replace_tokens_in_webconfig == 'true' }}
+      shell: powershell
       run: |
-        $securePassword = ConvertTo-SecureString "$env:AGENT_PASSWORD" -AsPlainText -Force
-        $credential = New-Object System.Management.Automation.PSCredential ($env:AGENT_USER, $securePassword)
-        $useSsl = $env:COMMUNICATION_PROTOCOL -eq 'https'
+        $configPath = "${{ runner.temp }}/${{ inputs.site_name_full }}/Web.config"
+        $content = Get-Content $configPath -Raw
+        $content = $content -replace '#{authority}#', '${{ env.ELVID_ADDR }}'
+        $content = $content -replace '#{Build.BuildNumber}#', '${{ github.run_number }}'
+        $content = $content -replace '#{vaultAddr}#', '${{ env.VAULT_ADDR }}'
+        $content = $content -replace '#{Environment}#', '${{ inputs.environment }}'
+        $content = $content -replace '#{clientId}#', '${{ inputs.webapp_client_id }}'
+        $content = $content -replace '#{uri}#', '${{ inputs.webapp_uri }}'
+        Set-Content -Path $configPath -Value $content -NoNewline
 
-        $session = New-PSSession -ComputerName $env:TARGET_HOST -Credential $credential -UseSSL:$useSsl
-        try {
-          Invoke-Command -Session $session -ScriptBlock {
-            param($targetDir)
-            New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
-            Get-ChildItem -Path $targetDir -Force -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
-          } -ArgumentList $env:TARGET_DIR
+    - name: Copy files to temporary directory
+      shell: powershell
+      run: |
+        $cred = New-Object System.Management.Automation.PSCredential($env:AGENT_USERNAME, (ConvertTo-SecureString $env:AGENT_PASSWORD -AsPlainText -Force))
+        $session = New-PSSession -ComputerName '${{ inputs.target_host }}' -Credential $cred
 
-          Copy-Item -Path (Join-Path "$env:EXTRACT_PATH" '*') -Destination $env:TARGET_DIR -ToSession $session -Recurse -Force
-        }
-        finally {
-          Remove-PSSession -Session $session
-        }
-      env:
-        TARGET_HOST: ${{ inputs.target-host }}
-        TARGET_DIR: ${{ inputs.target-dir }}
-        AGENT_USER: ${{ inputs.agent-user }}
-        AGENT_PASSWORD: ${{ inputs.agent-password }}
-        COMMUNICATION_PROTOCOL: ${{ inputs.communication-protocol }}
+        Invoke-Command -Session $session -ScriptBlock {
+          param($tempDir)
+          if (Test-Path $tempDir) {
+            Remove-Item -Path $tempDir -Recurse -Force
+          }
+          New-Item -ItemType Directory -Force -Path $tempDir
+        } -ArgumentList '${{ inputs.temp_dir }}'
+
+        Copy-Item -Path "${{ runner.temp }}/${{ inputs.site_name_full }}/*" -Destination '${{ inputs.temp_dir }}' -ToSession $session -Recurse -Force
+        Remove-PSSession $session
 
     - name: Stop IIS Site
-      shell: pwsh
+      shell: powershell
       run: |
-        $securePassword = ConvertTo-SecureString "$env:AGENT_PASSWORD" -AsPlainText -Force
-        $credential = New-Object System.Management.Automation.PSCredential ($env:AGENT_USER, $securePassword)
-        $useSsl = $env:COMMUNICATION_PROTOCOL -eq 'https'
+        $cred = New-Object System.Management.Automation.PSCredential($env:AGENT_USERNAME, (ConvertTo-SecureString $env:AGENT_PASSWORD -AsPlainText -Force))
+        $session = New-PSSession -ComputerName '${{ inputs.target_host }}' -Credential $cred
 
-        $session = New-PSSession -ComputerName $env:TARGET_HOST -Credential $credential -UseSSL:$useSsl
-        try {
-          Invoke-Command -Session $session -ScriptBlock {
-            param($siteName)
-            & $env:windir\System32\inetsrv\appcmd stop site /site.name:$siteName
-          } -ArgumentList $env:SITE_NAME
+        Invoke-Command -Session $session -ScriptBlock {
+          & $env:windir\System32\inetsrv\appcmd stop site /site.name:${{ inputs.site_name_full }}
         }
-        finally {
-          Remove-PSSession -Session $session
-        }
-      env:
-        TARGET_HOST: ${{ inputs.target-host }}
-        SITE_NAME: ${{ inputs.site-name }}
-        AGENT_USER: ${{ inputs.agent-user }}
-        AGENT_PASSWORD: ${{ inputs.agent-password }}
-        COMMUNICATION_PROTOCOL: ${{ inputs.communication-protocol }}
 
-    - name: Stop IIS App pool
-      shell: pwsh
+        Remove-PSSession $session
+
+    - name: Stop IIS App Pool
+      shell: powershell
       run: |
-        $securePassword = ConvertTo-SecureString "$env:AGENT_PASSWORD" -AsPlainText -Force
-        $credential = New-Object System.Management.Automation.PSCredential ($env:AGENT_USER, $securePassword)
-        $useSsl = $env:COMMUNICATION_PROTOCOL -eq 'https'
+        $cred = New-Object System.Management.Automation.PSCredential($env:AGENT_USERNAME, (ConvertTo-SecureString $env:AGENT_PASSWORD -AsPlainText -Force))
+        $session = New-PSSession -ComputerName '${{ inputs.target_host }}' -Credential $cred
 
-        $session = New-PSSession -ComputerName $env:TARGET_HOST -Credential $credential -UseSSL:$useSsl
-        try {
-          Invoke-Command -Session $session -ScriptBlock {
-            param($appPoolName)
-            & $env:windir\System32\inetsrv\appcmd stop apppool /apppool.name:$appPoolName
-          } -ArgumentList $env:APP_POOL_NAME
+        Invoke-Command -Session $session -ScriptBlock {
+          & $env:windir\System32\inetsrv\appcmd stop apppool /apppool.name:${{ inputs.app_pool_name }}
         }
-        finally {
-          Remove-PSSession -Session $session
-        }
-      env:
-        TARGET_HOST: ${{ inputs.target-host }}
-        APP_POOL_NAME: ${{ inputs.app-pool-name }}
-        AGENT_USER: ${{ inputs.agent-user }}
-        AGENT_PASSWORD: ${{ inputs.agent-password }}
-        COMMUNICATION_PROTOCOL: ${{ inputs.communication-protocol }}
 
-    - name: Copy files from temp to site directory
-      shell: pwsh
+        Remove-PSSession $session
+
+    - name: Copy files from temp folder
+      shell: powershell
       run: |
-        $securePassword = ConvertTo-SecureString "$env:AGENT_PASSWORD" -AsPlainText -Force
-        $credential = New-Object System.Management.Automation.PSCredential ($env:AGENT_USER, $securePassword)
-        $useSsl = $env:COMMUNICATION_PROTOCOL -eq 'https'
+        $cred = New-Object System.Management.Automation.PSCredential($env:AGENT_USERNAME, (ConvertTo-SecureString $env:AGENT_PASSWORD -AsPlainText -Force))
+        $session = New-PSSession -ComputerName '${{ inputs.target_host }}' -Credential $cred
 
-        $session = New-PSSession -ComputerName $env:TARGET_HOST -Credential $credential -UseSSL:$useSsl
-        try {
-          Invoke-Command -Session $session -ScriptBlock {
-            param($targetDir, $siteDir)
-            # Use cp -Force -Recurse pattern from Azure template for parity
-            cp -Force -Recurse "$targetDir*" $siteDir
-          } -ArgumentList $env:TARGET_DIR, $env:SITE_DIR
-        }
-        finally {
-          Remove-PSSession -Session $session
-        }
-      env:
-        TARGET_HOST: ${{ inputs.target-host }}
-        TARGET_DIR: ${{ inputs.target-dir }}
-        SITE_DIR: ${{ inputs.site-dir }}
-        AGENT_USER: ${{ inputs.agent-user }}
-        AGENT_PASSWORD: ${{ inputs.agent-password }}
-        COMMUNICATION_PROTOCOL: ${{ inputs.communication-protocol }}
+        Invoke-Command -Session $session -ScriptBlock {
+          param($sourceDir, $targetDir)
+          Copy-Item -Path "$sourceDir*" -Destination $targetDir -Recurse -Force
+        } -ArgumentList '${{ inputs.temp_dir }}', '${{ inputs.site_dir }}'
+
+        Remove-PSSession $session
 
     - name: Start IIS Site
-      shell: pwsh
+      shell: powershell
       run: |
-        $securePassword = ConvertTo-SecureString "$env:AGENT_PASSWORD" -AsPlainText -Force
-        $credential = New-Object System.Management.Automation.PSCredential ($env:AGENT_USER, $securePassword)
-        $useSsl = $env:COMMUNICATION_PROTOCOL -eq 'https'
+        $cred = New-Object System.Management.Automation.PSCredential($env:AGENT_USERNAME, (ConvertTo-SecureString $env:AGENT_PASSWORD -AsPlainText -Force))
+        $session = New-PSSession -ComputerName '${{ inputs.target_host }}' -Credential $cred
 
-        $session = New-PSSession -ComputerName $env:TARGET_HOST -Credential $credential -UseSSL:$useSsl
-        try {
-          Invoke-Command -Session $session -ScriptBlock {
-            param($siteName)
-            & $env:windir\System32\inetsrv\appcmd start site /site.name:$siteName
-          } -ArgumentList $env:SITE_NAME
+        Invoke-Command -Session $session -ScriptBlock {
+          & $env:windir\System32\inetsrv\appcmd start site /site.name:${{ inputs.site_name_full }}
         }
-        finally {
-          Remove-PSSession -Session $session
-        }
-      env:
-        TARGET_HOST: ${{ inputs.target-host }}
-        SITE_NAME: ${{ inputs.site-name }}
-        AGENT_USER: ${{ inputs.agent-user }}
-        AGENT_PASSWORD: ${{ inputs.agent-password }}
-        COMMUNICATION_PROTOCOL: ${{ inputs.communication-protocol }}
 
-    - name: Start IIS App pool
-      shell: pwsh
+        Remove-PSSession $session
+
+    - name: Start IIS App Pool
+      shell: powershell
       run: |
-        $securePassword = ConvertTo-SecureString "$env:AGENT_PASSWORD" -AsPlainText -Force
-        $credential = New-Object System.Management.Automation.PSCredential ($env:AGENT_USER, $securePassword)
-        $useSsl = $env:COMMUNICATION_PROTOCOL -eq 'https'
+        $cred = New-Object System.Management.Automation.PSCredential($env:AGENT_USERNAME, (ConvertTo-SecureString $env:AGENT_PASSWORD -AsPlainText -Force))
+        $session = New-PSSession -ComputerName '${{ inputs.target_host }}' -Credential $cred
 
-        $session = New-PSSession -ComputerName $env:TARGET_HOST -Credential $credential -UseSSL:$useSsl
-        try {
-          Invoke-Command -Session $session -ScriptBlock {
-            param($appPoolName)
-            & $env:windir\System32\inetsrv\appcmd start apppool /apppool.name:$appPoolName
-          } -ArgumentList $env:APP_POOL_NAME
+        Invoke-Command -Session $session -ScriptBlock {
+          & $env:windir\System32\inetsrv\appcmd start apppool /apppool.name:${{ inputs.app_pool_name }}
         }
-        finally {
-          Remove-PSSession -Session $session
-        }
-      env:
-        TARGET_HOST: ${{ inputs.target-host }}
-        APP_POOL_NAME: ${{ inputs.app-pool-name }}
-        AGENT_USER: ${{ inputs.agent-user }}
-        AGENT_PASSWORD: ${{ inputs.agent-password }}
-        COMMUNICATION_PROTOCOL: ${{ inputs.communication-protocol }}
+
+        Remove-PSSession $session
+
