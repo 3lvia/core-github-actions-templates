@@ -149,13 +149,6 @@ runs:
           monitoring/kv/data/shared grafana_api_url        | GRAFANA_URL ;
           monitoring/kv/data/shared grafana_editor_api_key | GRAFANA_API_KEY
 
-    - name: Bug Hunt
-      shell: bash
-      if: ${{ inputs.runtime-cloud-provider == 'GKE' }}
-      run: |
-        gcloud auth list
-        gcloud config list
-
     - name: Install 3lv CLI
       uses: 3lvia/cli/setup@trunk
       with:
