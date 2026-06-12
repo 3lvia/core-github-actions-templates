@@ -133,9 +133,9 @@ runs:
         workload_identity_provider: ${{ inputs.GC_WORKLOAD_IDENTITY_PROVIDER }}
         service_account: ${{ inputs.GC_SERVICE_ACCOUNT }}
 
-    - name: Setup Google Cloud CLI with GKE auth plugin if not on Elvia runner
+    - name: Setup Google Cloud CLI with GKE auth plugin
       uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
-      if: ${{ inputs.runtime-cloud-provider == 'GKE' && !startsWith(runner.name, 'elvia-runner-') }}
+      if: ${{ inputs.runtime-cloud-provider == 'GKE' }}
       with:
         install_components: 'gke-gcloud-auth-plugin'
 
