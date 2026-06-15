@@ -48,7 +48,7 @@ jobs:
         id: zizmor_scan
         uses: zizmorcore/zizmor-action@5f14fd08f7cf1cb1609c1e344975f152c7ee938d # v0.5.6
         with:
-          advanced-security: false # write to ghas
+          advanced-security: true # write to ghas
 
       # - name: Upload zizmor SARIF artifact
       #   uses: actions/upload-artifact@v4
@@ -57,34 +57,34 @@ jobs:
       #     path: ${{ steps.zizmor_scan.outputs.output-file }}
       #     if-no-files-found: error
 
-      # - name: Fail on high severity findings
-      #   shell: bash
-      #   run: |
-      #     set -euo pipefail
+      - name: Fail on high severity findings
+        shell: bash
+        run: |
+          set -euo pipefail
 
-      #     SARIF_FILE="${{ steps.zizmor_scan.outputs.output-file }}"
-      #     echo "Using SARIF file: ${SARIF_FILE}"
+          SARIF_FILE="${{ steps.zizmor_scan.outputs.output-file }}"
+          echo "Using SARIF file: ${SARIF_FILE}"
 
-      #     if [[ -z "${SARIF_FILE}" || ! -f "${SARIF_FILE}" ]]; then
-      #       echo "No SARIF file found from zizmor-action output"
-      #       exit 1
-      #     fi
+          if [[ -z "${SARIF_FILE}" || ! -f "${SARIF_FILE}" ]]; then
+            echo "No SARIF file found from zizmor-action output"
+            exit 1
+          fi
 
-      #     FAIL_KIND_COUNT=$(jq -r '
-      #       [
-      #         .runs[]?
-      #         | .results[]?
-      #         | (.kind // "")
-      #         | tostring
-      #         | ascii_downcase
-      #         | select(. == "fail")
-      #       ]
-      #       | length
-      #     ' "${SARIF_FILE}")
+          FAIL_KIND_COUNT=$(jq -r '
+            [
+              .runs[]?
+              | .results[]?
+              | (.kind // "")
+              | tostring
+              | ascii_downcase
+              | select(. == "fail")
+            ]
+            | length
+          ' "${SARIF_FILE}")
 
-      #     echo "Fail kind findings: ${FAIL_KIND_COUNT}"
+          echo "Fail kind findings: ${FAIL_KIND_COUNT}"
 
-      #     if [[ "${FAIL_KIND_COUNT}" -gt 0 ]]; then
-      #       echo "Failing workflow: blocking zizmor findings detected"
-      #       exit 1
-      #     fi
+          if [[ "${FAIL_KIND_COUNT}" -gt 0 ]]; then
+            echo "Failing workflow: blocking zizmor findings detected"
+            exit 1
+          fi
