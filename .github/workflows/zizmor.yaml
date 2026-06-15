@@ -50,6 +50,13 @@ jobs:
         with:
           advanced-security: true # write to ghas
 
+      - name: Upload zizmor SARIF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: zizmor-sarif
+          path: ${{ steps.zizmor_scan.outputs.output-file }}
+          if-no-files-found: error
+
       - name: Fail on high severity findings
         shell: bash
         run: |
@@ -100,9 +107,35 @@ jobs:
             | length
           ' "${SARIF_FILE}")
 
-          echo "High severity findings: ${HIGH_COUNT}"
+          FAIL_KIND_COUNT=$(jq -r '
+            [
+              .runs[]?
+              | .results[]?
+              | (.kind // "")
+              | tostring
+              | ascii_downcase
+              | select(. == "fail")
+            ]
+            | length
+          ' "${SARIF_FILE}")
 
-          if [[ "${HIGH_COUNT}" -gt 0 ]]; then
-            echo "Failing workflow: high severity zizmor findings detected"
+          ERROR_LEVEL_COUNT=$(jq -r '
+            [
+              .runs[]?
+              | .results[]?
+              | (.level // "")
+              | tostring
+              | ascii_downcase
+              | select(. == "error")
+            ]
+            | length
+          ' "${SARIF_FILE}")
+
+          echo "High severity findings: ${HIGH_COUNT}"
+          echo "Fail kind findings: ${FAIL_KIND_COUNT}"
+          echo "Error level findings: ${ERROR_LEVEL_COUNT}"
+
+          if [[ "${HIGH_COUNT}" -gt 0 || "${FAIL_KIND_COUNT}" -gt 0 || "${ERROR_LEVEL_COUNT}" -gt 0 ]]; then
+            echo "Failing workflow: blocking zizmor findings detected"
             exit 1
           fi
