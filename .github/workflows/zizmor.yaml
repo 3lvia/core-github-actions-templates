@@ -63,7 +63,7 @@ jobs:
           set -euo pipefail
 
           SARIF_FILE="${{ steps.zizmor_scan.outputs.output-file }}"
-          echo "Using SARIF file: ${SARIF_FILE}"
+          # echo "Using SARIF file: ${SARIF_FILE}"
 
           if [[ -z "${SARIF_FILE}" || ! -f "${SARIF_FILE}" ]]; then
             echo "No SARIF file found from zizmor-action output"
@@ -82,7 +82,30 @@ jobs:
             | length
           ' "${SARIF_FILE}")
 
+          FAILS_PER_FILE=$(jq -r '
+            [
+              .runs[]?
+              | .results[]? as $result
+              | select((($result.kind // "") | tostring | ascii_downcase) == "fail")
+              | (
+                  $result.codeFlows[]?.threadFlows[]?.locations[]?.location.logicalLocations[]?.properties.symbolic.key.Local.given_path
+                  // $result.locations[]?.physicalLocation.artifactLocation.uri
+                  // "unknown"
+                )
+            ]
+            | reduce .[] as $path ({}; .[$path] = ((.[$path] // 0) + 1))
+            | to_entries
+            | sort_by(.key)
+            | .[]
+            | "\(.value)\t\(.key)"
+          ' "${SARIF_FILE}")
+
           echo "Fail kind findings: ${FAIL_KIND_COUNT}"
+
+          if [[ -n "${FAILS_PER_FILE}" ]]; then
+            echo "Fail findings by file (count<TAB>given_path):"
+            echo "${FAILS_PER_FILE}"
+          fi
 
           if [[ "${FAIL_KIND_COUNT}" -gt 0 ]]; then
             echo "Failing workflow: blocking zizmor findings detected"
