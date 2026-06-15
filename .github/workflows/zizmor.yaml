@@ -50,13 +50,6 @@ jobs:
         with:
           advanced-security: true # write to ghas
 
-      # - name: Upload zizmor SARIF artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: zizmor-sarif
-      #     path: ${{ steps.zizmor_scan.outputs.output-file }}
-      #     if-no-files-found: error
-
       - name: Fail on high severity findings
         shell: bash
         run: |
@@ -87,11 +80,13 @@ jobs:
               .runs[]?
               | .results[]? as $result
               | select((($result.kind // "") | tostring | ascii_downcase) == "fail")
-              | (
-                  $result.codeFlows[]?.threadFlows[]?.locations[]?.location.logicalLocations[]?.properties.symbolic.key.Local.given_path
-                  // $result.locations[]?.physicalLocation.artifactLocation.uri
-                  // "unknown"
-                )
+              | ([
+                  $result.codeFlows[]?.threadFlows[]?.locations[]?.location.logicalLocations[]?.properties.symbolic.key.Local.given_path,
+                  $result.locations[]?.physicalLocation.artifactLocation.uri,
+                  "unknown"
+                ]
+                | map(select(. != null and . != ""))
+                | .[0])
             ]
             | reduce .[] as $path ({}; .[$path] = ((.[$path] // 0) + 1))
             | to_entries
