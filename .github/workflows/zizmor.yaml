@@ -45,6 +45,64 @@ jobs:
           cat "$GITHUB_WORKSPACE/zizmor.yml"
 
       - name: Run zizmor 🌈
+        id: zizmor_scan
         uses: zizmorcore/zizmor-action@5f14fd08f7cf1cb1609c1e344975f152c7ee938d # v0.5.6
         with:
           advanced-security: true # write to ghas
+
+      - name: Fail on high severity findings
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          SARIF_FILE="${{ steps.zizmor_scan.outputs.output-file }}"
+          echo "Using SARIF file: ${SARIF_FILE}"
+
+          if [[ -z "${SARIF_FILE}" || ! -f "${SARIF_FILE}" ]]; then
+            echo "No SARIF file found from zizmor-action output"
+            exit 1
+          fi
+
+          HIGH_COUNT=$(jq -r '
+            def result_severity($run; $result):
+              (
+                $result.properties.problem.severity
+                // $result.properties.severity
+                // (
+                  if (($result.ruleId // "") != "") then
+                    ($run.tool.driver.rules // [] | map(select(.id == $result.ruleId)) | .[0].properties.problem.severity)
+                  elif ($result.ruleIndex != null) then
+                    (($run.tool.driver.rules // [])[$result.ruleIndex].properties.problem.severity)
+                  else
+                    null
+                  end
+                )
+                // (
+                  if (($result.ruleId // "") != "") then
+                    ($run.tool.driver.rules // [] | map(select(.id == $result.ruleId)) | .[0].properties.severity)
+                  elif ($result.ruleIndex != null) then
+                    (($run.tool.driver.rules // [])[$result.ruleIndex].properties.severity)
+                  else
+                    null
+                  end
+                )
+                // ""
+              )
+              | tostring
+              | ascii_downcase;
+
+            [
+              .runs[]? as $run
+              | $run.results[]? as $result
+              | result_severity($run; $result)
+              | select(. == "high")
+            ]
+            | length
+          ' "${SARIF_FILE}")
+
+          echo "High severity findings: ${HIGH_COUNT}"
+
+          if [[ "${HIGH_COUNT}" -gt 0 ]]; then
+            echo "Failing workflow: high severity zizmor findings detected"
+            exit 1
+          fi
