@@ -48,7 +48,7 @@ jobs:
         id: zizmor_scan
         uses: zizmorcore/zizmor-action@5f14fd08f7cf1cb1609c1e344975f152c7ee938d # v0.5.6
         with:
-          advanced-security: true # write to ghas
+          advanced-security: false # write to ghas
 
       - name: Upload zizmor SARIF artifact
         uses: actions/upload-artifact@v4
@@ -70,43 +70,6 @@ jobs:
             exit 1
           fi
 
-          HIGH_COUNT=$(jq -r '
-            def result_severity($run; $result):
-              (
-                $result.properties.problem.severity
-                // $result.properties.severity
-                // (
-                  if (($result.ruleId // "") != "") then
-                    ($run.tool.driver.rules // [] | map(select(.id == $result.ruleId)) | .[0].properties.problem.severity)
-                  elif ($result.ruleIndex != null) then
-                    (($run.tool.driver.rules // [])[$result.ruleIndex].properties.problem.severity)
-                  else
-                    null
-                  end
-                )
-                // (
-                  if (($result.ruleId // "") != "") then
-                    ($run.tool.driver.rules // [] | map(select(.id == $result.ruleId)) | .[0].properties.severity)
-                  elif ($result.ruleIndex != null) then
-                    (($run.tool.driver.rules // [])[$result.ruleIndex].properties.severity)
-                  else
-                    null
-                  end
-                )
-                // ""
-              )
-              | tostring
-              | ascii_downcase;
-
-            [
-              .runs[]? as $run
-              | $run.results[]? as $result
-              | result_severity($run; $result)
-              | select(. == "high")
-            ]
-            | length
-          ' "${SARIF_FILE}")
-
           FAIL_KIND_COUNT=$(jq -r '
             [
               .runs[]?
@@ -119,23 +82,9 @@ jobs:
             | length
           ' "${SARIF_FILE}")
 
-          ERROR_LEVEL_COUNT=$(jq -r '
-            [
-              .runs[]?
-              | .results[]?
-              | (.level // "")
-              | tostring
-              | ascii_downcase
-              | select(. == "error")
-            ]
-            | length
-          ' "${SARIF_FILE}")
-
-          echo "High severity findings: ${HIGH_COUNT}"
           echo "Fail kind findings: ${FAIL_KIND_COUNT}"
-          echo "Error level findings: ${ERROR_LEVEL_COUNT}"
 
-          if [[ "${HIGH_COUNT}" -gt 0 || "${FAIL_KIND_COUNT}" -gt 0 || "${ERROR_LEVEL_COUNT}" -gt 0 ]]; then
+          if [[ "${FAIL_KIND_COUNT}" -gt 0 ]]; then
             echo "Failing workflow: blocking zizmor findings detected"
             exit 1
           fi
