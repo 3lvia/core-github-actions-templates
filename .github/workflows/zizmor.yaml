@@ -52,18 +52,36 @@ jobs:
         with:
           advanced-security: true # write to ghas
 
-      - name: Fail on high severity findings
+      - name: Parse findings and diagnostics
         shell: bash
         run: |
           set -euo pipefail
 
+          echo "=== Zizmor Diagnostics ==="
+          echo "event_name=${{ github.event_name }}"
+          echo "repository=${{ github.repository }}"
+          echo "ref=${{ github.ref }}"
+          echo "sha=${{ github.sha }}"
+          echo "actor=${{ github.actor }}"
+          echo "run_id=${{ github.run_id }}"
+          echo "pr_number=${{ github.event.pull_request.number || 'n/a' }}"
+          echo "pr_is_fork=${{ github.event.pull_request.head.repo.fork || false }}"
+          echo "security_events_permission=write (configured in job.permissions)"
+
           SARIF_FILE="${{ steps.zizmor_scan.outputs.output-file }}"
-          # echo "Using SARIF file: ${SARIF_FILE}"
+          echo "sarif_output_file=${SARIF_FILE}"
 
           if [[ -z "${SARIF_FILE}" || ! -f "${SARIF_FILE}" ]]; then
             echo "No SARIF file found from zizmor-action output"
             exit 1
           fi
+
+          echo "sarif_file_exists=true"
+
+          SARIF_RESULT_COUNT=$(jq -r '[.runs[]? | .results[]?] | length' "${SARIF_FILE}")
+          SARIF_RULE_COUNT=$(jq -r '[.runs[]? | .tool.driver.rules[]?] | length' "${SARIF_FILE}")
+          echo "sarif_result_count=${SARIF_RESULT_COUNT}"
+          echo "sarif_rule_count=${SARIF_RULE_COUNT}"
 
           FAIL_KIND_COUNT=$(jq -r '
             [
@@ -133,3 +151,5 @@ jobs:
 
             echo "ZIZMOR_FAIL_ON_FINDINGS=${ZIZMOR_FAIL_ON_FINDINGS}; not failing workflow"
           fi
+
+          echo "=== Diagnostics Complete ==="
