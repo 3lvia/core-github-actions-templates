@@ -8,6 +8,9 @@ on:
       - trunk
   pull_request:
     branches: ["**"]
+  #Currently added daily schedule while rule is in eval mode to collect information from all repositories
+  schedule:
+    - cron: '0 21 * * *'
 
 permissions: {}
 
@@ -56,17 +59,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-
-          echo "=== Zizmor Diagnostics ==="
-          echo "event_name=${{ github.event_name }}"
-          echo "repository=${{ github.repository }}"
-          echo "ref=${{ github.ref }}"
-          echo "sha=${{ github.sha }}"
-          echo "actor=${{ github.actor }}"
-          echo "run_id=${{ github.run_id }}"
-          echo "pr_number=${{ github.event.pull_request.number || 'n/a' }}"
-          echo "pr_is_fork=${{ github.event.pull_request.head.repo.fork || false }}"
-          echo "security_events_permission=write (configured in job.permissions)"
 
           SARIF_FILE="${{ steps.zizmor_scan.outputs.output-file }}"
           echo "sarif_output_file=${SARIF_FILE}"
