@@ -76,29 +76,48 @@ jobs:
           ' "${SARIF_FILE}")
 
           FAILS_PER_FILE=$(jq -r '
+            def fail_path($result):
+              [
+                $result.codeFlows[]?.threadFlows[]?.locations[]?.location.logicalLocations[]?.properties.symbolic.key.Local.given_path,
+                $result.locations[]?.physicalLocation.artifactLocation.uri,
+                "unknown"
+              ]
+              | map(select(. != null and . != ""))
+              | .[0];
+
             [
               .runs[]?
               | .results[]? as $result
               | select((($result.kind // "") | tostring | ascii_downcase) == "fail")
-              | ([
-                  $result.codeFlows[]?.threadFlows[]?.locations[]?.location.logicalLocations[]?.properties.symbolic.key.Local.given_path,
-                  $result.locations[]?.physicalLocation.artifactLocation.uri,
-                  "unknown"
-                ]
-                | map(select(. != null and . != ""))
-                | .[0])
+              | {
+                  path: fail_path($result),
+                  rule_id: ($result.ruleId // "unknown"),
+                  line: (
+                    $result.locations[]?.physicalLocation.region.startLine
+                    // $result.locations[]?.physicalLocation.region.endLine
+                    // "unknown"
+                  ),
+                  message: (
+                    $result.message.text
+                    // $result.message.markdown
+                    // $result.ruleId
+                    // "unknown error"
+                  )
+                }
             ]
-            | reduce .[] as $path ({}; .[$path] = ((.[$path] // 0) + 1))
-            | to_entries
-            | sort_by(.key)
-            | .[]
-            | "\(.value)\t\(.key)"
+            | sort_by(.path, .message)
+            | group_by(.path)
+            | map(
+                .[0].path + "\n" +
+                (map("  - [" + .rule_id + ":" + (.line | tostring) + "] " + .message) | join("\n"))
+              )
+            | join("\n")
           ' "${SARIF_FILE}")
 
           echo "Fail kind findings: ${FAIL_KIND_COUNT}"
 
           if [[ -n "${FAILS_PER_FILE}" ]]; then
-            echo "Fail findings by file (count<TAB>given_path):"
+            echo "Fail findings by file:"
             echo "${FAILS_PER_FILE}"
           fi
 
