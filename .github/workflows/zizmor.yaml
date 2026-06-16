@@ -14,6 +14,8 @@ permissions: {}
 jobs:
   zizmor:
     runs-on: ubuntu-latest
+    env:
+      ZIZMOR_FAIL_ON_FINDINGS: "false"
     permissions:
       contents: read # only needed for private repos
       actions: read # only needed for private repos
@@ -122,8 +124,12 @@ jobs:
           fi
 
           if [[ "${FAIL_KIND_COUNT}" -gt 0 ]]; then
-            # echo "Failing workflow: blocking zizmor findings detected"
-            # exit 1
-
             echo "Workflow: Zizmor findings detected"
+
+            if [[ "${ZIZMOR_FAIL_ON_FINDINGS,,}" == "true" ]]; then
+              echo "Failing workflow: blocking zizmor findings detected"
+              exit 1
+            fi
+
+            echo "ZIZMOR_FAIL_ON_FINDINGS=${ZIZMOR_FAIL_ON_FINDINGS}; not failing workflow"
           fi
