@@ -90,6 +90,14 @@ inputs:
 
       If set to a GHCR registry, the action will push to the GitHub Container Registry of the repository.
       Using GHCR requires the `packages: write` permission to push to the registry.
+
+      **This input does not affect where `Deploy` looks for the image.** `Deploy` only sets
+      `image.tag`; the repository comes from the Helm chart, which defaults to
+      `containerregistryelvia.azurecr.io/$namespace-$name`. So if you push somewhere other than
+      Elvia's ACR and then deploy with the `Deploy` action, you must also set `image.repository`
+      (or the per-environment `image.<env>.repository`) in your Helm values file — otherwise the
+      pod ends up in `ImagePullBackOff` and the deploy fails on a rollout timeout several minutes
+      later, with no mention of the image in the error.
     required: false
   push:
     description: 'If `true`, the action will push the Docker image to the registry.'

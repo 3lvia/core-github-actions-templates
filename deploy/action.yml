@@ -2,9 +2,16 @@ name: 'Deploy'
 description: |
   Deploys an application to Kubernetes using the Elvia Helm chart.
   This action is a wrapper around the [3lv CLI](https://github.com/3lvia/cli) deploy command (`3lv deploy`).
+
   To use the `Build` and `Deploy` actions with Elvias container registry and runtime services,
   you must first add your GitHub repository to [github-repositories-terraform](https://github.com/3lvia/github-repositories-terraform).
   If you are running on ISS, you should add the repository to [iss-terraform](https://github.com/3lvia/iss-terraform) instead.
+
+  This action sets only the image *tag*. The image repository comes from the Helm chart and
+  defaults to `containerregistryelvia.azurecr.io/$namespace-$name`, so there is no `registry`
+  input here. If `Build` pushed somewhere else (e.g. GHCR), override `image.repository` in your
+  Helm values file to match — otherwise this action deploys a reference to an image that does
+  not exist, and fails on a rollout timeout rather than a missing-image error.
 inputs:
   name:
     description: 'Name of application. Do not include namespace.'
