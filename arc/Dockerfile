@@ -185,15 +185,11 @@ RUN apt-get install -y --no-install-recommends \
         libxcomposite1 \
         libatomic1
 
-# Preinstall Playwright browsers and their full OS dependency set, so the playwright
-# template's install step becomes a fast no-op instead of downloading three browsers on
-# every ephemeral runner pod (measured in elvid 2026-08-18: ~1.2 min x 3 deploy jobs =
-# ~3.7 min per pipeline, plus an actions/cache workaround this makes redundant).
-#
-# The version must track Microsoft.Playwright in consumer repos (elvid: 1.62.0, elvid#913;
-# the browser revisions are identical across the Node and .NET bindings of the same
-# version). On mismatch Playwright falls back to downloading at runtime into the same
-# path — slower, never broken; that is also why the path is left world-writable.
+# Preinstall Playwright browsers and OS deps so the playwright template's install step
+# becomes a fast no-op (measured: ~1.2 min x 3 deploy jobs per pipeline). Tracks
+# Microsoft.Playwright in consumer repos; on mismatch Playwright downloads at runtime
+# into this world-writable path — slower, never broken.
+# renovate: datasource=npm depName=playwright
 ARG PLAYWRIGHT_VERSION=1.62.0
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 RUN npx -y playwright@${PLAYWRIGHT_VERSION} install --with-deps chromium firefox webkit && \
