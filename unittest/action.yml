@@ -40,6 +40,11 @@ inputs:
     description: 'How many days to keep the uploaded test result artifact.'
     required: false
     default: '14'
+  test-runner:
+    description: 'Test runner mode: `vstest` (legacy dotnet test/VSTest flags) or `mtp` (Microsoft.Testing.Platform flags).'
+    required: false
+    default: 'vstest'
+
 runs:
   using: 'composite'
   steps:
@@ -65,19 +70,31 @@ runs:
         fi
 
         for testproject in $testprojects; do
-          if [[ "$TEST_COVERAGE" == 'true' ]]; then
-            if [[ "$COVERLET_RUNSETTINGS_FILE" != '' ]]; then
-              dotnet test -l:trx --collect:"XPlat Code Coverage" --settings "$COVERLET_RUNSETTINGS_FILE" "$testproject"
+          if [[ "$TEST_RUNNER" == 'mtp' ]]; then
+            if [[ "$TEST_COVERAGE" == 'true' ]]; then
+              if [[ "$COVERLET_RUNSETTINGS_FILE" != '' ]]; then
+                echo "::warning::coverlet-runsettings-file is not supported when running dotnet test in Microsoft.Testing.Platform mode. Ignoring '$COVERLET_RUNSETTINGS_FILE' and running with default coverlet.MTP settings. Use a testconfig.json file in the test project instead, see https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/Coverlet.MTP.Integration.md#configuration-files"
+              fi
+              dotnet test --project "$testproject" --report-trx --coverlet --coverlet-output-format cobertura
             else
-              dotnet test -l:trx --collect:"XPlat Code Coverage" "$testproject"
+              dotnet test --project "$testproject" --report-trx
             fi
           else
-            dotnet test -l:trx "$testproject"
+            if [[ "$TEST_COVERAGE" == 'true' ]]; then
+              if [[ "$COVERLET_RUNSETTINGS_FILE" != '' ]]; then
+                dotnet test -l:trx --collect:"XPlat Code Coverage" --settings "$COVERLET_RUNSETTINGS_FILE" --project "$testproject"
+              else
+                dotnet test -l:trx --collect:"XPlat Code Coverage" --project "$testproject"
+              fi
+            else
+              dotnet test -l:trx --project "$testproject"
+            fi
           fi
         done
       env:
         TEST_PROJECTS: ${{ inputs.test-projects }}
         TEST_COVERAGE: ${{ inputs.test-coverage }}
+        TEST_RUNNER: ${{ inputs.test-runner }}
         COVERLET_RUNSETTINGS_FILE: ${{ inputs.coverlet-runsettings-file }}
       working-directory: ${{ inputs.working-directory }}
 

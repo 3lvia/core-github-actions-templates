@@ -28,6 +28,10 @@ inputs:
       If not specified, no runsettings file will be used for dotnet-coverage.
     required: false
     default: ''
+  test-runner:
+    description: 'Test runner mode: `vstest` (legacy dotnet test/VSTest flags) or `mtp` (Microsoft.Testing.Platform flags).'
+    required: false
+    default: 'vstest'
 
 runs:
   using: 'composite'
@@ -78,10 +82,18 @@ runs:
 
         testprojects=$(find . -iname "$TEST_PROJECTS")
         for testproject in $testprojects; do
-          if [[ "$DOTNET_COVERAGE_RUNSETTINGS_FILE" != '' ]]; then
-            ./sonar/scanner/dotnet-coverage collect "dotnet test -l:trx $testproject" -f xml -o "$(uuidgen)_coverage.xml" --settings "$DOTNET_COVERAGE_RUNSETTINGS_FILE"
+          if [[ "$TEST_RUNNER" == 'mtp' ]]; then
+            if [[ "$DOTNET_COVERAGE_RUNSETTINGS_FILE" != '' ]]; then
+              ./sonar/scanner/dotnet-coverage collect "dotnet test --project $testproject" -f xml -o "$(uuidgen)_coverage.xml" --settings "$DOTNET_COVERAGE_RUNSETTINGS_FILE"
+            else
+              ./sonar/scanner/dotnet-coverage collect "dotnet test --project $testproject" -f xml -o "$(uuidgen)_coverage.xml"
+            fi
           else
-            ./sonar/scanner/dotnet-coverage collect "dotnet test -l:trx $testproject" -f xml -o "$(uuidgen)_coverage.xml"
+            if [[ "$DOTNET_COVERAGE_RUNSETTINGS_FILE" != '' ]]; then
+              ./sonar/scanner/dotnet-coverage collect "dotnet test -l:trx $testproject" -f xml -o "$(uuidgen)_coverage.xml" --settings "$DOTNET_COVERAGE_RUNSETTINGS_FILE"
+            else
+              ./sonar/scanner/dotnet-coverage collect "dotnet test -l:trx $testproject" -f xml -o "$(uuidgen)_coverage.xml"
+            fi
           fi
         done
 
@@ -92,4 +104,5 @@ runs:
         SONAR_TOKEN: ${{ inputs.sonarcloud-token }}
         SONAR_CLOUD_PROJECT_KEY: ${{ inputs.sonarcloud-project-key }}
         TEST_PROJECTS: ${{ inputs.test-projects }}
+        TEST_RUNNER: ${{ inputs.test-runner }}
       working-directory: ${{ inputs.working-directory }}

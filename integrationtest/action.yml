@@ -41,6 +41,11 @@ inputs:
     description: 'How many days to keep the uploaded test result artifact.'
     required: false
     default: '14'
+  test-runner:
+    description: 'Test runner mode: `vstest` (legacy dotnet test/VSTest flags) or `mtp` (Microsoft.Testing.Platform flags).'
+    required: false
+    default: 'vstest'
+
 runs:
   using: 'composite'
   steps:
@@ -73,10 +78,15 @@ runs:
         fi
 
         for testproject in $testprojects; do
-          dotnet test -l:trx "$testproject"
+          if [[ "$TEST_RUNNER" == 'mtp' ]]; then
+            dotnet test --project "$testproject" --report-trx
+          else
+            dotnet test -l:trx "$testproject"
+          fi
         done
       env:
         TEST_PROJECTS: ${{ inputs.test-projects }}
+        TEST_RUNNER: ${{ inputs.test-runner }}
       working-directory: ${{ inputs.working-directory }}
 
     # The published check summary only carries outcomes; the raw .trx also has per-test timings,
