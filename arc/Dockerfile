@@ -199,9 +199,11 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 RUN npx -y playwright@${PLAYWRIGHT_VERSION} install --with-deps chromium firefox webkit && \
     chmod -R 777 /ms-playwright
 
-# Playwright 1.48 browser builds link against older ICU/vpx than Ubuntu 24.04 (noble)
-# ships. Same workaround consumer workflows carry today (elvid.yaml); belongs here so
-# they can drop it.
+# Playwright 1.48's browser builds (notably WebKit) link against older ICU/vpx than
+# Ubuntu 24.04 (noble) ships, and install-deps does not fix that — verified empirically:
+# elvid added exactly these symlinks 2026-02-05 while already on 1.48 (elvid@9a728e9d).
+# The .so.70/.so.7 names do not exist on noble, so the links shadow nothing and are inert
+# if a future PLAYWRIGHT_VERSION bump ships proper noble builds — revisit on bump.
 RUN ln -sf /usr/lib/x86_64-linux-gnu/libicudata.so.74 /usr/lib/x86_64-linux-gnu/libicudata.so.70 && \
     ln -sf /usr/lib/x86_64-linux-gnu/libicui18n.so.74 /usr/lib/x86_64-linux-gnu/libicui18n.so.70 && \
     ln -sf /usr/lib/x86_64-linux-gnu/libicuuc.so.74 /usr/lib/x86_64-linux-gnu/libicuuc.so.70 && \
