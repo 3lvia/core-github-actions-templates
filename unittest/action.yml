@@ -81,12 +81,12 @@ runs:
           else
             if [[ "$TEST_COVERAGE" == 'true' ]]; then
               if [[ "$COVERLET_RUNSETTINGS_FILE" != '' ]]; then
-                dotnet test -l:trx --collect:"XPlat Code Coverage" --settings "$COVERLET_RUNSETTINGS_FILE" --project "$testproject"
+                 dotnet test -l:trx --collect:"XPlat Code Coverage" --settings "$COVERLET_RUNSETTINGS_FILE" "$testproject"
               else
-                dotnet test -l:trx --collect:"XPlat Code Coverage" --project "$testproject"
+                dotnet test -l:trx --collect:"XPlat Code Coverage" "$testproject"
               fi
             else
-              dotnet test -l:trx --project "$testproject"
+              dotnet test -l:trx "$testproject"
             fi
           fi
         done
