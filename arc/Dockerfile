@@ -185,6 +185,28 @@ RUN apt-get install -y --no-install-recommends \
         libxcomposite1 \
         libatomic1
 
+# Preinstall Playwright browsers and their full OS dependency set, so the playwright
+# template's install step becomes a fast no-op instead of downloading three browsers on
+# every ephemeral runner pod (measured in elvid 2026-08-18: ~1.2 min x 3 deploy jobs =
+# ~3.7 min per pipeline, plus an actions/cache workaround this makes redundant).
+#
+# The version must track Microsoft.Playwright in consumer repos (elvid: 1.48.0; the
+# browser revisions are identical across the Node and .NET bindings of the same version).
+# On mismatch Playwright falls back to downloading at runtime into the same path — slower,
+# never broken; that is also why the path is left world-writable.
+ARG PLAYWRIGHT_VERSION=1.48.0
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN npx -y playwright@${PLAYWRIGHT_VERSION} install --with-deps chromium firefox webkit && \
+    chmod -R 777 /ms-playwright
+
+# Playwright 1.48 browser builds link against older ICU/vpx than Ubuntu 24.04 (noble)
+# ships. Same workaround consumer workflows carry today (elvid.yaml); belongs here so
+# they can drop it.
+RUN ln -sf /usr/lib/x86_64-linux-gnu/libicudata.so.74 /usr/lib/x86_64-linux-gnu/libicudata.so.70 && \
+    ln -sf /usr/lib/x86_64-linux-gnu/libicui18n.so.74 /usr/lib/x86_64-linux-gnu/libicui18n.so.70 && \
+    ln -sf /usr/lib/x86_64-linux-gnu/libicuuc.so.74 /usr/lib/x86_64-linux-gnu/libicuuc.so.70 && \
+    ln -sf /usr/lib/x86_64-linux-gnu/libvpx.so.9 /usr/lib/x86_64-linux-gnu/libvpx.so.7
+
 # Install Postgres
 RUN apt-get install -y --no-install-recommends postgresql-client
 
