@@ -31,6 +31,16 @@ inputs:
     required: false
     default: ''
 
+  test-results-artifact-name:
+    description:
+      'Name of the workflow artifact that the raw .trx test result files are uploaded to. Must be unique within the
+      workflow run.'
+    required: false
+    default: 'integration-test-results-${{ github.job }}'
+  test-results-retention-days:
+    description: 'How many days to keep the uploaded test result artifact.'
+    required: false
+    default: '14'
 runs:
   using: 'composite'
   steps:
@@ -68,6 +78,20 @@ runs:
       env:
         TEST_PROJECTS: ${{ inputs.test-projects }}
       working-directory: ${{ inputs.working-directory }}
+
+    # The published check summary only carries outcomes; the raw .trx also has per-test timings,
+    # start/end times and full failure details — and passed/skipped tests leave no other trace.
+    # Without this upload the files die with the runner.
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      with:
+        name: ${{ inputs.test-results-artifact-name }}
+        path: |
+          **/TestResults/*.trx
+          .github/**/TestResults/*.trx
+        retention-days: ${{ inputs.test-results-retention-days }}
+        if-no-files-found: ignore
 
     - name: Publish test results
       uses: EnricoMi/publish-unit-test-result-action@d0a4676d0e0b938bc201470d88276b7c74c712b3 # v2.24.0
