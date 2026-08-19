@@ -72,7 +72,8 @@ see [here](#elvia-specific-actions) for more information.
 - [Development](#development)
   - [Formatting](#formatting)
   - [Action documentation & table of contents](#action-documentation--table-of-contents)
-  <!-- gh-actions-docs-toc-end -->
+
+<!-- gh-actions-docs-toc-end -->
 
 ## Examples
 
