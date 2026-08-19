@@ -41,11 +41,6 @@ inputs:
     description: 'How many days to keep the uploaded test result artifact.'
     required: false
     default: '14'
-  test-runner:
-    description: 'Test runner mode: `vstest` (legacy dotnet test/VSTest flags) or `mtp` (Microsoft.Testing.Platform flags).'
-    required: false
-    default: 'vstest'
-
 runs:
   using: 'composite'
   steps:
@@ -78,15 +73,22 @@ runs:
         fi
 
         for testproject in $testprojects; do
-          if [[ "$TEST_RUNNER" == 'mtp' ]]; then
+          # Try VSTest-compatible flags first.
+          # Exit code 5 means the test host is running in Microsoft.Testing.Platform (MTP) mode
+          # and rejected the VSTest-style flags as invalid — retry with MTP-native flags.
+          # '|| exit_code=$?' prevents bash's set -e from aborting the script on non-zero exit.
+          exit_code=0
+          dotnet test "$testproject" -l:trx || exit_code=$?
+
+          if [[ $exit_code -eq 5 ]]; then
+            echo "VSTest flags not supported (exit code 5), retrying with Microsoft.Testing.Platform flags..."
             dotnet test --project "$testproject" --report-trx
-          else
-            dotnet test -l:trx "$testproject"
+          elif [[ $exit_code -ne 0 ]]; then
+            exit $exit_code
           fi
         done
       env:
         TEST_PROJECTS: ${{ inputs.test-projects }}
-        TEST_RUNNER: ${{ inputs.test-runner }}
       working-directory: ${{ inputs.working-directory }}
 
     # The published check summary only carries outcomes; the raw .trx also has per-test timings,
