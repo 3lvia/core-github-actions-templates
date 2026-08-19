@@ -73,7 +73,19 @@ runs:
         fi
 
         for testproject in $testprojects; do
-          dotnet test -l:trx "$testproject"
+          # Try VSTest-compatible flags first.
+          # Exit code 5 means the test host is running in Microsoft.Testing.Platform (MTP) mode
+          # and rejected the VSTest-style flags as invalid — retry with MTP-native flags.
+          # '|| exit_code=$?' prevents bash's set -e from aborting the script on non-zero exit.
+          exit_code=0
+          dotnet test "$testproject" -l:trx || exit_code=$?
+
+          if [[ $exit_code -eq 5 ]]; then
+            echo "VSTest flags not supported (exit code 5), retrying with Microsoft.Testing.Platform flags..."
+            dotnet test --project "$testproject" --report-trx
+          elif [[ $exit_code -ne 0 ]]; then
+            exit $exit_code
+          fi
         done
       env:
         TEST_PROJECTS: ${{ inputs.test-projects }}

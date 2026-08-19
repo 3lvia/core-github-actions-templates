@@ -29,7 +29,6 @@ inputs:
       If not specified, no runsettings file will be used for coverlet.
     required: false
     default: ''
-
   test-results-artifact-name:
     description:
       'Name of the workflow artifact that the raw .trx test result files are uploaded to. Must be unique within the
@@ -65,14 +64,33 @@ runs:
         fi
 
         for testproject in $testprojects; do
+          # Try VSTest-compatible flags first.
+          # Exit code 5 means the test host is running in Microsoft.Testing.Platform (MTP) mode
+          # and rejected the VSTest-style flags as invalid — retry with MTP-native flags.
+          # '|| exit_code=$?' prevents bash's set -e from aborting the script on non-zero exit.
+          exit_code=0
           if [[ "$TEST_COVERAGE" == 'true' ]]; then
             if [[ "$COVERLET_RUNSETTINGS_FILE" != '' ]]; then
-              dotnet test -l:trx --collect:"XPlat Code Coverage" --settings "$COVERLET_RUNSETTINGS_FILE" "$testproject"
+              dotnet test "$testproject" -l:trx --collect:"XPlat Code Coverage" --settings "$COVERLET_RUNSETTINGS_FILE" || exit_code=$?
             else
-              dotnet test -l:trx --collect:"XPlat Code Coverage" "$testproject"
+              dotnet test "$testproject" -l:trx --collect:"XPlat Code Coverage" || exit_code=$?
             fi
           else
-            dotnet test -l:trx "$testproject"
+            dotnet test "$testproject" -l:trx || exit_code=$?
+          fi
+
+          if [[ $exit_code -eq 5 ]]; then
+            echo "VSTest flags not supported (exit code 5), retrying with Microsoft.Testing.Platform flags..."
+            if [[ "$TEST_COVERAGE" == 'true' ]]; then
+              if [[ "$COVERLET_RUNSETTINGS_FILE" != '' ]]; then
+                echo "::warning::coverlet-runsettings-file is not supported in MTP mode. Ignoring '$COVERLET_RUNSETTINGS_FILE'. Use a testconfig.json in the test project instead. See https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/Coverlet.MTP.Integration.md#configuration-files"
+              fi
+              dotnet test --project "$testproject" --report-trx --coverlet --coverlet-output-format cobertura
+            else
+              dotnet test --project "$testproject" --report-trx
+            fi
+          elif [[ $exit_code -ne 0 ]]; then
+            exit $exit_code
           fi
         done
       env:
@@ -110,7 +128,7 @@ runs:
       uses: danielpalme/ReportGenerator-GitHub-Action@d3ebf1f760f7d8ab92cc44d9bcfee7ad73722a31 # v5.5.11
       continue-on-error: true
       with:
-        reports: '**/*.cobertura.xml' # REQUIRED # The coverage reports that should be parsed (separated by semicolon). Globbing is supported.
+        reports: '**/*.cobertura*.xml' # REQUIRED # Matches both VSTest (*.cobertura.xml) and MTP/coverlet.MTP (*.cobertura.{timestamp}.xml) output filenames.
         targetdir: '${{ github.workspace }}' # REQUIRED # The directory where the generated report should be saved.
         reporttypes: 'Cobertura' # The output formats and scope (separated by semicolon) Values: Badges, Clover, Cobertura, CsvSummary, Html, Html_Dark, Html_Light, Html_BlueRed, HtmlChart, HtmlInline, HtmlInline_AzurePipelines, HtmlInline_AzurePipelines_Dark, HtmlInline_AzurePipelines_Light, HtmlSummary, JsonSummary, Latex, LatexSummary, lcov, MarkdownSummary, MarkdownSummaryGithub, MarkdownDeltaSummary, MHtml, PngChart, SonarQube, TeamCitySummary, TextSummary, TextDeltaSummary, Xml, XmlSummary
         verbosity: 'Info' # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
