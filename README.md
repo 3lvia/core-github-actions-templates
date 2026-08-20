@@ -451,16 +451,16 @@ Run .NET unit tests.
 
 ### Inputs
 
-| Name                          | Description                                                                                                                                                               | Required | Default                                                    |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------- |
-| `checkout`                    | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                                      | no       | `true`                                                     |
-| `coverlet-runsettings-file`   | Path to a coverlet runsettings file, relative to the root of the repository. If not specified, no runsettings file will be used for coverlet.                             | no       | ``                                                         |
-| `dotnet-tool-manifest`        | Path to the .NET tool manifest file, relative to the root of the repository. Only needed if you require .NET tools that are outside of `working-directory` for the build. | no       | `./.config/dotnet-tools.json`                              |
-| `test-coverage`               | If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector.                                                        | no       | `false`                                                    |
-| `test-projects`               | Pattern to use to find test projects.                                                                                                                                     | no       | `unit*test*csproj`                                         |
-| `test-results-artifact-name`  | Name of the workflow artifact that the raw .trx test result files are uploaded to. Must be unique within the workflow run.                                                | no       | `unit-test-results-${{ github.job }}-${{ github.action }}` |
-| `test-results-retention-days` | How many days to keep the uploaded test result artifact.                                                                                                                  | no       | `14`                                                       |
-| `working-directory`           | Will run unit tests on projects under this working directory.                                                                                                             | no       | `./`                                                       |
+| Name                          | Description                                                                                                                                                                                                       | Required | Default                                                    |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------- |
+| `checkout`                    | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                                                                              | no       | `true`                                                     |
+| `coverlet-runsettings-file`   | Path to a coverlet runsettings file, relative to the root of the repository. If not specified, no runsettings file will be used for coverlet.                                                                     | no       | ``                                                         |
+| `dotnet-tool-manifest`        | Path to the .NET tool manifest file, relative to the root of the repository. Only needed if you require .NET tools that are outside of `working-directory` for the build.                                         | no       | `./.config/dotnet-tools.json`                              |
+| `test-coverage`               | If test coverage should be computed. Requires a NuGet coverage package in each test project: `coverlet.collector` (VSTest mode) or `Microsoft.Testing.Extensions.CodeCoverage` (Microsoft.Testing.Platform mode). | no       | `false`                                                    |
+| `test-projects`               | Pattern to use to find test projects.                                                                                                                                                                             | no       | `unit*test*csproj`                                         |
+| `test-results-artifact-name`  | Name of the workflow artifact that the raw .trx test result files are uploaded to. Must be unique within the workflow run.                                                                                        | no       | `unit-test-results-${{ github.job }}-${{ github.action }}` |
+| `test-results-retention-days` | How many days to keep the uploaded test result artifact.                                                                                                                                                          | no       | `14`                                                       |
+| `working-directory`           | Will run unit tests on projects under this working directory.                                                                                                                                                     | no       | `./`                                                       |
 
 ### Permissions
 
@@ -498,7 +498,7 @@ More permissions might be required depending on the inputs set, see the actions 
     # Default: './.config/dotnet-tools.json'
 
     test-coverage:
-    # If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector.
+    # If test coverage should be computed. Requires a NuGet coverage package in each test project: `coverlet.collector` (VSTest mode) or `Microsoft.Testing.Extensions.CodeCoverage` (Microsoft.Testing.Platform mode).
     #
     # Required: no
     # Default: 'false'
