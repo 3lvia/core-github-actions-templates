@@ -20,7 +20,9 @@ inputs:
     required: false
     default: 'unit*test*csproj'
   test-coverage:
-    description: 'If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector.'
+    description: |
+      If test coverage should be computed.
+      Requires a NuGet coverage package in each test project: `coverlet.collector` (VSTest mode) or `Microsoft.Testing.Extensions.CodeCoverage` (Microsoft.Testing.Platform mode).
     required: false
     default: 'false'
   coverlet-runsettings-file:
@@ -83,11 +85,27 @@ runs:
             echo "VSTest flags not supported (exit code 5), retrying with Microsoft.Testing.Platform flags..."
             if [[ "$TEST_COVERAGE" == 'true' ]]; then
               if [[ "$COVERLET_RUNSETTINGS_FILE" != '' ]]; then
-                echo "::warning::coverlet-runsettings-file is not supported in MTP mode. Ignoring '$COVERLET_RUNSETTINGS_FILE'. Use a testconfig.json in the test project instead. See https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/Coverlet.MTP.Integration.md#configuration-files"
+                echo "::warning::coverlet-runsettings-file is not supported in MTP mode. Ignoring '$COVERLET_RUNSETTINGS_FILE'. Use a codecoverage.testconfig.json in the test project instead."
               fi
-              dotnet test --project "$testproject" --report-trx --coverlet --coverlet-output-format cobertura
+              exit_code=0
+              dotnet test --project "$testproject" --report-trx --coverage --coverage-output-format cobertura || exit_code=$?
+              if [[ $exit_code -eq 5 ]]; then
+                echo "::error::One or more MTP flags were not recognized in '$testproject'. Ensure the test project includes 'Microsoft.Testing.Extensions.TrxReport' (for --report-trx) and 'Microsoft.Testing.Extensions.CodeCoverage' (for --coverage)."
+                exit 1
+              elif [[ $exit_code -ne 0 ]]; then
+                echo "::error::Microsoft.Testing.Platform retry failed for '$testproject'. If MTP mode is not enabled, ensure global.json contains: {\"test\":{\"runner\":\"Microsoft.Testing.Platform\"}} (.NET 10 SDK required)."
+                exit $exit_code
+              fi
             else
-              dotnet test --project "$testproject" --report-trx
+              exit_code=0
+              dotnet test --project "$testproject" --report-trx || exit_code=$?
+              if [[ $exit_code -eq 5 ]]; then
+                echo "::error::--report-trx was not recognized in '$testproject'. Add the NuGet package 'Microsoft.Testing.Extensions.TrxReport' to the test project to enable TRX reporting in MTP mode."
+                exit 1
+              elif [[ $exit_code -ne 0 ]]; then
+                echo "::error::Microsoft.Testing.Platform retry failed for '$testproject'. If MTP mode is not enabled, ensure global.json contains: {\"test\":{\"runner\":\"Microsoft.Testing.Platform\"}} (.NET 10 SDK required)."
+                exit $exit_code
+              fi
             fi
           elif [[ $exit_code -ne 0 ]]; then
             exit $exit_code
@@ -128,7 +146,7 @@ runs:
       uses: danielpalme/ReportGenerator-GitHub-Action@d3ebf1f760f7d8ab92cc44d9bcfee7ad73722a31 # v5.5.11
       continue-on-error: true
       with:
-        reports: '**/*.cobertura*.xml' # REQUIRED # Matches both VSTest (*.cobertura.xml) and MTP/coverlet.MTP (*.cobertura.{timestamp}.xml) output filenames.
+        reports: '**/*.cobertura*.xml' # REQUIRED # Matches both VSTest/coverlet.collector (*.cobertura.xml) and MTP/Microsoft.Testing.Extensions.CodeCoverage output filenames.
         targetdir: '${{ github.workspace }}' # REQUIRED # The directory where the generated report should be saved.
         reporttypes: 'Cobertura' # The output formats and scope (separated by semicolon) Values: Badges, Clover, Cobertura, CsvSummary, Html, Html_Dark, Html_Light, Html_BlueRed, HtmlChart, HtmlInline, HtmlInline_AzurePipelines, HtmlInline_AzurePipelines_Dark, HtmlInline_AzurePipelines_Light, HtmlSummary, JsonSummary, Latex, LatexSummary, lcov, MarkdownSummary, MarkdownSummaryGithub, MarkdownDeltaSummary, MHtml, PngChart, SonarQube, TeamCitySummary, TextSummary, TextDeltaSummary, Xml, XmlSummary
         verbosity: 'Info' # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
