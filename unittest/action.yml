@@ -89,16 +89,23 @@ runs:
               fi
               exit_code=0
               dotnet test --project "$testproject" --report-trx --coverage --coverage-output-format cobertura || exit_code=$?
+              if [[ $exit_code -eq 5 ]]; then
+                echo "::error::One or more MTP flags were not recognized in '$testproject'. Ensure the test project includes 'Microsoft.Testing.Extensions.TrxReport' (for --report-trx) and 'Microsoft.Testing.Extensions.CodeCoverage' (for --coverage)."
+                exit 1
+              elif [[ $exit_code -ne 0 ]]; then
+                echo "::error::Microsoft.Testing.Platform retry failed for '$testproject'. If MTP mode is not enabled, ensure global.json contains: {\"test\":{\"runner\":\"Microsoft.Testing.Platform\"}} (.NET 10 SDK required)."
+                exit $exit_code
+              fi
             else
               exit_code=0
               dotnet test --project "$testproject" --report-trx || exit_code=$?
-            fi
-            if [[ $exit_code -eq 5 ]]; then
-              echo "::error::Coverage collection failed in '$testproject'. Add the NuGet package 'Microsoft.Testing.Extensions.CodeCoverage' to the test project to enable coverage in MTP mode."
-              exit 1
-            elif [[ $exit_code -ne 0 ]]; then
-              echo "::error::Microsoft.Testing.Platform retry failed for '$testproject'. If MTP mode is not enabled, ensure global.json contains: {\"test\":{\"runner\":\"Microsoft.Testing.Platform\"}} (.NET 10 SDK required)."
-              exit $exit_code
+              if [[ $exit_code -eq 5 ]]; then
+                echo "::error::--report-trx was not recognized in '$testproject'. Add the NuGet package 'Microsoft.Testing.Extensions.TrxReport' to the test project to enable TRX reporting in MTP mode."
+                exit 1
+              elif [[ $exit_code -ne 0 ]]; then
+                echo "::error::Microsoft.Testing.Platform retry failed for '$testproject'. If MTP mode is not enabled, ensure global.json contains: {\"test\":{\"runner\":\"Microsoft.Testing.Platform\"}} (.NET 10 SDK required)."
+                exit $exit_code
+              fi
             fi
           elif [[ $exit_code -ne 0 ]]; then
             exit $exit_code
