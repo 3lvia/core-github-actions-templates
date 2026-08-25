@@ -36,7 +36,7 @@ inputs:
       'Name of the workflow artifact that the raw .trx test result files are uploaded to. Must be unique within the
       workflow run.'
     required: false
-    default: 'integration-test-results-${{ github.job }}'
+    default: 'integration-test-results-${{ github.job }}-${{ github.action }}'
   test-results-retention-days:
     description: 'How many days to keep the uploaded test result artifact.'
     required: false
@@ -73,7 +73,19 @@ runs:
         fi
 
         for testproject in $testprojects; do
-          dotnet test -l:trx "$testproject"
+          # Try VSTest-compatible flags first.
+          # Exit code 5 means the test host is running in Microsoft.Testing.Platform (MTP) mode
+          # and rejected the VSTest-style flags as invalid — retry with MTP-native flags.
+          # '|| exit_code=$?' prevents bash's set -e from aborting the script on non-zero exit.
+          exit_code=0
+          dotnet test "$testproject" -l:trx || exit_code=$?
+
+          if [[ $exit_code -eq 5 ]]; then
+            echo "VSTest flags not supported (exit code 5), retrying with Microsoft.Testing.Platform flags..."
+            dotnet test --project "$testproject" --report-trx
+          elif [[ $exit_code -ne 0 ]]; then
+            exit $exit_code
+          fi
         done
       env:
         TEST_PROJECTS: ${{ inputs.test-projects }}
@@ -84,7 +96,8 @@ runs:
     # Without this upload the files die with the runner.
     - name: Upload test results
       if: always()
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      continue-on-error: true
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: ${{ inputs.test-results-artifact-name }}
         path: |

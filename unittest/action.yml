@@ -20,7 +20,9 @@ inputs:
     required: false
     default: 'unit*test*csproj'
   test-coverage:
-    description: 'If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector.'
+    description: |
+      If test coverage should be computed.
+      Requires a NuGet coverage package in each test project: `coverlet.collector` (VSTest mode) or `Microsoft.Testing.Extensions.CodeCoverage` (Microsoft.Testing.Platform mode).
     required: false
     default: 'false'
   coverlet-runsettings-file:
@@ -29,13 +31,12 @@ inputs:
       If not specified, no runsettings file will be used for coverlet.
     required: false
     default: ''
-
   test-results-artifact-name:
     description:
       'Name of the workflow artifact that the raw .trx test result files are uploaded to. Must be unique within the
       workflow run.'
     required: false
-    default: 'unit-test-results-${{ github.job }}'
+    default: 'unit-test-results-${{ github.job }}-${{ github.action }}'
   test-results-retention-days:
     description: 'How many days to keep the uploaded test result artifact.'
     required: false
@@ -65,14 +66,49 @@ runs:
         fi
 
         for testproject in $testprojects; do
+          # Try VSTest-compatible flags first.
+          # Exit code 5 means the test host is running in Microsoft.Testing.Platform (MTP) mode
+          # and rejected the VSTest-style flags as invalid — retry with MTP-native flags.
+          # '|| exit_code=$?' prevents bash's set -e from aborting the script on non-zero exit.
+          exit_code=0
           if [[ "$TEST_COVERAGE" == 'true' ]]; then
             if [[ "$COVERLET_RUNSETTINGS_FILE" != '' ]]; then
-              dotnet test -l:trx --collect:"XPlat Code Coverage" --settings "$COVERLET_RUNSETTINGS_FILE" "$testproject"
+              dotnet test "$testproject" -l:trx --collect:"XPlat Code Coverage" --settings "$COVERLET_RUNSETTINGS_FILE" || exit_code=$?
             else
-              dotnet test -l:trx --collect:"XPlat Code Coverage" "$testproject"
+              dotnet test "$testproject" -l:trx --collect:"XPlat Code Coverage" || exit_code=$?
             fi
           else
-            dotnet test -l:trx "$testproject"
+            dotnet test "$testproject" -l:trx || exit_code=$?
+          fi
+
+          if [[ $exit_code -eq 5 ]]; then
+            echo "VSTest flags not supported (exit code 5), retrying with Microsoft.Testing.Platform flags..."
+            if [[ "$TEST_COVERAGE" == 'true' ]]; then
+              if [[ "$COVERLET_RUNSETTINGS_FILE" != '' ]]; then
+                echo "::warning::coverlet-runsettings-file is not supported in MTP mode. Ignoring '$COVERLET_RUNSETTINGS_FILE'. Use a codecoverage.testconfig.json in the test project instead."
+              fi
+              exit_code=0
+              dotnet test --project "$testproject" --report-trx --coverage --coverage-output-format cobertura || exit_code=$?
+              if [[ $exit_code -eq 5 ]]; then
+                echo "::error::One or more MTP flags were not recognized in '$testproject'. Ensure the test project includes 'Microsoft.Testing.Extensions.TrxReport' (for --report-trx) and 'Microsoft.Testing.Extensions.CodeCoverage' (for --coverage)."
+                exit 1
+              elif [[ $exit_code -ne 0 ]]; then
+                echo "::error::Microsoft.Testing.Platform retry failed for '$testproject'. If MTP mode is not enabled, ensure global.json contains: {\"test\":{\"runner\":\"Microsoft.Testing.Platform\"}} (.NET 10 SDK required)."
+                exit $exit_code
+              fi
+            else
+              exit_code=0
+              dotnet test --project "$testproject" --report-trx || exit_code=$?
+              if [[ $exit_code -eq 5 ]]; then
+                echo "::error::--report-trx was not recognized in '$testproject'. Add the NuGet package 'Microsoft.Testing.Extensions.TrxReport' to the test project to enable TRX reporting in MTP mode."
+                exit 1
+              elif [[ $exit_code -ne 0 ]]; then
+                echo "::error::Microsoft.Testing.Platform retry failed for '$testproject'. If MTP mode is not enabled, ensure global.json contains: {\"test\":{\"runner\":\"Microsoft.Testing.Platform\"}} (.NET 10 SDK required)."
+                exit $exit_code
+              fi
+            fi
+          elif [[ $exit_code -ne 0 ]]; then
+            exit $exit_code
           fi
         done
       env:
@@ -86,7 +122,8 @@ runs:
     # Without this upload the files die with the runner.
     - name: Upload test results
       if: always()
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      continue-on-error: true
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: ${{ inputs.test-results-artifact-name }}
         path: |
@@ -109,7 +146,7 @@ runs:
       uses: danielpalme/ReportGenerator-GitHub-Action@d3ebf1f760f7d8ab92cc44d9bcfee7ad73722a31 # v5.5.11
       continue-on-error: true
       with:
-        reports: '**/*.cobertura.xml' # REQUIRED # The coverage reports that should be parsed (separated by semicolon). Globbing is supported.
+        reports: '**/*.cobertura*.xml' # REQUIRED # Matches both VSTest/coverlet.collector (*.cobertura.xml) and MTP/Microsoft.Testing.Extensions.CodeCoverage output filenames.
         targetdir: '${{ github.workspace }}' # REQUIRED # The directory where the generated report should be saved.
         reporttypes: 'Cobertura' # The output formats and scope (separated by semicolon) Values: Badges, Clover, Cobertura, CsvSummary, Html, Html_Dark, Html_Light, Html_BlueRed, HtmlChart, HtmlInline, HtmlInline_AzurePipelines, HtmlInline_AzurePipelines_Dark, HtmlInline_AzurePipelines_Light, HtmlSummary, JsonSummary, Latex, LatexSummary, lcov, MarkdownSummary, MarkdownSummaryGithub, MarkdownDeltaSummary, MHtml, PngChart, SonarQube, TeamCitySummary, TextSummary, TextDeltaSummary, Xml, XmlSummary
         verbosity: 'Info' # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off

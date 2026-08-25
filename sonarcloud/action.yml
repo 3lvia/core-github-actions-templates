@@ -28,7 +28,6 @@ inputs:
       If not specified, no runsettings file will be used for dotnet-coverage.
     required: false
     default: ''
-
 runs:
   using: 'composite'
   steps:
@@ -78,10 +77,26 @@ runs:
 
         testprojects=$(find . -iname "$TEST_PROJECTS")
         for testproject in $testprojects; do
+          # Try VSTest-compatible flags first.
+          # Exit code 5 means the test host is running in Microsoft.Testing.Platform (MTP) mode
+          # and rejected the VSTest-style flags as invalid — retry with MTP-native flags.
+          # '|| exit_code=$?' prevents bash's set -e from aborting the script on non-zero exit.
+          exit_code=0
           if [[ "$DOTNET_COVERAGE_RUNSETTINGS_FILE" != '' ]]; then
-            ./sonar/scanner/dotnet-coverage collect "dotnet test -l:trx $testproject" -f xml -o "$(uuidgen)_coverage.xml" --settings "$DOTNET_COVERAGE_RUNSETTINGS_FILE"
+            ./sonar/scanner/dotnet-coverage collect "dotnet test $testproject -l:trx" -f xml -o "$(uuidgen)_coverage.xml" --settings "$DOTNET_COVERAGE_RUNSETTINGS_FILE" || exit_code=$?
           else
-            ./sonar/scanner/dotnet-coverage collect "dotnet test -l:trx $testproject" -f xml -o "$(uuidgen)_coverage.xml"
+              ./sonar/scanner/dotnet-coverage collect "dotnet test $testproject -l:trx" -f xml -o "$(uuidgen)_coverage.xml" || exit_code=$?
+          fi
+
+          if [[ $exit_code -eq 5 ]]; then
+            echo "VSTest flags not supported (exit code 5), retrying with Microsoft.Testing.Platform flags..."
+            if [[ "$DOTNET_COVERAGE_RUNSETTINGS_FILE" != '' ]]; then
+              ./sonar/scanner/dotnet-coverage collect "dotnet test --project $testproject" -f xml -o "$(uuidgen)_coverage.xml" --settings "$DOTNET_COVERAGE_RUNSETTINGS_FILE"
+            else
+              ./sonar/scanner/dotnet-coverage collect "dotnet test --project $testproject" -f xml -o "$(uuidgen)_coverage.xml"
+            fi
+          elif [[ $exit_code -ne 0 ]]; then
+            exit $exit_code
           fi
         done
 
