@@ -185,6 +185,17 @@ RUN apt-get install -y --no-install-recommends \
         libxcomposite1 \
         libatomic1
 
+# Preinstall Playwright browsers and OS deps so the playwright template's install step
+# becomes a fast no-op (measured: ~1.2 min x 3 deploy jobs per pipeline). Tracks
+# Microsoft.Playwright in consumer repos; on mismatch Playwright downloads at runtime
+# into this world-writable path — slower, never broken.
+# renovate: datasource=npm depName=playwright
+ARG PLAYWRIGHT_VERSION=1.62.1
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN npx -y playwright@${PLAYWRIGHT_VERSION} install --with-deps chromium firefox webkit && \
+    chmod -R 777 /ms-playwright
+
+
 # Install Postgres
 RUN apt-get install -y --no-install-recommends postgresql-client
 

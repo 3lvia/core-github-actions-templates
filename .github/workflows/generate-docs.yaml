@@ -1,8 +1,11 @@
-name: Generate action documentation
+name: Verify action documentation
+
+# README.md is generated from the action.yml files. This check regenerates it on
+# every pull request and fails if the committed README is out of date, so the
+# contributor updates it before merge. Nothing is pushed to trunk by a bot.
 
 on:
-  push:
-    branches: [trunk]
+  pull_request:
     paths:
       - '.github/workflows/generate-docs.yaml'
       - '**/action.yml'
@@ -10,18 +13,20 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: '${{ github.workflow }}-${{ github.event_name }}'
+  group: '${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}'
   cancel-in-progress: true
 
 jobs:
-  generate-docs:
-    name: Generate action documentation
+  verify-docs:
+    name: Verify action documentation
     runs-on: elvia-runner
     permissions:
-      contents: write
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Generate docs
         uses: 3lvia/gh-actions-docs@2db29362f0d6d92052f6fa49b71743af5f0c11f8 # v1
@@ -30,20 +35,17 @@ jobs:
           ignore-headers: '# core-github-actions-templates,## Table of Contents'
           run-prettier: 'true'
 
-      - name: Commit changes
+      - name: Fail if README.md is out of date
         shell: bash
         run: |
-          if [[ -z "$(git status --porcelain)" ]]; then
-            echo 'No changes to commit.'
+          if git diff --quiet -- README.md; then
+            echo 'README.md is up to date.'
             exit 0
           fi
 
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-
-          git add README.md
-          git commit -m 'Update action documentation'
-          git push
-        env:
-          GH_TOKEN: ${{ github.token }}
-
+          echo '::error file=README.md::README.md is out of date with the action.yml files.'
+          echo
+          echo 'Regenerate it by running this workflow locally, or apply the diff below:'
+          echo
+          git --no-pager diff -- README.md
+          exit 1

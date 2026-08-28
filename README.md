@@ -72,7 +72,8 @@ see [here](#elvia-specific-actions) for more information.
 - [Development](#development)
   - [Formatting](#formatting)
   - [Action documentation & table of contents](#action-documentation--table-of-contents)
-  <!-- gh-actions-docs-toc-end -->
+
+<!-- gh-actions-docs-toc-end -->
 
 ## Examples
 
@@ -450,14 +451,16 @@ Run .NET unit tests.
 
 ### Inputs
 
-| Name                        | Description                                                                                                                                                               | Required | Default                       |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------- |
-| `checkout`                  | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                                      | no       | `true`                        |
-| `coverlet-runsettings-file` | Path to a coverlet runsettings file, relative to the root of the repository. If not specified, no runsettings file will be used for coverlet.                             | no       | ``                            |
-| `dotnet-tool-manifest`      | Path to the .NET tool manifest file, relative to the root of the repository. Only needed if you require .NET tools that are outside of `working-directory` for the build. | no       | `./.config/dotnet-tools.json` |
-| `test-coverage`             | If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector.                                                        | no       | `false`                       |
-| `test-projects`             | Pattern to use to find test projects.                                                                                                                                     | no       | `unit*test*csproj`            |
-| `working-directory`         | Will run unit tests on projects under this working directory.                                                                                                             | no       | `./`                          |
+| Name                          | Description                                                                                                                                                                                                       | Required | Default                                                    |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------- |
+| `checkout`                    | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                                                                              | no       | `true`                                                     |
+| `coverlet-runsettings-file`   | Path to a coverlet runsettings file, relative to the root of the repository. If not specified, no runsettings file will be used for coverlet.                                                                     | no       | ``                                                         |
+| `dotnet-tool-manifest`        | Path to the .NET tool manifest file, relative to the root of the repository. Only needed if you require .NET tools that are outside of `working-directory` for the build.                                         | no       | `./.config/dotnet-tools.json`                              |
+| `test-coverage`               | If test coverage should be computed. Requires a NuGet coverage package in each test project: `coverlet.collector` (VSTest mode) or `Microsoft.Testing.Extensions.CodeCoverage` (Microsoft.Testing.Platform mode). | no       | `false`                                                    |
+| `test-projects`               | Pattern to use to find test projects.                                                                                                                                                                             | no       | `unit*test*csproj`                                         |
+| `test-results-artifact-name`  | Name of the workflow artifact that the raw .trx test result files are uploaded to. Must be unique within the workflow run.                                                                                        | no       | `unit-test-results-${{ github.job }}-${{ github.action }}` |
+| `test-results-retention-days` | How many days to keep the uploaded test result artifact.                                                                                                                                                          | no       | `14`                                                       |
+| `working-directory`           | Will run unit tests on projects under this working directory.                                                                                                                                                     | no       | `./`                                                       |
 
 ### Permissions
 
@@ -495,7 +498,7 @@ More permissions might be required depending on the inputs set, see the actions 
     # Default: './.config/dotnet-tools.json'
 
     test-coverage:
-    # If test coverage should be computed. Requires that all test projects include the Nuget package coverlet.collector.
+    # If test coverage should be computed. Requires a NuGet coverage package in each test project: `coverlet.collector` (VSTest mode) or `Microsoft.Testing.Extensions.CodeCoverage` (Microsoft.Testing.Platform mode).
     #
     # Required: no
     # Default: 'false'
@@ -505,6 +508,18 @@ More permissions might be required depending on the inputs set, see the actions 
     #
     # Required: no
     # Default: 'unit*test*csproj'
+
+    test-results-artifact-name:
+    # Name of the workflow artifact that the raw .trx test result files are uploaded to. Must be unique within the workflow run.
+    #
+    # Required: no
+    # Default: 'unit-test-results-${{ github.job }}-${{ github.action }}'
+
+    test-results-retention-days:
+    # How many days to keep the uploaded test result artifact.
+    #
+    # Required: no
+    # Default: '14'
 
     working-directory:
     # Will run unit tests on projects under this working directory.
@@ -523,15 +538,17 @@ Run .NET integration tests.
 
 ### Inputs
 
-| Name                   | Description                                                                                                                                                               | Required | Default                       |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------- |
-| `checkout`             | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                                      | no       | `true`                        |
-| `dotnet-tool-manifest` | Path to the .NET tool manifest file, relative to the root of the repository. Only needed if you require .NET tools that are outside of `working-directory` for the build. | no       | `./.config/dotnet-tools.json` |
-| `environment`          | Environment is used to find correct Vault instance.                                                                                                                       | yes      | `dev`                         |
-| `slack-channel`        | Slack channel to notify on failure. Leave empty to disable notifications                                                                                                  | no       | ``                            |
-| `system`               | System is used to log in to Vault using correct role.                                                                                                                     | yes      |                               |
-| `test-projects`        | Pattern to use to find test projects.                                                                                                                                     | no       | `integration*test*csproj`     |
-| `working-directory`    | Will run integration tests on projects under this working directory.                                                                                                      | no       | `./`                          |
+| Name                          | Description                                                                                                                                                               | Required | Default                                                           |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------- |
+| `checkout`                    | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out.                                      | no       | `true`                                                            |
+| `dotnet-tool-manifest`        | Path to the .NET tool manifest file, relative to the root of the repository. Only needed if you require .NET tools that are outside of `working-directory` for the build. | no       | `./.config/dotnet-tools.json`                                     |
+| `environment`                 | Environment is used to find correct Vault instance.                                                                                                                       | yes      | `dev`                                                             |
+| `slack-channel`               | Slack channel to notify on failure. Leave empty to disable notifications                                                                                                  | no       | ``                                                                |
+| `system`                      | System is used to log in to Vault using correct role.                                                                                                                     | yes      |                                                                   |
+| `test-projects`               | Pattern to use to find test projects.                                                                                                                                     | no       | `integration*test*csproj`                                         |
+| `test-results-artifact-name`  | Name of the workflow artifact that the raw .trx test result files are uploaded to. Must be unique within the workflow run.                                                | no       | `integration-test-results-${{ github.job }}-${{ github.action }}` |
+| `test-results-retention-days` | How many days to keep the uploaded test result artifact.                                                                                                                  | no       | `14`                                                              |
+| `working-directory`           | Will run integration tests on projects under this working directory.                                                                                                      | no       | `./`                                                              |
 
 ### Permissions
 
@@ -585,6 +602,18 @@ More permissions might be required depending on the inputs set, see the actions 
     #
     # Required: no
     # Default: 'integration*test*csproj'
+
+    test-results-artifact-name:
+    # Name of the workflow artifact that the raw .trx test result files are uploaded to. Must be unique within the workflow run.
+    #
+    # Required: no
+    # Default: 'integration-test-results-${{ github.job }}-${{ github.action }}'
+
+    test-results-retention-days:
+    # How many days to keep the uploaded test result artifact.
+    #
+    # Required: no
+    # Default: '14'
 
     working-directory:
     # Will run integration tests on projects under this working directory.
@@ -826,13 +855,15 @@ Run Playwright tests written in .NET.
 
 ### Inputs
 
-| Name            | Description                                                                                                                          | Required | Default |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ------- |
-| `checkout`      | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`  |
-| `configuration` | Value to set for the `--configuration` flag when running `dotnet test`.                                                              | no       | `Debug` |
-| `environment`   | Environment is used to find correct Vault instance.                                                                                  | yes      |         |
-| `system`        | System is used to log in to Vault using correct role.                                                                                | yes      |         |
-| `test-project`  | Name of test project file to run.                                                                                                    | yes      |         |
+| Name                          | Description                                                                                                                          | Required | Default                                                    |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- | ---------------------------------------------------------- |
+| `checkout`                    | If `true`, the action will check out the repository. If `false`, the action will assume the repository has already been checked out. | no       | `true`                                                     |
+| `configuration`               | Value to set for the `--configuration` flag when running `dotnet test`.                                                              | no       | `Debug`                                                    |
+| `environment`                 | Environment is used to find correct Vault instance.                                                                                  | yes      |                                                            |
+| `system`                      | System is used to log in to Vault using correct role.                                                                                | yes      |                                                            |
+| `test-project`                | Name of test project file to run.                                                                                                    | yes      |                                                            |
+| `test-results-artifact-name`  | Name of the workflow artifact that the raw .trx test result files are uploaded to. Must be unique within the workflow run.           | no       | `smoketest-results-${{ github.job }}-${{ github.action }}` |
+| `test-results-retention-days` | How many days to keep the uploaded test result artifact.                                                                             | no       | `14`                                                       |
 
 ### Permissions
 
@@ -878,6 +909,18 @@ More permissions might be required depending on the inputs set, see the actions 
     # Name of test project file to run.
     #
     # Required: yes
+
+    test-results-artifact-name:
+    # Name of the workflow artifact that the raw .trx test result files are uploaded to. Must be unique within the workflow run.
+    #
+    # Required: no
+    # Default: 'smoketest-results-${{ github.job }}-${{ github.action }}'
+
+    test-results-retention-days:
+    # How many days to keep the uploaded test result artifact.
+    #
+    # Required: no
+    # Default: '14'
 ```
 
 <!-- gh-actions-docs-end -->

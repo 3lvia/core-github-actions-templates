@@ -15,24 +15,24 @@ EXEMPT_ORGS = {
 
 # Organizations that should warn if not pinned (but are allowed)
 WARNING_ORGS = {
-    "actions",                 # GitHub official actions
-    "github",                  # CodeQL actions m.m.
-    "docker",                  # Official Docker actions
-    "azure",                   # Microsoft Azure actions
-    "google-github-actions",   # Google Cloud official actions
-    "hashicorp",               # Terraform/Vault
-    "slackapi",                # Slack official
-    "sigstore",                # Cosign / supply chain tooling
-    "sonarsource",             # SonarQube official
-    "astral-sh",               # uv (Python toolchain)
-    "pnpm",                    # pnpm setup
+#     "actions",                 # GitHub official actions
+#     "github",                  # CodeQL actions m.m.
+#     "docker",                  # Official Docker actions
+#     "azure",                   # Microsoft Azure actions
+#     "google-github-actions",   # Google Cloud official actions
+#     "hashicorp",               # Terraform/Vault
+#     "slackapi",                # Slack official
+#     "sigstore",                # Cosign / supply chain tooling
+#     "sonarsource",             # SonarQube official
+#     "astral-sh",               # uv (Python toolchain)
+#     "pnpm",                    # pnpm setup
 }
 
 SHA_RE = re.compile(r"^[0-9a-fA-F]{40}$")
 DOCKER_DIGEST_RE = re.compile(r"^sha256:[0-9a-fA-F]{64}$")
 
 # Environment variable to run in warning-only mode
-WARNING_MODE = True  # os.getenv("VERIFY_ACTION_PINNING_WARNING_MODE", "").lower() in ("true", "1", "yes")
+WARNING_MODE = False  # os.getenv("VERIFY_ACTION_PINNING_WARNING_MODE", "").lower() in ("true", "1", "yes")
 
 def is_local_action(uses: str) -> bool:
     return uses.startswith("./")
