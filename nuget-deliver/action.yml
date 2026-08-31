@@ -49,8 +49,8 @@ runs:
         environment: dev
         exportToken: 'false'
         secrets: |
-          libraries/kv/data/shared nuget_publisher_app_id | NUGET_PUBLISHER_APP_ID ;
-          libraries/kv/data/shared nuget_publisher_app_key | NUGET_PUBLISHER_APP_KEY
+          libraries/kv/data/nuget-publisher nuget_publisher_app_id | NUGET_PUBLISHER_APP_ID ;
+          libraries/kv/data/nuget-publisher nuget_publisher_app_key | NUGET_PUBLISHER_APP_KEY
 
     - name: Mint short-lived App token for nuget-publisher
       id: app
