@@ -1,0 +1,105 @@
+name: 'NuGet Deliver'
+description: 'Deliver a packed NuGet package to the central nuget-publisher, which verifies and publishes it to nuget.org. No API key needed.'
+inputs:
+  system:
+    description: 'System name, used to log in to Vault (same as for the vault action).'
+    required: true
+  package-id:
+    description: 'NuGet package ID. Must be mapped to this repository in nuget-publisher/packages.yaml.'
+    required: true
+  version:
+    description: 'Version to publish, e.g. 2.3.3. Must match the packed .nupkg.'
+    required: true
+  packages-path:
+    description: 'Directory containing the packed .nupkg (and optional .snupkg).'
+    required: false
+    default: './artifacts'
+  wait:
+    description: 'Wait for the publisher run and fail this job if it fails.'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Check inputs
+      shell: bash
+      run: |
+        # Explicit checks for required inputs, due to https://github.com/actions/runner/issues/1070
+        [[ "$PACKAGE_ID" ]] || { echo "Parameter 'package-id' is required, but is empty." ; exit 1; }
+        [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-+][0-9A-Za-z.-]+)?$ ]] || { echo "::error::Invalid version '$VERSION'." ; exit 1; }
+        [[ -f "$PACKAGES_PATH/$PACKAGE_ID.$VERSION.nupkg" ]] || { echo "::error::$PACKAGES_PATH/$PACKAGE_ID.$VERSION.nupkg not found. Run 'dotnet pack' first, or set the 'packages-path' input." ; exit 1; }
+      env:
+        PACKAGE_ID: ${{ inputs.package-id }}
+        VERSION: ${{ inputs.version }}
+        PACKAGES_PATH: ${{ inputs.packages-path }}
+
+    - name: Upload package as workflow artifact
+      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+      with:
+        name: nupkg
+        path: ${{ inputs.packages-path }}/*nupkg
+        retention-days: 3
+        if-no-files-found: error
+
+    - name: Get publisher App credentials from Vault
+      uses: 3lvia/core-github-actions-templates/vault@trunk
+      with:
+        system: ${{ inputs.system }}
+        environment: dev
+        exportToken: 'false'
+        secrets: |
+          libraries/kv/data/nuget-publisher nuget_publisher_app_id | NUGET_PUBLISHER_APP_ID ;
+          libraries/kv/data/nuget-publisher nuget_publisher_app_key | NUGET_PUBLISHER_APP_KEY
+
+    - name: Mint short-lived App token for nuget-publisher
+      id: app
+      uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+      with:
+        app-id: ${{ env.NUGET_PUBLISHER_APP_ID }}
+        private-key: ${{ env.NUGET_PUBLISHER_APP_KEY }}
+        owner: 3lvia
+        repositories: nuget-publisher
+        permission-actions: write
+
+    - name: Dispatch nuget-publisher
+      shell: bash
+      run: |
+        # Dispatch the central publisher; it re-verifies everything this payload claims.
+        gh workflow run publish.yaml -R 3lvia/nuget-publisher --ref trunk \
+          -f source_repo="$GITHUB_REPOSITORY" \
+          -f run_id="$GITHUB_RUN_ID" \
+          -f package_id="$PACKAGE_ID" \
+          -f version="$VERSION"
+      env:
+        GH_TOKEN: ${{ steps.app.outputs.token }}
+        PACKAGE_ID: ${{ inputs.package-id }}
+        VERSION: ${{ inputs.version }}
+
+    - name: Wait for the publisher
+      if: ${{ inputs.wait == 'true' }}
+      shell: bash
+      run: |
+        # The publisher run-name embeds "<repo>#<run_id>", which makes it findable.
+        match="$GITHUB_REPOSITORY#$GITHUB_RUN_ID"
+        for attempt in 1 2 3 4 5 6; do
+          sleep 10
+          id=$(gh run list -R 3lvia/nuget-publisher -w publish.yaml --limit 20 \
+                 --json databaseId,displayTitle \
+                 --jq ".[] | select(.displayTitle | contains(\"$match\")) | .databaseId" | head -1)
+          [[ "$id" ]] && break
+        done
+        [[ "$id" ]] || { echo "::error::Could not find the dispatched publisher run. Check https://github.com/3lvia/nuget-publisher/actions." ; exit 1; }
+        gh run watch "$id" -R 3lvia/nuget-publisher --exit-status --interval 15
+      env:
+        GH_TOKEN: ${{ steps.app.outputs.token }}
+
+    - name: Show message on failure
+      if: failure()
+      shell: bash
+      run: |
+        # Show message on failure
+        echo "::error::Delivery failed. Is '$PACKAGE_ID' mapped to this repository in https://github.com/3lvia/nuget-publisher/blob/trunk/packages.yaml? Publisher runs: https://github.com/3lvia/nuget-publisher/actions"
+        exit 1
+      env:
+        PACKAGE_ID: ${{ inputs.package-id }}

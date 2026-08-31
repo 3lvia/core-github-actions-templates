@@ -68,6 +68,14 @@ see [here](#elvia-specific-actions) for more information.
     - [Inputs](#inputs-12)
     - [Permissions](#permissions-12)
     - [Usage](#usage-12)
+  - [NuGet Publish](#nuget-publish)
+    - [Inputs](#inputs-13)
+    - [Permissions](#permissions-13)
+    - [Usage](#usage-13)
+  - [NuGet Deliver](#nuget-deliver)
+    - [Inputs](#inputs-14)
+    - [Permissions](#permissions-14)
+    - [Usage](#usage-14)
   - [Elvia-specific Actions](#elvia-specific-actions)
 - [Development](#development)
   - [Formatting](#formatting)
@@ -1194,6 +1202,116 @@ More permissions might be required depending on the inputs set, see the actions 
     # System name is used to log in to Vault using the correct role.
     #
     # Required: yes
+```
+
+<!-- gh-actions-docs-end -->
+
+<!-- gh-actions-docs-start path=nuget-publish/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
+
+## NuGet Publish
+
+Publish NuGet packages to nuget.org using Trusted Publishing (GitHub OIDC), without any stored API key.
+
+### Inputs
+
+| Name       | Description                                                                                                | Required | Default                               |
+| ---------- | ---------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------- |
+| `packages` | Glob for the .nupkg files to push. Matching .snupkg symbol packages are pushed automatically.              | no       | `./artifacts/*.nupkg`                 |
+| `source`   | NuGet server URL to push to.                                                                               | no       | `https://api.nuget.org/v3/index.json` |
+| `user`     | nuget.org username (profile name, not e-mail) that owns the Trusted Publishing policy for this repository. | yes      |                                       |
+
+### Permissions
+
+This action requires the following base [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+
+- `contents: read`
+- `id-token: write`
+
+More permissions might be required depending on the inputs set, see the actions documentation for more information.
+
+### Usage
+
+```yaml
+- name: NuGet Publish
+  uses: 3lvia/core-github-actions-templates/nuget-publish@trunk
+  with:
+    packages:
+    # Glob for the .nupkg files to push. Matching .snupkg symbol packages are pushed automatically.
+    #
+    # Required: no
+    # Default: './artifacts/*.nupkg'
+
+    source:
+    # NuGet server URL to push to.
+    #
+    # Required: no
+    # Default: 'https://api.nuget.org/v3/index.json'
+
+    user:
+    # nuget.org username (profile name, not e-mail) that owns the Trusted Publishing policy for this repository.
+    #
+    # Required: yes
+```
+
+<!-- gh-actions-docs-end -->
+
+<!-- gh-actions-docs-start path=nuget-deliver/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
+
+## NuGet Deliver
+
+Deliver a packed NuGet package to the central nuget-publisher, which verifies and publishes it to nuget.org. No API key needed.
+
+### Inputs
+
+| Name            | Description                                                                           | Required | Default       |
+| --------------- | ------------------------------------------------------------------------------------- | -------- | ------------- |
+| `package-id`    | NuGet package ID. Must be mapped to this repository in nuget-publisher/packages.yaml. | yes      |               |
+| `packages-path` | Directory containing the packed .nupkg (and optional .snupkg).                        | no       | `./artifacts` |
+| `system`        | System name, used to log in to Vault (same as for the vault action).                  | yes      |               |
+| `version`       | Version to publish, e.g. 2.3.3. Must match the packed .nupkg.                         | yes      |               |
+| `wait`          | Wait for the publisher run and fail this job if it fails.                             | no       | `true`        |
+
+### Permissions
+
+This action requires the following base [permissions](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs):
+
+- `contents: read`
+- `id-token: write`
+
+More permissions might be required depending on the inputs set, see the actions documentation for more information.
+
+### Usage
+
+```yaml
+- name: NuGet Deliver
+  uses: 3lvia/core-github-actions-templates/nuget-deliver@trunk
+  with:
+    package-id:
+    # NuGet package ID. Must be mapped to this repository in nuget-publisher/packages.yaml.
+    #
+    # Required: yes
+
+    packages-path:
+    # Directory containing the packed .nupkg (and optional .snupkg).
+    #
+    # Required: no
+    # Default: './artifacts'
+
+    system:
+    # System name, used to log in to Vault (same as for the vault action).
+    #
+    # Required: yes
+
+    version:
+    # Version to publish, e.g. 2.3.3. Must match the packed .nupkg.
+    #
+    # Required: yes
+
+    wait:
+    # Wait for the publisher run and fail this job if it fails.
+    #
+    # Required: no
+    # Default: 'true'
 ```
 
 <!-- gh-actions-docs-end -->
