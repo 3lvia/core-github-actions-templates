@@ -35,7 +35,7 @@ runs:
         PACKAGES_PATH: ${{ inputs.packages-path }}
 
     - name: Upload package as workflow artifact
-      uses: actions/upload-artifact@2848b2cda0e662f38fa2200f9021df66fda4f620 # v5.0.0
+      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
       with:
         name: nupkg
         path: ${{ inputs.packages-path }}/*nupkg
@@ -99,5 +99,7 @@ runs:
       shell: bash
       run: |
         # Show message on failure
-        echo "::error::Delivery failed. Is '${{ inputs.package-id }}' mapped to this repository in https://github.com/3lvia/nuget-publisher/blob/trunk/packages.yaml? Publisher runs: https://github.com/3lvia/nuget-publisher/actions"
+        echo "::error::Delivery failed. Is '$PACKAGE_ID' mapped to this repository in https://github.com/3lvia/nuget-publisher/blob/trunk/packages.yaml? Publisher runs: https://github.com/3lvia/nuget-publisher/actions"
         exit 1
+      env:
+        PACKAGE_ID: ${{ inputs.package-id }}
