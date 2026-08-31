@@ -1,0 +1,63 @@
+name: 'NuGet Publish'
+description: 'Publish NuGet packages to nuget.org using Trusted Publishing (GitHub OIDC), without any stored API key.'
+inputs:
+  user:
+    description: 'nuget.org username (profile name, not e-mail) that owns the Trusted Publishing policy for this repository.'
+    required: true
+  packages:
+    description: 'Glob for the .nupkg files to push. Matching .snupkg symbol packages are pushed automatically.'
+    required: false
+    default: './artifacts/*.nupkg'
+  source:
+    description: 'NuGet server URL to push to.'
+    required: false
+    default: 'https://api.nuget.org/v3/index.json'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Check inputs
+      shell: bash
+      run: |
+        # Explicit checks for required inputs, due to https://github.com/actions/runner/issues/1070
+        [[ "$USER_INPUT" ]] || { echo "Parameter 'user' is required, but is empty." ; exit 1; }
+
+        if [[ -z "$ACTIONS_ID_TOKEN_REQUEST_URL" ]]; then
+          echo "::error::This action requires the permission 'id-token: write' to be added to the workflow."
+          exit 1
+        fi
+
+        # shellcheck disable=SC2086
+        files=$(ls $PACKAGES 2>/dev/null || true)
+        [[ "$files" ]] || { echo "::error::No packages match '$PACKAGES'. Run 'dotnet pack' first, or set the 'packages' input." ; exit 1; }
+      env:
+        USER_INPUT: ${{ inputs.user }}
+        PACKAGES: ${{ inputs.packages }}
+
+    - name: Get short-lived API key from nuget.org
+      id: login
+      uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+      with:
+        user: ${{ inputs.user }}
+
+    - name: Push packages
+      shell: bash
+      run: |
+        # Push packages. --skip-duplicate makes re-runs safe; a matching .snupkg
+        # symbol package is pushed automatically together with its .nupkg.
+        # shellcheck disable=SC2086
+        for package in $PACKAGES; do
+          dotnet nuget push "$package" --source "$SOURCE" --api-key "$NUGET_API_KEY" --skip-duplicate
+        done
+      env:
+        PACKAGES: ${{ inputs.packages }}
+        SOURCE: ${{ inputs.source }}
+        NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+
+    - name: Show message on failure
+      if: failure()
+      shell: bash
+      run: |
+        # Show message on failure
+        echo "::error::Publishing failed. A Trusted Publishing policy must exist on nuget.org for this repository and this exact workflow file, owned by the user given in the 'user' input. Contact team Core to have one created. See https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing."
+        exit 1
