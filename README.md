@@ -68,7 +68,7 @@ see [here](#elvia-specific-actions) for more information.
     - [Inputs](#inputs-12)
     - [Permissions](#permissions-12)
     - [Usage](#usage-12)
-  - [NuGet Deliver](#nuget-deliver)
+  - [NuGet Publish](#nuget-publish)
     - [Inputs](#inputs-13)
     - [Permissions](#permissions-13)
     - [Usage](#usage-13)
@@ -1202,11 +1202,11 @@ More permissions might be required depending on the inputs set, see the actions 
 
 <!-- gh-actions-docs-end -->
 
-<!-- gh-actions-docs-start path=nuget-deliver/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
+<!-- gh-actions-docs-start path=nuget-publish/action.yml owner=3lvia project=core-github-actions-templates version=trunk permissions=contents:read,id-token:write -->
 
-## NuGet Deliver
+## NuGet Publish
 
-Deliver packed NuGet packages to the central nuget-publisher, which verifies and publishes them to nuget.org. No API key needed. One delivery may carry several packages.
+Publish NuGet packages to nuget.org through the central nuget-publisher (Trusted Publishing, no API key). One publish may carry several packages.
 
 ### Inputs
 
@@ -1228,8 +1228,8 @@ More permissions might be required depending on the inputs set, see the actions 
 ### Usage
 
 ```yaml
-- name: NuGet Deliver
-  uses: 3lvia/core-github-actions-templates/nuget-deliver@trunk
+- name: NuGet Publish
+  uses: 3lvia/core-github-actions-templates/nuget-publish@trunk
   with:
     packages-path:
     # Directory containing the packed .nupkg files (and optional .snupkg). All of them are delivered.
