@@ -1,5 +1,5 @@
-name: 'NuGet Deliver'
-description: 'Deliver packed NuGet packages to the central nuget-publisher, which verifies and publishes them to nuget.org. No API key needed. One delivery may carry several packages.'
+name: 'NuGet Publish'
+description: 'Publish NuGet packages to nuget.org through the central nuget-publisher (Trusted Publishing, no API key). One publish may carry several packages.'
 inputs:
   system:
     description: 'System name, used to log in to Vault (same as for the vault action).'
@@ -90,5 +90,5 @@ runs:
       shell: bash
       run: |
         # Show message on failure
-        echo "::error::Delivery failed. Are all delivered packages mapped to this repository in https://github.com/3lvia/nuget-publisher/blob/trunk/packages.yaml? Publisher runs: https://github.com/3lvia/nuget-publisher/actions"
+        echo "::error::Publishing failed. Are all packages mapped to this repository in https://github.com/3lvia/nuget-publisher/blob/trunk/packages.yaml? Publisher runs: https://github.com/3lvia/nuget-publisher/actions"
         exit 1
