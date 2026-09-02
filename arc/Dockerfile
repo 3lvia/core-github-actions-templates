@@ -81,6 +81,7 @@ RUN apt-get update -y && \
     apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
         unzip \
+        zip \
         curl \
         uidmap \
         iptables \
@@ -100,6 +101,8 @@ RUN apt-get update -y && \
 ARG NODEJS_VERSION=24
 ARG TRIVY_VERSION=0.69.2
 ARG TRIVY_CHECKSUM=affa59a1e37d86e4b8ab2cd02f0ab2e63d22f1bf9cf6a7aa326c884e25e26ce3
+ARG YQ_VERSION=4.53.6
+ARG YQ_CHECKSUM=c5f056448f973ae7d39b5401949648a78f2dc1947d6a8eb65be60d5c504b9385
 ARG KUBECTL_VERSION=1.32
 
 # Install Node.js
@@ -117,6 +120,13 @@ RUN curl -sLO https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_V
     && echo "${TRIVY_CHECKSUM}  trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" | sha256sum -c \
     && tar -xzf trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz -C /usr/local/bin trivy \
     && rm trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz
+
+# yq: used by nuget-publisher (publish.yaml, authorise-packages.sh, validate-packages.yaml) and
+# handy for any workflow that reads YAML. Pinned + checksum-verified like trivy above.
+RUN curl -sLo yq_linux_amd64 https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64 \
+    && echo "${YQ_CHECKSUM}  yq_linux_amd64" | sha256sum -c \
+    && install -o root -g root -m 755 yq_linux_amd64 /usr/local/bin/yq \
+    && rm yq_linux_amd64
 
 # Install Azure CLI
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
