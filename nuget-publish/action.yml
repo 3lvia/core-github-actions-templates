@@ -68,6 +68,7 @@ runs:
         GH_TOKEN: ${{ steps.app.outputs.token }}
 
     - name: Wait for the publisher
+      id: wait
       if: ${{ inputs.wait == 'true' }}
       shell: bash
       run: |
@@ -85,14 +86,41 @@ runs:
           echo "waiting for the publisher run to appear (attempt $attempt)..."
         done
         [[ "$id" ]] || { echo "::error::Could not find the dispatched publisher run after 5 minutes. Check https://github.com/3lvia/nuget-publisher/actions." ; exit 1; }
-        gh run watch "$id" -R 3lvia/nuget-publisher --exit-status --interval 15
+        url="https://github.com/3lvia/nuget-publisher/actions/runs/$id"
+        echo "Publisher run: $url"
+
+        # Poll instead of `gh run watch`: watch also fetches check annotations, which this
+        # token cannot read, and floods the log with "403 Forbidden" warnings.
+        status=""
+        for attempt in $(seq 1 80); do   # up to 20 min; the publisher itself takes ~30 s, the rest is queue
+          status=$(gh run view "$id" -R 3lvia/nuget-publisher --json status --jq .status)
+          [[ "$status" == "completed" ]] && break
+          sleep 15
+        done
+        [[ "$status" == "completed" ]] || { echo "::error::The publisher run did not complete within 20 minutes: $url" ; exit 1; }
+        conclusion=$(gh run view "$id" -R 3lvia/nuget-publisher --json conclusion --jq .conclusion)
+        if [[ "$conclusion" == "success" ]]; then
+          echo "Published. Details: $url"
+          exit 0
+        fi
+
+        # Surface the publisher's own error messages here, so the team sees *why* without
+        # leaving this run (e.g. which package is not mapped in packages.yaml).
+        gh run view "$id" -R 3lvia/nuget-publisher --log-failed 2>/dev/null \
+          | sed -E 's/\x1b\[[0-9;]*m//g' \
+          | grep -oE '##\[error\].*' | sed -E 's/^##\[error\]//' \
+          | grep -vE '^Process completed' | awk '!seen[$0]++' \
+          | while IFS= read -r line; do echo "::error::$line"; done
+        echo "::error::Publishing failed (publisher conclusion: $conclusion). Ensure every package this repository publishes is listed under it in https://github.com/3lvia/nuget-publisher/blob/trunk/packages.yaml, then re-run. Publisher run: $url"
+        exit 1
       env:
         GH_TOKEN: ${{ steps.app.outputs.token }}
 
     - name: Show message on failure
-      if: failure()
+      # Reached only if a step *before* the wait fails (Vault, token, dispatch); the wait
+      # step prints the publisher's own errors itself.
+      if: failure() && steps.wait.outcome != 'failure'
       shell: bash
       run: |
-        # Show message on failure
-        echo "::error::Publishing failed. Are all packages mapped to this repository in https://github.com/3lvia/nuget-publisher/blob/trunk/packages.yaml? Publisher runs: https://github.com/3lvia/nuget-publisher/actions"
+        echo "::error::Delivery to nuget-publisher failed before publishing started. Check the steps above; the publisher was not reached (or not found). Runs: https://github.com/3lvia/nuget-publisher/actions"
         exit 1
