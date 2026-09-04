@@ -55,6 +55,51 @@ runs:
         owner: 3lvia
         repositories: nuget-publisher
         permission-actions: write
+        permission-contents: read # packages.yaml, for the pre-check below
+
+    - name: Check packages.yaml before dispatching
+      shell: bash
+      run: |
+        # Fail fast on the most common mistake - a package that is not (yet) listed under this
+        # repository in packages.yaml - before a publisher run is started and Core is alerted.
+        # This mirrors scripts/authorise-packages.sh in nuget-publisher, which stays the
+        # authoritative, fail-closed check. This pre-check is fail-OPEN: if packages.yaml cannot
+        # be read or a tool is missing, we warn and let the publisher decide.
+        edit="https://github.com/3lvia/nuget-publisher/edit/trunk/packages.yaml"
+        if ! command -v yq >/dev/null || ! command -v unzip >/dev/null; then
+          echo "::warning::yq/unzip not available on this runner; skipping the packages.yaml pre-check."
+          exit 0
+        fi
+        if ! gh api -H "Accept: application/vnd.github.raw" \
+              repos/3lvia/nuget-publisher/contents/packages.yaml > packages.yaml 2>/dev/null; then
+          echo "::warning::Could not read packages.yaml from nuget-publisher; skipping the pre-check."
+          exit 0
+        fi
+        if ! REPO="$GITHUB_REPOSITORY" yq -e '.[] | select(.repo == strenv(REPO))' packages.yaml >/dev/null 2>&1; then
+          echo "::error::$GITHUB_REPOSITORY is not onboarded in nuget-publisher. Add it to packages.yaml (Core reviews the PR):"
+          echo "::error::  edit -> $edit"
+          echo "::error::  add   -> - repo: $GITHUB_REPOSITORY"
+          echo "::error::           packages: [<Your.Package.Id>]"
+          exit 1
+        fi
+        allowed=$(REPO="$GITHUB_REPOSITORY" yq -r '.[] | select(.repo == strenv(REPO)) | .packages[]' packages.yaml)
+        shopt -s nullglob
+        missing=0
+        for f in "$PACKAGES_PATH"/*.nupkg; do
+          id=$(unzip -p "$f" '*.nuspec' | grep -oE '<id>[^<]+' | head -1 | sed 's/<id>//')
+          [[ "$id" ]] || { echo "::warning::Could not read the package id from $(basename "$f"); leaving it to the publisher."; continue; }
+          if printf '%s\n' "$allowed" | grep -qxF -- "$id"; then
+            echo "listed in packages.yaml: $id"
+          else
+            echo "::error::$GITHUB_REPOSITORY is not allowed to publish '$id'. Add it to $GITHUB_REPOSITORY's packages in packages.yaml:"
+            echo "::error::  edit -> $edit"
+            missing=1
+          fi
+        done
+        [[ $missing -eq 0 ]] || exit 1
+      env:
+        GH_TOKEN: ${{ steps.app.outputs.token }}
+        PACKAGES_PATH: ${{ inputs.packages-path }}
 
     - name: Dispatch nuget-publisher
       shell: bash
