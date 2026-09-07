@@ -55,6 +55,51 @@ runs:
         owner: 3lvia
         repositories: nuget-publisher
         permission-actions: write
+        permission-contents: read # packages.yaml, for the pre-check below
+
+    - name: Check packages.yaml before dispatching
+      shell: bash
+      run: |
+        # Fail fast on the most common mistake - a package that is not (yet) listed under this
+        # repository in packages.yaml - before a publisher run is started and Core is alerted.
+        # This mirrors scripts/authorise-packages.sh in nuget-publisher, which stays the
+        # authoritative, fail-closed check. This pre-check is fail-OPEN: if packages.yaml cannot
+        # be read or a tool is missing, we warn and let the publisher decide.
+        edit="https://github.com/3lvia/nuget-publisher/edit/trunk/packages.yaml"
+        if ! command -v yq >/dev/null || ! command -v unzip >/dev/null; then
+          echo "::warning::yq/unzip not available on this runner; skipping the packages.yaml pre-check."
+          exit 0
+        fi
+        if ! gh api -H "Accept: application/vnd.github.raw" \
+              repos/3lvia/nuget-publisher/contents/packages.yaml > packages.yaml 2>/dev/null; then
+          echo "::warning::Could not read packages.yaml from nuget-publisher; skipping the pre-check."
+          exit 0
+        fi
+        if ! REPO="$GITHUB_REPOSITORY" yq -e '.[] | select(.repo == strenv(REPO))' packages.yaml >/dev/null 2>&1; then
+          echo "::error::$GITHUB_REPOSITORY is not onboarded in nuget-publisher. Add it to packages.yaml (Core reviews the PR):"
+          echo "::error::  edit -> $edit"
+          echo "::error::  add   -> - repo: $GITHUB_REPOSITORY"
+          echo "::error::           packages: [<Your.Package.Id>]"
+          exit 1
+        fi
+        allowed=$(REPO="$GITHUB_REPOSITORY" yq -r '.[] | select(.repo == strenv(REPO)) | .packages[]' packages.yaml)
+        shopt -s nullglob
+        missing=0
+        for f in "$PACKAGES_PATH"/*.nupkg; do
+          id=$(unzip -p "$f" '*.nuspec' | grep -oE '<id>[^<]+' | head -1 | sed 's/<id>//')
+          [[ "$id" ]] || { echo "::warning::Could not read the package id from $(basename "$f"); leaving it to the publisher."; continue; }
+          if printf '%s\n' "$allowed" | grep -qxF -- "$id"; then
+            echo "listed in packages.yaml: $id"
+          else
+            echo "::error::$GITHUB_REPOSITORY is not allowed to publish '$id'. Add it to $GITHUB_REPOSITORY's packages in packages.yaml:"
+            echo "::error::  edit -> $edit"
+            missing=1
+          fi
+        done
+        [[ $missing -eq 0 ]] || exit 1
+      env:
+        GH_TOKEN: ${{ steps.app.outputs.token }}
+        PACKAGES_PATH: ${{ inputs.packages-path }}
 
     - name: Dispatch nuget-publisher
       shell: bash
@@ -68,6 +113,7 @@ runs:
         GH_TOKEN: ${{ steps.app.outputs.token }}
 
     - name: Wait for the publisher
+      id: wait
       if: ${{ inputs.wait == 'true' }}
       shell: bash
       run: |
@@ -85,14 +131,41 @@ runs:
           echo "waiting for the publisher run to appear (attempt $attempt)..."
         done
         [[ "$id" ]] || { echo "::error::Could not find the dispatched publisher run after 5 minutes. Check https://github.com/3lvia/nuget-publisher/actions." ; exit 1; }
-        gh run watch "$id" -R 3lvia/nuget-publisher --exit-status --interval 15
+        url="https://github.com/3lvia/nuget-publisher/actions/runs/$id"
+        echo "Publisher run: $url"
+
+        # Poll instead of `gh run watch`: watch also fetches check annotations, which this
+        # token cannot read, and floods the log with "403 Forbidden" warnings.
+        status=""
+        for attempt in $(seq 1 80); do   # up to 20 min; the publisher itself takes ~30 s, the rest is queue
+          status=$(gh run view "$id" -R 3lvia/nuget-publisher --json status --jq .status)
+          [[ "$status" == "completed" ]] && break
+          sleep 15
+        done
+        [[ "$status" == "completed" ]] || { echo "::error::The publisher run did not complete within 20 minutes: $url" ; exit 1; }
+        conclusion=$(gh run view "$id" -R 3lvia/nuget-publisher --json conclusion --jq .conclusion)
+        if [[ "$conclusion" == "success" ]]; then
+          echo "Published. Details: $url"
+          exit 0
+        fi
+
+        # Surface the publisher's own error messages here, so the team sees *why* without
+        # leaving this run (e.g. which package is not mapped in packages.yaml).
+        gh run view "$id" -R 3lvia/nuget-publisher --log-failed 2>/dev/null \
+          | sed -E 's/\x1b\[[0-9;]*m//g' \
+          | grep -oE '##\[error\].*' | sed -E 's/^##\[error\]//' \
+          | grep -vE '^Process completed' | awk '!seen[$0]++' \
+          | while IFS= read -r line; do echo "::error::$line"; done
+        echo "::error::Publishing failed (publisher conclusion: $conclusion). Ensure every package this repository publishes is listed under it in https://github.com/3lvia/nuget-publisher/blob/trunk/packages.yaml, then re-run. Publisher run: $url"
+        exit 1
       env:
         GH_TOKEN: ${{ steps.app.outputs.token }}
 
     - name: Show message on failure
-      if: failure()
+      # Reached only if a step *before* the wait fails (Vault, token, dispatch); the wait
+      # step prints the publisher's own errors itself.
+      if: failure() && steps.wait.outcome != 'failure'
       shell: bash
       run: |
-        # Show message on failure
-        echo "::error::Publishing failed. Are all packages mapped to this repository in https://github.com/3lvia/nuget-publisher/blob/trunk/packages.yaml? Publisher runs: https://github.com/3lvia/nuget-publisher/actions"
+        echo "::error::Delivery to nuget-publisher failed before publishing started. Check the steps above; the publisher was not reached (or not found). Runs: https://github.com/3lvia/nuget-publisher/actions"
         exit 1
