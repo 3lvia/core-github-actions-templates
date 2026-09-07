@@ -71,7 +71,9 @@ inputs:
     required: false
     default: 'true'
   sign-image:
-    description: 'If `true`, the action will sign the Docker image with Cosign.'
+    description: |
+      If `true`, the action will sign the Docker image with Cosign.
+      Signing requires the image to exist in the registry, so this is skipped when `push` is `false`.
     required: false
     default: 'true'
   checkout:
@@ -220,14 +222,14 @@ runs:
         echo "image-digest=$(echo $IMAGE_NAME_WITH_DIGEST | cut -d'@' -f2)" >> "$GITHUB_OUTPUT"
 
     - name: Sign image with Cosign using GitHub OIDC token
-      if: ${{ inputs.sign-image == 'true' }}
+      if: ${{ inputs.sign-image == 'true' && inputs.push == 'true' }}
       shell: bash
       run: cosign sign -y --oidc-provider='github-actions' "$IMAGE_NAME_WITH_DIGEST"
       env:
         IMAGE_NAME_WITH_DIGEST: ${{ steps.get-outputs.outputs.image-name-with-digest }}
 
     - name: Verify image signatue
-      if: ${{ inputs.sign-image == 'true' }}
+      if: ${{ inputs.sign-image == 'true' && inputs.push == 'true' }}
       shell: bash
       run: |
         cosign verify \
