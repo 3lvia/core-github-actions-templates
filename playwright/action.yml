@@ -45,14 +45,18 @@ runs:
 
     - name: Build .NET project
       shell: bash
-      run: dotnet build '${{ inputs.test-project }}'
+      run: dotnet build "$TEST_PROJECT"
+      env:
+        TEST_PROJECT: ${{ inputs.test-project }}
 
     - name: Install playwright
       shell: pwsh
       run: |
-        $dirName = [System.IO.Path]::GetDirectoryName("${{ inputs.test-project }}")
+        $dirName = [System.IO.Path]::GetDirectoryName($env:TEST_PROJECT)
         $playwrightscript = Get-ChildItem -Path $dirName -Filter playwright.ps1 -Recurse -ErrorAction SilentlyContinue -Force
         &$playwrightscript.FullName install
+      env:
+        TEST_PROJECT: ${{ inputs.test-project }}
 
     - name: Run .NET tests
       shell: bash

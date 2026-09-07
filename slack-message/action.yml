@@ -44,19 +44,22 @@ runs:
     - name: Notify Slack
       shell: bash
       run: |
-        result=$(curl --silent -d '{"channel": "${{ inputs.slack-channel }}", "text": "${{ inputs.message }}"}' -H "Content-type: application/json; charset=utf-8" -H "Authorization: Bearer $SLACK_API_TOKEN" "https://slack.com/api/chat.postMessage")
+        payload=$(jq -n --arg channel "$SLACK_CHANNEL" --arg text "$MESSAGE" '{channel: $channel, text: $text}')
+        result=$(curl --silent --data "$payload" -H "Content-type: application/json; charset=utf-8" -H "Authorization: Bearer $SLACK_API_TOKEN" "https://slack.com/api/chat.postMessage")
         ok=$(echo "$result" | jq -r '.ok')
 
         if [[ "$ok" == 'true' ]]; then
-          echo "Sent message to slack channel ${{ inputs.slack-channel }}."
+          echo "Sent message to Slack channel $SLACK_CHANNEL."
         else
           error=$(echo "$result" | jq -r '.error')
 
           if [[ $"error" == 'not_in_channel' ]]; then
-            echo $'::error::\x40Github Workflow Notifications does not have access to the channel ${{ inputs.slack-channel }}, please add it to the channel.'
+            echo "::error::Github Workflow Notifications does not have access to the channel $SLACK_CHANNEL, please add it to the channel."
           else
             echo "$result" | jq '.'
           fi
         fi
       env:
+        SLACK_CHANNEL: ${{ inputs.slack-channel }}
+        MESSAGE: ${{ inputs.message }}
         SLACK_API_TOKEN: ${{ env.SLACK_API_TOKEN }}

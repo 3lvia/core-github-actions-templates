@@ -56,7 +56,9 @@ runs:
       shell: bash
       run: |
         # Add default set of CVE's to ignore
-        echo "AVD-DS-0026" >> '${{ inputs.trivyignore }}'
+        echo "AVD-DS-0026" >> "$TRIVY_IGNORE"
+      env:
+        TRIVY_IGNORE: ${{ inputs.trivyignore }}
 
     - name: Install Trivy if not using Elvia runner
       if: ${{ !startsWith(runner.name, 'elvia-runner-') }}
@@ -73,19 +75,27 @@ runs:
       shell: bash
       run: |
         # Run Trivy
-        trivy config '${{ inputs.path }}' \
+        trivy_args=(config "$TRIVY_PATH" \
           --format sarif \
-          --output '${{ env.TRIVY_SARIF }}' \
+          --output "$TRIVY_SARIF" \
           --exit-code 0 \
-          --severity '${{ inputs.severity }}' \
-          --ignorefile '${{ inputs.trivyignore }}' \
-          ${{ inputs.skip-dirs != '' && format('--skip-dirs {0}', inputs.skip-dirs) || '' }}
+          --severity "$TRIVY_SEVERITY" \
+          --ignorefile "$TRIVY_IGNORE")
+        if [[ -n "$TRIVY_SKIP_DIRS" ]]; then
+          trivy_args+=(--skip-dirs "$TRIVY_SKIP_DIRS")
+        fi
+        trivy "${trivy_args[@]}"
+      env:
+        TRIVY_PATH: ${{ inputs.path }}
+        TRIVY_SEVERITY: ${{ inputs.severity }}
+        TRIVY_IGNORE: ${{ inputs.trivyignore }}
+        TRIVY_SKIP_DIRS: ${{ inputs.skip-dirs }}
 
     - name: Modify Trivy report
       shell: bash
       run: |
         # Run jq to modify the Trivy report
-        cat ${{ env.TRIVY_SARIF }} |jq '.runs[0].results[] |= (select(.locations[].physicalLocation.artifactLocation.uri=="").locations[].physicalLocation.artifactLocation.uri=".")'>trivy2.sarif
+        cat "$TRIVY_SARIF" | jq '.runs[0].results[] |= (select(.locations[].physicalLocation.artifactLocation.uri=="").locations[].physicalLocation.artifactLocation.uri=".")' > trivy2.sarif
 
     - name: Upload Trivy report to GitHub Security tab
       if: ${{ inputs.upload-report == 'true' }}

@@ -91,6 +91,10 @@ Tre workflows hadde ingen funn i denne scannen.
 
 To composite actions hadde ingen funn i denne scannen.
 
+Alle 19 `template-injection`-funn i workflows og composite actions er nå
+fjernet. Den opprinnelige scannen telte flere forekomster i samme scriptblokk
+separat.
+
 ## Anbefalt rekkefølge
 
 1. `template-injection` i composite actions og workflows. Dette kan gi
@@ -106,8 +110,8 @@ To composite actions hadde ingen funn i denne scannen.
 
 ## Arbeidsstatus
 
-- [ ] Composite actions: `template-injection`
-- [ ] Workflows: `template-injection`
+- [x] Composite actions: `template-injection` (14 funn løst)
+- [x] Workflows: `template-injection` (5 funn løst)
 - [ ] `artipacked` og credential-persistens
 - [ ] `github-env`
 - [ ] `excessive-permissions`

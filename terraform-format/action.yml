@@ -22,4 +22,6 @@ runs:
 
     - name: Check formatting
       shell: bash
-      run: terraform fmt -check -recursive ${{ inputs.path }}
+      run: terraform fmt -check -recursive "$TF_PATH"
+      env:
+        TF_PATH: ${{ inputs.path }}
