@@ -17,11 +17,11 @@ regel og fil slik at gjentakende problemer kan løses som mønstre.
 
 ## Sammendrag
 
-| Område | Funn | Status |
-| --- | ---: | --- |
-| Workflows | 135 | Åpen |
-| Composite actions | 27 | Åpen |
-| Totalt | 162 | Åpen |
+| Område            | Funn | Status |
+| ----------------- | ---: | ------ |
+| Workflows         |  135 | Åpen   |
+| Composite actions |   27 | Åpen   |
+| Totalt            |  162 | Åpen   |
 
 Dette er en arbeidsliste fra én scan. Den bør oppdateres etter hver
 fix-gruppe og en ny scan bør brukes som fasit før branchen merges.
@@ -30,33 +30,33 @@ fix-gruppe og en ny scan bør brukes som fasit før branchen merges.
 
 ### Funn per regel
 
-| Regel | Antall | Første prioritet |
-| --- | ---: | --- |
-| `artipacked` | 62 | Høy |
-| `github-app` | 49 | Høy |
-| `self-repository` | 10 | Medium |
-| `excessive-permissions` | 5 | Høy |
-| `adhoc-packages` | 1 | Medium |
-| `obfuscation` | 3 | Medium |
-| `template-injection` | 5 | Høy |
+| Regel                   | Antall | Første prioritet |
+| ----------------------- | -----: | ---------------- |
+| `artipacked`            |     62 | Høy              |
+| `github-app`            |     49 | Høy              |
+| `self-repository`       |     10 | Medium           |
+| `excessive-permissions` |      5 | Høy              |
+| `adhoc-packages`        |      1 | Medium           |
+| `obfuscation`           |      3 | Medium           |
+| `template-injection`    |      5 | Høy              |
 
 ### Funn per fil
 
-| Fil | Funn | Status |
-| --- | ---: | --- |
-| `.github/workflows/test-actions.yaml` | 34 | Åpen |
-| `.github/workflows/update-starter-workflows.yaml` | 12 | Åpen |
-| `.github/workflows/example-build-deploy-dotnet-google.yaml` | 14 | Åpen |
-| `.github/workflows/example-build-deploy-dotnet.yaml` | 14 | Åpen |
-| `.github/workflows/example-build-deploy-go-google.yaml` | 10 | Åpen |
-| `.github/workflows/example-build-deploy-go.yaml` | 10 | Åpen |
-| `.github/workflows/example-build-deploy-python-google.yaml` | 10 | Åpen |
-| `.github/workflows/example-build-deploy-python.yaml` | 10 | Åpen |
-| `.github/workflows/example-build-deploy-dockerfile-google.yaml` | 8 | Åpen |
-| `.github/workflows/example-build-deploy-dockerfile.yaml` | 8 | Åpen |
-| `.github/workflows/check-format.yaml` | 3 | Åpen |
-| `.github/workflows/build-arc-image.yaml` | 1 | Åpen |
-| `.github/workflows/zizmor.yaml` | 1 | Åpen |
+| Fil                                                             | Funn | Status |
+| --------------------------------------------------------------- | ---: | ------ |
+| `.github/workflows/test-actions.yaml`                           |   34 | Åpen   |
+| `.github/workflows/update-starter-workflows.yaml`               |   12 | Åpen   |
+| `.github/workflows/example-build-deploy-dotnet-google.yaml`     |   14 | Åpen   |
+| `.github/workflows/example-build-deploy-dotnet.yaml`            |   14 | Åpen   |
+| `.github/workflows/example-build-deploy-go-google.yaml`         |   10 | Åpen   |
+| `.github/workflows/example-build-deploy-go.yaml`                |   10 | Åpen   |
+| `.github/workflows/example-build-deploy-python-google.yaml`     |   10 | Åpen   |
+| `.github/workflows/example-build-deploy-python.yaml`            |   10 | Åpen   |
+| `.github/workflows/example-build-deploy-dockerfile-google.yaml` |    8 | Åpen   |
+| `.github/workflows/example-build-deploy-dockerfile.yaml`        |    8 | Åpen   |
+| `.github/workflows/check-format.yaml`                           |    3 | Åpen   |
+| `.github/workflows/build-arc-image.yaml`                        |    1 | Åpen   |
+| `.github/workflows/zizmor.yaml`                                 |    1 | Åpen   |
 
 Tre workflows hadde ingen funn i denne scannen.
 
@@ -64,36 +64,39 @@ Tre workflows hadde ingen funn i denne scannen.
 
 ### Funn per regel
 
-| Regel | Antall | Første prioritet |
-| --- | ---: | --- |
-| `template-injection` | 14 | Høy |
-| `artipacked` | 11 | Høy |
-| `github-env` | 1 | Høy |
-| `unsound-ternary` | 1 | Medium |
+| Regel                | Antall | Første prioritet |
+| -------------------- | -----: | ---------------- |
+| `template-injection` |     14 | Høy              |
+| `artipacked`         |     11 | Høy              |
+| `github-env`         |      1 | Høy              |
+| `unsound-ternary`    |      1 | Medium           |
 
 ### Funn per action
 
-| Action | Funn | Status |
-| --- | ---: | --- |
-| `trivy-iac-scan/action.yml` | 8 | Åpen |
-| `slack-message/action.yml` | 4 | Åpen |
-| `playwright/action.yml` | 3 | Åpen |
-| `build/action.yml` | 2 | Åpen |
-| `terraform-format/action.yml` | 2 | Åpen |
-| `analyze/action.yml` | 1 | Åpen |
-| `deploy/action.yml` | 1 | Åpen |
-| `integrationtest/action.yml` | 1 | Åpen |
-| `sonarcloud/action.yml` | 1 | Åpen |
-| `unittest/action.yml` | 1 | Åpen |
-| `validate-metrics/action.yml` | 1 | Åpen |
-| `vault/action.yml` | 1 | Åpen |
-| `verify-edna-deploy/action.yml` | 1 | Åpen |
+| Action                          | Funn | Status |
+| ------------------------------- | ---: | ------ |
+| `trivy-iac-scan/action.yml`     |    8 | Åpen   |
+| `slack-message/action.yml`      |    4 | Åpen   |
+| `playwright/action.yml`         |    3 | Åpen   |
+| `build/action.yml`              |    2 | Åpen   |
+| `terraform-format/action.yml`   |    2 | Åpen   |
+| `analyze/action.yml`            |    1 | Åpen   |
+| `deploy/action.yml`             |    1 | Åpen   |
+| `integrationtest/action.yml`    |    1 | Åpen   |
+| `sonarcloud/action.yml`         |    1 | Åpen   |
+| `unittest/action.yml`           |    1 | Åpen   |
+| `validate-metrics/action.yml`   |    1 | Åpen   |
+| `vault/action.yml`              |    1 | Åpen   |
+| `verify-edna-deploy/action.yml` |    1 | Åpen   |
 
 To composite actions hadde ingen funn i denne scannen.
 
 Alle 19 `template-injection`-funn i workflows og composite actions er nå
 fjernet. Den opprinnelige scannen telte flere forekomster i samme scriptblokk
 separat.
+
+Alle 73 `artipacked`-funn er også fjernet ved å sette
+`persist-credentials: false` på checkout-stegene.
 
 ## Anbefalt rekkefølge
 
@@ -112,7 +115,7 @@ separat.
 
 - [x] Composite actions: `template-injection` (14 funn løst)
 - [x] Workflows: `template-injection` (5 funn løst)
-- [ ] `artipacked` og credential-persistens
+- [x] `artipacked` og credential-persistens (73 funn løst)
 - [ ] `github-env`
 - [ ] `excessive-permissions`
 - [ ] `github-app` og `self-repository`

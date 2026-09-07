@@ -3,4 +3,4 @@ rules:
     config:
       policies:
         3lvia/*: ref-pin
-        "*": hash-pin
+        '*': hash-pin
