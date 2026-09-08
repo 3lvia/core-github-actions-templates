@@ -118,7 +118,7 @@ Alle 73 `artipacked`-funn er også fjernet ved å sette
 - [x] `artipacked` og credential-persistens (73 funn løst)
 - [x] `github-env` (1 funn løst)
 - [x] `unsound-ternary` (1 funn løst)
-- [ ] `excessive-permissions`
+- [x] `excessive-permissions` (5 funn løst)
 - [x] `github-app` (49 funn løst)
 - [ ] `self-repository`
 - [ ] Resterende medium-funn
