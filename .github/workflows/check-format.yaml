@@ -31,4 +31,4 @@ jobs:
       - name: Check format of workflows and markdown files
         run: |
           echo '.github/workflows/example-*.yml' > .prettierignore
-          npx --yes prettier@3.8.2 -c --single-quote "**/*.yml" "**/*.md"
+          npx --yes prettier@3.9.6 -c --single-quote "**/*.yml" "**/*.md"
