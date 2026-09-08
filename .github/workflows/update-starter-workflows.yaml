@@ -89,9 +89,13 @@ jobs:
 
             # Special case for replacing name of concurrency group for demo-api-go, since it is deployed twice (go.mod and Dockerfile).
             # TODO: loop and don't hardcode envs three times
-            sed -i "s/group: 'dev-.*--this-group-is-replaced-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'/group: '${{ '\${{ github.workflow }}-\${{ github.ref }}-deploy-dev' }}'/g" "$new_workflow_path"
-            sed -i "s/group: 'test-.*--this-group-is-replaced-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'/group: '${{ '\${{ github.workflow }}-\${{ github.ref }}-deploy-test' }}'/g" "$new_workflow_path"
-            sed -i "s/group: 'prod-.*--this-group-is-replaced-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'/group: '${{ '\${{ github.workflow }}-\${{ github.ref }}-deploy-prod' }}'/g" "$new_workflow_path"
+            github_expression_start='$'
+            deploy_dev_group="${github_expression_start}{{ github.workflow }}-${github_expression_start}{{ github.ref }}-deploy-dev"
+            deploy_test_group="${github_expression_start}{{ github.workflow }}-${github_expression_start}{{ github.ref }}-deploy-test"
+            deploy_prod_group="${github_expression_start}{{ github.workflow }}-${github_expression_start}{{ github.ref }}-deploy-prod"
+            sed -i "s|group: 'dev-.*--this-group-is-replaced-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'|group: '$deploy_dev_group'|g" "$new_workflow_path"
+            sed -i "s|group: 'test-.*--this-group-is-replaced-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'|group: '$deploy_test_group'|g" "$new_workflow_path"
+            sed -i "s|group: 'prod-.*--this-group-is-replaced-in-final-example-needs-this-to-not-deploy-demo-api-go-simultaneously-in-two-examples'|group: '$deploy_prod_group'|g" "$new_workflow_path"
 
             new_workflow_properties_file="dotgithub/workflow-templates/${file_name_no_prefix%.yml}.properties.json"
             if [ ! -f "$new_workflow_properties_file" ]; then
