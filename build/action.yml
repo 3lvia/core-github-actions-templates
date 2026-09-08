@@ -186,15 +186,20 @@ runs:
     - name: Build with 3lv
       shell: bash
       run: |
+        additional_tags="${GITHUB_SHA}-${GITHUB_RUN_NUMBER}"
+        if [[ -n "$DOCKER_ADDITIONAL_TAGS" ]]; then
+          additional_tags+=",$DOCKER_ADDITIONAL_TAGS"
+        fi
+
         3lv build \
           --project-file "$PROJECT_FILE" \
           --scan-formats table,sarif,markdown \
-          --additional-tags "$ADDITIONAL_TAGS" \
+          --additional-tags "$additional_tags" \
           "$APPLICATION_NAME"
       env:
         APPLICATION_NAME: ${{ inputs.name }}
         PROJECT_FILE: ${{ inputs.project-file }}
-        ADDITIONAL_TAGS: "${{ github.sha }}-${{ github.run_number }}${{ inputs.docker-additional-tags == '' && '' || ',' }}${{ inputs.docker-additional-tags }}"
+        DOCKER_ADDITIONAL_TAGS: ${{ inputs.docker-additional-tags }}
         # Pass optional inputs as environment variables, since they can be empty.
         # The CLI does not accept empty strings passed to the flags, e.g. `--go-main-package-directory ''` will cause an error.
         3LV_SYSTEM_NAME: ${{ inputs.namespace }}
