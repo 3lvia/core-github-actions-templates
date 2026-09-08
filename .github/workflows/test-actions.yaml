@@ -19,6 +19,9 @@ env:
   APPLICATION_BASE_NAME: 'demo-api'
   SYSTEM_NAME: 'core'
 
+permissions:
+  contents: read
+
 jobs:
   prepare-jobs:
     name: Prepare jobs
@@ -596,4 +599,3 @@ jobs:
           fi
         env:
           APP_INSIGHTS_NAME: ${{ env.APP_INSIGHTS_NAME }}
-
