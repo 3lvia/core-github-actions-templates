@@ -37,7 +37,8 @@ runs:
 
     - name: Set Vault address based on environment
       shell: bash
-      run: |
+      run:
+        | # zizmor: ignore[github-env] VAULT_ADDR must remain available to later workflow steps.
         # Set Vault address based on environment
         if [[ "$ENVIRONMENT" == 'dev' || "$ENVIRONMENT" == 'sandbox' ]]; then
           echo 'VAULT_ADDR=https://vault.dev-elvia.io' >> "$GITHUB_ENV"
