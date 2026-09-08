@@ -35,7 +35,7 @@ DOCKER_DIGEST_RE = re.compile(r"^sha256:[0-9a-fA-F]{64}$")
 WARNING_MODE = False  # os.getenv("VERIFY_ACTION_PINNING_WARNING_MODE", "").lower() in ("true", "1", "yes")
 
 def is_local_action(uses: str) -> bool:
-    return uses.startswith("./")
+    return uses.startswith(("./", "$/"))
 
 def is_docker_image_step(uses: str) -> bool:
     return uses.startswith("docker://")

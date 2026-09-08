@@ -122,7 +122,7 @@ Alle 73 `artipacked`-funn er også fjernet ved å sette
 - [x] `github-app` (49 funn løst)
 - [x] `obfuscation` (3 funn løst)
 - [x] `adhoc-packages` (1 funn løst)
-- [ ] `self-repository`
+- [x] `self-repository` (10 funn løst)
 - [ ] Resterende medium-funn
 - [ ] Kjør full zizmor-scan på nytt med samme `zizmor.yml`
 - [ ] Oppdater denne filen med sluttresultatet

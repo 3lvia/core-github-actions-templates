@@ -183,7 +183,7 @@ jobs:
           path: 'core'
           persist-credentials: false
 
-      - uses: ./analyze
+      - uses: $/analyze
         with:
           checkout: 'false'
           language: ${{ matrix.language }}
@@ -227,7 +227,7 @@ jobs:
           path: 'core'
           persist-credentials: false
 
-      - uses: ./unittest
+      - uses: $/unittest
         with:
           checkout: 'false'
           working-directory: 'core/applications/demo-api'
@@ -279,7 +279,7 @@ jobs:
           path: 'core'
           persist-credentials: false
 
-      - uses: ./build
+      - uses: $/build
         id: build
         with:
           checkout: 'false'
@@ -325,7 +325,7 @@ jobs:
           ENTRYPOINT ["echo", "I am vulnerable"]
           EOF
 
-      - uses: ./build
+      - uses: $/build
         with:
           checkout: 'false'
           name: 'vulnerable-service'
@@ -434,7 +434,7 @@ jobs:
           path: 'core'
           persist-credentials: false
 
-      - uses: ./deploy
+      - uses: $/deploy
         with:
           checkout: 'false'
           name: ${{ matrix.application-name }}
@@ -488,7 +488,7 @@ jobs:
           path: 'core'
           persist-credentials: false
 
-      - uses: ./integrationtest
+      - uses: $/integrationtest
         with:
           checkout: 'false'
           system: ${{ env.SYSTEM_NAME }}
@@ -516,7 +516,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: ./trivy-iac-scan
+      - uses: $/trivy-iac-scan
         with:
           checkout: 'false'
 
@@ -535,7 +535,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: ./terraform-format
+      - uses: $/terraform-format
         with:
           checkout: 'false'
 
@@ -557,7 +557,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: ./slack-message
+      - uses: $/slack-message
         with:
           slack-channel: '#team-core-alerts-muted'
           message: ':test_tube: Testing Slack Message using Vault in ${{ github.workflow }} for ${{ github.event_name }} event.'
@@ -582,7 +582,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: ./vault
+      - uses: $/vault
         with:
           environment: 'dev'
           system: 'core'
