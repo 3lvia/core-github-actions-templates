@@ -10,6 +10,9 @@ concurrency:
   group: '${{ github.workflow }}-${{ github.ref }}'
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   prettier-check:
     name: 'Prettier check'
@@ -32,4 +35,3 @@ jobs:
         run: |
           echo '.github/workflows/example-*.yml' > .prettierignore
           prettier -c --single-quote "**/*.yml" "**/*.md"
-

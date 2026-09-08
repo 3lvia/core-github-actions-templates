@@ -19,6 +19,9 @@ env:
   APPLICATION_BASE_NAME: 'demo-api'
   SYSTEM_NAME: 'core'
 
+permissions:
+  contents: read
+
 jobs:
   prepare-jobs:
     name: Prepare jobs
