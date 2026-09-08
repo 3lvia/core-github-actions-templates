@@ -39,7 +39,6 @@ jobs:
           owner: ${{ github.repository_owner }}
           repositories: '.github,core-github-actions-templates'
           permission-contents: write
-          permission-issues: write
           permission-pull-requests: write
 
       - name: Checkout .github repository
