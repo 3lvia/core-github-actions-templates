@@ -32,7 +32,7 @@ jobs:
       group: '${{ github.workflow }}-${{ github.ref }}-analyze'
       cancel-in-progress: true
     steps:
-# START REMOVE FROM EXAMPLE
+      # START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: app-token
@@ -41,6 +41,7 @@ jobs:
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: 'core'
+          permission-contents: read
 
       - name: Checkout core repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -49,16 +50,16 @@ jobs:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
           persist-credentials: false
-# END REMOVE FROM EXAMPLE
+      # END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/analyze@trunk
         with:
           # This can be set to a more specific path if you want to analyze only a part of the repository.
           working-directory: 'applications/demo-api/src'
           language: 'csharp'
-# START REMOVE FROM EXAMPLE
+          # START REMOVE FROM EXAMPLE
           checkout: 'false'
           upload-results: 'false'
-# END REMOVE FROM EXAMPLE
+  # END REMOVE FROM EXAMPLE
 
   unit-tests:
     name: Unit Tests
@@ -73,7 +74,7 @@ jobs:
       group: '${{ github.workflow }}-${{ github.ref }}-unit-tests'
       cancel-in-progress: true
     steps:
-# START REMOVE FROM EXAMPLE
+      # START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: app-token
@@ -82,6 +83,7 @@ jobs:
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: 'core'
+          permission-contents: read
 
       - name: Checkout core repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -89,15 +91,15 @@ jobs:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
           persist-credentials: false
-# END REMOVE FROM EXAMPLE
+      # END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/unittest@trunk
         with:
           # This can be set to a more specific path if you want to search for tests in only a part of the repository.
           working-directory: 'applications/demo-api/src'
           test-coverage: 'true'
-# START REMOVE FROM EXAMPLE
+          # START REMOVE FROM EXAMPLE
           checkout: 'false'
-# END REMOVE FROM EXAMPLE
+  # END REMOVE FROM EXAMPLE
 
   integration-tests:
     name: Integration Tests
@@ -113,7 +115,7 @@ jobs:
       group: '${{ github.workflow }}-${{ github.ref }}-integration-tests'
       cancel-in-progress: true
     steps:
-# START REMOVE FROM EXAMPLE
+      # START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: app-token
@@ -122,6 +124,7 @@ jobs:
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: 'core'
+          permission-contents: read
 
       - name: Checkout core repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -129,17 +132,17 @@ jobs:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
           persist-credentials: false
-# END REMOVE FROM EXAMPLE
+      # END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/integrationtest@trunk
         with:
           # This can be set to a more specific path if you want to search for tests in only a part of the repository.
           working-directory: 'applications/demo-api/src'
           system: ${{ env.SYSTEM_NAME }}
-# START REMOVE FROM EXAMPLE
+          # START REMOVE FROM EXAMPLE
           checkout: 'false'
         env:
           BASE_URL: 'https://core.dev-elvia.io/demo-api'
-# END REMOVE FROM EXAMPLE
+  # END REMOVE FROM EXAMPLE
 
   build:
     name: Build
@@ -156,7 +159,7 @@ jobs:
       cancel-in-progress: true
     environment: build
     steps:
-# START REMOVE FROM EXAMPLE
+      # START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: app-token
@@ -165,24 +168,24 @@ jobs:
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: 'core'
-
+          permission-contents: read
       - name: Checkout core repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
           persist-credentials: false
-# END REMOVE FROM EXAMPLE
+      # END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/build@trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
           project-file: ${{ env.PROJECT_FILE }}
           AZURE_CLIENT_ID: ${{ vars.ACR_CLIENT_ID }}
-# START REMOVE FROM EXAMPLE
+          # START REMOVE FROM EXAMPLE
           checkout: 'false'
           trivy-upload-report: 'false'
-# END REMOVE FROM EXAMPLE
+  # END REMOVE FROM EXAMPLE
 
   deploy-dev:
     name: Deploy Dev
@@ -202,7 +205,7 @@ jobs:
       group: '${{ github.workflow }}-${{ github.ref }}-deploy-dev'
     environment: dev
     steps:
-# START REMOVE FROM EXAMPLE
+      # START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: app-token
@@ -211,6 +214,7 @@ jobs:
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: 'core'
+          permission-contents: read
 
       - name: Checkout core repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -218,7 +222,7 @@ jobs:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
           persist-credentials: false
-# END REMOVE FROM EXAMPLE
+      # END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/deploy@trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
@@ -229,9 +233,9 @@ jobs:
           # Can be commented out if you don't want this.
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
-# START REMOVE FROM EXAMPLE
+          # START REMOVE FROM EXAMPLE
           checkout: 'false'
-# END REMOVE FROM EXAMPLE
+  # END REMOVE FROM EXAMPLE
 
   deploy-test:
     name: Deploy Test
@@ -248,7 +252,7 @@ jobs:
     # Only on push to trunk
     if: github.ref == 'refs/heads/trunk'
     steps:
-# START REMOVE FROM EXAMPLE
+      # START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: app-token
@@ -257,6 +261,7 @@ jobs:
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: 'core'
+          permission-contents: read
 
       - name: Checkout core repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -264,7 +269,7 @@ jobs:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
           persist-credentials: false
-# END REMOVE FROM EXAMPLE
+      # END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/deploy@trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
@@ -275,9 +280,9 @@ jobs:
           # Can be commented out if you don't want this.
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
-# START REMOVE FROM EXAMPLE
+          # START REMOVE FROM EXAMPLE
           checkout: 'false'
-# END REMOVE FROM EXAMPLE
+  # END REMOVE FROM EXAMPLE
 
   deploy-prod:
     name: Deploy Prod
@@ -294,7 +299,7 @@ jobs:
     # Only on push to trunk
     if: github.ref == 'refs/heads/trunk'
     steps:
-# START REMOVE FROM EXAMPLE
+      # START REMOVE FROM EXAMPLE
       - name: Get GitHub App token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: app-token
@@ -303,6 +308,7 @@ jobs:
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: 'core'
+          permission-contents: read
 
       - name: Checkout core repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -310,7 +316,7 @@ jobs:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
           persist-credentials: false
-# END REMOVE FROM EXAMPLE
+      # END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/deploy@trunk
         with:
           name: ${{ env.APPLICATION_NAME }}
@@ -321,7 +327,7 @@ jobs:
           # Can be commented out if you don't want this.
           slack-channel: '#team-${{ env.SYSTEM_NAME }}-alerts'
           AZURE_CLIENT_ID: ${{ vars.AKS_CLIENT_ID }}
-# START REMOVE FROM EXAMPLE
+          # START REMOVE FROM EXAMPLE
           checkout: 'false'
 # END REMOVE FROM EXAMPLE
 
