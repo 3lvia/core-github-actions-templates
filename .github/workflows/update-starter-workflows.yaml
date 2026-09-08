@@ -37,6 +37,9 @@ jobs:
           client-id: ${{ vars.GH_APP_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          repositories: '.github,core-github-actions-templates'
+          permission-contents: write
+          permission-pull-requests: write
 
       - name: Checkout .github repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
