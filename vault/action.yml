@@ -25,21 +25,32 @@ runs:
       env:
         SYSTEM: ${{ inputs.system }}
 
-    - name: Validate environment
+    - name: Set Vault address based on environment
       shell: bash
       run: |
-        case "$ENVIRONMENT" in
-          dev|sandbox|kptest|test|prod) ;;
-          *) echo "Unsupported environment: $ENVIRONMENT"; exit 1 ;;
-        esac
+        # Set Vault address based on environment
+        if [[ "$ENVIRONMENT" == 'dev' || "$ENVIRONMENT" == 'sandbox' ]]; then
+          echo 'VAULT_ADDR=https://vault.dev-elvia.io' >> "$GITHUB_ENV"
+        elif [[ "$ENVIRONMENT" == 'kptest' ]]; then
+          echo 'VAULT_ADDR=https://vault.kptest-elvia.io' >> "$GITHUB_ENV"
+        elif [[ "$ENVIRONMENT" == 'test' ]]; then
+          echo 'VAULT_ADDR=https://vault.test-elvia.io' >> "$GITHUB_ENV"
+        elif [[ "$ENVIRONMENT" == 'prod' ]]; then
+          echo 'VAULT_ADDR=https://vault.elvia.io' >> "$GITHUB_ENV"
+        else
+          echo "Unsupported environment: $ENVIRONMENT"
+          exit 1
+        fi
+
+        echo "REPO_SHORT_NAME=${GITHUB_REPOSITORY##*/}" >> "$GITHUB_ENV"
       env:
         ENVIRONMENT: ${{ inputs.environment }}
 
     - name: Login to Vault and export token
       uses: hashicorp/vault-action@892a26828f195e65540a40b4768ae4571f51ebfc # v4.0.0
       with:
-        url: ${{ (inputs.environment == 'dev' || inputs.environment == 'sandbox') && 'https://vault.dev-elvia.io' || inputs.environment == 'kptest' && 'https://vault.kptest-elvia.io' || inputs.environment == 'test' && 'https://vault.test-elvia.io' || inputs.environment == 'prod' && 'https://vault.elvia.io' || '' }}
-        role: 'jwt-github-${{ inputs.system }}-${{ github.event.repository.name }}'
+        url: ${{ env.VAULT_ADDR }}
+        role: 'jwt-github-${{ inputs.system }}-${{ env.REPO_SHORT_NAME }}'
         method: 'jwt'
         path: 'jwt-github'
         exportToken: ${{ inputs.exportToken }}
