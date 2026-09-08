@@ -35,6 +35,28 @@ runs:
       env:
         ENVIRONMENT: ${{ inputs.environment }}
 
+    - name: Set Vault address based on environment
+      shell: bash
+      run:
+        | # zizmor: ignore[github-env] VAULT_ADDR must remain available to later workflow steps.
+        # Set Vault address based on environment
+        if [[ "$ENVIRONMENT" == 'dev' || "$ENVIRONMENT" == 'sandbox' ]]; then
+          echo 'VAULT_ADDR=https://vault.dev-elvia.io' >> "$GITHUB_ENV"
+        elif [[ "$ENVIRONMENT" == 'kptest' ]]; then
+          echo 'VAULT_ADDR=https://vault.kptest-elvia.io' >> "$GITHUB_ENV"
+        elif [[ "$ENVIRONMENT" == 'test' ]]; then
+          echo 'VAULT_ADDR=https://vault.test-elvia.io' >> "$GITHUB_ENV"
+        elif [[ "$ENVIRONMENT" == 'prod' ]]; then
+          echo 'VAULT_ADDR=https://vault.elvia.io' >> "$GITHUB_ENV"
+        else
+          echo "Unsupported environment: $ENVIRONMENT"
+          exit 1
+        fi
+
+        echo "REPO_SHORT_NAME=${GITHUB_REPOSITORY##*/}" >> "$GITHUB_ENV"
+      env:
+        ENVIRONMENT: ${{ inputs.environment }}
+
     - name: Login to Vault and export token
       uses: hashicorp/vault-action@892a26828f195e65540a40b4768ae4571f51ebfc # v4.0.0
       with:
