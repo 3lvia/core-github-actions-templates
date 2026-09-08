@@ -28,10 +28,7 @@ jobs:
         with:
           node-version: 24
 
-      - name: Install dependencies
-        run: npm install -g prettier
-
       - name: Check format of workflows and markdown files
         run: |
           echo '.github/workflows/example-*.yml' > .prettierignore
-          prettier -c --single-quote "**/*.yml" "**/*.md"
+          npx --yes prettier@3.8.2 -c --single-quote "**/*.yml" "**/*.md"
