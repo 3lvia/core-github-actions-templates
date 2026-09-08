@@ -48,6 +48,7 @@ jobs:
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
 # END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/analyze@trunk
         with:
@@ -89,6 +90,7 @@ jobs:
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
 # END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/build@trunk
         with:
@@ -132,6 +134,7 @@ jobs:
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
 # END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/deploy@trunk
         with:
@@ -180,6 +183,7 @@ jobs:
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
 # END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/deploy@trunk
         with:
@@ -228,6 +232,7 @@ jobs:
         with:
           repository: '3lvia/core'
           token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
 # END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/deploy@trunk
         with:

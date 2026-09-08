@@ -1,0 +1,6 @@
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        3lvia/*: ref-pin
+        '*': hash-pin

@@ -28,6 +28,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: ${{ env.REPOSITORY }}
+          persist-credentials: false
 
       - name: Get GitHub App token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
@@ -43,6 +44,7 @@ jobs:
           path: 'dotgithub'
           repository: '3lvia/.github'
           token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
 
       - name: Update workflows-templates
         shell: bash
@@ -127,8 +129,8 @@ jobs:
             });
 
             const header = "## 📝 Starter Workflow Templates Update\n";
-            const examplesFilesChanged = atob('${{ steps.get-diff.outputs.examples-files-changed }}');
-            const examplesDiff = atob('${{ steps.get-diff.outputs.examples-diff }}');
+            const examplesFilesChanged = atob(process.env.EXAMPLES_FILES_CHANGED);
+            const examplesDiff = atob(process.env.EXAMPLES_DIFF);
 
             const botComment = comments.find(
               (comment) =>
@@ -165,6 +167,9 @@ jobs:
                 body,
               });
             }
+        env:
+          EXAMPLES_FILES_CHANGED: ${{ steps.get-diff.outputs.examples-files-changed }}
+          EXAMPLES_DIFF: ${{ steps.get-diff.outputs.examples-diff }}
 
       - name: Commit changes
         shell: bash
@@ -175,8 +180,8 @@ jobs:
             exit 0
           fi
 
-          git config user.email '${{ vars.GH_APP_USER_EMAIL }}'
-          git config user.name '${{ vars.GH_APP_USERNAME }}'
+          git config user.email "$GH_APP_USER_EMAIL"
+          git config user.name "$GH_APP_USERNAME"
 
           git add workflow-templates
           git commit -m 'Update starter workflows'
@@ -188,3 +193,5 @@ jobs:
         working-directory: 'dotgithub'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_APP_USER_EMAIL: ${{ vars.GH_APP_USER_EMAIL }}
+          GH_APP_USERNAME: ${{ vars.GH_APP_USERNAME }}

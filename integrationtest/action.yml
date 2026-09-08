@@ -47,6 +47,8 @@ runs:
     - name: Checkout repository
       if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
 
     - name: Login Vault and export token
       uses: 3lvia/core-github-actions-templates/vault@trunk

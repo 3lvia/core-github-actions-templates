@@ -60,7 +60,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          SARIF_FILE="${{ steps.zizmor_scan.outputs.output-file }}"
           echo "sarif_output_file=${SARIF_FILE}"
 
           if [[ -z "${SARIF_FILE}" || ! -f "${SARIF_FILE}" ]]; then
@@ -145,3 +144,5 @@ jobs:
           fi
 
           echo "=== Diagnostics Complete ==="
+        env:
+          SARIF_FILE: ${{ steps.zizmor_scan.outputs.output-file }}
