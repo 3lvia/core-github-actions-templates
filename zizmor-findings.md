@@ -118,7 +118,8 @@ Alle 73 `artipacked`-funn er også fjernet ved å sette
 - [x] `artipacked` og credential-persistens (73 funn løst)
 - [ ] `github-env`
 - [ ] `excessive-permissions`
-- [ ] `github-app` og `self-repository`
+- [x] `github-app` (49 funn løst)
+- [ ] `self-repository`
 - [ ] Resterende medium-funn
 - [ ] Kjør full zizmor-scan på nytt med samme `zizmor.yml`
 - [ ] Oppdater denne filen med sluttresultatet
