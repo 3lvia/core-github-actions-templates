@@ -1,0 +1,363 @@
+name: Intility Deploy Service
+description: |
+  This action assumes a self-hosted Windows runner with network access to target hosts.
+  If Vault is used, caller workflow must grant id-token: write permission.
+
+inputs:
+  system:
+    description: System name used by the Vault action role mapping.
+    required: true
+  environment:
+    description: Deployment environment.
+    required: true
+  vault-secret-path:
+    description: 'Vault secret path for credentials'
+    required: true
+  vault-secrets:
+    description: |
+      Vault secret mappings for hashicorp/vault-action (one per line).
+      Use {vault-secret-path} as placeholder for inputs.vault-secret-path.
+      Example: {vault-secret-path} agent-username | AGENT_USERNAME ;
+    required: false
+    default: |
+      {vault-secret-path} agent-username | AGENT_USERNAME ;
+      {vault-secret-path} agent-password | AGENT_PASSWORD ;
+      {vault-secret-path} netbas-windows-service-username | SERVICE_USER ;
+      {vault-secret-path} netbas-windows-service-password | SERVICE_PASSWORD ;
+      {vault-secret-path} role-id | ROLE_ID ;
+  target-host:
+    description: Target host used for remote PowerShell operations.
+    required: true
+  target-path:
+    description: 'Directory on target host'
+    required: true  
+  service-name:
+    description: 'Windows service name'
+    required: true
+  artifact-name:
+    description: 'Build artifact name to download'
+    required: false
+    default: 'drop'
+  scripts-artifact-name:
+    description: 'Install script to download'
+    required: false
+  run-install-script:
+    description: 'Run InstallService.ps1 on the target host after copying files'
+    required: false
+    default: 'false'
+  communication-protocol:
+    description: 'Use https'
+    required: false
+    default: 'http'
+  replace-target-file:
+    required: false
+    default: appsettings.json
+  replace-tokens:
+    description: |
+      JSON object mapping token names (without #{...}#) to replacement values.
+      Example: {"kvalitetsportalen_base_url":"https://example.io","MsmqReceiveQueue":"FORMATNAME:..."}
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Set Vault address based on environment
+      shell: powershell
+      env:
+        ENVIRONMENT: ${{ inputs.environment }}
+      run: |
+        switch ($env:ENVIRONMENT) {
+          'dev' { 'VAULT_ADDR=https://vault.dev-elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          'test' { 'VAULT_ADDR=https://vault.test-elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          'prod' { 'VAULT_ADDR=https://vault.elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+           default { throw "Unsupported environment: $($env:ENVIRONMENT)" }
+        }
+
+    - name: Set Elvid address based on environment
+      shell: powershell
+      env:
+        ENVIRONMENT: ${{ inputs.environment }}
+      run: |
+        switch ($env:ENVIRONMENT) {
+          'dev' { 'ELVID_ADDR=https://elvid.test-elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          'test' { 'ELVID_ADDR=https://elvid.test-elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          'prod' { 'ELVID_ADDR=https://elvid.elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          default { throw "Unsupported environment: $($env:ENVIRONMENT)" }
+        }
+
+    - name: Set repo variables
+      shell: powershell
+      env:
+        ENVIRONMENT: ${{ inputs.environment }}
+      run: |
+        $repoShortName = ($env:GITHUB_REPOSITORY -split '/')[-1]
+        "REPO_SHORT_NAME=$repoShortName" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+   
+    - name: Build Vault secrets
+      shell: powershell
+      run: |
+        $vaultPath = '${{ inputs.vault-secret-path }}'
+        $secrets = @'
+        ${{ inputs.vault-secrets }}
+        '@
+        $lines = $secrets.Trim() -split "`r?`n" | Where-Object { $_.Trim() -ne '' }
+        $built = foreach ($line in $lines) {
+          $trimmed = $line.Trim().Replace('{vault-secret-path}', $vaultPath)
+          if ($trimmed -match '^[\w.-]+/') {
+            $trimmed
+          } else {
+            "$vaultPath $trimmed"
+          }
+        }
+        $builtSecrets = ($built -join "`n").Trim()
+        "VAULT_SECRETS<<EOF" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        $builtSecrets | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        "EOF" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    - name: Login to Vault and export token
+      uses: hashicorp/vault-action@892a26828f195e65540a40b4768ae4571f51ebfc # v4.0.0
+      with:
+        url: ${{ env.VAULT_ADDR }}
+        role: 'jwt-github-${{ inputs.system }}-${{ env.REPO_SHORT_NAME }}'
+        method: 'jwt'
+        path: 'jwt-github'
+        exportToken: false
+        secrets: ${{ env.VAULT_SECRETS }}
+    - name: Diagnose WinRM reachability
+      shell: powershell
+      run: |
+        $ErrorActionPreference = 'Continue'
+        Write-Host "=== Runner info ==="
+        Write-Host "Runner host : $env:COMPUTERNAME"
+        Write-Host "Target host : $env:TARGET_HOST"
+        Write-Host "Protocol    : $env:COMMUNICATION_PROTOCOL"
+
+        Write-Host "`n=== DNS resolution ==="
+        try {
+          Resolve-DnsName -Name $env:TARGET_HOST -ErrorAction Stop | Format-Table -AutoSize
+        } catch {
+          Write-Warning "DNS resolution failed: $($_.Exception.Message)"
+        }
+
+        Write-Host "`n=== TCP probe 5985 (WinRM HTTP) ==="
+        Test-NetConnection -ComputerName $env:TARGET_HOST -Port 5985 -WarningAction SilentlyContinue |
+          Select-Object ComputerName,RemoteAddress,RemotePort,TcpTestSucceeded | Format-List
+
+        Write-Host "=== TCP probe 5986 (WinRM HTTPS) ==="
+        Test-NetConnection -ComputerName $env:TARGET_HOST -Port 5986 -WarningAction SilentlyContinue |
+          Select-Object ComputerName,RemoteAddress,RemotePort,TcpTestSucceeded | Format-List
+
+        Write-Host "=== Test-WSMan ==="
+        try {
+          Test-WSMan -ComputerName $env:TARGET_HOST -UseSSL:($env:COMMUNICATION_PROTOCOL -eq 'https') -ErrorAction Stop
+        } catch {
+          Write-Warning "Test-WSMan failed: $($_.Exception.Message)"
+        }
+      env:
+        TARGET_HOST: ${{ inputs.target-host }}
+        COMMUNICATION_PROTOCOL: ${{ inputs.communication-protocol }}
+
+    - name: Test connection to server
+      shell: powershell
+      run: |
+        $ErrorActionPreference = 'Stop'
+        $securePassword = ConvertTo-SecureString "$env:AGENT_PASSWORD" -AsPlainText -Force
+        $credential = New-Object System.Management.Automation.PSCredential ($env:AGENT_USERNAME, $securePassword)
+        $useSsl = $env:COMMUNICATION_PROTOCOL -eq 'https'
+
+        $sessionOption = New-PSSessionOption `
+          -SkipCACheck `
+          -SkipCNCheck `
+          -SkipRevocationCheck `
+          -OperationTimeout 60000 `
+          -OpenTimeout 60000
+
+        $sessionParams = @{
+          ComputerName   = $env:TARGET_HOST
+          Credential     = $credential
+          Authentication = 'Negotiate'
+          SessionOption  = $sessionOption
+          UseSSL         = $useSsl
+        }
+
+        $session = New-PSSession @sessionParams
+        try {
+          Invoke-Command -Session $session -ScriptBlock { Write-Output "Intility connection working on $env:COMPUTERNAME" }
+        }
+        finally {
+          Remove-PSSession -Session $session
+        }
+      env:
+        TARGET_HOST: ${{ inputs.target-host }}
+        COMMUNICATION_PROTOCOL: ${{ inputs.communication-protocol }}
+
+    - name: Download artifact
+      uses: actions/download-artifact@v8
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ runner.temp }}/${{ inputs.artifact-name }}
+
+    - name: Download scripts artifact
+      uses: actions/download-artifact@v8
+      with:
+        name: ${{ inputs.scripts-artifact-name }}
+        path: ${{ runner.temp }}/${{ inputs.scripts-artifact-name }}
+
+    - name: Extract deployment package
+      shell: powershell
+      run: |
+        $extractPath = Join-Path "${{ runner.temp }}" "${{ inputs.artifact-name }}-extracted"
+        New-Item -ItemType Directory -Force -Path $extractPath
+        Expand-Archive -Path "${{ runner.temp }}/${{ inputs.artifact-name }}/${{ inputs.artifact-name }}.zip" -DestinationPath $extractPath -Force
+    
+    - name: Replace tokens in appsettings.json
+      shell: powershell
+      run: |
+        $configPath = Join-Path "${{ runner.temp }}" "${{ inputs.artifact-name }}-extracted/${{ inputs.replace-target-file }}"
+        if (-not (Test-Path $configPath)) {
+          throw "${{ inputs.replace-target-file }} not found at $configPath"
+        }
+        $content = Get-Content $configPath -Raw
+        $tokensJson = @'
+        ${{ inputs.replace-tokens }}
+        '@
+        $tokens = $tokensJson.Trim() | ConvertFrom-Json
+        foreach ($prop in $tokens.PSObject.Properties) {
+          # Escape backslashes so JSON config files keep \\ (e.g. MSMQ FORMATNAME paths)
+          $replacement = ([string]$prop.Value).Replace('\', '\\')
+          $content = $content -replace "#{$($prop.Name)}#", $replacement
+        }
+        $content = $content -replace '#{Build.BuildNumber}#', '${{ github.run_number }}'
+        $content = $content -replace '#{environment}#', '${{ inputs.environment }}'
+        $content = $content -replace '#{vault_url}#', '${{ env.VAULT_ADDR }}'
+        $content = $content -replace '#{role_id}#', '${{ env.ROLE_ID }}'
+        Set-Content -Path $configPath -Value $content -NoNewline
+
+    - name: Copy files to remote installation folder
+      shell: powershell
+      run: |
+        $cred = New-Object System.Management.Automation.PSCredential($env:AGENT_USERNAME, (ConvertTo-SecureString $env:AGENT_PASSWORD -AsPlainText -Force))
+        $session = New-PSSession -ComputerName '${{ inputs.target-host }}' -Credential $cred
+
+        $remoteInstallPath = Join-Path '${{ inputs.target-path }}' '${{ inputs.service-name }}-${{ inputs.environment }}/installation'
+
+        Invoke-Command -Session $session -ScriptBlock {
+          param($tempDir)
+          if (Test-Path $tempDir) {
+            Remove-Item -Path $tempDir -Recurse -Force
+          }
+          New-Item -ItemType Directory -Force -Path $tempDir
+        } -ArgumentList $remoteInstallPath
+
+        Copy-Item -Path "${{ runner.temp }}/${{ inputs.artifact-name }}-extracted/*" -Destination $remoteInstallPath -ToSession $session -Recurse -Force
+        Remove-PSSession $session
+
+    - name: Copy install script to remote scripts folder
+      shell: powershell
+      run: |
+        $cred = New-Object System.Management.Automation.PSCredential($env:AGENT_USERNAME, (ConvertTo-SecureString $env:AGENT_PASSWORD -AsPlainText -Force))
+        $session = New-PSSession -ComputerName '${{ inputs.target-host }}' -Credential $cred
+
+        $remoteScriptsPath = Join-Path '${{ inputs.target-path }}' '${{ inputs.service-name }}-${{ inputs.environment }}/scripts'
+        $localScriptsDir = Join-Path '${{ runner.temp }}' '${{ inputs.scripts-artifact-name }}'
+        $localScriptPath = Get-ChildItem -Path $localScriptsDir -Recurse -Filter 'InstallService.ps1' | Select-Object -First 1
+
+        if (-not $localScriptPath) {
+          throw "InstallService.ps1 not found under $localScriptsDir"
+        }
+
+        Invoke-Command -Session $session -ScriptBlock {
+          param($scriptsDir)
+          New-Item -ItemType Directory -Force -Path $scriptsDir | Out-Null
+        } -ArgumentList $remoteScriptsPath
+
+        Copy-Item -Path $localScriptPath.FullName -Destination $remoteScriptsPath -ToSession $session -Force
+        Remove-PSSession $session
+
+    - name: Run PowerShell - Installscript
+      if: inputs.run-install-script == 'true'
+      shell: powershell
+      env:
+        TARGET_HOST: ${{ inputs.target-host }}
+        COMMUNICATION_PROTOCOL: ${{ inputs.communication-protocol }}
+      run: |
+        $ErrorActionPreference = 'Stop'
+        $serviceInstanceName = '${{ inputs.service-name }}-${{ inputs.environment }}'
+        $remoteBasePath = Join-Path '${{ inputs.target-path }}' $serviceInstanceName
+        $scriptPath = Join-Path $remoteBasePath 'scripts\InstallService.ps1'
+        $execPath = Join-Path $remoteBasePath 'application'
+        $installationFiles = Join-Path $remoteBasePath 'installation'
+        $executable = '${{ inputs.service-name }}.exe'
+
+        $securePassword = ConvertTo-SecureString "$env:AGENT_PASSWORD" -AsPlainText -Force
+        $credential = New-Object System.Management.Automation.PSCredential ($env:AGENT_USERNAME, $securePassword)
+        $useSsl = $env:COMMUNICATION_PROTOCOL -eq 'https'
+
+        $sessionOption = New-PSSessionOption `
+          -SkipCACheck `
+          -SkipCNCheck `
+          -SkipRevocationCheck `
+          -OperationTimeout 60000 `
+          -OpenTimeout 60000
+
+        $sessionParams = @{
+          ComputerName   = $env:TARGET_HOST
+          Credential     = $credential
+          Authentication = 'Negotiate'
+          SessionOption  = $sessionOption
+          UseSSL         = $useSsl
+        }
+        $session = New-PSSession @sessionParams
+
+        try {
+          Invoke-Command -Session $session -ScriptBlock {
+            param(
+              $ScriptPath,
+              $ServiceName,
+              $ServiceDescription,
+              $ServiceDisplayName,
+              $ExecPath,
+              $Executable,
+              $ServiceAccountName,
+              $ServiceAccountPassword,
+              $InstallationFiles
+            )
+            if (Test-Path -LiteralPath $ExecPath) {
+              $appItem = Get-Item -LiteralPath $ExecPath -Force
+              if (-not $appItem.PSIsContainer) {
+                Write-Host "Removing file that blocks application folder: $ExecPath"
+                Remove-Item -LiteralPath $ExecPath -Force
+              }
+            }
+            if (-not (Test-Path -LiteralPath $ExecPath)) {
+              New-Item -ItemType Directory -Path $ExecPath -Force | Out-Null
+            }
+            if (-not (Test-Path $ScriptPath)) {
+              throw "InstallService.ps1 not found at $ScriptPath"
+            }
+            & $ScriptPath `
+              $ServiceName `
+              $ServiceDescription `
+              $ServiceDisplayName `
+              $ExecPath `
+              $Executable `
+              $ServiceAccountName `
+              $ServiceAccountPassword `
+              $InstallationFiles
+          } -ArgumentList @(
+            $scriptPath,
+            $serviceInstanceName,
+            $serviceInstanceName,
+            $serviceInstanceName,
+            $execPath,
+            $executable,
+            $env:SERVICE_USER,
+            $env:SERVICE_PASSWORD,
+            $installationFiles
+          )
+        }
+        finally {
+          Remove-PSSession -Session $session
+        }
+
+    

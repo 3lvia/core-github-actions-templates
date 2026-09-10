@@ -1,0 +1,122 @@
+parameters:
+  - name: environment
+  - name: agent_pool
+  - name: app_pool_name
+  - name: target_host
+  - name: target_dir
+  - name: site_dir
+  - name: site_name
+  - name: source_path
+  - name: replace_tokens
+  - name: replace_target_files
+  - name: vault_addr
+  - name: role_id
+  - name: variables
+    type: object
+
+jobs:
+- deployment: DeployToIIS
+  displayName: Deploy to IIS ${{ parameters.environment }}
+  environment: ${{ parameters.environment }}
+  pool:
+    name: ${{ parameters.agent_pool }}
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+          - download: none
+          - checkout: 'templates'
+            path: templates
+          - task: UsePythonVersion@0
+            displayName: "Use Python 3.9"
+            inputs:
+              versionSpec: 3.9
+          - task: PythonScript@0
+            displayName: Run python script to set variables
+            inputs:
+              scriptPath: $(Pipeline.Workspace)/templates/set-variables-from-vault/set-variables-from-vault.py
+              arguments: --json_params "${{ convertToJson(parameters.variables) }}"
+            env:
+              ROLE_ID: ${{ parameters.role_id }}
+              VAULT_ADDR: ${{ parameters.vault_addr }}
+          - task: PowerShellOnTargetMachines@3
+            displayName: "Run PowerShell: Test connection to server"
+            inputs:
+              machines: ${{ parameters.target_host }}
+              userName: $(agentuser)
+              userPassword: $(agentpass)
+              scriptType: 'Inline'
+              inlineScript: 'Write-Output "Intility connection working"'
+              communicationProtocol: 'http'
+          - task: DownloadPipelineArtifact@2
+            displayName: "Download application zipfile"
+            inputs:
+              artifact: drop
+              path: '$(Pipeline.Workspace)\drop'
+              patterns: '**/*.zip'
+          - task: ExtractFiles@1
+            displayName: "Extract files"
+            inputs:
+              destinationFolder: $(Pipeline.Workspace)\${{ parameters.site_name }}
+              archiveFilePatterns: '$(Pipeline.Workspace)\drop\*.zip'
+              cleanDestinationFolder: true
+          - task: qetza.replacetokens.replacetokens-task.replacetokens@3
+            displayName: "Replace tokens in web.config"
+            inputs:
+              rootDirectory: $(Pipeline.Workspace)\${{ parameters.site_name }}
+              targetFiles: ${{ parameters.replace_target_files }}
+              inlineVariables: ${{ parameters.replace_tokens }}
+          - task: WindowsMachineFileCopy@2
+            displayName: "Copy files to remote server"
+            inputs:
+              machineNames: ${{ parameters.target_host }}
+              adminUserName: $(agentuser)
+              adminPassword: $(agentpass)
+              targetPath: ${{ parameters.target_dir }}
+              sourcePath: '$(Pipeline.Workspace)\${{ parameters.source_path }}'
+              cleanTargetBeforeCopy: true
+          - task: PowerShellOnTargetMachines@3
+            displayName: "Stop IIS Site ${{ parameters.target_host }}"
+            inputs:
+              machines: ${{ parameters.target_host }}
+              userName: $(agentuser)
+              userPassword: $(agentpass)
+              scriptType: 'Inline'
+              inlineScript: '& $env:windir\System32\inetsrv\appcmd stop site /site.name:${{ parameters.site_name }}'
+              communicationProtocol: 'http'
+          - task: PowerShellOnTargetMachines@3
+            displayName: "Stop IIS App pool ${{ parameters.target_host }}"
+            inputs:
+              machines: ${{ parameters.target_host }}
+              userName: $(agentuser)
+              userPassword: $(agentpass)
+              scriptType: 'Inline'
+              inlineScript: '& $env:windir\System32\inetsrv\appcmd stop apppool /apppool.name:${{ parameters.app_pool_name }}'
+              communicationProtocol: 'http'
+          - task: PowerShellOnTargetMachines@3
+            displayName: "Copy files from temp folder"
+            inputs:
+              machines: ${{ parameters.target_host }}
+              userName: $(agentuser)
+              userPassword: $(agentpass)
+              scriptType: 'Inline'
+              inlineScript: 'cp -Force -Recurse ${{ parameters.target_dir }}* ${{ parameters.site_dir }}'
+              communicationProtocol: 'http'
+          - task: PowerShellOnTargetMachines@3
+            displayName: "Start IIS Site ${{ parameters.target_host }}"
+            inputs:
+              machines: ${{ parameters.target_host }}
+              userName: $(agentuser)
+              userPassword: $(agentpass)
+              scriptType: 'Inline'
+              inlineScript: '& $env:windir\System32\inetsrv\appcmd start site /site.name:${{ parameters.site_name }}'
+              communicationProtocol: 'http'
+          - task: PowerShellOnTargetMachines@3
+            displayName: "Start IIS App pool ${{ parameters.target_host }}"
+            inputs:
+              machines: ${{ parameters.target_host }}
+              userName: $(agentuser)
+              userPassword: $(agentpass)
+              scriptType: 'Inline'
+              inlineScript: '& $env:windir\System32\inetsrv\appcmd start apppool /apppool.name:${{ parameters.app_pool_name }}'
+              communicationProtocol: 'http'
