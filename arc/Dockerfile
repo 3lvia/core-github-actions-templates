@@ -8,7 +8,7 @@ ARG TARGETOS
 ARG TARGETARCH
 ARG RUNNER_VERSION
 # renovate: datasource=github-releases depName=actions/runner-container-hooks
-ARG RUNNER_CONTAINER_HOOKS_VERSION=0.7.0
+ARG RUNNER_CONTAINER_HOOKS_VERSION=0.8.1
 # renovate: datasource=github-releases depName=actions/runner-container-hooks
 ARG RUNNER_CONTAINER_HOOKS_NOVOLUME_VERSION=0.8.1
 # renovate: datasource=github-releases depName=docker/cli
