@@ -13,7 +13,7 @@ permissions: {}
 
 jobs:
   zizmor:
-    runs-on: elvia-runner
+    runs-on: ubuntu-latest
     env:
       ZIZMOR_FAIL_ON_FINDINGS: "false"
     permissions:
