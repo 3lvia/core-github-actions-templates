@@ -13,6 +13,14 @@
       "matchStrings": ["prettier@(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
       "depNameTemplate": "prettier",
       "datasourceTemplate": "npm"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^arc/Dockerfile$"],
+      "matchStrings": ["ARG TRIVY_VERSION=(?<currentValue>\\S+)"],
+      "depNameTemplate": "aquasecurity/trivy",
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver"
     }
   ],
   "packageRules": [
@@ -24,6 +32,18 @@
         "3lvia/gh-actions-docs"
       ],
       "pinDigests": false
+    },
+    {
+      "matchPackageNames": ["aquasecurity/trivy"],
+      "prBodyNotes": [
+        "Update `TRIVY_CHECKSUM` with the SHA256 for the new `trivy_<version>_Linux-64bit.tar.gz` release asset."
+      ]
+    },
+    {
+      "matchPackageNames": ["mikefarah/yq"],
+      "prBodyNotes": [
+        "Update `YQ_CHECKSUM` with the SHA256 for the new `yq_linux_amd64` release asset."
+      ]
     }
   ]
 }

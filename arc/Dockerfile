@@ -7,8 +7,13 @@ FROM mcr.microsoft.com/dotnet/runtime-deps:10.0-noble AS build
 ARG TARGETOS
 ARG TARGETARCH
 ARG RUNNER_VERSION
+# renovate: datasource=github-releases depName=actions/runner-container-hooks
 ARG RUNNER_CONTAINER_HOOKS_VERSION=0.7.0
+# renovate: datasource=github-releases depName=actions/runner-container-hooks
+ARG RUNNER_CONTAINER_HOOKS_NOVOLUME_VERSION=0.8.1
+# renovate: datasource=github-releases depName=docker/cli
 ARG DOCKER_VERSION=29.4.0
+# renovate: datasource=github-releases depName=docker/buildx
 ARG BUILDX_VERSION=0.33.0
 
 RUN apt update -y && apt install curl unzip -y
@@ -24,7 +29,7 @@ RUN curl -f -L -o runner-container-hooks.zip https://github.com/actions/runner-c
     && unzip ./runner-container-hooks.zip -d ./k8s \
     && rm runner-container-hooks.zip
 
-RUN curl -f -L -o runner-container-hooks.zip https://github.com/actions/runner-container-hooks/releases/download/v0.8.1/actions-runner-hooks-k8s-0.8.1.zip \
+RUN curl -f -L -o runner-container-hooks.zip https://github.com/actions/runner-container-hooks/releases/download/v${RUNNER_CONTAINER_HOOKS_NOVOLUME_VERSION}/actions-runner-hooks-k8s-${RUNNER_CONTAINER_HOOKS_NOVOLUME_VERSION}.zip \
     && unzip ./runner-container-hooks.zip -d ./k8s-novolume \
     && rm runner-container-hooks.zip
 
@@ -98,11 +103,14 @@ RUN apt-get update -y && \
         gettext \
         make
 
+# renovate: datasource=node depName=node
 ARG NODEJS_VERSION=24
-ARG TRIVY_VERSION=0.69.2
-ARG TRIVY_CHECKSUM=affa59a1e37d86e4b8ab2cd02f0ab2e63d22f1bf9cf6a7aa326c884e25e26ce3
+ARG TRIVY_VERSION=0.74.0
+ARG TRIVY_CHECKSUM=2ae6fe3ee734b7fdf11335663e18c75ea12dccc76062f09f164a3b0f8be4371a
+# renovate: datasource=github-releases depName=mikefarah/yq
 ARG YQ_VERSION=4.53.6
 ARG YQ_CHECKSUM=c5f056448f973ae7d39b5401949648a78f2dc1947d6a8eb65be60d5c504b9385
+# renovate: datasource=github-releases depName=kubernetes/kubernetes versioning=semver
 ARG KUBECTL_VERSION=1.32
 
 # Install Node.js
