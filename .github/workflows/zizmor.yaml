@@ -8,15 +8,12 @@ on:
       - trunk
   pull_request:
     branches: ["**"]
-  #Currently added daily schedule while rule is in eval mode to collect information from all repositories
-  schedule:
-    - cron: '0 21 * * *'
 
 permissions: {}
 
 jobs:
   zizmor:
-    runs-on: ubuntu-latest
+    runs-on: elvia-runner
     env:
       ZIZMOR_FAIL_ON_FINDINGS: "false"
     permissions:
