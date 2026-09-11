@@ -3,13 +3,20 @@ name: Build ARC image
 on:
   push:
     branches: [trunk]
+    paths:
+      - 'arc/**'
+      - '.github/workflows/build-arc-image.yaml'
   pull_request:
     branches: [trunk]
+    paths:
+      - 'arc/**'
+      - '.github/workflows/build-arc-image.yaml'
+  workflow_dispatch:
   schedule:
     - cron: '3 4 * * *' # Daily at 04:03 UTC
 
 concurrency:
-  group: 'build-arc-image'
+  group: "${{ github.workflow }}-${{ github.event_name == 'pull_request' && 'pull-requests' || github.ref }}"
   cancel-in-progress: true
 
 jobs:
