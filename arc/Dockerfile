@@ -98,6 +98,7 @@ RUN apt-get update -y && \
         skopeo \
         wget \
         python3-pip \
+        python3-yaml \
         util-linux \
         file \
         gettext \

@@ -30,5 +30,9 @@ jobs:
           repository: '3lvia/core-github-actions-templates'
           path: '.policy-tools'
 
+      # elvia-runner-imaget får python3-yaml i arc/Dockerfile; dette dekker runnere som kjører et eldre image.
+      - name: Ensure PyYAML
+        run: python3 -c "import yaml" 2>/dev/null || python3 -m pip install --quiet --break-system-packages pyyaml
+
       - name: Validate workflows
         run: python3 .policy-tools/.github/scripts/verify_action_pinning.py
