@@ -102,7 +102,7 @@ runs:
         [[ "$NAMESPACE" ]] || { echo "Parameter 'namespace' is required, but is empty." ; exit 1; }
         [[ "$ENVIRONMENT" ]] || { echo "Parameter 'environment' is required, but is empty." ; exit 1; }
         [[ "$NAME" ]] || { echo "Parameter 'name' is required, but is empty." ; exit 1; }
-        [[ "$WORKLOAD_TYPE" == 'deployment' || "$WORKLOAD_TYPE" == 'statefulset' || "$WORKLOAD_TYPE" == 'job' ]] || { echo "Parameter 'workload-type' must be 'deployment', 'statefulset' or job" ; exit 1; }
+        [[ "$WORKLOAD_TYPE" == 'deployment' || "$WORKLOAD_TYPE" == 'statefulset' || "$WORKLOAD_TYPE" == 'job' || "$WORKLOAD_TYPE" == 'cronjob' ]] || { echo "Parameter 'workload-type' must be 'deployment', 'statefulset', 'job' or 'cronjob'" ; exit 1; }
         [[ "$RUNTIME_CLOUD_PROVIDER" == 'AKS' || "$RUNTIME_CLOUD_PROVIDER" == 'GKE' || "$RUNTIME_CLOUD_PROVIDER" == 'ISS' ]] || { echo "Parameter 'runtime-cloud-provider' input must be 'AKS', 'GKE' or 'ISS'" ; exit 1; }
       env:
         NAMESPACE: ${{ inputs.namespace }}
