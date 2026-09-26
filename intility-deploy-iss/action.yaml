@@ -1,0 +1,225 @@
+name: Deploy to IIS
+description: |
+  Deploy a previously uploaded artifact to IIS via PowerShell remoting and Vault credentials.
+
+  Configuration guidance:
+  - For .NET Core API apps: Use replace_tokens_in_appsettings=true
+  - For .NET Framework apps: Use replace_tokens_in_webconfig=true with webapp_uri and webapp_client_id parameters
+
+inputs:
+  environment:
+    description: 'Target environment (dev, test, prod, etc.)'
+    required: true
+  system_name:
+    description: 'System name for Vault role'
+    required: true
+  target_host:
+    description: 'Target IIS host machine'
+    required: true
+  site_dir:
+    description: 'IIS site directory on target host'
+    required: true
+  temp_dir:
+    description: 'Temporary directory on target host'
+    required: true
+  app_pool_name:
+    description: 'IIS Application Pool name'
+    required: true
+  site_name_full:
+    description: 'Full IIS site name'
+    required: true
+  artifact_name:
+    description: 'Build artifact name to download'
+    required: false
+    default: 'drop'
+  artifact_zip:
+    description: 'Name of the zip file in the artifact'
+    required: false
+    default: 'app.zip'
+  vault_secret_path:
+    description: 'Vault secret path for credentials'
+    required: true
+  replace_tokens_in_appsettings:
+    description: 'Whether to replace tokens in appsettings.json (use for .NET Core API apps)'
+    required: false
+    default: 'true'
+  replace_tokens_in_webconfig:
+    description: 'Whether to replace tokens in web.config (use for .NET Framework apps)'
+    required: false
+    default: 'true'
+  webapp_uri:
+    description: 'Webapp URI (required when replace_tokens_in_webconfig=true for .NET Framework apps)'
+    required: false
+    default: ''
+  webapp_client_id:
+    description: 'Webapp client ID for Elvid (required when replace_tokens_in_webconfig=true for .NET Framework apps)'
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Set Vault address based on environment
+      shell: powershell
+      env:
+        ENVIRONMENT: ${{ inputs.environment }}
+      run: |
+        switch ($env:ENVIRONMENT) {
+          'dev' { 'VAULT_ADDR=https://vault.dev-elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          'sandbox' { 'VAULT_ADDR=https://vault.dev-elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          'kptest' { 'VAULT_ADDR=https://vault.kptest-elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          'test' { 'VAULT_ADDR=https://vault.test-elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          'prod' { 'VAULT_ADDR=https://vault.elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          default { throw "Unsupported environment: $($env:ENVIRONMENT)" }
+        }
+
+    - name: Set Elvid address based on environment
+      shell: powershell
+      env:
+        ENVIRONMENT: ${{ inputs.environment }}
+      run: |
+        switch ($env:ENVIRONMENT) {
+          'dev' { 'ELVID_ADDR=https://elvid.test-elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          'kptest' { 'ELVID_ADDR=https://elvid.test-elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          'test' { 'ELVID_ADDR=https://elvid.test-elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          'prod' { 'ELVID_ADDR=https://elvid.elvia.io' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append }
+          default { throw "Unsupported environment: $($env:ENVIRONMENT)" }
+        }
+
+    - name: Set repo variables
+      shell: powershell
+      env:
+        ENVIRONMENT: ${{ inputs.environment }}
+      run: |
+        $repoShortName = ($env:GITHUB_REPOSITORY -split '/')[-1]
+        "REPO_SHORT_NAME=$repoShortName" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    - name: Login to Vault and export token
+      uses: hashicorp/vault-action@892a26828f195e65540a40b4768ae4571f51ebfc # v4.0.0
+      with:
+        url: ${{ env.VAULT_ADDR }}
+        role: 'jwt-github-${{ inputs.system_name }}-${{ env.REPO_SHORT_NAME }}'
+        method: 'jwt'
+        path: 'jwt-github'
+        exportToken: false
+        secrets: |
+          ${{ inputs.vault_secret_path }} agent_username | AGENT_USERNAME ;
+          ${{ inputs.vault_secret_path }} agent_password | AGENT_PASSWORD ;
+
+    - name: Download artifact
+      uses: actions/download-artifact@v8
+      with:
+        name: ${{ inputs.artifact_name }}
+        path: ${{ runner.temp }}/drop
+
+    - name: Extract deployment package
+      shell: powershell
+      run: |
+        $extractPath = "${{ runner.temp }}/${{ inputs.site_name_full }}"
+        New-Item -ItemType Directory -Force -Path $extractPath
+        Expand-Archive -Path "${{ runner.temp }}/drop/${{ inputs.artifact_zip }}" -DestinationPath $extractPath -Force
+
+    - name: Replace tokens in appsettings.json
+      if: ${{ inputs.replace_tokens_in_appsettings == 'true' }}
+      shell: powershell
+      run: |
+        $configPath = "${{ runner.temp }}/${{ inputs.site_name_full }}/appsettings.json"
+        $content = Get-Content $configPath -Raw
+        $content = $content -replace '#{authority}#', '${{ env.ELVID_ADDR }}'
+        $content = $content -replace '#{Build.BuildNumber}#', '${{ github.run_number }}'
+        $content = $content -replace '#{vaultAddr}#', '${{ env.VAULT_ADDR }}'
+        $content = $content -replace '#{Environment}#', '${{ inputs.environment }}'
+        Set-Content -Path $configPath -Value $content -NoNewline
+
+    - name: Replace tokens in web.config
+      if: ${{ inputs.replace_tokens_in_webconfig == 'true' }}
+      shell: powershell
+      run: |
+        $configPath = "${{ runner.temp }}/${{ inputs.site_name_full }}/Web.config"
+        $content = Get-Content $configPath -Raw
+        $content = $content -replace '#{authority}#', '${{ env.ELVID_ADDR }}'
+        $content = $content -replace '#{Build.BuildNumber}#', '${{ github.run_number }}'
+        $content = $content -replace '#{vaultAddr}#', '${{ env.VAULT_ADDR }}'
+        $content = $content -replace '#{Environment}#', '${{ inputs.environment }}'
+        $content = $content -replace '#{clientId}#', '${{ inputs.webapp_client_id }}'
+        $content = $content -replace '#{uri}#', '${{ inputs.webapp_uri }}'
+        Set-Content -Path $configPath -Value $content -NoNewline
+
+    - name: Copy files to temporary directory
+      shell: powershell
+      run: |
+        $cred = New-Object System.Management.Automation.PSCredential($env:AGENT_USERNAME, (ConvertTo-SecureString $env:AGENT_PASSWORD -AsPlainText -Force))
+        $session = New-PSSession -ComputerName '${{ inputs.target_host }}' -Credential $cred
+
+        Invoke-Command -Session $session -ScriptBlock {
+          param($tempDir)
+          if (Test-Path $tempDir) {
+            Remove-Item -Path $tempDir -Recurse -Force
+          }
+          New-Item -ItemType Directory -Force -Path $tempDir
+        } -ArgumentList '${{ inputs.temp_dir }}'
+
+        Copy-Item -Path "${{ runner.temp }}/${{ inputs.site_name_full }}/*" -Destination '${{ inputs.temp_dir }}' -ToSession $session -Recurse -Force
+        Remove-PSSession $session
+
+    - name: Stop IIS Site
+      shell: powershell
+      run: |
+        $cred = New-Object System.Management.Automation.PSCredential($env:AGENT_USERNAME, (ConvertTo-SecureString $env:AGENT_PASSWORD -AsPlainText -Force))
+        $session = New-PSSession -ComputerName '${{ inputs.target_host }}' -Credential $cred
+
+        Invoke-Command -Session $session -ScriptBlock {
+          & $env:windir\System32\inetsrv\appcmd stop site /site.name:${{ inputs.site_name_full }}
+        }
+
+        Remove-PSSession $session
+
+    - name: Stop IIS App Pool
+      shell: powershell
+      run: |
+        $cred = New-Object System.Management.Automation.PSCredential($env:AGENT_USERNAME, (ConvertTo-SecureString $env:AGENT_PASSWORD -AsPlainText -Force))
+        $session = New-PSSession -ComputerName '${{ inputs.target_host }}' -Credential $cred
+
+        Invoke-Command -Session $session -ScriptBlock {
+          & $env:windir\System32\inetsrv\appcmd stop apppool /apppool.name:${{ inputs.app_pool_name }}
+        }
+
+        Remove-PSSession $session
+
+    - name: Copy files from temp folder
+      shell: powershell
+      run: |
+        $cred = New-Object System.Management.Automation.PSCredential($env:AGENT_USERNAME, (ConvertTo-SecureString $env:AGENT_PASSWORD -AsPlainText -Force))
+        $session = New-PSSession -ComputerName '${{ inputs.target_host }}' -Credential $cred
+
+        Invoke-Command -Session $session -ScriptBlock {
+          param($sourceDir, $targetDir)
+          Copy-Item -Path "$sourceDir*" -Destination $targetDir -Recurse -Force
+        } -ArgumentList '${{ inputs.temp_dir }}', '${{ inputs.site_dir }}'
+
+        Remove-PSSession $session
+
+    - name: Start IIS Site
+      shell: powershell
+      run: |
+        $cred = New-Object System.Management.Automation.PSCredential($env:AGENT_USERNAME, (ConvertTo-SecureString $env:AGENT_PASSWORD -AsPlainText -Force))
+        $session = New-PSSession -ComputerName '${{ inputs.target_host }}' -Credential $cred
+
+        Invoke-Command -Session $session -ScriptBlock {
+          & $env:windir\System32\inetsrv\appcmd start site /site.name:${{ inputs.site_name_full }}
+        }
+
+        Remove-PSSession $session
+
+    - name: Start IIS App Pool
+      shell: powershell
+      run: |
+        $cred = New-Object System.Management.Automation.PSCredential($env:AGENT_USERNAME, (ConvertTo-SecureString $env:AGENT_PASSWORD -AsPlainText -Force))
+        $session = New-PSSession -ComputerName '${{ inputs.target_host }}' -Credential $cred
+
+        Invoke-Command -Session $session -ScriptBlock {
+          & $env:windir\System32\inetsrv\appcmd start apppool /apppool.name:${{ inputs.app_pool_name }}
+        }
+
+        Remove-PSSession $session
+
