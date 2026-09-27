@@ -57,7 +57,7 @@ runs:
         WORKING_DIRECTORY: ${{ inputs.working-directory }}
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
+      uses: github/codeql-action/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
       with:
         config-file: 'codeql-config.yml'
         languages: ${{ inputs.language }}
@@ -81,6 +81,6 @@ runs:
       working-directory: ${{ inputs.working-directory }}
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
+      uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
       with:
         upload: ${{ inputs.upload-results == 'true' && 'always' || 'never' }}
