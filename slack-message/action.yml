@@ -53,7 +53,7 @@ runs:
         else
           error=$(echo "$result" | jq -r '.error')
 
-          if [[ $"error" == 'not_in_channel' ]]; then
+          if [[ "$error" == 'not_in_channel' ]]; then
             echo "::error::Github Workflow Notifications does not have access to the channel $SLACK_CHANNEL, please add it to the channel."
           else
             echo "$result" | jq '.'
