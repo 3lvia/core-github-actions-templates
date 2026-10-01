@@ -82,7 +82,7 @@ see [here](#elvia-specific-actions) for more information.
 ## Examples
 
 The files beginning with `example-` in the folder [.github/workflows](.github/workflows) are working examples of how to use these actions.
-Both of these examples require you to have added your system/application to the list in the [github-repositories-terraform](http://github.com/3lvia/github-repositories-terraform) repository.
+Both of these examples require you to have added your repository to your system in the registry [3lvia/systems](https://github.com/3lvia/systems) (`systems/<system>.yaml`).
 This is needed for the `Build` and `Deploy` actions to work correctly.
 
 You can also click on the **'Actions'** tab on your repository and click **'New workflow'** to get a selection of Elvia templates.
@@ -106,7 +106,8 @@ See [core-github-actions-runner](https://github.com/3lvia/core-github-actions-ru
 Builds a Docker image, signs it using Cosign, scans it for vulnerabilities using Trivy and pushes to either Azure Container Registry or GitHub Container Registry.
 This action is a wrapper around the [3lv CLI](https://github.com/3lvia/cli) build command (`3lv build`).
 To use the `Build` and `Deploy` actions with Elvias container registry and runtime services,
-you must first add your GitHub repository to [github-repositories-terraform](https://github.com/3lvia/github-repositories-terraform).
+you must first add your GitHub repository to your system in the registry [3lvia/systems](https://github.com/3lvia/systems)
+(`systems/<system>.yaml`; a colleague approves, access is in place a few minutes after merge).
 If you are running on ISS, you should add the repository to [iss-terraform](https://github.com/3lvia/iss-terraform) instead.
 
 ### Inputs
@@ -280,7 +281,8 @@ Deploys an application to Kubernetes using the Elvia Helm chart.
 This action is a wrapper around the [3lv CLI](https://github.com/3lvia/cli) deploy command (`3lv deploy`).
 
 To use the `Build` and `Deploy` actions with Elvias container registry and runtime services,
-you must first add your GitHub repository to [github-repositories-terraform](https://github.com/3lvia/github-repositories-terraform).
+you must first add your GitHub repository to your system in the registry [3lvia/systems](https://github.com/3lvia/systems)
+(`systems/<system>.yaml`; a colleague approves, access is in place a few minutes after merge).
 If you are running on ISS, you should add the repository to [iss-terraform](https://github.com/3lvia/iss-terraform) instead.
 
 This action sets only the image _tag_. The image repository comes from the Helm chart and
