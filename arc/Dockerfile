@@ -106,7 +106,7 @@ RUN apt-get update -y && \
 
 # renovate: datasource=node depName=node
 ARG NODEJS_VERSION=24
-ARG TRIVY_VERSION=0.74.0
+ARG TRIVY_VERSION=0.75.0
 ARG TRIVY_CHECKSUM=2ae6fe3ee734b7fdf11335663e18c75ea12dccc76062f09f164a3b0f8be4371a
 # renovate: datasource=github-releases depName=mikefarah/yq
 ARG YQ_VERSION=4.53.6
