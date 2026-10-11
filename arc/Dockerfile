@@ -210,7 +210,7 @@ RUN apt-get install -y --no-install-recommends \
 # Microsoft.Playwright in consumer repos; on mismatch Playwright downloads at runtime
 # into this world-writable path — slower, never broken.
 # renovate: datasource=npm depName=playwright
-ARG PLAYWRIGHT_VERSION=1.63.0
+ARG PLAYWRIGHT_VERSION=1.64.0
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 RUN npx -y playwright@${PLAYWRIGHT_VERSION} install --with-deps chromium firefox webkit && \
     chmod -R 777 /ms-playwright
