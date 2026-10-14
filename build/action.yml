@@ -231,7 +231,7 @@ runs:
     - name: Sign image with Cosign using GitHub OIDC token
       if: ${{ inputs.sign-image == 'true' && inputs.push == 'true' }}
       shell: bash
-      run: cosign sign -y --oidc-provider='github-actions' "$IMAGE_NAME_WITH_DIGEST"
+      run: cosign sign -y --new-bundle-format=false --oidc-provider='github-actions' "$IMAGE_NAME_WITH_DIGEST"
       env:
         IMAGE_NAME_WITH_DIGEST: ${{ steps.get-outputs.outputs.image-name-with-digest }}
 
@@ -239,7 +239,7 @@ runs:
       if: ${{ inputs.sign-image == 'true' && inputs.push == 'true' }}
       shell: bash
       run: |
-        cosign verify \
+        cosign verify --new-bundle-format=false \
           --certificate-identity "$CERTIFICATE_IDENTITY" \
           --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
           "$IMAGE_NAME_WITH_DIGEST" | jq
