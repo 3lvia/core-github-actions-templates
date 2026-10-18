@@ -14,7 +14,7 @@ ARG RUNNER_CONTAINER_HOOKS_NOVOLUME_VERSION=0.8.1
 # renovate: datasource=github-releases depName=docker/cli
 ARG DOCKER_VERSION=29.4.0
 # renovate: datasource=github-releases depName=docker/buildx
-ARG BUILDX_VERSION=0.37.2
+ARG BUILDX_VERSION=0.38.0
 
 RUN apt update -y && apt install curl unzip -y
 
@@ -210,7 +210,7 @@ RUN apt-get install -y --no-install-recommends \
 # Microsoft.Playwright in consumer repos; on mismatch Playwright downloads at runtime
 # into this world-writable path — slower, never broken.
 # renovate: datasource=npm depName=playwright
-ARG PLAYWRIGHT_VERSION=1.63.0
+ARG PLAYWRIGHT_VERSION=1.64.1
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 RUN npx -y playwright@${PLAYWRIGHT_VERSION} install --with-deps chromium firefox webkit && \
     chmod -R 777 /ms-playwright
