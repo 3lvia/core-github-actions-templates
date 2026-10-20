@@ -147,6 +147,8 @@ jobs:
   build:
     name: Build
     runs-on: elvia-runner
+    outputs:
+      image-digest: ${{ steps.build.outputs.image-digest }}
     permissions:
       actions: read
       contents: write
@@ -177,6 +179,7 @@ jobs:
           persist-credentials: false
       # END REMOVE FROM EXAMPLE
       - uses: 3lvia/core-github-actions-templates/build@trunk
+        id: build
         with:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
@@ -227,6 +230,7 @@ jobs:
         with:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
+          image-digest: ${{ needs.build.outputs.image-digest }}
           environment: 'dev'
           helm-values-file: ${{ env.HELM_VALUES_FILE }}
           # Will post to the Slack channel of your system if the deployment fails.
@@ -274,6 +278,7 @@ jobs:
         with:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
+          image-digest: ${{ needs.build.outputs.image-digest }}
           environment: 'test'
           helm-values-file: ${{ env.HELM_VALUES_FILE }}
           # Will post to the Slack channel of your system if the deployment fails.
@@ -321,6 +326,7 @@ jobs:
         with:
           name: ${{ env.APPLICATION_NAME }}
           namespace: ${{ env.SYSTEM_NAME }}
+          image-digest: ${{ needs.build.outputs.image-digest }}
           environment: 'prod'
           helm-values-file: ${{ env.HELM_VALUES_FILE }}
           # Will post to the Slack channel of your system if the deployment fails.

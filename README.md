@@ -311,6 +311,7 @@ not exist, and fails on a rollout timeout rather than a missing-image error.
 | `helm-chart-repository-url`     | Location of Elvia's Helm chart repository; should only be changed if testing a new version of the chart.                                                                                                                                | no       |                             |
 | `helm-values-file`              | Path to Helm values file, relative to the root of the repository.                                                                                                                                                                       | no       | `.github/deploy/values.yml` |
 | `helm-values-path`              | :warning: **DEPRECATED**: _Please use `helm-values-file` instead, which is a drop-in replacement. `helm-values-path` will be removed in the future._ :warning:<br><br>Path to Helm values file, relative to the root of the repository. | no       |                             |
+| `image-digest`                  | Digest (`sha256:...`) of the image to deploy, typically `needs.<build-job>.outputs.image-digest` from the `Build` action. Pins the Deployment to `repository:tag@digest`. Requires 3lv with `--image-digest` and chart >= 0.34.0.       | no       | ``                          |
 | `name`                          | Name of application. Do not include namespace.                                                                                                                                                                                          | yes      |                             |
 | `namespace`                     | Namespace or system of the application.                                                                                                                                                                                                 | yes      |                             |
 | `override-image-tag`            | Overrides the default image tag of 'github.sha-github.run_number'. **This should not normally be set; only change this if you know what you are doing.**                                                                                | no       | ``                          |
@@ -411,6 +412,12 @@ More permissions might be required depending on the inputs set, see the actions 
     #
     # Required: no
     # Default: '.github/deploy/values.yml'
+
+    image-digest:
+    # Digest (`sha256:...`) of the image to deploy, typically `needs.<build-job>.outputs.image-digest` from the `Build` action. Pins the Deployment to `repository:tag@digest`. Requires 3lv with `--image-digest` and chart >= 0.34.0.
+    #
+    # Required: no
+    # Default: ''
 
     name:
     # Name of application. Do not include namespace.
