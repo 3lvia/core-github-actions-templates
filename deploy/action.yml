@@ -57,6 +57,16 @@ inputs:
       **This should not normally be set; only change this if you know what you are doing.**
     required: false
     default: ''
+  # Why pin by digest: the sigstore policy-controller admission webhook resolves image tags to
+  # digests on ReplicaSets. A Deployment template without the digest never matches its
+  # ReplicaSets, and the deployment controller creates new ReplicaSets forever once the webhook
+  # is enabled for the namespace (dev/test/prod, 2026-10-19). With the digest in the template
+  # the webhook's rewrite is a no-op, and the deployment is pinned to the signed image.
+  # The flag is only passed to 3lv when set, so older 3lv versions keep working.
+  image-digest:
+    description: 'Digest (`sha256:...`) of the image to deploy, typically `needs.<build-job>.outputs.image-digest` from the `Build` action. Pins the Deployment to `repository:tag@digest`. Requires 3lv with `--image-digest` and chart >= 0.34.0.'
+    required: false
+    default: ''
   slack-channel:
     description: 'Slack channel to notify on failure. Leave empty to disable notifications.'
     required: false
@@ -170,6 +180,11 @@ runs:
     - name: Deploy
       shell: bash
       run: |
+        # --image-digest only when given, so older 3lv versions without the flag keep working.
+        extra_args=()
+        if [[ -n "$IMAGE_DIGEST" ]]; then
+          extra_args+=(--image-digest "$IMAGE_DIGEST")
+        fi
         3lv deploy \
           --system-name "$SYSTEM_NAME" \
           --helm-values-file "$HELM_VALUES_FILE" \
@@ -178,9 +193,11 @@ runs:
           --runtime-cloud-provider "$RUNTIME_CLOUD_PROVIDER" \
           --image-tag "$IMAGE_TAG" \
           --run-id "$RUN_ID" \
+          "${extra_args[@]}" \
           "$NAME"
       env:
         SYSTEM_NAME: ${{ inputs.namespace }}
+        IMAGE_DIGEST: ${{ inputs.image-digest }}
         HELM_VALUES_FILE: ${{ inputs.helm-values-path == '' && inputs.helm-values-file || inputs.helm-values-path }}
         IMAGE_TAG: ${{ inputs.override-image-tag == '' && format('{0}-{1}', github.sha, github.run_number) || inputs.override-image-tag }}
         ENVIRONMENT: ${{ inputs.environment }}
