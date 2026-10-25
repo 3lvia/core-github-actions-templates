@@ -107,8 +107,9 @@ RUN apt-get update -y && \
 # renovate: datasource=node depName=node
 ARG NODEJS_VERSION=24
 # renovate: datasource=github-releases depName=aquasecurity/trivy
-ARG TRIVY_VERSION=0.76.0
-ARG TRIVY_CHECKSUM=e24b1c51293c1b15e4ba8d45bbc7891ba053f90278ec2698f3562c993e145fe7
+ARG TRIVY_VERSION=0.76.1
+# Use Linux_64bit.tar.gz
+ARG TRIVY_CHECKSUM=c7cbe3137fb8a48a17574bede3dd6beb16742d1e9772929940fc90082c39d9c0  trivy_0.76.1_Linux-64bit.tar.gz
 # renovate: datasource=github-releases depName=mikefarah/yq
 ARG YQ_VERSION=4.54.1
 ARG YQ_CHECKSUM=8e34fc298390875de416e6a4afcb8cabeceb25d9aa8506c1a2f9353cf702ea5f
