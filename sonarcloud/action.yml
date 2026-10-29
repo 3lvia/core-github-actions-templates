@@ -78,7 +78,7 @@ runs:
 
         # If the repo has a solution file, build it once up front. The test runs below then use
         # --no-build instead of restoring and rebuilding for every test project (and again on the MTP retry).
-        solutions=$(find . -maxdepth 2 \( -iname '*.sln' -o -iname '*.slnx' \))
+        solutions=$(find . -maxdepth 1 \( -iname '*.sln' -o -iname '*.slnx' \))
         built_solution=false
         if [[ -n "$solutions" ]]; then
           for solution in $solutions; do
