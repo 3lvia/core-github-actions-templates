@@ -76,25 +76,43 @@ runs:
       run: |
         ./sonar/scanner/dotnet-sonarscanner begin /k:"$SONAR_CLOUD_PROJECT_KEY" /o:"elvia" /d:sonar.token="$SONAR_TOKEN" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=*_coverage.xml /d:sonar.scanner.scanAll=false
 
+        # If the repo has a solution file, build it once up front. The test runs below then use
+        # --no-build instead of restoring and rebuilding for every test project (and again on the MTP retry).
+        solutions=$(find . -maxdepth 2 \( -iname '*.sln' -o -iname '*.slnx' \))
+        built_solution=false
+        if [[ -n "$solutions" ]]; then
+          for solution in $solutions; do
+            dotnet build "$solution"
+          done
+          built_solution=true
+        fi
+
         testprojects=$(find . -iname "$TEST_PROJECTS")
         for testproject in $testprojects; do
+          # Only skip the build if the solution build produced output for this project;
+          # test projects that are not part of a solution are still built by dotnet test.
+          no_build=""
+          if [[ "$built_solution" == true && -d "$(dirname "$testproject")/bin" ]]; then
+            no_build="--no-build"
+          fi
+
           # Try VSTest-compatible flags first.
           # Exit code 5 means the test host is running in Microsoft.Testing.Platform (MTP) mode
           # and rejected the VSTest-style flags as invalid — retry with MTP-native flags.
           # '|| exit_code=$?' prevents bash's set -e from aborting the script on non-zero exit.
           exit_code=0
           if [[ "$DOTNET_COVERAGE_RUNSETTINGS_FILE" != '' ]]; then
-            ./sonar/scanner/dotnet-coverage collect "dotnet test $testproject -l:trx" -f xml -o "$(uuidgen)_coverage.xml" --settings "$DOTNET_COVERAGE_RUNSETTINGS_FILE" || exit_code=$?
+            ./sonar/scanner/dotnet-coverage collect "dotnet test $testproject $no_build -l:trx" -f xml -o "$(uuidgen)_coverage.xml" --settings "$DOTNET_COVERAGE_RUNSETTINGS_FILE" || exit_code=$?
           else
-              ./sonar/scanner/dotnet-coverage collect "dotnet test $testproject -l:trx" -f xml -o "$(uuidgen)_coverage.xml" || exit_code=$?
+              ./sonar/scanner/dotnet-coverage collect "dotnet test $testproject $no_build -l:trx" -f xml -o "$(uuidgen)_coverage.xml" || exit_code=$?
           fi
 
           if [[ $exit_code -eq 5 ]]; then
             echo "VSTest flags not supported (exit code 5), retrying with Microsoft.Testing.Platform flags..."
             if [[ "$DOTNET_COVERAGE_RUNSETTINGS_FILE" != '' ]]; then
-              ./sonar/scanner/dotnet-coverage collect "dotnet test --project $testproject" -f xml -o "$(uuidgen)_coverage.xml" --settings "$DOTNET_COVERAGE_RUNSETTINGS_FILE"
+              ./sonar/scanner/dotnet-coverage collect "dotnet test --project $testproject $no_build" -f xml -o "$(uuidgen)_coverage.xml" --settings "$DOTNET_COVERAGE_RUNSETTINGS_FILE"
             else
-              ./sonar/scanner/dotnet-coverage collect "dotnet test --project $testproject" -f xml -o "$(uuidgen)_coverage.xml"
+              ./sonar/scanner/dotnet-coverage collect "dotnet test --project $testproject $no_build" -f xml -o "$(uuidgen)_coverage.xml"
             fi
           elif [[ $exit_code -ne 0 ]]; then
             exit $exit_code
