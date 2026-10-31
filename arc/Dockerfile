@@ -105,7 +105,7 @@ RUN apt-get update -y && \
         make
 
 # renovate: datasource=node depName=node
-ARG NODEJS_VERSION=24
+ARG NODEJS_VERSION=26
 # renovate: datasource=github-releases depName=aquasecurity/trivy
 ARG TRIVY_VERSION=0.76.1
 # Use Linux_64bit.tar.gz
